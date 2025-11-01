@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+      http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- Авто-backfill NULL -> 'Admin' и установка NOT NULL для USER_.FIRST_NAME -->
+    <changeSet id="fix-user-first-name-not-null" author="Vzvod">
+        <addNotNullConstraint
+                tableName="USER_"
+                columnName="FIRST_NAME"
+                columnDataType="VARCHAR(20)"
+                defaultNullValue="Admin"/>
+    </changeSet>
+
+    <!-- Авто-backfill NULL -> 'Admin' и установка NOT NULL для USER_.LAST_NAME -->
+    <changeSet id="fix-user-last-name-not-null" author="Vzvod">
+        <addNotNullConstraint
+                tableName="USER_"
+                columnName="LAST_NAME"
+                columnDataType="VARCHAR(20)"
+                defaultNullValue="Admin"/>
+    </changeSet>
+</databaseChangeLog>
