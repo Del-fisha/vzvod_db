@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://userView.title">
+    <data>
+        <instance id="userDc" class="com.company.vzvod.entity.User" fetchPlan="_local">
+            <loader id="userDl"/>
+        </instance>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <layout>
+        <hbox height="100%" width="100%">
+            <vbox height="100%" width="40%">
+                <image height="150px" width="150px" maxWidth="150px" maxHeight="150px"
+                       resource="classpath:/pic/Question.jpeg"/>
+                <formLayout id="userForm" dataContainer="userDc">
+                    <textField property="firstName" readOnly="true"/>
+                    <textField property="lastName" readOnly="true"/>
+                    <textField property="patronymic" readOnly="true"/>
+                    <datePicker property="dateOfBirth" readOnly="true"/>
+                </formLayout>
+                <button text="Edit" id="editBtn"/>
+            </vbox>
+            <div id="divider" width="2px" height="100%" classNames="divider">
+            </div>
+            <vbox width="60%" height="100%">
+            </vbox>
+        </hbox>
+    </layout>
+</view>

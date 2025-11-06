@@ -16,7 +16,8 @@ import java.util.UUID;
 @JmixEntity
 @Table(name = "SERVICE_INFO", indexes = {
         @Index(name = "IDX_SERVICE_INFO_USER", columnList = "USER_ID"),
-        @Index(name = "IDX_SERVICE_INFO_ID_CARD", columnList = "ID_CARD_ID")
+        @Index(name = "IDX_SERVICE_INFO_ID_CARD", columnList = "ID_CARD_ID"),
+        @Index(name = "IDX_SERVICE_INFO_DEPARTMENT", columnList = "DEPARTMENT_ID")
 })
 @Entity
 public class ServiceInfo {
@@ -29,6 +30,14 @@ public class ServiceInfo {
     @JoinColumn(name = "USER_ID", nullable = false)
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     private User user;
+
+    @OnDeleteInverse(DeletePolicy.CASCADE)
+    @ManyToOne(fetch = FetchType.LAZY)  // ← Измените на ManyToOne
+    @JoinColumn(name = "DEPARTMENTID")
+    private Department department;
+
+    @Column(name = "RANK_")
+    private String rank;
 
     @Column(name = "STATUS", nullable = false)
     private Integer status;
@@ -57,6 +66,22 @@ public class ServiceInfo {
     @PastOrPresent(message = "{msg://com.company.vzvod.entity/ServiceInfo.startOfPost.validation.PastOrPresent}")
     @Column(name = "START_OF_POST")
     private LocalDate startOfPost;
+
+    public Department getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(Department department) {
+        this.department = department;
+    }
+
+    public Rank getRank() {
+        return rank == null ? null : Rank.fromId(rank);
+    }
+
+    public void setRank(Rank rank) {
+        this.rank = rank == null ? null : rank.getId();
+    }
 
     public IdCard getIdCard() {
         return idCard;

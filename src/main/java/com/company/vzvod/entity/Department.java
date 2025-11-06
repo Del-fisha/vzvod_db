@@ -23,25 +23,14 @@ public class Department {
     private Integer number;
 
     @OneToMany(mappedBy = "department")
-    private List<User> commmanders;
+    private List<ServiceInfo> units;
 
-    @OneToMany(mappedBy = "department")
-    private List<User> units;
-
-    public List<User> getUnits() {
+    public List<ServiceInfo> getUnits() {
         return units;
     }
 
-    public void setUnits(List<User> units) {
+    public void setUnits(List<ServiceInfo> units) {
         this.units = units;
-    }
-
-    public List<User> getCommmanders() {
-        return commmanders;
-    }
-
-    public void setCommmanders(List<User> commmanders) {
-        this.commmanders = commmanders;
     }
 
     public Integer getNumber() {

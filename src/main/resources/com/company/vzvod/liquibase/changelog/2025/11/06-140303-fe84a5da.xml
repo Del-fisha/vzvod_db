@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+    <changeSet id="1" author="Vzvod">
+        <addColumn tableName="SERVICE_INFO">
+            <column name="DEPARTMENT_ID" type="UUID"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="2" author="Vzvod">
+        <addColumn tableName="USER_">
+            <column name="EDUCATION_ID" type="UUID"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="3" author="Vzvod">
+        <createIndex indexName="IDX_SERVICE_INFO_DEPARTMENT" tableName="SERVICE_INFO">
+            <column name="DEPARTMENT_ID"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseColumnNames="DEPARTMENT_ID" baseTableName="SERVICE_INFO"
+                                 constraintName="FK_SERVICE_INFO_ON_DEPARTMENT" onDelete="CASCADE"
+                                 referencedColumnNames="ID" referencedTableName="DEPARTMENT"/>
+    </changeSet>
+    <changeSet id="4" author="Vzvod">
+        <createIndex indexName="IDX_USER__EDUCATION" tableName="USER_">
+            <column name="EDUCATION_ID"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseColumnNames="EDUCATION_ID" baseTableName="USER_"
+                                 constraintName="FK_USER__ON_EDUCATION" onDelete="CASCADE" referencedColumnNames="ID"
+                                 referencedTableName="EDUCATION"/>
+    </changeSet>
+    <changeSet id="5" author="Vzvod">
+        <dropColumn columnName="DEPARTMENT_ID" tableName="USER_"/>
+    </changeSet>
+</databaseChangeLog>

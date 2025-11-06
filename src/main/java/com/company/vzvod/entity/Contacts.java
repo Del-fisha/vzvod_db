@@ -1,6 +1,9 @@
 package com.company.vzvod.entity;
 
+import io.jmix.core.MetadataTools;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
+import io.jmix.core.metamodel.annotation.DependsOnProperties;
+import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import jakarta.persistence.*;
 
@@ -72,4 +75,9 @@ public class Contacts {
         this.id = id;
     }
 
+    @InstanceName
+    @DependsOnProperties({"phoneNumber"})
+    public String getInstanceName(MetadataTools metadataTools) {
+        return metadataTools.format(phoneNumber);
+    }
 }

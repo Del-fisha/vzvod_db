@@ -26,7 +26,7 @@ import java.util.UUID;
 @Table(name = "USER_", indexes = {
         @Index(name = "IDX_USER__ON_USERNAME", columnList = "USERNAME", unique = true),
         @Index(name = "IDX_USER__CONTACTS_INFO", columnList = "CONTACTS_INFO_ID"),
-        @Index(name = "IDX_USER__DEPARTMENT", columnList = "DEPARTMENT_ID")
+        @Index(name = "IDX_USER__EDUCATION", columnList = "EDUCATION_ID")
 })
 public class User implements JmixUserDetails {
 
@@ -64,7 +64,6 @@ public class User implements JmixUserDetails {
     @Column(name = "DATE_OF_BIRTH", nullable = false)
     private LocalDate dateOfBirth;
 
-
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "user", optional = false)
     private ServiceInfo serviceInfo;
 
@@ -73,23 +72,24 @@ public class User implements JmixUserDetails {
     @OneToOne(fetch = FetchType.LAZY)
     private Contacts contactsInfo;
 
+    @OnDeleteInverse(DeletePolicy.CASCADE)
+    @JoinColumn(name = "EDUCATION_ID")
+    @OneToOne(fetch = FetchType.LAZY)
+    private Education education;
+
+
     @OneToMany(mappedBy = "user")
     private List<Vehicle> vehicleInfo;
-
-    @OnDeleteInverse(DeletePolicy.CASCADE)
-    @JoinColumn(name = "DEPARTMENT_ID")
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Department department;
 
     @Transient
     private Collection<? extends GrantedAuthority> authorities;
 
-    public Department getDepartment() {
-        return department;
+    public Education getEducation() {
+        return education;
     }
 
-    public void setDepartment(Department department) {
-        this.department = department;
+    public void setEducation(Education education) {
+        this.education = education;
     }
 
     public List<Vehicle> getVehicleInfo() {
