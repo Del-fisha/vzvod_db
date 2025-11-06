@@ -20,11 +20,47 @@
                     <textField property="patronymic" readOnly="true"/>
                     <datePicker property="dateOfBirth" readOnly="true"/>
                 </formLayout>
-                <button text="Edit" id="editBtn"/>
+                <button text="msg://mainInfoEdit.text" id="editBtn"/>
             </vbox>
             <div id="divider" width="2px" height="100%" classNames="divider">
             </div>
             <vbox width="60%" height="100%">
+
+                <vbox>
+                    <nativeLabel id="serviceInfoLabel" text="msg://serviceInfoNativeLabel.text"/>
+                    <textField id="serviceInfoDisplay" readOnly="true"/>
+                    <hbox>
+                        <button id="serviceInfoEdit" text="msg://serviceInfoEdit.text"/>
+                        <button id="serviceInfoViewDetails" text="msg://vehiclesViewDetails.text"/>
+                    </hbox>
+                </vbox>
+
+                <vbox>
+                    <nativeLabel id="contactsLabel" text="msg://contactsNativeLabel.text"/>
+                    <textField id="contactsDisplay" readOnly="true"/>
+                    <hbox>
+                        <button id="contactsEdit" text="msg://contactsEdit.text"/>
+                        <button id="contactsViewDetails" text="msg://contactsViewDetails.text"/>
+                    </hbox>
+                </vbox>
+
+                <vbox>
+                    <nativeLabel id="vehicleLabel" text="msg://vehicleNativeLabel.text"/>
+                    <textField id="vehiclesDisplay" readOnly="true"/>
+                    <hbox>
+                        <button id="vehiclesEdit" text="msg://vehiclesEdit.text"/>
+                        <button id="vehiclesViewDetails" text="msg://vehiclesViewDetails.text"/>
+                    </hbox>
+                </vbox>
+
+                <vbox>
+                    <nativeLabel id="educationLabel" text="msg://educationNativeLabel.text"/>
+                    <textField id="educationDisplay" readOnly="true"/>
+                    <hbox>
+                        <button id="educationEdit" text="msg://educationEdit.text"/>
+                        <button id="educationViewDetails" text="msg://educationViewDetails.text"/>
+                    </hbox>
+                </vbox>
             </vbox>
         </hbox>
     </layout>
