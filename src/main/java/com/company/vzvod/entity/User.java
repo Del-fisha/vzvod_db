@@ -205,5 +205,4 @@ public class User implements JmixUserDetails {
         return String.format("%s %s", (firstName != null ? firstName : ""),
                 (lastName != null ? lastName : "")).trim();
     }
-
 }
