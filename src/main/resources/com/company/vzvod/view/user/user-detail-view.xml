@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <view xmlns="http://jmix.io/schema/flowui/view"
-      title="msg://mainUserDetailView.title"
+      title="msg://userDetailView.title"
       focusComponent="form">
     <data>
         <instance id="userDc"
@@ -37,6 +37,7 @@
             <textField id="lastNameField" property="lastName"/>
             <textField id="patronymicField" property="patronymic"/>
             <datePicker id="dateOfBirthField" property="dateOfBirth"/>
+
             <entityPicker id="serviceInfoField" property="serviceInfo">
                 <actions>
                     <action id="entityLookupAction" type="entity_lookup"/>

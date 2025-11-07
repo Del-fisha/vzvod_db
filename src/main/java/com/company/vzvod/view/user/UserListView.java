@@ -5,6 +5,7 @@ import com.company.vzvod.view.mainviewtopmenu.MainViewTopMenu;
 import com.vaadin.flow.router.Route;
 import io.jmix.flowui.view.*;
 
+
 @Route(value = "users", layout = MainViewTopMenu.class)
 @ViewController(id = "User.list")
 @ViewDescriptor(path = "user-list-view.xml")

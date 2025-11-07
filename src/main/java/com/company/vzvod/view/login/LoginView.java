@@ -1,7 +1,5 @@
 package com.company.vzvod.view.login;
 
-import com.company.vzvod.view.user.RegisterUserDetailView;
-import com.company.vzvod.view.user.UserDetailView;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.login.AbstractLogin.LoginEvent;
@@ -35,7 +33,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import io.jmix.flowui.DialogWindows;
-import io.jmix.flowui.view.DialogWindow;
 import com.company.vzvod.entity.User;
 import io.jmix.flowui.Notifications;
 
@@ -136,14 +133,6 @@ public class LoginView extends StandardView implements LocaleChangeObserver {
         loginI18n.setErrorMessage(errorMessage);
 
         login.setI18n(loginI18n);
-    }
-
-    @Subscribe(id = "registerButton", subject = "clickListener")
-    public void onRegisterButtonClick(ClickEvent<JmixButton> event) {
-        dialogWindows.detail(this, User.class)
-                .newEntity()
-                .withViewClass(UserDetailView.class)
-                .open();
     }
 
 }
