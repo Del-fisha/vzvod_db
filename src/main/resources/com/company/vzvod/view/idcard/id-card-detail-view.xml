@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <view xmlns="http://jmix.io/schema/flowui/view"
-      title="msg://educationDetailView.title"
+      title="msg://idCardDetailView.title"
       focusComponent="form">
     <data>
-        <instance id="educationDc"
-                  class="com.company.vzvod.entity.Education">
+        <instance id="idCardDc"
+                  class="com.company.vzvod.entity.IdCard">
             <fetchPlan extends="_base"/>
-            <loader id="educationDl"/>
+            <loader id="idCardDl"/>
         </instance>
     </data>
     <facets>
@@ -17,16 +17,14 @@
         <action id="closeAction" type="detail_close"/>
     </actions>
     <layout>
-        <formLayout id="form" dataContainer="educationDc">
+        <formLayout id="form" dataContainer="idCardDc">
             <responsiveSteps>
                 <responsiveStep minWidth="0" columns="1"/>
                 <responsiveStep minWidth="40em" columns="2"/>
             </responsiveSteps>
-            <datePicker id="startedField" property="started"/>
+            <textField id="splField" property="spl"/>
+            <datePicker id="issuedField" property="issued"/>
             <datePicker id="untilField" property="until"/>
-            <select id="typeField" property="type" itemsEnum="com.company.vzvod.entity.TypeOfEducation"/>
-            <select id="statusField" property="status"/> <!--ToDo Изменить msg-->
-            <textField id="nameOfInstitutionField" property="nameOfInstitution"/>
         </formLayout>
         <hbox id="detailActions">
             <button id="saveAndCloseButton" action="saveAction"/>

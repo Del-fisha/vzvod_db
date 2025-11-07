@@ -35,7 +35,7 @@
                 </actions>
             </entityPicker>
             <select id="rankField" property="rank"/>
-            <select id="statusField" property="status"/>
+            <select id="statusField" property="status"/> <!--ToDo Изменить msg-->
             <select id="postField" property="post"/>
             <entityPicker id="idCardField" property="idCard">
                 <actions>
