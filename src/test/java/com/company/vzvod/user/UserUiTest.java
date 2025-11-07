@@ -2,6 +2,8 @@ package com.company.vzvod.user;
 
 import com.company.vzvod.VzvodApplication;
 import com.company.vzvod.entity.User;
+import com.company.vzvod.view.user.UserDetailView;
+import com.company.vzvod.view.user.UserListView;
 import io.jmix.core.DataManager;
 import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.component.grid.DataGrid;
