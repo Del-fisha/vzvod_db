@@ -7,6 +7,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import io.jmix.core.EntityStates;
 import io.jmix.flowui.Notifications;
 import io.jmix.flowui.component.textfield.TypedTextField;
@@ -18,9 +19,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.TimeZone;
 
+@AnonymousAllowed
 @Route(value = "users/:id", layout = MainViewTopMenu.class)
 @ViewController(id = "User.detail")
-@ViewDescriptor(path = "user-detail-view.xml")
+@ViewDescriptor(path = "user-detail-view(not).xml")
 @EditedEntityContainer("userDc")
 public class UserDetailView extends StandardDetailView<User> {
 
@@ -30,8 +32,6 @@ public class UserDetailView extends StandardDetailView<User> {
     private PasswordField passwordField;
     @ViewComponent
     private PasswordField confirmPasswordField;
-    @ViewComponent
-    private ComboBox<String> timeZoneField;
     @ViewComponent
     private MessageBundle messageBundle;
     @Autowired
@@ -44,10 +44,6 @@ public class UserDetailView extends StandardDetailView<User> {
 
     private boolean newEntity;
 
-    @Subscribe
-    public void onInit(final InitEvent event) {
-        timeZoneField.setItems(List.of(TimeZone.getAvailableIDs()));
-    }
 
     @Subscribe
     public void onInitEntity(final InitEntityEvent<User> event) {

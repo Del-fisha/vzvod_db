@@ -1,5 +1,8 @@
 package com.company.vzvod.view.login;
 
+import com.company.vzvod.view.user.RegisterUserDetailView;
+import com.company.vzvod.view.user.UserDetailView;
+import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.login.AbstractLogin.LoginEvent;
 import com.vaadin.flow.component.login.LoginI18n;
@@ -12,6 +15,7 @@ import io.jmix.core.MessageTools;
 import io.jmix.core.security.AccessDeniedException;
 import io.jmix.flowui.component.loginform.JmixLoginForm;
 import io.jmix.flowui.kit.component.ComponentUtils;
+import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.kit.component.loginform.JmixLoginI18n;
 import io.jmix.flowui.view.*;
 import io.jmix.securityflowui.authentication.AuthDetails;
@@ -30,6 +34,11 @@ import java.util.Locale;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import io.jmix.flowui.DialogWindows;
+import io.jmix.flowui.view.DialogWindow;
+import com.company.vzvod.entity.User;
+import io.jmix.flowui.Notifications;
+
 @Route(value = "login")
 @ViewController(id = "LoginView")
 @ViewDescriptor(path = "login-view.xml")
@@ -45,6 +54,12 @@ public class LoginView extends StandardView implements LocaleChangeObserver {
 
     @Autowired
     private MessageTools messageTools;
+
+    @Autowired
+    private DialogWindows dialogWindows;
+
+    @Autowired
+    private Notifications notifications;
 
     @ViewComponent
     private JmixLoginForm login;
@@ -122,4 +137,13 @@ public class LoginView extends StandardView implements LocaleChangeObserver {
 
         login.setI18n(loginI18n);
     }
+
+    @Subscribe(id = "registerButton", subject = "clickListener")
+    public void onRegisterButtonClick(ClickEvent<JmixButton> event) {
+        dialogWindows.detail(this, User.class)
+                .newEntity()
+                .withViewClass(UserDetailView.class)
+                .open();
+    }
+
 }

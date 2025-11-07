@@ -29,9 +29,9 @@
                            visible="false"/>
             <textField id="firstNameField" property="firstName"/>
             <textField id="lastNameField" property="lastName"/>
-            <textField id="emailField" property="email"/>
-            <comboBox id="timeZoneField" property="timeZoneId" clearButtonVisible="true"/>
-            <checkbox id="activeField" property="active"/>
+<!--            <textField id="emailField" property="email"/>-->
+<!--            <comboBox id="timeZoneField" property="timeZoneId" clearButtonVisible="true"/>-->
+<!--            <checkbox id="activeField" property="active"/>-->
         </formLayout>
         <hbox id="detailActions">
             <button id="saveAndCloseButton" action="saveAction"/>
