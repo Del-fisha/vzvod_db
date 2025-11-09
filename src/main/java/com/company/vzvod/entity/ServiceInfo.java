@@ -31,10 +31,8 @@ public class ServiceInfo {
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     private User user;
 
-    @OnDeleteInverse(DeletePolicy.CASCADE)
-    @ManyToOne(fetch = FetchType.LAZY)  // ← Измените на ManyToOne
-    @JoinColumn(name = "DEPARTMENTID")
-    private Department department;
+    @Column(name = "DEPARTMENT")
+    private Integer department;
 
     @Column(name = "RANK_")
     private String rank;
@@ -67,12 +65,12 @@ public class ServiceInfo {
     @Column(name = "START_OF_POST")
     private LocalDate startOfPost;
 
-    public Department getDepartment() {
-        return department;
+    public Dep getDepartment() {
+        return department == null ? null : Dep.fromId(department);
     }
 
-    public void setDepartment(Department department) {
-        this.department = department;
+    public void setDepartment(Dep department) {
+        this.department = department == null ? null : department.getId();
     }
 
     public Rank getRank() {

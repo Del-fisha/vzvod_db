@@ -5,12 +5,18 @@
     <data>
         <instance id="serviceInfoDc"
                   class="com.company.vzvod.entity.ServiceInfo">
-            <fetchPlan extends="_base">
-                <property name="department" fetchPlan="_base"/>
+            <fetchPlan>
                 <property name="idCard" fetchPlan="_instance_name">
                     <property name="issued"/>
                     <property name="until"/>
                 </property>
+                <property name="rank"/>
+                <property name="status"/>
+                <property name="post"/>
+                <property name="token"/>
+                <property name="breastplate"/>
+                <property name="startDate"/>
+                <property name="startOfPost"/>
             </fetchPlan>
             <loader id="serviceInfoDl"/>
         </instance>
@@ -28,14 +34,9 @@
                 <responsiveStep minWidth="0" columns="1"/>
                 <responsiveStep minWidth="40em" columns="2"/>
             </responsiveSteps>
-            <entityPicker id="departmentField" property="department">
-                <actions>
-                    <action id="entityLookupAction" type="entity_lookup"/>
-                    <action id="entityClearAction" type="entity_clear"/>
-                </actions>
-            </entityPicker>
+            <select id="departmentField" property="department"/>
             <select id="rankField" property="rank"/>
-            <select id="statusField" property="status"/> <!--ToDo Изменить msg-->
+            <select id="statusField" property="status"/>
             <select id="postField" property="post"/>
             <entityPicker id="idCardField" property="idCard">
                 <actions>

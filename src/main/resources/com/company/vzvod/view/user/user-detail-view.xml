@@ -6,8 +6,15 @@
         <instance id="userDc"
                   class="com.company.vzvod.entity.User">
             <fetchPlan extends="_base">
-                <property name="serviceInfo" fetchPlan="_base">
-                    <property name="department" fetchPlan="_base"/>
+                <property name="serviceInfo">
+                    <property name="rank"/>
+                    <property name="status"/>
+                    <property name="post"/>
+                    <property name="idCard" fetchPlan="_base"/>
+                    <property name="token"/>
+                    <property name="breastplate"/>
+                    <property name="startDate"/>
+                    <property name="startOfPost"/>
                 </property>
                 <property name="contactsInfo" fetchPlan="_base">
                     <property name="registration" fetchPlan="_base"/>
@@ -38,12 +45,13 @@
             <textField id="patronymicField" property="patronymic"/>
             <datePicker id="dateOfBirthField" property="dateOfBirth"/>
 
-            <entityPicker id="serviceInfoField" property="serviceInfo">
-                <actions>
-                    <action id="entityLookupAction" type="entity_lookup"/>
-                    <action id="entityClearAction" type="entity_clear"/>
-                </actions>
-            </entityPicker>
+<!--            <entityPicker id="serviceInfoField" property="serviceInfo">-->
+<!--                <actions>-->
+<!--                    <action id="entityLookupAction" type="entity_lookup"/>-->
+<!--                    <action id="entityClearAction" type="entity_clear"/>-->
+<!--                </actions>-->
+<!--            </entityPicker>-->
+            <button id="serviceInfoCreateButton" text="msg://com.company.vzvod.view.user.user/serviceInfoButtonCreate.text"/>
             <entityPicker id="contactsInfoField" property="contactsInfo">
                 <actions>
                     <action id="entityLookupAction" type="entity_lookup"/>
