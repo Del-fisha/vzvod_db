@@ -33,22 +33,22 @@ public class ServiceInfoDetailView extends StandardDetailView<ServiceInfo> {
     @Subscribe(id = "idCardCreateButton", subject = "clickListener")
     public void onIdCardCreateButtonClick(final ClickEvent<JmixButton> event) {
 
-        ServiceInfo serviceInfo = serviceInfoDc.getItem();
-        if (serviceInfo == null) {
-            return;
+            ServiceInfo serviceInfo = serviceInfoDc.getItem();
+            if (serviceInfo == null) {
+                return;
+            }
+
+
+            IdCard idCard = serviceInfo.getIdCard();
+            if (idCard == null) {
+                idCard = dataManager.create(IdCard.class);
+                serviceInfo.setIdCard(idCard);
+
+            dialogWindows.detail(this, IdCard.class)
+                    .withViewClass(IdCardDetailView.class)
+                    .withParentDataContext(getViewData().getDataContext())
+                    .editEntity(idCard)
+                    .open();
         }
-
-
-        IdCard idCard = serviceInfo.getIdCard();
-        if (idCard == null) {
-            idCard = dataManager.create(IdCard.class);
-            serviceInfo.setIdCard(idCard);
-
-        dialogWindows.detail(this, IdCard.class)
-                .withViewClass(IdCardDetailView.class)
-                .withParentDataContext(getViewData().getDataContext())
-                .editEntity(idCard)
-                .open();
-    }
     }
 }

@@ -1,7 +1,9 @@
 package com.company.vzvod.view.user;
 
+import com.company.vzvod.entity.Contacts;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.User;
+import com.company.vzvod.view.contacts.ContactsDetailView;
 import com.company.vzvod.view.mainviewtopmenu.MainViewTopMenu;
 import com.company.vzvod.view.serviceinfo.ServiceInfoDetailView;
 import com.vaadin.flow.component.ClickEvent;
@@ -38,7 +40,6 @@ public class UserDetailView extends StandardDetailView<User> {
             return;
         }
 
-        // 2) Берём «служебку», если есть; иначе создаём новую
         ServiceInfo serviceInfo = user.getServiceInfo();
         if (serviceInfo == null) {
             serviceInfo = dataManager.create(ServiceInfo.class);
@@ -50,6 +51,27 @@ public class UserDetailView extends StandardDetailView<User> {
                 .withViewClass(ServiceInfoDetailView.class)
                 .withParentDataContext(getViewData().getDataContext())
                 .editEntity(serviceInfo)
+                .open();
+    }
+
+    @Subscribe(id = "contactsCreateButton", subject = "clickListener")
+    public void onContactsCreateButtonClick(final ClickEvent<JmixButton> event) {
+
+        User user = userDc.getItem();
+        if (user == null) {
+            return;
+        }
+        Contacts contact = user.getContactsInfo();
+
+        if (contact == null) {
+            contact = dataManager.create(Contacts.class);
+            user.setContactsInfo(contact);
+        }
+
+        dialogWindows.detail(this, Contacts.class)
+                .withViewClass(ContactsDetailView.class)
+                .withParentDataContext(getViewData().getDataContext())
+                .editEntity(contact)
                 .open();
     }
 }

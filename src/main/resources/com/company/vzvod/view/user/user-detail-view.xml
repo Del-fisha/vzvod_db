@@ -39,25 +39,13 @@
                 <responsiveStep minWidth="0" columns="1"/>
                 <responsiveStep minWidth="40em" columns="2"/>
             </responsiveSteps>
-            <textField id="usernameField" property="username"/>
             <textField id="firstNameField" property="firstName"/>
             <textField id="lastNameField" property="lastName"/>
             <textField id="patronymicField" property="patronymic"/>
             <datePicker id="dateOfBirthField" property="dateOfBirth"/>
 
-<!--            <entityPicker id="serviceInfoField" property="serviceInfo">-->
-<!--                <actions>-->
-<!--                    <action id="entityLookupAction" type="entity_lookup"/>-->
-<!--                    <action id="entityClearAction" type="entity_clear"/>-->
-<!--                </actions>-->
-<!--            </entityPicker>-->
             <button id="serviceInfoCreateButton" text="msg://com.company.vzvod.view.user.user/serviceInfoButtonCreate.text"/>
-            <entityPicker id="contactsInfoField" property="contactsInfo">
-                <actions>
-                    <action id="entityLookupAction" type="entity_lookup"/>
-                    <action id="entityClearAction" type="entity_clear"/>
-                </actions>
-            </entityPicker>
+            <button id="contactsCreateButton" text="msg://com.company.vzvod.view.user.user/contactsButtonCreate.text"/>
             <entityPicker id="educationField" property="education">
                 <actions>
                     <action id="entityLookupAction" type="entity_lookup"/>

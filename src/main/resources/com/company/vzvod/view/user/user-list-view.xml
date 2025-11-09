@@ -31,7 +31,6 @@
     <facets>
         <dataLoadCoordinator auto="true"/>
         <urlQueryParameters>
-<!--            <genericFilter component="genericFilter"/>-->
             <pagination component="pagination"/>
         </urlQueryParameters>
     </facets>
@@ -40,10 +39,6 @@
         <action id="discardAction" type="lookup_discard"/>
     </actions>
     <layout>
-<!--        <genericFilter id="genericFilter"-->
-<!--                       dataLoader="usersDl">-->
-<!--            <properties include=".*"/>-->
-<!--        </genericFilter>-->
         <dataGrid id="usersDataGrid"
                   width="100%"
                   minHeight="20em"
@@ -55,7 +50,6 @@
                 <action id="removeAction" type="list_remove"/>
             </actions>
             <columns resizable="true">
-<!--                <column property="username"/>-->
                 <column property="lastName"/>
                 <column property="firstName"/>
                 <column property="patronymic"/>
