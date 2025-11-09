@@ -38,15 +38,17 @@
             <select id="rankField" property="rank"/>
             <select id="statusField" property="status"/>
             <select id="postField" property="post"/>
-            <entityPicker id="idCardField" property="idCard">
-                <actions>
-                    <action id="entityLookupAction" type="entity_lookup"/>
-                    <action id="entityClearAction" type="entity_clear"/>
-                </actions>
-            </entityPicker>
+<!--            <entityPicker id="idCardField" property="idCard">-->
+<!--                <actions>-->
+<!--                    <action id="entityLookupAction" type="entity_lookup"/>-->
+<!--                    <action id="entityClearAction" type="entity_clear"/>-->
+<!--                </actions>-->
+<!--            </entityPicker>-->
             <textField id="tokenField" property="token"/>
             <textField id="breastplateField" property="breastplate"/>
             <datePicker id="startDateField" property="startDate"/>
+            <button id="idCardCreateButton" text="msg://com.company.vzvod.view.user.user/idCardButtonCreate.text"/>
+
             <datePicker id="startOfPostField" property="startOfPost"/>
         </formLayout>
         <hbox id="detailActions">
