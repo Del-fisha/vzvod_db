@@ -46,12 +46,8 @@
 
             <button id="serviceInfoCreateButton" text="msg://com.company.vzvod.view.user.user/serviceInfoButtonCreate.text"/>
             <button id="contactsCreateButton" text="msg://com.company.vzvod.view.user.user/contactsButtonCreate.text"/>
-            <entityPicker id="educationField" property="education">
-                <actions>
-                    <action id="entityLookupAction" type="entity_lookup"/>
-                    <action id="entityClearAction" type="entity_clear"/>
-                </actions>
-            </entityPicker>
+            <button id="educationCreateButton" text="msg://com.company.vzvod.view.user.user/educationButtonCreate.text"/>
+            <button id="vehicleCreateButton" text="msg://com.company.vzvod.view.user.user/vehicleButtonCreate.text"/>
         </formLayout>
         <hbox id="detailActions">
             <button id="saveAndCloseButton" action="saveCloseAction"/>
