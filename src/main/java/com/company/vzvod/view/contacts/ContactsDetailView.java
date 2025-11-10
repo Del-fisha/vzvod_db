@@ -59,11 +59,11 @@ public class ContactsDetailView extends StandardDetailView<Contacts> {
             return;
         }
 
-        Address addressHabitation = contact.getRegistration();
+        Address addressHabitation = contact.getHabitation();
 
         if (addressHabitation == null) {
             addressHabitation = dataManager.create(Address.class);
-            contact.setRegistration(addressHabitation);
+            contact.setHabitation(addressHabitation);
         }
 
         dialogWindows.detail(this, Address.class)
