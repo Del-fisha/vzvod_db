@@ -6,7 +6,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.PastOrPresent;
 
 import java.time.LocalDate;
@@ -25,7 +24,6 @@ public class Education {
     @Column(name = "STARTED")
     private LocalDate started;
 
-    @FutureOrPresent(message = "{msg://com.company.vzvod.entity/Education.until.validation.FutureOrPresent}")
     @Column(name = "UNTIL_")
     private LocalDate until;
 

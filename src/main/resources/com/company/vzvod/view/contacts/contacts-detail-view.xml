@@ -28,6 +28,7 @@
             <textField id="phoneNumberField" property="phoneNumber"/>
             <select id="nearestMetroStationField" property="nearestMetroStation"/>
             <button id="registerAddressCreateButton" text="msg://com.company.vzvod.view.user.user/registerAddressCreateButton.text"/>
+            <checkbox id="sameAddressCheckbox" label="msg://sameAddressCheckbox.label"/>
             <button id="habitationAddressCreateButton" text="msg://com.company.vzvod.view.user.user/habitationAddressCreateButton.text"/>
         </formLayout>
         <hbox id="detailActions">

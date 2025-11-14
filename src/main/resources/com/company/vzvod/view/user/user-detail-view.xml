@@ -39,6 +39,8 @@
                 <responsiveStep minWidth="0" columns="1"/>
                 <responsiveStep minWidth="40em" columns="2"/>
             </responsiveSteps>
+            <textField id="userNameField" property="username" helperText="msg://com.company.vzvod.view.user.user/userNameField.text"/>
+            <passwordField id="passwordField" property="password" helperText="msg://com.company.vzvod.view.user.user/passwordField.text"/>
             <textField id="firstNameField" property="firstName"/>
             <textField id="lastNameField" property="lastName"/>
             <textField id="patronymicField" property="patronymic"/>
@@ -48,6 +50,7 @@
             <button id="contactsCreateButton" text="msg://com.company.vzvod.view.user.user/contactsButtonCreate.text"/>
             <button id="educationCreateButton" text="msg://com.company.vzvod.view.user.user/educationButtonCreate.text"/>
             <button id="vehicleCreateButton" text="msg://com.company.vzvod.view.user.user/vehicleButtonCreate.text"/>
+
         </formLayout>
         <hbox id="detailActions">
             <button id="saveAndCloseButton" action="saveCloseAction"/>
