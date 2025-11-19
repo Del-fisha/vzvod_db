@@ -41,8 +41,8 @@
             </responsiveSteps>
             <textField id="userNameField" property="username" helperText="msg://com.company.vzvod.view.user.user/userNameField.text"/>
             <passwordField id="passwordField" property="password" helperText="msg://com.company.vzvod.view.user.user/passwordField.text"/>
-            <textField id="firstNameField" property="firstName"/>
             <textField id="lastNameField" property="lastName"/>
+            <textField id="firstNameField" property="firstName"/>
             <textField id="patronymicField" property="patronymic"/>
             <datePicker id="dateOfBirthField" property="dateOfBirth"/>
 
