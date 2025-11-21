@@ -13,6 +13,7 @@ import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.component.checkbox.JmixCheckbox;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.InstanceContainer;
+import io.jmix.flowui.model.InstanceLoader;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -189,6 +190,38 @@ public class ContactsDetailView extends StandardDetailView<Contacts> {
         copy.setStatusOfHousing(source.getStatusOfHousing());
 
         return copy;
+    }
+
+
+    // 1) Вынесенная инициализация чекбокса из данных сущности
+    private void initSameCheckboxFromEntity() {
+        Contacts contact = contactsDc.getItemOrNull();
+        boolean same = contact != null
+                && contact.getRegistration() != null
+                && contact.getHabitation() != null
+                && addressesAreEqual(contact.getRegistration(), contact.getHabitation());
+        // Эта установка НЕ вызовет копирование, т.к. в обработчике стоит isFromClient()
+        sameAddressCheckbox.setValue(same);
+        applySameAddressMode(same);
+    }
+
+    // 2) После загрузки данных контакта (из contactsDl)
+    @Subscribe(id = "contactsDl", target = Target.DATA_LOADER)
+    public void onContactsDlPostLoad(InstanceLoader.PostLoadEvent event) {
+        initSameCheckboxFromEntity();
+    }
+
+    // 3) Когда View полностью готово (данные уже в контейнерах)
+    @Subscribe
+    public void onReady(final ReadyEvent event) {
+        initSameCheckboxFromEntity();
+    }
+
+    // 4) Для новой сущности задать предсказуемый дефолт
+    @Subscribe
+    public void onInitEntity(final InitEntityEvent<Contacts> event) {
+        sameAddressCheckbox.setValue(false);
+        applySameAddressMode(false);
     }
 
 }

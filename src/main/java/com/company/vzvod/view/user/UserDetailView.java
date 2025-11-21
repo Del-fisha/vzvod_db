@@ -33,6 +33,9 @@ public class UserDetailView extends StandardDetailView<User> {
     @Autowired
     private DataManager dataManager;
 
+    @ViewComponent
+    private JmixButton vehicleCreateButton;
+
 
     @Subscribe(id = "serviceInfoCreateButton", subject = "clickListener")
     public void onServiceInfoCreateButtonClick1(final ClickEvent<JmixButton> event) {
