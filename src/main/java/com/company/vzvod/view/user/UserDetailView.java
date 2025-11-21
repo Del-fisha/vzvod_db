@@ -36,6 +36,15 @@ public class UserDetailView extends StandardDetailView<User> {
     @ViewComponent
     private JmixButton vehicleCreateButton;
 
+    @Subscribe
+    public void onBeforeShow(BeforeShowEvent event) {
+        // Делаем кнопку неактивной сразу при открытии экрана
+        vehicleCreateButton.setEnabled(false);
+    }
+
+
+
+
 
     @Subscribe(id = "serviceInfoCreateButton", subject = "clickListener")
     public void onServiceInfoCreateButtonClick1(final ClickEvent<JmixButton> event) {
