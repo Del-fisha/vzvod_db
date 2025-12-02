@@ -65,6 +65,14 @@ public class ServiceInfo {
     @Column(name = "START_OF_POST")
     private LocalDate startOfPost;
 
+    public void setStartOfPost(LocalDate startOfPost) {
+        this.startOfPost = startOfPost;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
     public Dep getDepartment() {
         return department == null ? null : Dep.fromId(department);
     }
