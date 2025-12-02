@@ -16,8 +16,11 @@
                     <property name="breastplate"/>
                     <property name="startDate"/>
                     <property name="startOfPost"/>
+                    <property name="department"/>
                 </property>
-                <property name="contactsInfo" fetchPlan="_base"/>
+                <property name="contactsInfo" fetchPlan="_base">
+                    <property name="phoneNumber"/>
+                </property>
                 <property name="education" fetchPlan="_base"/>
                 <property name="vehicleInfo" fetchPlan="_base"/>
             </fetchPlan>
@@ -54,9 +57,10 @@
                 <column property="firstName"/>
                 <column property="patronymic"/>
                 <column property="dateOfBirth"/>
-                <column property="serviceInfo"/>
-                <column property="contactsInfo"/>
-                <column property="education"/>
+                <column property="serviceInfo.department"/>
+                <column property="serviceInfo.post"/>
+                <column property="serviceInfo.rank"/>
+                <column property="contactsInfo.phoneNumber"/>
             </columns>
         </dataGrid>
         <hbox id="buttonsPanel" classNames="buttons-panel">
