@@ -88,12 +88,14 @@ public class UserDetailView extends StandardDetailView<User> {
                 .open();
     }
 
+
     @Subscribe(id = "educationCreateButton", subject = "clickListener")
     public void onEducationCreateButtonClick(final ClickEvent<JmixButton> event) {
         User user = userDc.getItem();
         if (user == null) {
             return;
         }
+
 
         Education education = user.getEducation();
         if (education == null) {

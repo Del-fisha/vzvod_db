@@ -17,6 +17,7 @@
                 <property name="breastplate"/>
                 <property name="startDate"/>
                 <property name="startOfPost"/>
+                <property name="department"/>
             </fetchPlan>
             <loader id="serviceInfoDl"/>
         </instance>
