@@ -33,8 +33,9 @@ public class ServiceInfo {
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     private User user;
 
-    @Column(name = "DEPARTMENT")
-    private Integer department;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "DEPARTMENT_ID")
+    private Department department;
 
     @Column(name = "RANK_")
     private String rank;
@@ -74,12 +75,12 @@ public class ServiceInfo {
         this.startDate = startDate;
     }
 
-    public Dep getDepartment() {
-        return department == null ? null : Dep.fromId(department);
+    public Department getDepartment() {
+        return this.department;
     }
 
-    public void setDepartment(Dep department) {
-        this.department = department == null ? null : department.getId();
+    public void setDepartment(Department department) {
+        this.department = department;
     }
 
     public Rank getRank() {

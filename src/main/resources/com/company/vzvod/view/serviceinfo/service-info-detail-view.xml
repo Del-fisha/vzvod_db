@@ -21,7 +21,17 @@
             </fetchPlan>
             <loader id="serviceInfoDl"/>
         </instance>
+        <collection id="departmentsDc" class="com.company.vzvod.entity.Department">
+            <loader id="departmentsDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from Department e]]>
+                </query>
+            </loader>
+            <fetchPlan extends="_base"/>
+        </collection>
     </data>
+
+
     <facets>
         <dataLoadCoordinator auto="true"/>
     </facets>
@@ -35,7 +45,12 @@
                 <responsiveStep minWidth="0" columns="1"/>
                 <responsiveStep minWidth="40em" columns="2"/>
             </responsiveSteps>
-            <select id="departmentField" property="department"/>
+            <entityComboBox id="departmentField"
+                            property="department"
+                            dataContainer="serviceInfoDc"
+                            itemsContainer="departmentsDc" width="100px"/>
+
+
             <select id="rankField" property="rank"/>
             <select id="statusField" property="status"/>
             <select id="postField" property="post"/>

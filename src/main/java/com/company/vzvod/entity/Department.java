@@ -5,11 +5,10 @@ import io.jmix.core.metamodel.annotation.DependsOnProperties;
 import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.datatype.DatatypeFormatter;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @JmixEntity
@@ -24,8 +23,19 @@ public class Department {
     @Column(name = "NUMBER_")
     private Integer number;
 
+    @OneToMany(mappedBy = "department")
+    private List<ServiceInfo> serviceInfos = new ArrayList<>();
+
+    public List<ServiceInfo> getServiceInfos() {
+        return serviceInfos;
+    }
+
+    public void setServiceInfos(List<ServiceInfo> serviceInfos) {
+        this.serviceInfos = serviceInfos;
+    }
+
     public Integer getNumber() {
-        return number;
+        return this.number;
     }
 
     public void setNumber(Integer number) {
