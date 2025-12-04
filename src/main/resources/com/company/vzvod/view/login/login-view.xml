@@ -17,7 +17,5 @@
                           password="msg://loginForm.errorPassword"/>
         </loginForm>
 
-        <button id="registerButton" text="msg://com.company.vzvod.view.user.user/register.text"/>
-
     </layout>
 </view>
