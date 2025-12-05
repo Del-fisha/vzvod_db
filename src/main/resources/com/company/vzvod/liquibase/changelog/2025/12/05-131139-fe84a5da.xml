@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+    <changeSet id="1" author="Vzvod">
+        <createTable tableName="PENALTY">
+            <column name="ID" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK_PENALTY"/>
+            </column>
+            <column name="USER_SERVICE_INFO_ID" type="UUID"/>
+            <column name="INITIATOR" type="VARCHAR(255)"/>
+            <column name="PENALTY_TYPE" type="VARCHAR(255)"/>
+            <column name="PENALTY_STATUS" type="VARCHAR(255)"/>
+            <column name="DATE_" type="DATE"/>
+            <column name="ORDER_NUMBER" type="VARCHAR(40)"/>
+            <column name="DESCRIPTION" type="VARCHAR(400)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="2" author="Vzvod">
+        <createIndex indexName="IDX_PENALTY_USER_SERVICE_INFO" tableName="PENALTY">
+            <column name="USER_SERVICE_INFO_ID"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseColumnNames="USER_SERVICE_INFO_ID" baseTableName="PENALTY"
+                                 constraintName="FK_PENALTY_ON_USER_SERVICE_INFO" referencedColumnNames="ID"
+                                 referencedTableName="SERVICE_INFO"/>
+    </changeSet>
+</databaseChangeLog>

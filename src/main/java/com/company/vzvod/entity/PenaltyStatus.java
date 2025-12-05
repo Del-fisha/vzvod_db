@@ -7,7 +7,9 @@ import org.springframework.lang.Nullable;
 
 public enum PenaltyStatus implements EnumClass<String> {
 
-    ;
+    ACTIVE("A"),
+    REMOVED("B"),
+    COMPLETED("C");
 
     private final String id;
 

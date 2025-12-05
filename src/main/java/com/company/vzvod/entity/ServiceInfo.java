@@ -13,6 +13,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.PastOrPresent;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @JmixEntity
@@ -66,6 +67,17 @@ public class ServiceInfo {
     @PastOrPresent(message = "{msg://com.company.vzvod.entity/ServiceInfo.startOfPost.validation.PastOrPresent}")
     @Column(name = "START_OF_POST")
     private LocalDate startOfPost;
+
+    @OneToMany(mappedBy = "userServiceInfo")
+    private List<Penalty> penalty;
+
+    public List<Penalty> getPenalty() {
+        return penalty;
+    }
+
+    public void setPenalty(List<Penalty> penalty) {
+        this.penalty = penalty;
+    }
 
     public void setStartOfPost(LocalDate startOfPost) {
         this.startOfPost = startOfPost;

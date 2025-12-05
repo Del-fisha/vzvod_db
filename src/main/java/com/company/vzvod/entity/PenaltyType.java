@@ -5,7 +5,7 @@ import io.jmix.core.metamodel.datatype.EnumClass;
 import org.springframework.lang.Nullable;
 
 
-public enum PenaltyStatus implements EnumClass<String> {
+public enum PenaltyType implements EnumClass<String> {
 
     REMARK("R"),
     REPRIMAND("RP"),
@@ -16,7 +16,7 @@ public enum PenaltyStatus implements EnumClass<String> {
 
     private final String id;
 
-    PenaltyStatus(String id) {
+    PenaltyType(String id) {
         this.id = id;
     }
 
@@ -25,8 +25,8 @@ public enum PenaltyStatus implements EnumClass<String> {
     }
 
     @Nullable
-    public static PenaltyStatus fromId(String id) {
-        for (PenaltyStatus at : PenaltyStatus.values()) {
+    public static PenaltyType fromId(String id) {
+        for (PenaltyType at : PenaltyType.values()) {
             if (at.getId().equals(id)) {
                 return at;
             }
