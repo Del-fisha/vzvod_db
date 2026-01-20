@@ -11,6 +11,7 @@
                     <property name="user">
                         <property name="firstName"/>
                         <property name="lastName"/>
+                        <property name="patronymic"/>
                     </property>
                     <property name="department" fetchPlan="_base"/>
                     <property name="rank"/>
