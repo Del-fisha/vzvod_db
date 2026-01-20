@@ -13,6 +13,8 @@
                         <property name="lastName"/>
                     </property>
                     <property name="department" fetchPlan="_base"/>
+                    <property name="rank"/>
+                    <property name="post"/>
                 </property>
             </fetchPlan>
             <loader id="penaltiesDl" readOnly="true">
@@ -32,45 +34,41 @@
         <action id="selectAction" type="lookup_select"/>
         <action id="discardAction" type="lookup_discard"/>
     </actions>
-    <layout alignItems="STRETCH"
-            padding="false" spacing="false"
-            expand="contentBox">
-        <vbox id="contentBox" classNames="overflow-auto">
-            <hbox id="buttonsPanel" classNames="buttons-panel">
-                <startSlot>
-                    <button id="addButton" action="penaltiesDataGrid.addAction"/>
-                    <button id="editButton" action="penaltiesDataGrid.editAction"/>
-                    <button id="removeButton" action="penaltiesDataGrid.removeAction"/>
-                </startSlot>
-                <endSlot>
-                    <simplePagination id="pagination" dataLoader="penaltiesDl"/>
-                </endSlot>
-            </hbox>
-            <dataGrid id="penaltiesDataGrid"
-                      width="100%"
-                      minHeight="20em"
-                      dataContainer="penaltiesDc"
-                      columnReorderingAllowed="true">
-                <actions>
-                    <action id="addAction" type="list_add"/>
-                    <action id="editAction" type="list_edit"/>
-                    <action id="removeAction" type="list_remove"/>
-                </actions>
-                <columns resizable="true">
-                    <column property="userServiceInfo"/>
-                    <column property="initiator"/>
-                    <column property="penaltyType"/>
-                    <column property="penaltyStatus"/>
-                    <column property="date"/>
-                    <column property="orderNumber"/>
-                    <column property="description"/>
-                </columns>
-            </dataGrid>
-        </vbox>
-        <hbox id="lookupActions" visible="false"
-              classNames="px-m py-s bg-contrast-5">
+    <layout>
+
+        <dataGrid id="penaltiesDataGrid"
+                  width="100%"
+                  minHeight="20em"
+                  dataContainer="penaltiesDc"
+                  columnReorderingAllowed="true">
+            <actions>
+                <action id="createAction" type="list_create"/>
+                <action id="editAction" type="list_edit"/>
+                <action id="removeAction" type="list_remove"/>
+            </actions>
+            <columns resizable="true">
+                <column property="userServiceInfo"/>
+                <column property="initiator"/>
+                <column property="penaltyType"/>
+                <column property="penaltyStatus"/>
+                <column property="date"/>
+                <column property="orderNumber"/>
+                <column property="description"/>
+            </columns>
+        </dataGrid>
+        <hbox id="lookupActions" visible="false">
             <button id="selectButton" action="selectAction"/>
             <button id="discardButton" action="discardAction"/>
+        </hbox>
+        <hbox id="buttonsPanel" classNames="buttons-panel">
+            <startSlot>
+                <button id="createButton" action="penaltiesDataGrid.createAction" text="msg://createButton.text"/>
+                <button id="editButton" action="penaltiesDataGrid.editAction"/>
+                <button id="removeButton" action="penaltiesDataGrid.removeAction"/>
+            </startSlot>
+            <endSlot>
+                <simplePagination id="pagination" dataLoader="penaltiesDl"/>
+            </endSlot>
         </hbox>
     </layout>
 </view>

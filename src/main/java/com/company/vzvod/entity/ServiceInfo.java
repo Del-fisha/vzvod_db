@@ -168,11 +168,23 @@ public class ServiceInfo {
     }
 
     @InstanceName
-    @DependsOnProperties({"department", "post", "rank"})
-    public String getInstanceName(MetadataTools metadataTools) {
-        return String.format("%s %s %s",
-                metadataTools.format(getDepartment()),
-                metadataTools.format(getPost()),
-                metadataTools.format(getRank()));
+    @DependsOnProperties("user")
+    public String getInstanceName() {
+        if (user == null) {
+            return "";
+        }
+
+        if (department == null) {
+            return String.format("%s %s %s",
+                    user.getLastName(),
+                    user.getFirstName(),
+                    user.getPatronymic());
+        }
+        return String.format("%s %s %s (%d отделение)",
+                user.getLastName(),
+                user.getFirstName(),
+                user.getPatronymic(),
+                this.getDepartment().getNumber());
+        // Возможны ошибки с номером отделения
     }
 }

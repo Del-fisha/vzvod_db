@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      xmlns:c="http://jmix.io/schema/flowui/jpql-condition"
+      title="msg://serviceInfoListView.title"
+      focusComponent="serviceInfoesDataGrid">
+    <data>
+        <collection id="serviceInfoesDc"
+                    class="com.company.vzvod.entity.ServiceInfo">
+            <fetchPlan extends="_base"/>
+            <loader id="serviceInfoesDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from ServiceInfo e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+        <urlQueryParameters>
+            <pagination component="pagination"/>
+        </urlQueryParameters>
+    </facets>
+    <actions>
+        <action id="selectAction" type="lookup_select"/>
+        <action id="discardAction" type="lookup_discard"/>
+    </actions>
+    <layout>
+        <hbox id="buttonsPanel" classNames="buttons-panel">
+            <startSlot>
+            </startSlot>
+            <endSlot>
+                <simplePagination id="pagination" dataLoader="serviceInfoesDl"/>
+            </endSlot>
+        </hbox>
+        <dataGrid id="serviceInfoesDataGrid"
+                  width="100%"
+                  minHeight="20em"
+                  dataContainer="serviceInfoesDc"
+                  columnReorderingAllowed="true">
+            <actions>
+            </actions>
+            <columns resizable="true">
+                <column property="post"/>
+                <column property="rank"/>
+                <column property="user"/>
+            </columns>
+        </dataGrid>
+        <hbox id="lookupActions" visible="false">
+            <button id="selectButton" action="selectAction"/>
+            <button id="discardButton" action="discardAction"/>
+        </hbox>
+    </layout>
+</view>

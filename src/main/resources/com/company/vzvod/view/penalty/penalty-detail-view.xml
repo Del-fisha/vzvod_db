@@ -6,12 +6,8 @@
         <instance id="penaltyDc"
                   class="com.company.vzvod.entity.Penalty">
             <fetchPlan extends="_base">
-                <property name="userServiceInfo">
-                    <property name="user">
-                        <property name="firstName"/>
-                        <property name="lastName"/>
-                    </property>
-                    <property name="department" fetchPlan="_base"/>
+                <property name="userServiceInfo" fetchPlan="_base">
+                    <property name="user" fetchPlan="_base"/>
                 </property>
             </fetchPlan>
             <loader id="penaltyDl"/>
@@ -24,31 +20,29 @@
         <action id="saveCloseAction" type="detail_saveClose"/>
         <action id="closeAction" type="detail_close"/>
     </actions>
-    <layout alignItems="STRETCH"
-            padding="false" spacing="false"
-            expand="contentBox">
-        <vbox id="contentBox" classNames="overflow-auto">
-            <formLayout id="form" dataContainer="penaltyDc">
-                <responsiveSteps>
-                    <responsiveStep minWidth="0" columns="1"/>
-                    <responsiveStep minWidth="40em" columns="2"/>
-                </responsiveSteps>
-                <entityPicker id="userServiceInfoField" property="userServiceInfo">
-                    <actions>
-                        <action id="entityLookupAction" type="entity_lookup"/>
-                        <action id="entityClearAction" type="entity_clear"/>
-                    </actions>
-                </entityPicker>
-                <select id="initiatorField" property="initiator"/>
-                <select id="penaltyTypeField" property="penaltyType"/>
-                <select id="penaltyStatusField" property="penaltyStatus"/>
-                <datePicker id="dateField" property="date"/>
-                <textField id="orderNumberField" property="orderNumber"/>
-                <textField id="descriptionField" property="description"/>
-            </formLayout>
-        </vbox>
-        <hbox id="detailActions"
-              classNames="px-m py-s bg-contrast-5">
+    <layout>
+        <formLayout id="form" dataContainer="penaltyDc">
+            <responsiveSteps>
+                <responsiveStep minWidth="0" columns="1"/>
+                <responsiveStep minWidth="40em" columns="2"/>
+            </responsiveSteps>
+            <entityPicker id="serviceInfoPicker"
+                          dataContainer="penaltyDc"
+                          property="userServiceInfo"
+                          label="Сотрудник">
+                <actions>
+                    <action id="lookup" type="entity_lookup"/>
+                    <action id="clear" type="entity_clear"/>
+                </actions>
+            </entityPicker>
+            <select id="initiatorField" property="initiator"/>
+            <select id="penaltyTypeField" property="penaltyType"/>
+            <select id="penaltyStatusField" property="penaltyStatus"/>
+            <datePicker id="dateField" property="date"/>
+            <textField id="orderNumberField" property="orderNumber"/>
+            <textField id="descriptionField" property="description"/>
+        </formLayout>
+        <hbox id="detailActions">
             <button id="saveAndCloseButton" action="saveCloseAction"/>
             <button id="closeButton" action="closeAction"/>
         </hbox>
