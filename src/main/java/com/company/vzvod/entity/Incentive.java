@@ -1,8 +1,10 @@
 package com.company.vzvod.entity;
 
 import io.jmix.core.DeletePolicy;
+import io.jmix.core.MetadataTools;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.OnDeleteInverse;
+import io.jmix.core.metamodel.annotation.DependsOnProperties;
 import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import jakarta.persistence.*;
@@ -12,38 +14,34 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @JmixEntity
-@Table(name = "PENALTY", indexes = {
-        @Index(name = "IDX_PENALTY_USER_SERVICE_INFO", columnList = "USER_SERVICE_INFO_ID")
+@Table(name = "INCENTIVE", indexes = {
+        @Index(name = "IDX_INCENTIVE_USER_SERVICE_INFO", columnList = "USER_SERVICE_INFO_ID")
 })
 @Entity
-public class Penalty {
+public class Incentive {
     @JmixGeneratedValue
     @Column(name = "ID", nullable = false)
     @Id
     private UUID id;
 
     @OnDeleteInverse(DeletePolicy.CASCADE)
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_SERVICE_INFO_ID")
+    @ManyToOne(fetch = FetchType.LAZY)
     private ServiceInfo userServiceInfo;
 
     @Column(name = "INITIATOR")
     private String initiator;
 
-    @Column(name = "PENALTY_TYPE")
-    private String penaltyType;
+    @Column(name = "INCENTIVE_TYPE")
+    private Integer incentiveType;
 
-    @Column(name = "PENALTY_STATUS")
-    private String penaltyStatus;
-
-    @PastOrPresent(message = "{msg://com.company.vzvod.entity/Penalty.date.validation.PastOrPresent}")
+    @PastOrPresent(message = "{msg://com.company.vzvod.entity/Incentive.date.validation.PastOrPresent}")
     @Column(name = "DATE_")
     private LocalDate date;
 
     @Column(name = "ORDER_NUMBER", length = 40)
     private String orderNumber;
 
-    @InstanceName
     @Column(name = "DESCRIPTION", length = 400)
     private String description;
 
@@ -71,20 +69,12 @@ public class Penalty {
         this.date = date;
     }
 
-    public PenaltyStatus getPenaltyStatus() {
-        return penaltyStatus == null ? null : PenaltyStatus.fromId(penaltyStatus);
+    public IncentiveType getIncentiveType() {
+        return incentiveType == null ? null : IncentiveType.fromId(incentiveType);
     }
 
-    public void setPenaltyStatus(PenaltyStatus penaltyStatus) {
-        this.penaltyStatus = penaltyStatus == null ? null : penaltyStatus.getId();
-    }
-
-    public PenaltyType getPenaltyType() {
-        return penaltyType == null ? null : PenaltyType.fromId(penaltyType);
-    }
-
-    public void setPenaltyType(PenaltyType penaltyType) {
-        this.penaltyType = penaltyType == null ? null : penaltyType.getId();
+    public void setIncentiveType(IncentiveType incentiveType) {
+        this.incentiveType = incentiveType == null ? null : incentiveType.getId();
     }
 
     public Initiator getInitiator() {
@@ -111,4 +101,9 @@ public class Penalty {
         this.id = id;
     }
 
+    @InstanceName
+    @DependsOnProperties({"incentiveType"})
+    public String getInstanceName(MetadataTools metadataTools) {
+        return metadataTools.format(getIncentiveType());
+    }
 }

@@ -71,6 +71,9 @@ public class ServiceInfo {
     @OneToMany(mappedBy = "userServiceInfo")
     private List<Penalty> penalty;
 
+    @OneToMany(mappedBy = "userServiceInfo")
+    private List<Incentive> incentive;
+
     public List<Penalty> getPenalty() {
         return penalty;
     }

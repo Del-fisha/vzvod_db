@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://incentiveDetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="incentiveDc"
+                  class="com.company.vzvod.entity.Incentive">
+            <fetchPlan extends="_base">
+                <property name="userServiceInfo">
+                    <property name="user">
+                        <property name="firstName"/>
+                        <property name="lastName"/>
+                        <property name="patronymic"/> <!-- обязательно -->
+                    </property>
+                    <property name="department" fetchPlan="_base"/>
+                </property>
+            </fetchPlan>
+            <loader id="incentiveDl"/>
+        </instance>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <actions>
+        <action id="saveCloseAction" type="detail_saveClose"/>
+        <action id="closeAction" type="detail_close"/>
+    </actions>
+    <layout>
+        <formLayout id="form" dataContainer="incentiveDc">
+            <responsiveSteps>
+                <responsiveStep minWidth="0" columns="1"/>
+                <responsiveStep minWidth="40em" columns="2"/>
+            </responsiveSteps>
+            <entityPicker id="userServiceInfoField" property="userServiceInfo">
+                <actions>
+                    <action id="entityLookupAction" type="entity_lookup"/>
+                    <action id="entityClearAction" type="entity_clear"/>
+                </actions>
+            </entityPicker>
+            <select id="initiatorField" property="initiator"/>
+            <select id="incentiveTypeField" property="incentiveType"/>
+            <datePicker id="dateField" property="date"/>
+            <textField id="orderNumberField" property="orderNumber"/>
+            <textField id="descriptionField" property="description"/>
+        </formLayout>
+        <hbox id="detailActions">
+            <button id="saveAndCloseButton" action="saveCloseAction"/>
+            <button id="closeButton" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

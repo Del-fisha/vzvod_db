@@ -202,7 +202,7 @@ public class User implements JmixUserDetails {
     @InstanceName
     @DependsOnProperties({"firstName", "lastName"})
     public String getDisplayName() {
-        return String.format("%s %s", (firstName != null ? firstName : ""),
-                (lastName != null ? lastName : "")).trim();
+        return String.format("%s %s %s", (lastName != null ? lastName : ""),
+                (firstName != null ? firstName : ""), (patronymic != null ? patronymic : "")).trim();
     }
 }
