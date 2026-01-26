@@ -188,6 +188,5 @@ public class ServiceInfo {
                 user.getFirstName(),
                 user.getPatronymic(),
                 this.getDepartment().getNumber());
-        // Возможны ошибки с номером отделения
     }
 }

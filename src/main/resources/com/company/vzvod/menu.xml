@@ -5,6 +5,7 @@
         <item view="User.list" title="msg://com.company.vzvod.view.user/userListView.title"/>
         <item view="Penalty.list" title="msg://com.company.vzvod.view.penalty/penaltyListView.title"/>
         <item view="Incentive.list" title="msg://com.company.vzvod.view.penalty/incentiveListView.title"/>
+        <item view="Vocation.list" title="msg://com.company.vzvod.view.vocation/vocationListView.title"/>
     </menu>
 
 </menu-config>
