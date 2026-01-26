@@ -37,7 +37,7 @@ public class Vocation {
     private Integer countOfDays;
 
     @Column(name = "ALL_REMAIND_DAYS")
-    private LocalDate allRemaindDays;
+    private Integer allRemaindDays;
 
     @Column(name = "HAS_DEPARTURE")
     private Boolean hasDeparture;
@@ -88,11 +88,11 @@ public class Vocation {
         this.countOfDays = countOfDays;
     }
 
-    public LocalDate getAllRemaindDays() {
+    public Integer getAllRemaindDays() {
         return allRemaindDays;
     }
 
-    public void setAllRemaindDays(LocalDate allRemaindDays) {
+    public void setAllRemaindDays(Integer allRemaindDays) {
         this.allRemaindDays = allRemaindDays;
     }
 

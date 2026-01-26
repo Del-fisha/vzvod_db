@@ -42,7 +42,7 @@
             <datePicker id="startDateField" property="startDate"/>
             <datePicker id="endDateField" property="endDate"/>
             <textField id="countOfDaysField" property="countOfDays"/>
-            <datePicker id="allRemaindDaysField" property="allRemaindDays"/>
+            <integerField id="allRemaindDaysField" property="allRemaindDays"/>
             <textField id="cityToDriveField" property="cityToDrive"/>
             <textField id="daysAddedByDepartureField" property="daysAddedByDeparture"/>
         </formLayout>
