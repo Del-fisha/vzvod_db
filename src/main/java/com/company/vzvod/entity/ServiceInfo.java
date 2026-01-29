@@ -14,6 +14,7 @@ import jakarta.validation.constraints.PastOrPresent;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @JmixEntity
@@ -73,6 +74,21 @@ public class ServiceInfo {
 
     @OneToMany(mappedBy = "userServiceInfo")
     private List<Incentive> incentive;
+
+    @ManyToMany
+    @JoinTable(name = "SHIFT_SERVICE_INFO_LINK",
+            joinColumns = @JoinColumn(name = "SERVICEINFO_ID"),
+            inverseJoinColumns = @JoinColumn(name = "SHIFT_ID"))
+    private Set<Shift> shifts;
+
+
+    public List<Incentive> getIncentive() {
+        return incentive;
+    }
+
+    public void setIncentive(List<Incentive> incentive) {
+        this.incentive = incentive;
+    }
 
     public List<Penalty> getPenalty() {
         return penalty;
@@ -188,5 +204,13 @@ public class ServiceInfo {
                 user.getFirstName(),
                 user.getPatronymic(),
                 this.getDepartment().getNumber());
+    }
+
+    public Set<Shift> getShifts() {
+        return shifts;
+    }
+
+    public void setShifts(Set<Shift> shifts) {
+        this.shifts = shifts;
     }
 }

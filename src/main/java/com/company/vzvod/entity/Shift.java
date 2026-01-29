@@ -28,7 +28,7 @@ public class Shift {
     @Column(name = "TYPE_OF_SHIFT")
     private String typeOfShift;
 
-
+    @ManyToMany(mappedBy = "shifts")
     private Set<ServiceInfo> units;
 
     public Set<ServiceInfo> getUnits() {
