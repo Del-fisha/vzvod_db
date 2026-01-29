@@ -1,0 +1,34 @@
+package com.company.vzvod.entity;
+
+import io.jmix.core.metamodel.datatype.EnumClass;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
+
+public enum TypeOfCriminal implements EnumClass<Integer> {
+
+    FEDERAL_WANTED(1),
+    WATCH_LIST(2),
+    HOT_PURSUIT(3),
+    IDENTIFICATION(4);
+
+    private final Integer id;
+
+    TypeOfCriminal(Integer id) {
+        this.id = id;
+    }
+
+    @NonNull
+    public Integer getId() {
+        return id;
+    }
+
+    @Nullable
+    public static TypeOfCriminal fromId(Integer id) {
+        for (TypeOfCriminal at : TypeOfCriminal.values()) {
+            if (at.getId().equals(id)) {
+                return at;
+            }
+        }
+        return null;
+    }
+}
