@@ -2,10 +2,7 @@ package com.company.vzvod.entity;
 
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.metamodel.annotation.JmixEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.*;
 
 import java.util.UUID;
 
@@ -18,10 +15,12 @@ public class Violation {
     @Id
     private UUID id;
 
-    @Column()
+    @Column(name = "IMPACT")
     private Impact impact;
 
-//    private Shift shift; // ToDo Сделать сущность Shift
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "SHIFT_ID")
+    private Shift shift;
 
     public UUID getId() {
         return id;
@@ -31,13 +30,13 @@ public class Violation {
         this.id = id;
     }
 
-//    public Shift getShift() {
-//        return shift;
-//    }
-//
-//    public void setShift(Shift shift) {
-//        this.shift = shift;
-//    }
+    public Shift getShift() {
+        return shift;
+    }
+
+    public void setShift(Shift shift) {
+        this.shift = shift;
+    }
 
     public Impact getImpact() {
         return impact;

@@ -1,7 +1,8 @@
 package com.company.vzvod.entity;
 
+import io.jmix.core.DeletePolicy;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
-import io.jmix.core.metamodel.annotation.DependsOnProperties;
+import io.jmix.core.entity.annotation.OnDeleteInverse;
 import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import jakarta.persistence.*;
@@ -30,6 +31,37 @@ public class Shift {
 
     @ManyToMany(mappedBy = "shifts")
     private Set<ServiceInfo> units;
+
+    @InstanceName
+    @Column(name = "DATE_")
+    private LocalDate date;
+
+    @Column(name = "START_TIME")
+    private LocalTime startTime;
+
+    @Column(name = "END_TIME")
+    private LocalTime endTime;
+
+    @OnDeleteInverse(DeletePolicy.UNLINK)
+    @OneToMany(mappedBy = "shift")
+    private Set<CriminalViolation> criminalViolations;
+
+    @OnDeleteInverse(DeletePolicy.UNLINK)
+    @OneToMany(mappedBy = "shift")
+    private Set<AdministrativeViolation> administrativeViolations;
+
+    @Column(name = "COUNT_OF_STATEMENTS")
+    private Integer countOfStatements;
+
+    @Column(name = "COUNT_OF_CLAIMS")
+    private Integer countOfClaims;
+
+    @Column(name = "IBD_WITH_MIGRANT")
+    private Integer ibdWithMigrant;
+
+    @Column(name = "IBD_WITHOUT_MIGRANT")
+    private Integer ibdWithoutMigrant;
+
 
     public Set<ServiceInfo> getUnits() {
         return units;
@@ -110,32 +142,6 @@ public class Shift {
     public void setIbdWithoutMigrant(Integer ibdWithoutMigrant) {
         this.ibdWithoutMigrant = ibdWithoutMigrant;
     }
-
-    @InstanceName
-    @Column(name = "DATE_")
-    private LocalDate date;
-
-    @Column(name = "START_TIME")
-    private LocalTime startTime;
-
-    @Column(name = "END_TIME")
-    private LocalTime endTime;
-
-    private Set<CriminalViolation> criminalViolations;
-
-    private Set<AdministrativeViolation> administrativeViolations;
-
-    @Column(name = "COUNT_OF_STATEMENTS")
-    private Integer countOfStatements;
-
-    @Column(name = "COUNT_OF_CLAIMS")
-    private Integer countOfClaims;
-
-    @Column(name = "IBD_WITH_MIGRANT")
-    private Integer ibdWithMigrant;
-
-    @Column(name = "IBD_WITHOUT_MIGRANT")
-    private Integer ibdWithoutMigrant;
 
     public String getTypeOfShift() {
         return typeOfShift;

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="shift-and-violations-tables" author="vzvod">
+        <!-- Create SHIFT table -->
+        <createTable tableName="SHIFT">
+            <column name="ID" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="NUMBER" type="INT"/>
+            <column name="TYPE_OF_SHIFT" type="VARCHAR(255)"/>
+            <column name="DATE" type="DATE"/>
+            <column name="START_TIME" type="TIME"/>
+            <column name="END_TIME" type="TIME"/>
+        </createTable>
+
+        <!-- Create primary key index -->
+        <createIndex tableName="SHIFT" indexName="PK_SHIFT" unique="true">
+            <column name="ID"/>
+        </createIndex>
+
+        <!-- Create CRIMINAL_VIOLATION table (inherits from Violation) -->
+        <createTable tableName="CRIMINAL_VIOLATION">
+            <column name="ID" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="IMPACT" type="INT"/>
+            <column name="SHIFT_ID" type="uuid"/>
+            <column name="TYPE_OF_CRIMINAL" type="INT"/>
+        </createTable>
+
+        <!-- Create primary key index for CRIMINAL_VIOLATION -->
+        <createIndex tableName="CRIMINAL_VIOLATION" indexName="PK_CRIMINAL_VIOLATION" unique="true">
+            <column name="ID"/>
+        </createIndex>
+
+        <!-- Create foreign key from CRIMINAL_VIOLATION to SHIFT -->
+        <addForeignKeyConstraint
+                baseTableName="CRIMINAL_VIOLATION"
+                baseColumnNames="SHIFT_ID"
+                constraintName="FK_CRIMINAL_VIOLATION_ON_SHIFT"
+                referencedTableName="SHIFT"
+                referencedColumnNames="ID"
+                onDelete="SET NULL"/>
+
+        <!-- Create index on SHIFT_ID in CRIMINAL_VIOLATION -->
+        <createIndex tableName="CRIMINAL_VIOLATION" indexName="IDX_CRIMINAL_VIOLATION_SHIFT">
+            <column name="SHIFT_ID"/>
+        </createIndex>
+
+        <!-- Create ADMINISTRATIVE_VIOLATION table (inherits from Violation) -->
+        <createTable tableName="ADMINISTRATIVE_VIOLATION">
+            <column name="ID" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="IMPACT" type="INT"/>
+            <column name="SHIFT_ID" type="uuid"/>
+        </createTable>
+
+        <!-- Create primary key index for ADMINISTRATIVE_VIOLATION -->
+        <createIndex tableName="ADMINISTRATIVE_VIOLATION" indexName="PK_ADMINISTRATIVE_VIOLATION" unique="true">
+            <column name="ID"/>
+        </createIndex>
+
+        <!-- Create foreign key from ADMINISTRATIVE_VIOLATION to SHIFT -->
+        <addForeignKeyConstraint
+                baseTableName="ADMINISTRATIVE_VIOLATION"
+                baseColumnNames="SHIFT_ID"
+                constraintName="FK_ADMINISTRATIVE_VIOLATION_ON_SHIFT"
+                referencedTableName="SHIFT"
+                referencedColumnNames="ID"
+                onDelete="SET NULL"/>
+
+        <!-- Create index on SHIFT_ID in ADMINISTRATIVE_VIOLATION -->
+        <createIndex tableName="ADMINISTRATIVE_VIOLATION" indexName="IDX_ADMINISTRATIVE_VIOLATION_SHIFT">
+            <column name="SHIFT_ID"/>
+        </createIndex>
+
+        <!-- Create junction table for Shift.units (ManyToMany with ServiceInfo) -->
+        <!-- Primary key is composite: (SHIFT_ID, SERVICE_INFO_ID) defined directly in createTable -->
+        <createTable tableName="SHIFT_SERVICE_INFO">
+            <column name="SHIFT_ID" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="SERVICE_INFO_ID" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Create composite primary key index -->
+        <createIndex tableName="SHIFT_SERVICE_INFO" indexName="PK_SHIFT_SERVICE_INFO" unique="true">
+            <column name="SHIFT_ID"/>
+            <column name="SERVICE_INFO_ID"/>
+        </createIndex>
+
+        <!-- Create foreign key from SHIFT_SERVICE_INFO to SHIFT -->
+        <addForeignKeyConstraint
+                baseTableName="SHIFT_SERVICE_INFO"
+                baseColumnNames="SHIFT_ID"
+                constraintName="FK_SHIFT_SERVICE_INFO_ON_SHIFT"
+                referencedTableName="SHIFT"
+                referencedColumnNames="ID"
+                onDelete="CASCADE"/>
+
+        <!-- Create foreign key from SHIFT_SERVICE_INFO to SERVICE_INFO -->
+        <addForeignKeyConstraint
+                baseTableName="SHIFT_SERVICE_INFO"
+                baseColumnNames="SERVICE_INFO_ID"
+                constraintName="FK_SHIFT_SERVICE_INFO_ON_SERVICE_INFO"
+                referencedTableName="SERVICE_INFO"
+                referencedColumnNames="ID"
+                onDelete="CASCADE"/>
+
+        <!-- Create separate indices for better query performance -->
+        <createIndex tableName="SHIFT_SERVICE_INFO" indexName="IDX_SHIFT_SERVICE_INFO_SHIFT">
+            <column name="SHIFT_ID"/>
+        </createIndex>
+
+        <createIndex tableName="SHIFT_SERVICE_INFO" indexName="IDX_SHIFT_SERVICE_INFO_SERVICE_INFO">
+            <column name="SERVICE_INFO_ID"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
