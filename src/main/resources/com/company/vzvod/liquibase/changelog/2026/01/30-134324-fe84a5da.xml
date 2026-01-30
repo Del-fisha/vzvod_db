@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+    <!-- Добавляем колонку COUNT_OF_STATEMENTS в таблицу SHIFT -->
+    <changeSet id="1" author="Alexey Tarasov">
+        <addColumn tableName="SHIFT">
+            <column name="COUNT_OF_STATEMENTS" type="INT"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- Добавляем колонку COUNT_OF_CLAIMS в таблицу SHIFT -->
+    <changeSet id="2" author="Alexey Tarasov">
+        <addColumn tableName="SHIFT">
+            <column name="COUNT_OF_CLAIMS" type="INT"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- Добавляем колонку IBD_WITH_MIGRANT в таблицу SHIFT -->
+    <changeSet id="3" author="Alexey Tarasov">
+        <addColumn tableName="SHIFT">
+            <column name="IBD_WITH_MIGRANT" type="INT"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- Добавляем колонку IBD_WITHOUT_MIGRANT в таблицу SHIFT -->
+    <changeSet id="4" author="Alexey Tarasov">
+        <addColumn tableName="SHIFT">
+            <column name="IBD_WITHOUT_MIGRANT" type="INT"/>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

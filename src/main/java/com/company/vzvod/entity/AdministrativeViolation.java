@@ -2,9 +2,7 @@ package com.company.vzvod.entity;
 
 import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @JmixEntity
 @Table(name = "ADMINISTRATIVE_VIOLATION")
@@ -12,14 +10,14 @@ import jakarta.persistence.Table;
 public class AdministrativeViolation extends Violation {
 
     @InstanceName
-    @Column(name = "ARTICLE_OF_ADMINISTRATIVE")
-    private Integer article;
+    @Column(name = "ARTICLE")
+    private ArticleOfAdministrative article;
 
-    public Integer getType() {
+    public ArticleOfAdministrative getArticle() {
         return article;
     }
 
-    public void setType(ArticleOfAdministrative article) {
-        this.article = article == null ? null : article.getId();;
+    public void setArticle(ArticleOfAdministrative article) {
+        this.article = article;
     }
 }

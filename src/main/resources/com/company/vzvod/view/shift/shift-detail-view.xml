@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://shiftDetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="shiftDc"
+                  class="com.company.vzvod.entity.Shift">
+            <fetchPlan extends="_base">
+                <property name="units">
+                    <property name="user">
+                        <property name="firstName"/>
+                        <property name="lastName"/>
+                        <property name="patronymic"/>
+                    </property>
+                    <property name="department" fetchPlan="_base"/>
+                </property>
+            </fetchPlan>
+            <loader id="shiftDl"/>
+            <collection id="unitsDc" property="units"/>
+        </instance>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <actions>
+        <action id="saveCloseAction" type="detail_saveClose"/>
+        <action id="closeAction" type="detail_close"/>
+    </actions>
+    <layout alignItems="STRETCH"
+            padding="false" spacing="false"
+            expand="contentBox">
+        <vbox id="contentBox" classNames="overflow-auto">
+            <hbox spacing="true" expand="left">
+                <!-- ЛЕВАЯ КОЛОНКА - ТАБЛИЦА С СОТРУДНИКАМИ -->
+                <vbox id="left" spacing="true">
+                    <h3>Сотрудники в наряде</h3>
+                    <hbox spacing="true">
+                        <button id="addButton" action="unitsDataGrid.add" text="Добавить"/>
+                        <button id="removeButton" action="unitsDataGrid.remove" text="Удалить"/>
+                    </hbox>
+                    <dataGrid id="unitsDataGrid" dataContainer="unitsDc" width="100%" minHeight="25em">
+                        <columns>
+                            <column property="user.lastName" header="Фамилия"/>
+                            <column property="user.firstName" header="Имя"/>
+                            <column property="user.patronymic" header="Отчество"/>
+                        </columns>
+                        <actions>
+                            <action id="add" type="list_add"/>
+                            <action id="remove" type="list_remove"/>
+                        </actions>
+                    </dataGrid>
+                </vbox>
+
+                <!-- ПРАВАЯ КОЛОНКА - ФОРМА С ДАННЫМИ НАРЯДА -->
+                <formLayout id="form" dataContainer="shiftDc">
+                    <responsiveSteps>
+                        <responsiveStep minWidth="0" columns="1"/>
+                    </responsiveSteps>
+                    <h3>Данные наряда</h3>
+                    <select id="numberField" property="number"/>
+                    <select id="typeOfShiftField" property="typeOfShift"/>
+                    <datePicker id="dateField" property="date"/>
+                    <textField id="countOfStatementsField" property="countOfStatements"/>
+                    <textField id="ibdWithMigrantField" property="ibdWithMigrant"/>
+                    <textField id="ibdWithoutMigrantField" property="ibdWithoutMigrant"/>
+                    <textField id="countOfClaimsField" property="countOfClaims"/>
+                    <timePicker id="startTimeField" property="startTime"/>
+                    <timePicker id="endTimeField" property="endTime"/>
+                </formLayout>
+            </hbox>
+        </vbox>
+        <hbox id="detailActions"
+              classNames="px-m py-s bg-contrast-5">
+            <button id="saveAndCloseButton" action="saveCloseAction"/>
+            <button id="closeButton" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

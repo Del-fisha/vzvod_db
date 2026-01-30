@@ -6,6 +6,9 @@
         <item view="Penalty.list" title="msg://com.company.vzvod.view.penalty/penaltyListView.title"/>
         <item view="Incentive.list" title="msg://com.company.vzvod.view.penalty/incentiveListView.title"/>
         <item view="Vocation.list" title="msg://com.company.vzvod.view.vocation/vocationListView.title"/>
+        <item view="AdministrativeViolation.list"
+              title="msg://com.company.vzvod.view.administrativeviolation/administrativeViolationListView.title"/>
+        <item view="Shift.list" title="msg://com.company.vzvod.view.shift/shiftListView.title"/>
     </menu>
 
 </menu-config>

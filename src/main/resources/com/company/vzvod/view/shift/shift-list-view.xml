@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      xmlns:c="http://jmix.io/schema/flowui/jpql-condition"
+      title="msg://shiftListView.title"
+      focusComponent="shiftsDataGrid">
+    <data>
+        <collection id="shiftsDc"
+                    class="com.company.vzvod.entity.Shift">
+            <fetchPlan extends="_base">
+                <property name="units">
+                    <property name="user">
+                        <property name="firstName"/>
+                        <property name="lastName"/>
+                    </property>
+                    <property name="department" fetchPlan="_base"/>
+                </property>
+            </fetchPlan>
+            <loader id="shiftsDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from Shift e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+        <urlQueryParameters>
+            <pagination component="pagination"/>
+        </urlQueryParameters>
+    </facets>
+    <actions>
+        <action id="selectAction" type="lookup_select"/>
+        <action id="discardAction" type="lookup_discard"/>
+    </actions>
+    <layout alignItems="STRETCH"
+            padding="false" spacing="false"
+            expand="contentBox">
+        <vbox id="contentBox" classNames="overflow-auto">
+            <hbox id="buttonsPanel" classNames="buttons-panel">
+                <startSlot>
+                    <button id="createButton" action="shiftsDataGrid.createAction"/>
+                    <button id="editButton" action="shiftsDataGrid.editAction"/>
+                    <button id="removeButton" action="shiftsDataGrid.removeAction"/>
+                </startSlot>
+                <endSlot>
+                    <simplePagination id="pagination" dataLoader="shiftsDl"/>
+                </endSlot>
+            </hbox>
+            <dataGrid id="shiftsDataGrid"
+                      width="100%"
+                      minHeight="20em"
+                      dataContainer="shiftsDc"
+                      columnReorderingAllowed="true">
+                <actions>
+                    <action id="createAction" type="list_create"/>
+                    <action id="editAction" type="list_edit"/>
+                    <action id="removeAction" type="list_remove"/>
+                </actions>
+                <columns resizable="true">
+                    <column property="date"/>
+                    <column property="number"/>
+                    <column property="typeOfShift"/>
+                    <column property="ibdWithMigrant"/>
+                    <column property="ibdWithoutMigrant"/>
+                    <column property="countOfStatements"/>
+                    <column property="countOfClaims"/>
+                    <column property="startTime"/>
+                    <column property="endTime"/>
+
+                </columns>
+            </dataGrid>
+        </vbox>
+        <hbox id="lookupActions" visible="false"
+              classNames="px-m py-s bg-contrast-5">
+            <button id="selectButton" action="selectAction"/>
+            <button id="discardButton" action="discardAction"/>
+        </hbox>
+    </layout>
+</view>

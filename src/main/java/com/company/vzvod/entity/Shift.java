@@ -23,17 +23,17 @@ public class Shift {
     private UUID id;
 
     @InstanceName
-    @Column(name = "NUMBER_")
-    private Integer number;
+    @Column(name = "NUMBER")
+    private NumberOfShift number;
 
     @Column(name = "TYPE_OF_SHIFT")
-    private String typeOfShift;
+    private TypeOfShift typeOfShift;
 
     @ManyToMany(mappedBy = "shifts")
     private Set<ServiceInfo> units;
 
     @InstanceName
-    @Column(name = "DATE_")
+    @Column(name = "DATE")
     private LocalDate date;
 
     @Column(name = "START_TIME")
@@ -143,20 +143,20 @@ public class Shift {
         this.ibdWithoutMigrant = ibdWithoutMigrant;
     }
 
-    public String getTypeOfShift() {
+    public TypeOfShift getTypeOfShift() {
         return typeOfShift;
     }
 
     public void setTypeOfShift(TypeOfShift typeOfShift) {
-        this.typeOfShift = typeOfShift == null ? null : typeOfShift.toString();
+        this.typeOfShift = typeOfShift;
     }
 
-    public Integer getNumber() {
+    public NumberOfShift getNumber() {
         return number;
     }
 
     public void setNumber(NumberOfShift number) {
-        this.number = number == null ? null : number.getId();
+        this.number = number;
     }
 
     public UUID getId() {
