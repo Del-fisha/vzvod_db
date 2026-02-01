@@ -7,8 +7,8 @@ import org.springframework.lang.Nullable;
 
 public enum Dep implements EnumClass<Integer> {
 
-    FIRST(10),
-    SECOND(20);
+    FIRST(1),
+    SECOND(2);
 
     private final Integer id;
 

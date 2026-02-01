@@ -74,10 +74,7 @@ public class ServiceInfo {
     @OneToMany(mappedBy = "userServiceInfo")
     private List<Incentive> incentive;
 
-    @ManyToMany
-    @JoinTable(name = "SHIFT_SERVICE_INFO_LINK",
-            joinColumns = @JoinColumn(name = "SERVICEINFO_ID"),
-            inverseJoinColumns = @JoinColumn(name = "SHIFT_ID"))
+    @ManyToMany(mappedBy = "units")
     private Set<Shift> shifts;
 
 

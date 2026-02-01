@@ -14,9 +14,26 @@
                     </property>
                     <property name="department" fetchPlan="_base"/>
                 </property>
+
+                <!-- подтягиваем административные нарушения -->
+                <property name="administrativeViolations" fetchPlan="_base"/>
+
+                <!-- подтягиваем уголовные нарушения -->
+                <property name="criminalViolations" fetchPlan="_base"/>
             </fetchPlan>
+
             <loader id="shiftDl"/>
+
+            <!-- Сотрудники -->
             <collection id="unitsDc" property="units"/>
+
+            <!-- Административные -->
+            <collection id="administrativeViolationsDc"
+                        property="administrativeViolations"/>
+
+            <!-- Уголовные -->
+            <collection id="criminalViolationsDc"
+                        property="criminalViolations"/>
         </instance>
     </data>
     <facets>
@@ -30,29 +47,81 @@
             padding="false" spacing="false"
             expand="contentBox">
         <vbox id="contentBox" classNames="overflow-auto">
-            <hbox spacing="true" expand="left">
+            <hbox id="mainColumns"
+                  spacing="true"
+                  width="100%"
+                  height="100%"
+                  expand="left">
                 <!-- ЛЕВАЯ КОЛОНКА - ТАБЛИЦА С СОТРУДНИКАМИ -->
-                <vbox id="left" spacing="true">
-                    <h3>Сотрудники в наряде</h3>
+                <vbox id="left" spacing="true" height="100%">
+                    <!-- БЛОК 1. Сотрудники -->
+                    <h3 text="Сотрудники в наряде"/>
                     <hbox spacing="true">
-                        <button id="addButton" action="unitsDataGrid.add" text="Добавить"/>
-                        <button id="removeButton" action="unitsDataGrid.remove" text="Удалить"/>
+                        <button id="addUnitBtn" action="unitsDataGrid.add" text="Добавить сотрудника" themeNames="primary"/>
+                        <button id="removeUnitBtn" action="unitsDataGrid.remove" text="Удалить"/>
                     </hbox>
-                    <dataGrid id="unitsDataGrid" dataContainer="unitsDc" width="100%" minHeight="25em">
+                    <dataGrid id="unitsDataGrid"
+                              dataContainer="unitsDc"
+                              width="100%"
+                              minHeight="8em">
                         <columns>
                             <column property="user.lastName" header="Фамилия"/>
                             <column property="user.firstName" header="Имя"/>
                             <column property="user.patronymic" header="Отчество"/>
                         </columns>
                         <actions>
+                            <!-- создаёт связь с уже существующим ServiceInfo -->
                             <action id="add" type="list_add"/>
                             <action id="remove" type="list_remove"/>
                         </actions>
                     </dataGrid>
-                </vbox>
 
+                    <!-- БЛОК 2. Административные нарушения -->
+                    <h3 text="Административная практика"/>
+                    <hbox spacing="true">
+                        <button id="addAdminBtn" action="adminViolationsDataGrid.create" text="Добавить/Редактировать АП" themeNames="primary"/>
+                        <button id="removeAdminBtn" action="adminViolationsDataGrid.remove" text="Удалить"/>
+                    </hbox>
+                    <dataGrid id="adminViolationsDataGrid"
+                              dataContainer="administrativeViolationsDc"
+                              width="100%"
+                              minHeight="8em">
+                        <columns>
+                            <!-- подберите подходящие свойства вашей сущности AdministrativeViolation -->
+                            <column property="article" header="Статья"/>
+                            <!-- можно добавить дополнительные колонки -->
+                        </columns>
+                        <actions>
+                            <!-- открывает детальный экран нарушения -->
+                            <action id="create" type="list_create"/>
+                            <action id="edit" type="list_edit"/>
+                            <action id="remove" type="list_remove"/>
+                        </actions>
+                    </dataGrid>
+
+                    <!-- БЛОК 3. Уголовные нарушения -->
+                    <h3 text="Уголовная практика"/>
+                    <hbox spacing="true">
+                        <button id="addCriminalBtn" action="criminalViolationsDataGrid.create" text="Добавить/Редактировать УП" themeNames="primary"/>
+                        <button id="removeCriminalBtn" action="criminalViolationsDataGrid.remove" text="Удалить"/>
+                    </hbox>
+                    <dataGrid id="criminalViolationsDataGrid"
+                              dataContainer="criminalViolationsDc"
+                              width="100%"
+                              minHeight="8em">
+                        <columns>
+                            <!-- свойство type – ваш enum TypeOfCriminal -->
+                            <column property="type" header="Тип преступления"/>
+                        </columns>
+                        <actions>
+                            <action id="create" type="list_create"/>
+                            <action id="edit" type="list_edit"/>
+                            <action id="remove" type="list_remove"/>
+                        </actions>
+                    </dataGrid>
+                </vbox>
                 <!-- ПРАВАЯ КОЛОНКА - ФОРМА С ДАННЫМИ НАРЯДА -->
-                <formLayout id="form" dataContainer="shiftDc">
+                <formLayout id="form" dataContainer="shiftDc" height="100%">
                     <responsiveSteps>
                         <responsiveStep minWidth="0" columns="1"/>
                     </responsiveSteps>

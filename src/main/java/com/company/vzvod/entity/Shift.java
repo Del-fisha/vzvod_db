@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Set;
 import java.util.UUID;
 
@@ -22,17 +23,20 @@ public class Shift {
     @Id
     private UUID id;
 
-    @InstanceName
+
     @Column(name = "NUMBER")
     private NumberOfShift number;
 
     @Column(name = "TYPE_OF_SHIFT")
     private TypeOfShift typeOfShift;
 
-    @ManyToMany(mappedBy = "shifts")
+    @ManyToMany
+    @JoinTable(name = "SHIFT_SERVICE_INFO",
+            joinColumns = @JoinColumn(name = "SHIFT_ID"),
+            inverseJoinColumns = @JoinColumn(name = "SERVICE_INFO_ID"))
     private Set<ServiceInfo> units;
 
-    @InstanceName
+
     @Column(name = "DATE")
     private LocalDate date;
 
@@ -169,8 +173,15 @@ public class Shift {
 
     @InstanceName
     public String getInstanceName() {
-        return String.format("%s %s",
-                this.date, this.number.toString());
+        StringBuilder stringBuilder = new StringBuilder();
+        for (ServiceInfo serviceInfo : getUnits()) {
+            stringBuilder.append(serviceInfo.getUser().getLastName())
+                    .append(" ")
+                    .append(serviceInfo.getUser().getFirstName())
+                    .append(", ");
+        }
+        return String.format("%s (%s) %s",
+                this.date.format(DateTimeFormatter.ofPattern("yyyy dd MMMM")), this.number.getId(), stringBuilder);
     }
 
 

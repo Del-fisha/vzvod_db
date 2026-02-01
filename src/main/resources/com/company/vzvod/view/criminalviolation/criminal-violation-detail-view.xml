@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://criminalViolationDetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="criminalViolationDc"
+                  class="com.company.vzvod.entity.CriminalViolation">
+            <fetchPlan extends="_base">
+                <property name="shift">
+                    <property name="number"/>
+                    <property name="units">
+                        <property name="user">
+                            <property name="firstName"/>
+                            <property name="lastName"/>
+                        </property>
+                    </property>
+                </property>
+            </fetchPlan>
+            <loader id="criminalViolationDl"/>
+        </instance>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <actions>
+        <action id="saveCloseAction" type="detail_saveClose"/>
+        <action id="closeAction" type="detail_close"/>
+    </actions>
+    <layout alignItems="STRETCH"
+            padding="false" spacing="false"
+            expand="contentBox">
+        <vbox id="contentBox" classNames="overflow-auto">
+            <formLayout id="form" dataContainer="criminalViolationDc">
+                <responsiveSteps>
+                    <responsiveStep minWidth="0" columns="1"/>
+                    <responsiveStep minWidth="40em" columns="2"/>
+                </responsiveSteps>
+                <select id="impactField" property="impact"/>
+                <entityPicker id="shiftField" property="shift">
+                    <actions>
+                        <action id="entityLookupAction" type="entity_lookup"/>
+                        <action id="entityClearAction" type="entity_clear"/>
+                    </actions>
+                </entityPicker>
+                <select id="typeField" property="type"/>
+            </formLayout>
+        </vbox>
+        <hbox id="detailActions"
+              classNames="px-m py-s bg-contrast-5">
+            <button id="saveAndCloseButton" action="saveCloseAction"/>
+            <button id="closeButton" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

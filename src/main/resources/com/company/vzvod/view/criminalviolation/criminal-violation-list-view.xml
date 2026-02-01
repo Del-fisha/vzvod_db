@@ -1,30 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <view xmlns="http://jmix.io/schema/flowui/view"
       xmlns:c="http://jmix.io/schema/flowui/jpql-condition"
-      title="msg://administrativeViolationListView.title"
-      focusComponent="administrativeViolationsDataGrid">
+      title="msg://criminalViolationListView.title"
+      focusComponent="criminalViolationsDataGrid">
     <data>
-        <collection id="administrativeViolationsDc"
-                    class="com.company.vzvod.entity.AdministrativeViolation">
+        <collection id="criminalViolationsDc"
+                    class="com.company.vzvod.entity.CriminalViolation">
             <fetchPlan extends="_base">
                 <property name="shift">
                     <property name="number"/>
-                    <property name="date"/>
                     <property name="units">
-                        <property name="department">
-                            <property name="number"/>
-                        </property>
                         <property name="user">
                             <property name="firstName"/>
                             <property name="lastName"/>
-                            <property name="patronymic"/>
                         </property>
                     </property>
                 </property>
             </fetchPlan>
-            <loader id="administrativeViolationsDl" readOnly="true">
+            <loader id="criminalViolationsDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from AdministrativeViolation e]]>
+                    <![CDATA[select e from CriminalViolation e]]>
                 </query>
             </loader>
         </collection>
@@ -32,6 +27,7 @@
     <facets>
         <dataLoadCoordinator auto="true"/>
         <urlQueryParameters>
+            <genericFilter component="genericFilter"/>
             <pagination component="pagination"/>
         </urlQueryParameters>
     </facets>
@@ -43,20 +39,24 @@
             padding="false" spacing="false"
             expand="contentBox">
         <vbox id="contentBox" classNames="overflow-auto">
+            <genericFilter id="genericFilter"
+                           dataLoader="criminalViolationsDl">
+                <properties include=".*"/>
+            </genericFilter>
             <hbox id="buttonsPanel" classNames="buttons-panel">
                 <startSlot>
-                    <button id="createButton" action="administrativeViolationsDataGrid.createAction"/>
-                    <button id="editButton" action="administrativeViolationsDataGrid.editAction"/>
-                    <button id="removeButton" action="administrativeViolationsDataGrid.removeAction"/>
+                    <button id="createButton" action="criminalViolationsDataGrid.createAction"/>
+                    <button id="editButton" action="criminalViolationsDataGrid.editAction"/>
+                    <button id="removeButton" action="criminalViolationsDataGrid.removeAction"/>
                 </startSlot>
                 <endSlot>
-                    <simplePagination id="pagination" dataLoader="administrativeViolationsDl"/>
+                    <simplePagination id="pagination" dataLoader="criminalViolationsDl"/>
                 </endSlot>
             </hbox>
-            <dataGrid id="administrativeViolationsDataGrid"
+            <dataGrid id="criminalViolationsDataGrid"
                       width="100%"
                       minHeight="20em"
-                      dataContainer="administrativeViolationsDc"
+                      dataContainer="criminalViolationsDc"
                       columnReorderingAllowed="true">
                 <actions>
                     <action id="createAction" type="list_create"/>
@@ -64,12 +64,9 @@
                     <action id="removeAction" type="list_remove"/>
                 </actions>
                 <columns resizable="true">
-                    <column property="shift.date"/>
-                    <column property="shift.number"/>
-                    <column property="shift.units.department.number"/>
-                    <column property="shift.units"/>
-                    <column property="article"/>
                     <column property="impact"/>
+                    <column property="shift"/>
+                    <column property="type"/>
                 </columns>
             </dataGrid>
         </vbox>

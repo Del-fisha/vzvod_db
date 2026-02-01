@@ -6,7 +6,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
-@Table(name = "CriminalViolation")
+@Table(name = "CRIMINAL_VIOLATION")
 @JmixEntity
 @Entity
 public class CriminalViolation extends Violation {

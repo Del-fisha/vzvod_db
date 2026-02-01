@@ -9,6 +9,8 @@
         <item view="AdministrativeViolation.list"
               title="msg://com.company.vzvod.view.administrativeviolation/administrativeViolationListView.title"/>
         <item view="Shift.list" title="msg://com.company.vzvod.view.shift/shiftListView.title"/>
+        <item view="CriminalViolation.list"
+              title="msg://com.company.vzvod.view.criminalviolation/criminalViolationListView.title"/>
     </menu>
 
 </menu-config>
