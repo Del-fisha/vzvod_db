@@ -18,7 +18,11 @@
             </fetchPlan>
             <loader id="vocationsDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from Vocation e]]>
+                    <![CDATA[
+        select e from Vocation e
+        where :serviceInfo is null
+           or e.userServiceInfo = :serviceInfo
+    ]]>
                 </query>
             </loader>
         </collection>

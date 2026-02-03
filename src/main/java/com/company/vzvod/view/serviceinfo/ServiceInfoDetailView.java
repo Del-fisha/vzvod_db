@@ -3,8 +3,10 @@ package com.company.vzvod.view.serviceinfo;
 import com.company.vzvod.entity.IdCard;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.User;
+import com.company.vzvod.entity.Vocation;
 import com.company.vzvod.view.idcard.IdCardDetailView;
 import com.company.vzvod.view.mainviewtopmenu.MainViewTopMenu;
+import com.company.vzvod.view.vocation.VocationListView;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.router.Route;
 import io.jmix.core.DataManager;
@@ -14,6 +16,8 @@ import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
 
 @Route(value = "service-infoes/:id", layout = MainViewTopMenu.class)
 @ViewController(id = "ServiceInfo.detail")
@@ -50,5 +54,19 @@ public class ServiceInfoDetailView extends StandardDetailView<ServiceInfo> {
                     .editEntity(idCard)
                     .open();
         }
+    }
+
+    @Subscribe(id = "vocationListButton", subject = "clickListener")
+    public void onVocationListButtonClick(final ClickEvent<JmixButton> event) {
+        ServiceInfo serviceInfo = serviceInfoDc.getItem();
+        if (serviceInfo == null) {
+            return;
+        }
+
+        DialogWindow<VocationListView> window = dialogWindows.view(this, VocationListView.class).build();
+        window.getView().setServiceInfo(serviceInfo);
+
+        window.open();
+
     }
 }

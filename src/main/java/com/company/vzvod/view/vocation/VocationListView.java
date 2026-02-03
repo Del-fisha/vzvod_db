@@ -1,8 +1,10 @@
 package com.company.vzvod.view.vocation;
 
+import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.Vocation;
 import com.company.vzvod.view.mainviewtopmenu.MainViewTopMenu;
 import com.vaadin.flow.router.Route;
+import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.view.*;
 
 
@@ -12,4 +14,19 @@ import io.jmix.flowui.view.*;
 @LookupComponent("vocationsDataGrid")
 @DialogMode(width = "64em")
 public class VocationListView extends StandardListView<Vocation> {
+
+    @ViewComponent
+    private CollectionLoader<Vocation> vocationsDl;
+
+    private ServiceInfo serviceInfo;
+
+    public void setServiceInfo(final ServiceInfo serviceInfo) {
+        this.serviceInfo = serviceInfo;
+    }
+
+    @Subscribe
+    public void onBeforeShow(BeforeShowEvent event) {
+        vocationsDl.setParameter("serviceInfo", serviceInfo);
+        vocationsDl.load();
+    }
 }

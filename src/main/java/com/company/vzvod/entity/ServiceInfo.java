@@ -77,6 +77,17 @@ public class ServiceInfo {
     @ManyToMany(mappedBy = "units")
     private Set<Shift> shifts;
 
+    @OneToMany(mappedBy = "userServiceInfo")
+    private List<Vocation> vocations;
+
+
+    public List<Vocation> getVocations() {
+        return vocations;
+    }
+
+    public void setVocations(List<Vocation> vocations) {
+        this.vocations = vocations;
+    }
 
     public List<Incentive> getIncentive() {
         return incentive;

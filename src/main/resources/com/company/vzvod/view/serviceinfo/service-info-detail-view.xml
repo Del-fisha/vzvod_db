@@ -18,6 +18,9 @@
                 <property name="startDate"/>
                 <property name="startOfPost"/>
                 <property name="department"/>
+                <property name="shifts"/>
+                <property name="incentive"/>
+                <property name="penalty"/>
             </fetchPlan>
             <loader id="serviceInfoDl"/>
         </instance>
@@ -59,8 +62,8 @@
             <textField id="breastplateField" property="breastplate"/>
             <datePicker id="startDateField" property="startDate"/>
             <button id="idCardCreateButton" text="msg://com.company.vzvod.view.user.user/idCardButtonCreate.text"/>
-
             <datePicker id="startOfPostField" property="startOfPost"/>
+            <button id="vocationListButton" text="msg://com.company.vzvod.view.user.user/vocationButtonCreate.text"/>
         </formLayout>
         <hbox id="detailActions">
             <button id="saveAndCloseButton" action="saveAction"/>
