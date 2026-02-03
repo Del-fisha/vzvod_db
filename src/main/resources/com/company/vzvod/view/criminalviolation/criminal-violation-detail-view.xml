@@ -7,6 +7,7 @@
                   class="com.company.vzvod.entity.CriminalViolation">
             <fetchPlan extends="_base">
                 <property name="shift">
+                    <property name="date"/>
                     <property name="number"/>
                     <property name="units">
                         <property name="user">

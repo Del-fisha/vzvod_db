@@ -8,6 +8,7 @@
                     class="com.company.vzvod.entity.CriminalViolation">
             <fetchPlan extends="_base">
                 <property name="shift">
+                    <property name="date"/>
                     <property name="number"/>
                     <property name="units">
                         <property name="user">
@@ -27,7 +28,6 @@
     <facets>
         <dataLoadCoordinator auto="true"/>
         <urlQueryParameters>
-            <genericFilter component="genericFilter"/>
             <pagination component="pagination"/>
         </urlQueryParameters>
     </facets>
@@ -39,10 +39,6 @@
             padding="false" spacing="false"
             expand="contentBox">
         <vbox id="contentBox" classNames="overflow-auto">
-            <genericFilter id="genericFilter"
-                           dataLoader="criminalViolationsDl">
-                <properties include=".*"/>
-            </genericFilter>
             <hbox id="buttonsPanel" classNames="buttons-panel">
                 <startSlot>
                     <button id="createButton" action="criminalViolationsDataGrid.createAction"/>
