@@ -13,4 +13,5 @@ import io.jmix.flowui.view.ViewDescriptor;
 @ViewDescriptor(path = "incentive-detail-view.xml")
 @EditedEntityContainer("incentiveDc")
 public class IncentiveDetailView extends StandardDetailView<Incentive> {
+
 }

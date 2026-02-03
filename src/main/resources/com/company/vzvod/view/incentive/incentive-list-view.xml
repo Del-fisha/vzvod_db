@@ -18,7 +18,7 @@
             </fetchPlan>
             <loader id="incentivesDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from Incentive e]]>
+                    <![CDATA[select e from Incentive e where :serviceInfo is null or e.userServiceInfo = :serviceInfo]]>
                 </query>
             </loader>
         </collection>
