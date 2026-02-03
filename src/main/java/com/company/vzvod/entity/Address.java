@@ -121,12 +121,14 @@ public class Address {
 
     @InstanceName
     @DependsOnProperties({"city", "street", "houseNumber", "body", "flat"})
-    public String getInstanceName(MetadataTools metadataTools) {
-        return String.format("%s %s %s %s %s",
-                metadataTools.format(city),
-                metadataTools.format(street),
-                metadataTools.format(houseNumber),
-                metadataTools.format(body),
-                metadataTools.format(flat));
+    public String getInstanceName() {
+        return String.format("%s, %s, %s, %s, %s",
+                        city != null ? city : "",
+                        street != null ? street : "",
+                        houseNumber != null ? houseNumber : "",
+                        body != null ? body : "",
+                        flat != null ? flat : "")
+                .replaceAll(", +", ", ")
+                .replaceAll("^, |, $", "");
     }
 }
