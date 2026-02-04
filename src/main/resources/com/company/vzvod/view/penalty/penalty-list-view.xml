@@ -20,7 +20,7 @@
             </fetchPlan>
             <loader id="penaltiesDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from Penalty e]]>
+                    <![CDATA[select e from Penalty e where :serviceInfo is null or e.userServiceInfo = :serviceInfo]]>
                 </query>
             </loader>
         </collection>

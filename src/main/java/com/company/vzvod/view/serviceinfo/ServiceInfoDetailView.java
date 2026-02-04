@@ -4,6 +4,7 @@ import com.company.vzvod.entity.*;
 import com.company.vzvod.view.idcard.IdCardDetailView;
 import com.company.vzvod.view.incentive.IncentiveListView;
 import com.company.vzvod.view.mainviewtopmenu.MainViewTopMenu;
+import com.company.vzvod.view.penalty.PenaltyListView;
 import com.company.vzvod.view.vocation.VocationListView;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.router.Route;
@@ -76,6 +77,18 @@ public class ServiceInfoDetailView extends StandardDetailView<ServiceInfo> {
         }
 
         DialogWindow<IncentiveListView> window = dialogWindows.view(this, IncentiveListView.class).build();
+        window.getView().setServiceInfo(serviceInfo);
+        window.open();
+    }
+
+    @Subscribe(id = "penaltyListButton", subject = "clickListener")
+    public void onPenaltyListButtonClick(final ClickEvent<JmixButton> event) {
+        ServiceInfo serviceInfo = serviceInfoDc.getItem();
+        if (serviceInfo == null) {
+            return;
+        }
+
+        DialogWindow<PenaltyListView> window = dialogWindows.view(this, PenaltyListView.class).build();
         window.getView().setServiceInfo(serviceInfo);
         window.open();
     }
