@@ -65,6 +65,7 @@
             <datePicker id="startOfPostField" property="startOfPost"/>
             <button id="vocationListButton" text="msg://com.company.vzvod.view.user.user/vocationButtonCreate.text"/>
             <button id="incentiveListButton" text="msg://com.company.vzvod.view.penalty/incentiveListView.title"/>
+            <button id="penaltyListButton" text="msg://com.company.vzvod.view.penalty/penaltyListView.title"/>
         </formLayout>
         <hbox id="detailActions">
             <button id="saveAndCloseButton" action="saveAction"/>
