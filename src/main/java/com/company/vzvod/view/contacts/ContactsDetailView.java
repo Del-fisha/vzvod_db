@@ -78,37 +78,51 @@ public class ContactsDetailView extends StandardDetailView<Contacts> {
 
     @Subscribe("sameAddressCheckbox")
     public void onSameAddressCheckboxComponentValueChange(
-            final AbstractField.ComponentValueChangeEvent<JmixCheckbox, Boolean> event) {
+            AbstractField.ComponentValueChangeEvent<JmixCheckbox, Boolean> event) {
 
-        if (!event.isFromClient()) {
+        if (!event.isFromClient()) { // чтобы инициализация из кода не запускала логику
             return;
         }
 
         boolean same = Boolean.TRUE.equals(event.getValue());
-        applySameAddressMode(same);
+        Contacts contact = contactsDc.getItemOrNull();
+        if (contact == null) {
+            return;
+        }
 
-        if (!same) {
-            // Когда отключаем чекбокс, обнуляем адрес проживания
-            // Пользователь должен будет заполнить его заново
-            Contacts contact = contactsDc.getItemOrNull();
-            if (contact != null) {
+        if (same) {
+            // Копируем текущий адрес регистрации в адрес проживания
+            Address reg = contact.getRegistration();
+            if (reg != null) {
+                contact.setHabitation(copyAddress(reg));
+            } else {
+                // при желании тут можно показать уведомление, что регистрация пустая
                 contact.setHabitation(null);
             }
+            habitationAddressCreateButton.setEnabled(false);
+        } else {
+            // Отключили режим "одинаковые адреса" -> чистим адрес проживания и даём редактировать
+            contact.setHabitation(null);
+            habitationAddressCreateButton.setEnabled(true);
         }
     }
 
 
     @Subscribe(id = "contactsDc", target = Target.DATA_CONTAINER)
     public void onContactsDcItemPropertyChange(InstanceContainer.ItemPropertyChangeEvent<Contacts> event) {
-        // Если изменился адрес регистрации и чекбокс включён
-        if ("registration".equals(event.getProperty())
-                && Boolean.TRUE.equals(sameAddressCheckbox.getValue())) {
-            Contacts c = contactsDc.getItemOrNull();
-            if (c != null) {
-                // Создаём копию нового адреса регистрации для адреса проживания
-                Address newRegistration = (Address) event.getValue();
-                c.setHabitation(copyAddress(newRegistration));
-            }
+        if (!"registration".equals(event.getProperty())) {
+            return;
+        }
+
+        if (!Boolean.TRUE.equals(sameAddressCheckbox.getValue())) {
+            return;
+        }
+
+        Contacts contact = event.getItem();
+        Address newReg = (Address) event.getValue(); // новое значение registration
+
+        if (contact != null) {
+            contact.setHabitation(newReg != null ? copyAddress(newReg) : null);
         }
     }
 
@@ -193,19 +207,20 @@ public class ContactsDetailView extends StandardDetailView<Contacts> {
     }
 
 
-    // 1) Вынесенная инициализация чекбокса из данных сущности
     private void initSameCheckboxFromEntity() {
         Contacts contact = contactsDc.getItemOrNull();
-        boolean same = contact != null
-                && contact.getRegistration() != null
+        if (contact == null) {
+            return;
+        }
+
+        boolean same = contact.getRegistration() != null
                 && contact.getHabitation() != null
                 && addressesAreEqual(contact.getRegistration(), contact.getHabitation());
-        // Эта установка НЕ вызовет копирование, т.к. в обработчике стоит isFromClient()
-        sameAddressCheckbox.setValue(same);
-        applySameAddressMode(same);
+
+        sameAddressCheckbox.setValue(same); // isFromClient=false, логика копирования не запустится
+        habitationAddressCreateButton.setEnabled(!same);
     }
 
-    // 2) После загрузки данных контакта (из contactsDl)
     @Subscribe(id = "contactsDl", target = Target.DATA_LOADER)
     public void onContactsDlPostLoad(InstanceLoader.PostLoadEvent event) {
         initSameCheckboxFromEntity();
@@ -217,11 +232,10 @@ public class ContactsDetailView extends StandardDetailView<Contacts> {
         initSameCheckboxFromEntity();
     }
 
-    // 4) Для новой сущности задать предсказуемый дефолт
     @Subscribe
-    public void onInitEntity(final InitEntityEvent<Contacts> event) {
+    public void onInitEntity(InitEntityEvent<Contacts> event) {
         sameAddressCheckbox.setValue(false);
-        applySameAddressMode(false);
+        habitationAddressCreateButton.setEnabled(true);
     }
 
 }

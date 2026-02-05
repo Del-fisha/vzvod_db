@@ -15,6 +15,7 @@
                         </property>
                         <property name="department" fetchPlan="_base"/>
                     </property>
+                    <property name="date"/>
                 </property>
             </fetchPlan>
             <loader id="administrativeViolationDl"/>

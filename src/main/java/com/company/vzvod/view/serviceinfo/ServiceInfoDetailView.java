@@ -5,6 +5,7 @@ import com.company.vzvod.view.idcard.IdCardDetailView;
 import com.company.vzvod.view.incentive.IncentiveListView;
 import com.company.vzvod.view.mainviewtopmenu.MainViewTopMenu;
 import com.company.vzvod.view.penalty.PenaltyListView;
+import com.company.vzvod.view.shift.ShiftListView;
 import com.company.vzvod.view.vocation.VocationListView;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.router.Route;
@@ -89,6 +90,18 @@ public class ServiceInfoDetailView extends StandardDetailView<ServiceInfo> {
         }
 
         DialogWindow<PenaltyListView> window = dialogWindows.view(this, PenaltyListView.class).build();
+        window.getView().setServiceInfo(serviceInfo);
+        window.open();
+    }
+
+    @Subscribe(id = "shiftListButton", subject = "clickListener")
+    public void onShiftListButtonClick(final ClickEvent<JmixButton> event) {
+        ServiceInfo serviceInfo = serviceInfoDc.getItem();
+        if (serviceInfo == null) {
+            return;
+        }
+
+        DialogWindow<ShiftListView> window = dialogWindows.view(this, ShiftListView.class).build();
         window.getView().setServiceInfo(serviceInfo);
         window.open();
     }

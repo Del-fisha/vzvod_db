@@ -17,7 +17,10 @@
             </fetchPlan>
             <loader id="shiftsDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from Shift e]]>
+                    <![CDATA[
+                select distinct  e from Shift e
+                where :serviceInfo is null or :serviceInfo member of e.units
+            ]]>
                 </query>
             </loader>
         </collection>
