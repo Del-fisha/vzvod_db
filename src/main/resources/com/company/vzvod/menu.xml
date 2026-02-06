@@ -11,6 +11,7 @@
         <item view="Shift.list" title="msg://com.company.vzvod.view.shift/shiftListView.title"/>
         <item view="CriminalViolation.list"
               title="msg://com.company.vzvod.view.criminalviolation/criminalViolationListView.title"/>
+        <item view="UserListView" title="msg://com.company.vzvod.view.userlist/userListView.title"/>
     </menu>
 
 </menu-config>

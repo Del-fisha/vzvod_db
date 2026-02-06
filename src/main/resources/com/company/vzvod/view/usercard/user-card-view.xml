@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://com.company.vzvod.userCardView.title"
+      focusComponent="mainAccordion">
+
+    <data>
+        <!-- Основной пользователь -->
+        <instance id="userDc"
+                  class="com.company.vzvod.entity.User">
+            <fetchPlan>
+                <!-- основные поля -->
+                <property name="firstName"/>
+                <property name="lastName"/>
+                <property name="patronymic"/>
+                <property name="dateOfBirth"/>
+
+                <!-- служебная инфа -->
+                <property name="serviceInfo">
+                    <property name="department" fetchPlan="_base"/>
+                    <property name="rank"/>
+                    <property name="status"/>
+                    <property name="post"/>
+                    <property name="token"/>
+                    <property name="breastplate"/>
+                    <property name="startDate"/>
+                    <property name="startOfPost"/>
+                </property>
+
+                <!-- контакты + вложенные адреса -->
+                <property name="contactsInfo">
+                    <property name="phoneNumber"/>
+                    <property name="nearestMetroStation"/>
+                    <property name="registration" fetchPlan="_base"/>
+                    <property name="habitation" fetchPlan="_base"/>
+                </property>
+            </fetchPlan>
+            <loader id="userDl"/>
+        </instance>
+
+        <!-- Вложенные контейнеры для удобной привязки форм -->
+        <instance id="serviceInfoDc"
+                  class="com.company.vzvod.entity.ServiceInfo"/>
+        <instance id="contactsDc"
+                  class="com.company.vzvod.entity.Contacts"/>
+        <instance id="regAddressDc"
+                  class="com.company.vzvod.entity.Address"/>
+        <instance id="habAddressDc"
+                  class="com.company.vzvod.entity.Address"/>
+
+        <!-- Смены сотрудника -->
+        <collection id="shiftsDc"
+                    class="com.company.vzvod.entity.Shift">
+            <fetchPlan extends="_base"/>
+            <loader id="shiftsDl" readOnly="true">
+                <query>
+                    <![CDATA[
+                        select distinct s
+                        from Shift s
+                        join s.units si
+                        where si.user = :user
+                    ]]>
+                </query>
+            </loader>
+        </collection>
+
+        <!-- Сотрудники того же отделения для быстрой навигации -->
+        <collection id="colleaguesDc"
+                    class="com.company.vzvod.entity.User">
+            <fetchPlan>
+                <property name="lastName"/>
+                <property name="firstName"/>
+                <property name="patronymic"/>
+                <property name="serviceInfo">
+                    <property name="department"/>
+                </property>
+            </fetchPlan>
+            <loader id="colleaguesDl">
+                <query>
+                    <![CDATA[
+                        select u
+                        from User u
+                        join u.serviceInfo si
+                        where
+                            (:department is null and si.department is null)
+                            or si.department = :department
+                        order by u.lastName, u.firstName
+                    ]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+
+    <layout padding="true" spacing="true" width="100%">
+
+        <!-- ФИО в заголовке -->
+        <h2 id="header" alignSelf="CENTER"/>
+
+        <!-- Общий layout: слева список отделения, справа карточка -->
+        <hbox width="100%" spacing="true">
+            <!-- Левая колонка: сотрудники отделения -->
+            <vbox width="25%" spacing="true">
+                <h3 text="Сотрудники отделения"/>
+                <dataGrid id="colleaguesDataGrid"
+                          dataContainer="colleaguesDc"
+                          width="100%"
+                          minHeight="20em">
+                    <columns>
+                        <column property="lastName"/>
+                        <column property="firstName"/>
+                        <column property="patronymic"/>
+                    </columns>
+                </dataGrid>
+            </vbox>
+
+            <!-- Правая часть: сама карточка пользователя -->
+            <vbox width="75%" spacing="true">
+
+                <!-- Верх: слева User + ServiceInfo, справа аккордеон с контактами и адресами -->
+                <hbox width="100%" spacing="true">
+                    <!-- Левая колонка (данные пользователя и ServiceInfo) -->
+                    <vbox width="50%" spacing="true">
+                        <!-- Основные поля пользователя -->
+                        <formLayout id="userForm"
+                                    dataContainer="userDc"
+                                    labelsPosition="ASIDE">
+                            <!-- Можно вернуть ФИО, если надо -->
+                            <!--
+                            <textField property="lastName" readOnly="true"/>
+                            <textField property="firstName" readOnly="true"/>
+                            <textField property="patronymic" readOnly="true"/>
+                            -->
+                            <formItem>
+                                <textField property="dateOfBirth" readOnly="true"/>
+                            </formItem>
+                        </formLayout>
+
+                        <!-- Служебная информация (без аккордеона) -->
+                        <formLayout id="serviceInfoForm"
+                                    dataContainer="serviceInfoDc"
+                                    labelsPosition="ASIDE">
+                            <formItem>
+                                <textField property="department" readOnly="true"/>
+                            </formItem>
+                            <formItem>
+                                <textField property="rank" readOnly="true"/>
+                            </formItem>
+                            <formItem>
+                                <textField property="post" readOnly="true"/>
+                            </formItem>
+                            <formItem>
+                                <textField property="status" readOnly="true"/>
+                            </formItem>
+                            <formItem>
+                                <textField property="token" readOnly="true"/>
+                            </formItem>
+                            <formItem>
+                                <textField property="breastplate" readOnly="true"/>
+                            </formItem>
+                            <formItem>
+                                <textField property="startDate" readOnly="true"/>
+                            </formItem>
+                            <formItem>
+                                <textField property="startOfPost" readOnly="true"/>
+                            </formItem>
+                        </formLayout>
+                    </vbox>
+
+                    <!-- Правая колонка (контакты и адреса) -->
+                    <vbox width="50%">
+                        <accordion id="mainAccordion" width="100%">
+                            <!-- Контакты -->
+                            <accordionPanel summaryText="Контакты">
+                                <formLayout dataContainer="contactsDc"
+                                            labelsPosition="ASIDE"
+                                            autoResponsive="false">
+                                    <formItem>
+                                        <textField property="phoneNumber" readOnly="true"/>
+                                    </formItem>
+                                    <formItem>
+                                        <textField property="nearestMetroStation" readOnly="true"/>
+                                    </formItem>
+                                </formLayout>
+                            </accordionPanel>
+
+                            <!-- Адрес регистрации -->
+                            <accordionPanel summaryText="Адрес регистрации">
+                                <formLayout dataContainer="regAddressDc"
+                                            labelsPosition="ASIDE">
+                                    <formItem>
+                                        <textField property="index" readOnly="true"/>
+                                    </formItem>
+                                    <formItem>
+                                        <textField property="city" readOnly="true"/>
+                                    </formItem>
+                                    <formItem>
+                                        <textField property="street" readOnly="true"/>
+                                    </formItem>
+                                    <formItem>
+                                        <textField property="houseNumber" readOnly="true"/>
+                                    </formItem>
+                                    <formItem>
+                                        <textField property="body" readOnly="true"/>
+                                    </formItem>
+                                    <formItem>
+                                        <textField property="flat" readOnly="true"/>
+                                    </formItem>
+                                    <formItem>
+                                        <textField property="typeOfHousing" readOnly="true"/>
+                                    </formItem>
+                                    <formItem>
+                                        <textField property="statusOfHousing" readOnly="true"/>
+                                    </formItem>
+                                </formLayout>
+                            </accordionPanel>
+
+                            <!-- Адрес проживания -->
+                            <accordionPanel summaryText="Адрес проживания">
+                                <formLayout dataContainer="habAddressDc"
+                                            labelsPosition="ASIDE">
+                                    <formItem>
+                                        <textField property="index" readOnly="true"/>
+                                    </formItem>
+                                    <formItem>
+                                        <textField property="city" readOnly="true"/>
+                                    </formItem>
+                                    <formItem>
+                                        <textField property="street" readOnly="true"/>
+                                    </formItem>
+                                    <formItem>
+                                        <textField property="houseNumber" readOnly="true"/>
+                                    </formItem>
+                                    <formItem>
+                                        <textField property="body" readOnly="true"/>
+                                    </formItem>
+                                    <formItem>
+                                        <textField property="flat" readOnly="true"/>
+                                    </formItem>
+                                    <formItem>
+                                        <textField property="typeOfHousing" readOnly="true"/>
+                                    </formItem>
+                                    <formItem>
+                                        <textField property="statusOfHousing" readOnly="true"/>
+                                    </formItem>
+                                </formLayout>
+                            </accordionPanel>
+                        </accordion>
+                    </vbox>
+                </hbox>
+
+                <!-- Низ: общий аккордеон "Смены" -->
+                <accordion id="shiftsAccordion" width="100%">
+                    <accordionPanel summaryText="Смены">
+                        <dataGrid id="shiftsDataGrid"
+                                  dataContainer="shiftsDc"
+                                  width="100%"
+                                  minHeight="8em">
+                            <columns>
+                                <column property="date"/>
+                                <column property="number"/>
+                                <column property="typeOfShift"/>
+                                <column property="startTime"/>
+                                <column property="endTime"/>
+                            </columns>
+                        </dataGrid>
+                    </accordionPanel>
+                </accordion>
+            </vbox>
+        </hbox>
+
+    </layout>
+</view>
