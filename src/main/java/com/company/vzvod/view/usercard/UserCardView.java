@@ -14,6 +14,7 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 import io.jmix.flowui.ViewNavigators;
+import io.jmix.flowui.component.accordion.JmixAccordion;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.model.CollectionContainer;
 import io.jmix.flowui.model.CollectionLoader;
@@ -63,6 +64,9 @@ public class UserCardView extends StandardView {
     @ViewComponent
     private H2 header;
 
+    @ViewComponent
+    JmixAccordion mainAccordion;
+
     @Autowired
     private ViewNavigators viewNavigators;
 
@@ -82,6 +86,7 @@ public class UserCardView extends StandardView {
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         refreshUserData();
+        mainAccordion.close();
     }
 
     @Subscribe("colleaguesDataGrid")
