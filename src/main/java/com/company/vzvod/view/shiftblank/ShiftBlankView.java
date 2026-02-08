@@ -1,0 +1,52 @@
+package com.company.vzvod.view.shiftblank;
+
+import com.company.vzvod.entity.AdministrativeViolation;
+import com.company.vzvod.entity.CriminalViolation;
+import com.company.vzvod.entity.Shift;
+import com.company.vzvod.entity.User;
+import com.vaadin.flow.router.Route;
+import io.jmix.flowui.model.*;
+import io.jmix.flowui.view.*;
+
+import java.util.List;
+import java.util.UUID;
+
+@Route("shift-blank")                  // /shift-blank?shiftId=...
+@ViewController("ShiftBlankView")
+@ViewDescriptor("shift-blank-view.xml")
+public class ShiftBlankView extends StandardView {
+
+    @ViewComponent
+    private InstanceContainer<Shift> shiftDc;
+
+    @ViewComponent
+    private InstanceLoader<Shift> shiftDl;
+
+    @ViewComponent
+    private CollectionContainer<User> unitsDc;
+
+    @ViewComponent
+    private CollectionPropertyContainer<AdministrativeViolation> administrativeViolationsDc;
+
+    @ViewComponent
+    private CollectionPropertyContainer<CriminalViolation> criminalViolationsDc;
+
+    /**
+     * Читаем shiftId из query-параметров и грузим смену.
+     */
+    @Subscribe
+    public void onQueryParametersChange(QueryParametersChangeEvent event) {
+        List<String> params = event.getQueryParameters()
+                .getParameters()
+                .get("shiftId");
+
+        if (params == null || params.isEmpty()) {
+            return;
+        }
+
+        UUID id = UUID.fromString(params.get(0));
+        shiftDl.setEntityId(id);
+        shiftDl.load();
+    }
+
+}

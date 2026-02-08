@@ -1,1 +1,471 @@
 /* Define your styles here */
+/* Vzvod.css - ИСПРАВЛЕННАЯ И ОСВЕТЛЁННАЯ ВЕРСИЯ */
+/* === БАЗОВАЯ ТЕМАТИКА (ОСТРЫЕ УГЛЫ, контрастный текст) ================== */
+
+html {
+    /* ОСТРЫЕ УГЛЫ (без скругления) */
+    --lumo-border-radius-s: 0;
+    --lumo-border-radius-m: 0;
+    --lumo-border-radius-l: 0;
+
+    /* Базовые размеры и шрифт */
+    --lumo-font-size-m: 0.95rem;
+    --lumo-font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "Segoe UI", Roboto, sans-serif;
+
+    /* Цветовая палитра – «полицейская», ОСВЕТЛЁННАЯ */
+    --police-bg: #0b1626;                /* было #040913 */
+    --police-bg-elevated: #142239;       /* было #0b1724 */
+    --police-bg-soft: #1b2b45;           /* было #121f2f */
+    --police-primary: #2963b5;           /* было #1b4b8f */
+    --police-primary-soft: rgba(41, 99, 181, 0.22);
+    --police-primary-strong: #13407d;    /* было #0d2b59 */
+    --police-accent: #41c4ff;            /* было #27b4ff */
+    --police-danger: #ff6a6a;            /* было #ff4a4a */
+
+    --police-border-subtle: rgba(255, 255, 255, 0.06);
+    --police-border-strong: rgba(0, 0, 0, 0.8);
+
+    /* Текст чуть мягче, но светлый */
+    --police-text-main: #f5f7fb;
+    --police-text-secondary: #d0d8e8;
+    --police-text-muted: #a0aec6;
+
+    /* Привязка к Lumo */
+    --lumo-base-color: var(--police-bg);
+    --lumo-body-text-color: var(--police-text-main);
+
+    --lumo-primary-color: var(--police-primary);
+    --lumo-primary-color-50pct: rgba(41, 99, 181, 0.5);
+    --lumo-primary-color-10pct: rgba(41, 99, 181, 0.1);
+    --lumo-primary-text-color: var(--police-accent);
+
+    --lumo-error-color: var(--police-danger);
+    --lumo-error-color-50pct: rgba(255, 106, 106, 0.5);
+    --lumo-error-color-10pct: rgba(255, 106, 106, 0.1);
+
+    --lumo-contrast-10pct: rgba(255, 255, 255, 0.03);
+    --lumo-contrast-20pct: rgba(255, 255, 255, 0.06);
+    --lumo-contrast-40pct: rgba(255, 255, 255, 0.16);
+
+    --lumo-success-color: #2dd08b;
+}
+
+/* === ГЛОБАЛЬНЫЕ СТИЛИ ================================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+body,
+:host([theme~="dark"]) {
+    background: radial-gradient(circle at 0 0, #22365b 0, #0b1626 55%) fixed;
+    color: var(--police-text-main);
+    min-height: 100vh;
+}
+
+/* Типографика заголовков */
+h1, h2, h3, h4, h5 {
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 650;
+    margin: 0;
+    padding: 0;
+}
+
+/* === MAIN VIEW TOP MENU ================================================= */
+
+.jmix-main-view-top-menu-app-layout {
+    background: transparent;
+    box-shadow: none;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+/* Панель навигации */
+.jmix-main-view-top-menu-navigation-bar-box {
+    background: linear-gradient(90deg, #091425 0%, #101a31 40%, #172744 100%);
+    box-shadow:
+            0 0 0 1px rgba(0, 0, 0, 0.85),
+            0 18px 40px rgba(0, 0, 0, 0.9);
+    border-radius: 0;
+    padding: 0.35rem 0.75rem;
+    margin: 0.75rem 1rem 0.5rem 1rem;
+    max-width: calc(100% - 2rem);
+}
+
+.jmix-main-view-top-menu-header {
+    align-items: center;
+    gap: 0.75rem;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+/* Логотип */
+.jmix-main-view-top-menu-logo-container {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 30% 20%, #2c69bf, #050914);
+    border-radius: 0;
+    padding: 0.25rem 0.6rem;
+    box-shadow:
+            0 0 0 1px rgba(65, 196, 255, 0.35),
+            0 12px 24px rgba(0, 0, 0, 0.8);
+    flex-shrink: 0;
+}
+
+.jmix-main-view-top-menu-logo {
+    width: 32px;
+    height: 32px;
+    filter: drop-shadow(0 0 12px rgba(65, 196, 255, 0.65));
+}
+
+/* Навигация */
+.jmix-main-view-top-menu-navigation {
+    flex: 1;
+    min-width: 200px;
+    z-index: 10;
+}
+
+.jmix-main-view-top-menu-navigation vaadin-tabs {
+    border-radius: 0;
+    padding: 0.15rem;
+    background: rgba(15, 27, 49, 0.95); /* чуть светлее и ровнее */
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+    --lumo-primary-text-color: var(--police-text-main);
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.jmix-main-view-top-menu-navigation vaadin-tab {
+    border-radius: 0;
+    padding-inline: 0.9rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: #f5f7fb;            /* ЯВНО СВЕТЛЫЙ ТЕКСТ */
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* Активный пункт меню */
+.jmix-main-view-top-menu-navigation vaadin-tab[selected] {
+    background: linear-gradient(135deg, var(--police-primary) 0%, var(--police-primary-strong) 100%);
+    color: #ffffff;
+    box-shadow:
+            0 0 0 1px rgba(0, 0, 0, 0.7),
+            0 10px 25px rgba(0, 0, 0, 0.9);
+}
+
+/* Hover */
+.jmix-main-view-top-menu-navigation vaadin-tab:hover::before {
+    opacity: 0;
+}
+.jmix-main-view-top-menu-navigation vaadin-tab:hover {
+    background: radial-gradient(circle at 50% 0, rgba(65, 196, 255, 0.25), transparent 65%);
+    color: var(--police-accent);
+}
+
+/* Блок пользователя */
+.jmix-main-view-top-menu-user-box {
+    gap: 0.5rem;
+    padding-inline: 0.4rem;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    z-index: 20;
+}
+
+.jmix-main-view-top-menu-user-box jmix-user-indicator,
+.jmix-main-view-top-menu-user-box jmix-user-indicator::part(button) {
+    border-radius: 0;
+    background: rgba(10, 19, 38, 0.95);
+    color: var(--police-text-main);
+    box-shadow: 0 0 0 1px var(--police-border-subtle);
+}
+
+/* Кнопка выхода */
+.jmix-logout-button,
+.jmix-logout-button vaadin-button {
+    --lumo-button-size: 2.1rem;
+}
+
+.jmix-logout-button vaadin-button {
+    border-radius: 0;
+    padding-inline: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.7rem;
+    background: radial-gradient(circle at 0 0, #2a68c0 0, #081021 60%);
+    color: var(--police-text-main);
+    box-shadow:
+            0 0 0 1px rgba(65, 196, 255, 0.45),
+            0 14px 26px rgba(0, 0, 0, 0.95);
+}
+
+.jmix-logout-button vaadin-button:hover {
+    filter: brightness(1.1);
+}
+
+/* Нижний хедер */
+.jmix-main-view-top-menu-view-header-box {
+    margin: 0.2rem 1rem 0.7rem 1rem;
+    padding: 0.35rem 0.9rem;
+    border-radius: 0;
+    background: linear-gradient(90deg, rgba(26, 45, 82, 0.9), rgba(16, 31, 60, 0.8));
+    box-shadow:
+            0 0 0 1px rgba(65, 196, 255, 0.16),
+            0 18px 32px rgba(0, 0, 0, 0.95);
+    max-width: calc(100% - 2rem);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.jmix-main-view-top-menu-view-title {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: #f5f7fb; /* светлый заголовок */
+}
+
+/* === КНОПКИ ============================================================= */
+
+vaadin-button {
+    border-radius: 0;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+/* Primary */
+vaadin-button[theme~="primary"] {
+    background: linear-gradient(145deg, var(--police-primary), var(--police-primary-strong));
+    color: #ffffff;
+    box-shadow:
+            0 0 0 1px var(--police-border-strong),
+            0 12px 24px rgba(0, 0, 0, 0.85);
+}
+
+/* Tertiary */
+vaadin-button[theme~="tertiary"],
+vaadin-button[theme~="tertiary-inline"] {
+    background: transparent;
+    box-shadow: none;
+    color: var(--police-accent);
+}
+
+/* === DATA GRID ========================================================== */
+
+vaadin-grid {
+    border-radius: 0;
+    overflow: hidden;
+    background: var(--police-bg-elevated);
+    box-shadow:
+            0 0 0 1px var(--police-border-subtle),
+            0 18px 40px rgba(0, 0, 0, 0.9);
+    max-width: 100%;
+}
+
+/* Заголовки */
+vaadin-grid::part(header-cell) {
+    background: linear-gradient(180deg, #18263c, #122037);
+    color: var(--police-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 0.7rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Ячейки */
+vaadin-grid::part(cell) {
+    background-color: transparent;
+    color: var(--police-text-main);
+}
+
+/* Чередование строк */
+vaadin-grid::part(body-row):nth-child(odd) vaadin-grid-cell-content {
+    background-color: rgba(16, 26, 48, 0.8);
+}
+
+/* Hover */
+vaadin-grid::part(row):hover vaadin-grid-cell-content {
+    background: linear-gradient(90deg, rgba(65, 196, 255, 0.15), transparent);
+}
+
+/* Selected */
+vaadin-grid[theme~="row-stripes"]::part(row)[selected] vaadin-grid-cell-content,
+vaadin-grid::part(row)[selected] vaadin-grid-cell-content {
+    background: radial-gradient(circle at 0 0, var(--police-primary-soft), #081224);
+}
+
+/* === INPUT'Ы ============================================================ */
+
+vaadin-text-field::part(input-field),
+vaadin-date-picker::part(input-field),
+vaadin-combo-box::part(input-field) {
+    border-radius: 0;
+    background: rgba(12, 22, 42, 0.95);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    color: var(--police-text-main);
+}
+
+vaadin-text-field::part(input-field)::placeholder,
+vaadin-date-picker::part(input-field)::placeholder,
+vaadin-combo-box::part(input-field)::placeholder {
+    color: var(--police-text-muted);
+}
+
+vaadin-text-field::part(label),
+vaadin-date-picker::part(label),
+vaadin-combo-box::part(label) {
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--police-text-muted);
+    font-size: 0.68rem;
+}
+
+/* === ВЫПАДАЮЩИЕ МЕНЮ ==================================================== */
+
+vaadin-combo-box-overlay,
+vaadin-select-overlay,
+vaadin-menu-bar-submenu {
+    z-index: 1000 !important;
+}
+
+vaadin-combo-box-overlay::part(overlay),
+vaadin-select-overlay::part(overlay),
+vaadin-menu-bar-submenu {
+    background: var(--police-bg-elevated);
+    color: var(--police-text-main);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 12px 30px rgba(0, 0, 0, 0.95);
+}
+
+vaadin-combo-box-item {
+    background: transparent;
+    color: var(--police-text-main);
+}
+
+vaadin-combo-box-item:hover,
+vaadin-select-item:hover {
+    background: rgba(65, 196, 255, 0.15);
+    color: var(--police-accent);
+}
+
+vaadin-combo-box-item[selected],
+vaadin-select-item[selected] {
+    background: var(--police-primary-soft);
+    color: #ffffff;
+}
+
+/* === АККОРДЕОНЫ ========================================================= */
+
+vaadin-accordion-panel {
+    border-radius: 0;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+    box-shadow:
+            0 0 0 1px var(--police-border-subtle),
+            0 12px 30px rgba(0, 0, 0, 0.85);
+}
+
+vaadin-accordion-panel::part(summary) {
+    background: linear-gradient(90deg, #15223a, #1c3152);
+    color: var(--police-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 0.72rem;
+}
+
+vaadin-accordion-panel::part(content) {
+    background: radial-gradient(circle at 0 0, #1a2d4d 0, #101b32 60%);
+    color: var(--police-text-main);
+}
+
+/* === DETAILS ============================================================ */
+
+vaadin-details {
+    border-radius: 0;
+    overflow: hidden;
+    background: var(--police-bg-elevated);
+    box-shadow:
+            0 0 0 1px var(--police-border-subtle),
+            0 18px 40px rgba(0, 0, 0, 0.9);
+}
+
+vaadin-details::part(summary) {
+    background: linear-gradient(90deg, #15223a, #1a2944);
+    color: var(--police-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 0.72rem;
+}
+
+/* === LAYOUT-Ы ДЛЯ КАРТОЧЕК И СПИСКОВ ==================================== */
+
+view,
+jmix-view-layout {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+vbox[width="75%"],
+vbox[width="50%"],
+vbox[width="25%"],
+details[opened] > vbox,
+hbox[spacing="true"] > vbox {
+    border-radius: 0;
+    background: radial-gradient(circle at 0 0, rgba(36, 60, 104, 0.45), rgba(11, 22, 40, 0.98));
+    box-shadow:
+            0 0 0 1px var(--police-border-subtle),
+            0 20px 50px rgba(0, 0, 0, 0.95);
+    padding: 1.1rem 1.35rem;
+    max-width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+vbox h2,
+vbox h3 {
+    color: var(--police-text-secondary);
+}
+
+/* Заголовок ФИО */
+#header {
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--police-text-main);
+}
+
+/* === УТИЛИТЫ ============================================================ */
+
+a {
+    color: var(--police-accent);
+}
+
+[theme~="primary"] span[slot="prefix"],
+[theme~="primary"] vaadin-icon {
+    color: var(--police-accent);
+}
+
+code, pre {
+    background: rgba(12, 22, 42, 0.95);
+    color: #d0d8e8;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+*,
+*::before,
+*::after {
+    color: #ffffff !important;
+    text-shadow: none !important;
+}

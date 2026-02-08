@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://shiftBlankView.title">
+
+    <data>
+        <instance id="shiftDc"
+                  class="com.company.vzvod.entity.Shift">
+            <fetchPlan extends="_base">
+                <property name="units">
+                    <property name="user">
+                        <property name="firstName"/>
+                        <property name="lastName"/>
+                        <property name="patronymic"/>
+                    </property>
+                    <property name="department" fetchPlan="_instance_name"/>
+                </property>
+
+                <property name="administrativeViolations" fetchPlan="_base"/>
+                <property name="criminalViolations" fetchPlan="_base"/>
+            </fetchPlan>
+
+            <!-- ВАЖНО: loader есть, entityId задаём из Java -->
+            <loader id="shiftDl"/>
+            <collection id="unitsDc" property="units"/>
+            <collection id="administrativeViolationsDc" property="administrativeViolations"/>
+            <collection id="criminalViolationsDc" property="criminalViolations"/>
+        </instance>
+    </data>
+
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+
+    <layout padding="true" spacing="true" width="100%">
+        <h2 id="header" text="Данные наряда"/>
+
+        <hbox width="100%" spacing="true">
+            <!-- Левая колонка - сотрудники и нарушения -->
+            <vbox width="50%" spacing="true">
+                <h3 text="Сотрудники в наряде"/>
+                <dataGrid id="unitsDataGrid"
+                          dataContainer="unitsDc"
+                          width="100%"
+                          minHeight="8em">
+                    <columns>
+                        <column property="user.lastName" header="Фамилия"/>
+                        <column property="user.firstName" header="Имя"/>
+                        <column property="user.patronymic" header="Отчество"/>
+                    </columns>
+                </dataGrid>
+
+                <h3 text="Административная практика"/>
+                <dataGrid id="adminViolationsDataGrid"
+                          dataContainer="administrativeViolationsDc"
+                          width="100%"
+                          minHeight="8em">
+                    <columns>
+                        <column property="article" header="Статья"/>
+                    </columns>
+                </dataGrid>
+
+                <h3 text="Уголовная практика"/>
+                <dataGrid id="criminalViolationsDataGrid"
+                          dataContainer="criminalViolationsDc"
+                          width="100%"
+                          minHeight="8em">
+                    <columns>
+                        <column property="type" header="Тип преступления"/>
+                    </columns>
+                </dataGrid>
+            </vbox>
+
+            <!-- Правая колонка - общие данные смены -->
+            <formLayout id="form"
+                        dataContainer="shiftDc"
+                        width="50%">
+                <responsiveSteps>
+                    <responsiveStep minWidth="0" columns="1"/>
+                </responsiveSteps>
+
+                <h3>Данные наряда</h3>
+                <textField property="number" readOnly="true"/>
+                <textField property="typeOfShift" readOnly="true"/>
+                <textField property="date" readOnly="true"/>
+                <textField property="countOfStatements" readOnly="true"/>
+                <textField property="ibdWithMigrant" readOnly="true"/>
+                <textField property="ibdWithoutMigrant" readOnly="true"/>
+                <textField property="countOfClaims" readOnly="true"/>
+                <textField property="startTime" readOnly="true"/>
+                <textField property="endTime" readOnly="true"/>
+            </formLayout>
+        </hbox>
+    </layout>
+</view>

@@ -6,15 +6,21 @@ import com.company.vzvod.entity.Department;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.Shift;
 import com.company.vzvod.entity.User;
+import com.company.vzvod.view.shift.ShiftDetailView; // скорректируй пакет
+import com.company.vzvod.view.shiftblank.ShiftBlankView;
 import com.vaadin.flow.component.grid.ItemClickEvent;
+import com.vaadin.flow.component.grid.ItemDoubleClickEvent;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
+import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.model.CollectionContainer;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.model.InstanceLoader;
 import io.jmix.flowui.view.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.UUID;
@@ -57,9 +63,11 @@ public class UserCardView extends StandardView {
     @ViewComponent
     private H2 header;
 
+    @Autowired
+    private ViewNavigators viewNavigators;
+
     @Subscribe
     public void onQueryParametersChange(QueryParametersChangeEvent event) {
-        // читаем userId из URL
         List<String> params = event.getQueryParameters()
                 .getParameters()
                 .get("userId");
@@ -76,10 +84,6 @@ public class UserCardView extends StandardView {
         refreshUserData();
     }
 
-    /**
-     * Клик по сотруднику слева — переключаем карточку на этого пользователя
-     * без возврата к списку.
-     */
     @Subscribe("colleaguesDataGrid")
     public void onColleaguesDataGridItemClick(ItemClickEvent<User> event) {
         User selected = event.getItem();
@@ -87,31 +91,40 @@ public class UserCardView extends StandardView {
             return;
         }
 
-        // Перезагружаем основного пользователя по ID
         userDl.setEntityId(selected.getId());
         userDl.load();
-
-        // Обновляем все связанные данные (serviceInfo, контакты, смены, список коллег)
         refreshUserData();
     }
 
     /**
-     * Общий метод: читает пользователя из userDc и заполняет все остальные части карточки.
+     * Открытие редактора смены по двойному клику в нижнем гриде.
      */
+    @Subscribe("shiftsDataGrid")
+    public void onShiftsDataGridItemDoubleClick(ItemDoubleClickEvent<Shift> event) {
+        Shift shift = event.getItem();
+        if (shift == null) {
+            return;
+        }
+
+        viewNavigators.view(this, ShiftBlankView.class)
+                .withQueryParameters(
+                        QueryParameters.of("shiftId", shift.getId().toString())
+                )
+                .withBackwardNavigation(true)
+                .navigate();
+    }
+
     private void refreshUserData() {
         User user = userDc.getItemOrNull();
         if (user == null) {
             return;
         }
 
-        // Заголовок
         header.setText(user.getDisplayName());
 
-        // Служебная информация
         ServiceInfo serviceInfo = user.getServiceInfo();
         serviceInfoDc.setItem(serviceInfo);
 
-        // Контакты и адреса
         Contacts contacts = user.getContactsInfo();
         contactsDc.setItem(contacts);
 
@@ -123,11 +136,9 @@ public class UserCardView extends StandardView {
             habAddressDc.setItem(null);
         }
 
-        // Смены этого сотрудника
         shiftsDl.setParameter("user", user);
         shiftsDl.load();
 
-        // Список сотрудников того же отделения
         loadColleagues(user);
     }
 
@@ -138,7 +149,6 @@ public class UserCardView extends StandardView {
         colleaguesDl.setParameter("department", department);
         colleaguesDl.load();
 
-        // можно дополнительно выделить текущего пользователя в гриде
         if (colleaguesDataGrid != null && user.getId() != null) {
             colleaguesDc.getItems().stream()
                     .filter(u -> user.getId().equals(u.getId()))
