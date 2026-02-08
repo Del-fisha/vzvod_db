@@ -42,32 +42,68 @@
         <action id="saveAction" type="detail_saveClose"/>
         <action id="closeAction" type="detail_close"/>
     </actions>
+
     <layout>
-        <formLayout id="form" dataContainer="serviceInfoDc">
-            <responsiveSteps>
-                <responsiveStep minWidth="0" columns="1"/>
-                <responsiveStep minWidth="40em" columns="2"/>
-            </responsiveSteps>
-            <entityComboBox id="departmentField"
-                            property="department"
+        <!-- Две колонки: слева форма, справа зависимые списки -->
+        <hbox width="100%" spacing="true">
+
+            <!-- Левая колонка: все поля ServiceInfo -->
+            <vbox width="65%" spacing="true">
+                <formLayout id="form"
                             dataContainer="serviceInfoDc"
-                            itemsContainer="departmentsDc" width="100px"/>
+                            labelsPosition="ASIDE">
+                    <responsiveSteps>
+                        <responsiveStep minWidth="0" columns="1"/>
+                        <responsiveStep minWidth="40em" columns="2"/>
+                    </responsiveSteps>
 
+                    <entityComboBox id="departmentField"
+                                    property="department"
+                                    dataContainer="serviceInfoDc"
+                                    itemsContainer="departmentsDc"/>
 
-            <select id="rankField" property="rank"/>
-            <select id="statusField" property="status"/>
-            <select id="postField" property="post"/>
+                    <select id="rankField" property="rank"/>
+                    <select id="statusField" property="status"/>
+                    <select id="postField" property="post"/>
 
-            <textField id="tokenField" property="token"/>
-            <textField id="breastplateField" property="breastplate"/>
-            <datePicker id="startDateField" property="startDate"/>
-            <button id="idCardCreateButton" text="msg://com.company.vzvod.view.user.user/idCardButtonCreate.text"/>
-            <datePicker id="startOfPostField" property="startOfPost"/>
-            <button id="vocationListButton" text="msg://com.company.vzvod.view.user.user/vocationButtonCreate.text"/>
-            <button id="incentiveListButton" text="msg://com.company.vzvod.view.penalty/incentiveListView.title"/>
-            <button id="penaltyListButton" text="msg://com.company.vzvod.view.penalty/penaltyListView.title"/>
-            <button id="shiftListButton" text="msg://com.company.vzvod.view.shift/shiftListView.title"/>
-        </formLayout>
+                    <textField id="tokenField" property="token"/>
+                    <textField id="breastplateField" property="breastplate"/>
+                    <datePicker id="startDateField" property="startDate"/>
+                    <datePicker id="startOfPostField" property="startOfPost"/>
+
+                    <entityPicker id="idCardField"
+                                  property="idCard"
+                                  visible="false">
+                        <actions>
+                            <action id="entityOpen" type="entity_openComposition"/>
+                        </actions>
+                    </entityPicker>
+                </formLayout>
+            </vbox>
+
+            <!-- Правая колонка: кнопки зависимостей -->
+            <vbox width="35%" spacing="true">
+                <h3 text="Связанные сущности"/>
+
+                <button id="idCardCreateButton"
+                        text="msg://com.company.vzvod.view.user.user/idCardButtonCreate.text"
+                        action="idCardField.entityOpen"/>
+
+                <button id="vocationListButton"
+                        text="msg://com.company.vzvod.view.user.user/vocationButtonCreate.text"/>
+
+                <button id="incentiveListButton"
+                        text="msg://com.company.vzvod.view.penalty/incentiveListView.title"/>
+
+                <button id="penaltyListButton"
+                        text="msg://com.company.vzvod.view.penalty/penaltyListView.title"/>
+
+                <button id="shiftListButton"
+                        text="msg://com.company.vzvod.view.shift/shiftListView.title"/>
+            </vbox>
+
+        </hbox>
+
         <hbox id="detailActions">
             <button id="saveAndCloseButton" action="saveAction"/>
             <button id="closeButton" action="closeAction"/>

@@ -13,24 +13,4 @@ import io.jmix.flowui.view.*;
 @ViewDescriptor(path = "id-card-detail-view.xml")
 @EditedEntityContainer("idCardDc")
 public class IdCardDetailView extends StandardDetailView<IdCard> {
-
-    @ViewComponent
-    InstanceLoader idCardDl;
-
-    public ServiceInfo getServiceInfo() {
-        return serviceInfo;
-    }
-
-    public void setServiceInfo(ServiceInfo serviceInfo) {
-        this.serviceInfo = serviceInfo;
-    }
-
-    private ServiceInfo serviceInfo;
-
-    @Subscribe
-    public void onBeforeShow(BeforeShowEvent event) {
-        idCardDl.setParameter("serviceInfo", serviceInfo);
-        idCardDl.load();
-    }
-
 }

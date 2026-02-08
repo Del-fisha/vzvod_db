@@ -31,26 +31,6 @@ public class ServiceInfoDetailView extends StandardDetailView<ServiceInfo> {
     @Autowired
     private DialogWindows dialogWindows;
 
-    @Autowired
-    private DataManager dataManager;
-
-    @Subscribe(id = "idCardCreateButton", subject = "clickListener")
-    public void onIdCardCreateButtonClick(final ClickEvent<JmixButton> event) {
-
-            ServiceInfo serviceInfo = serviceInfoDc.getItem();
-            if (serviceInfo == null) {
-                return;
-            }
-        IdCard idCard = serviceInfo.getIdCard();
-        if (idCard == null) {
-            idCard = dataManager.create(IdCard.class);
-            serviceInfo.setIdCard(idCard);
-        }
-
-        DialogWindow<IdCardDetailView> window = dialogWindows.view(this, IdCardDetailView.class).build();
-        window.getView().setServiceInfo(serviceInfo);
-        window.open();
-    }
 
     @Subscribe(id = "vocationListButton", subject = "clickListener")
     public void onVocationListButtonClick(final ClickEvent<JmixButton> event) {
