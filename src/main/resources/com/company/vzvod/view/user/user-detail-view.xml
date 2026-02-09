@@ -15,6 +15,7 @@
                     <property name="breastplate"/>
                     <property name="startDate"/>
                     <property name="startOfPost"/>
+                    <property name="medicalExamination"/>
                 </property>
                 <property name="contactsInfo" fetchPlan="_base">
                     <property name="registration" fetchPlan="_base"/>

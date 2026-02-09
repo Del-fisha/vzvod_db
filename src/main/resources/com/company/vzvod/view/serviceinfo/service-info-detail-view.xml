@@ -21,6 +21,7 @@
                 <property name="shifts"/>
                 <property name="incentive"/>
                 <property name="penalty"/>
+                <property name="medicalExamination"/>
             </fetchPlan>
             <loader id="serviceInfoDl"/>
         </instance>
@@ -48,47 +49,66 @@
         <hbox width="100%" spacing="true">
 
             <!-- Левая колонка: все поля ServiceInfo -->
-            <vbox width="65%" spacing="true">
-                <formLayout id="form"
-                            dataContainer="serviceInfoDc"
-                            labelsPosition="ASIDE">
-                    <responsiveSteps>
-                        <responsiveStep minWidth="0" columns="1"/>
-                        <responsiveStep minWidth="40em" columns="2"/>
-                    </responsiveSteps>
 
-                    <entityComboBox id="departmentField"
-                                    property="department"
-                                    dataContainer="serviceInfoDc"
-                                    itemsContainer="departmentsDc"/>
+            <formLayout id="form"
+                        dataContainer="serviceInfoDc"
+                        labelsPosition="ASIDE">
+                <responsiveSteps>
+                    <responsiveStep minWidth="0" columns="1"/>
+                    <responsiveStep minWidth="40em" columns="2"/>
+                </responsiveSteps>
 
-                    <select id="rankField" property="rank"/>
-                    <select id="statusField" property="status"/>
-                    <select id="postField" property="post"/>
+                <entityComboBox id="departmentField"
+                                property="department"
+                                dataContainer="serviceInfoDc"
+                                itemsContainer="departmentsDc"/>
 
-                    <textField id="tokenField" property="token"/>
-                    <textField id="breastplateField" property="breastplate"/>
-                    <datePicker id="startDateField" property="startDate"/>
-                    <datePicker id="startOfPostField" property="startOfPost"/>
+                <select id="rankField" property="rank"/>
+                <select id="statusField" property="status"/>
+                <select id="postField" property="post"/>
 
-                    <entityPicker id="idCardField"
-                                  property="idCard"
-                                  visible="false">
-                        <actions>
-                            <action id="entityOpen" type="entity_openComposition"/>
-                        </actions>
-                    </entityPicker>
-                </formLayout>
-            </vbox>
+                <textField id="tokenField" property="token"/>
+                <textField id="breastplateField" property="breastplate"/>
+                <datePicker id="startDateField" property="startDate"/>
+                <datePicker id="startOfPostField" property="startOfPost"/>
+
+                <entityPicker id="idCardField"
+                              property="idCard"
+                              visible="false">
+                    <actions>
+                        <action id="entityOpen" type="entity_openComposition"/>
+                    </actions>
+                </entityPicker>
+            </formLayout>
+
 
             <!-- Правая колонка: кнопки зависимостей -->
-            <vbox width="35%" spacing="true">
-                <h3 text="Связанные сущности"/>
+<!--            <vbox width="35%" spacing="true">-->
+<!--                <h3 text="Связанные сущности"/>-->
 
+
+
+<!--            </vbox>-->
+
+        </hbox>
+
+        <hbox width="100%" spacing="true">
+            <vbox>
                 <button id="idCardCreateButton"
                         text="msg://com.company.vzvod.view.user.user/idCardButtonCreate.text"
                         action="idCardField.entityOpen"/>
 
+                <checkbox id="medicalExamination"
+                          dataContainer="serviceInfoDc"
+                          property="medicalExamination"
+                          label="Профосмотр"
+                          helperText=""
+                          classNames="align-checkbox"/>
+
+            </vbox>
+
+
+            <vbox>
                 <button id="vocationListButton"
                         text="msg://com.company.vzvod.view.user.user/vocationButtonCreate.text"/>
 
@@ -98,11 +118,14 @@
                 <button id="penaltyListButton"
                         text="msg://com.company.vzvod.view.penalty/penaltyListView.title"/>
 
-                <button id="shiftListButton"
-                        text="msg://com.company.vzvod.view.shift/shiftListView.title"/>
             </vbox>
 
         </hbox>
+
+
+        <button id="shiftListButton"
+                text="msg://com.company.vzvod.view.shift/shiftListView.title"
+                width="100%"/>
 
         <hbox id="detailActions">
             <button id="saveAndCloseButton" action="saveAction"/>

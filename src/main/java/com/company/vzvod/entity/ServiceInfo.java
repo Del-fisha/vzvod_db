@@ -6,6 +6,7 @@ import io.jmix.core.entity.annotation.OnDeleteInverse;
 import io.jmix.core.metamodel.annotation.DependsOnProperties;
 import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
+import io.jmix.core.metamodel.annotation.JmixProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -80,6 +81,17 @@ public class ServiceInfo {
     @OneToMany(mappedBy = "userServiceInfo")
     private List<Vocation> vocations;
 
+    @Column(name = "MEDICAL_EXAMINATION")
+    private Boolean medicalExamination = false;
+
+
+    public Boolean getMedicalExamination() {
+        return medicalExamination;
+    }
+
+    public void setMedicalExamination(Boolean medicalExamination) {
+        this.medicalExamination = medicalExamination;
+    }
 
     public List<Vocation> getVocations() {
         return vocations;

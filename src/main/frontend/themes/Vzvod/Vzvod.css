@@ -67,10 +67,18 @@ html, body {
 
 body,
 :host([theme~="dark"]) {
-    background: radial-gradient(circle at 0 0, #22365b 0, #0b1626 55%) fixed;
+    background-image: url("background_app_1.jpg");
+    background-size: cover;          /* Растянуть */
+    background-position: center;     /* Центрировать */
+    background-attachment: fixed;   /* Зафиксировать */
+    background-repeat: no-repeat;    /* Не повторять */
+
     color: var(--police-text-main);
     min-height: 100vh;
+    margin: 0;
+    padding: 0;
 }
+
 
 /* Типографика заголовков */
 h1, h2, h3, h4, h5 {
@@ -79,6 +87,7 @@ h1, h2, h3, h4, h5 {
     font-weight: 650;
     margin: 0;
     padding: 0;
+    align-self: center;
 }
 
 /* === MAIN VIEW TOP MENU ================================================= */
