@@ -12,7 +12,8 @@ public enum StatusInService implements EnumClass<Integer> {
     STUDY_LEAVE(30),
     PTC(40),
     BUSINESS_TRIP(50),
-    SICK_LEAVE(60);
+    SICK_LEAVE(60),
+    DECREE(70);
 
     private final Integer id;
 
