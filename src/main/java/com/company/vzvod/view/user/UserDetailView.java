@@ -43,9 +43,6 @@ public class UserDetailView extends StandardDetailView<User> {
     }
 
 
-
-
-
     @Subscribe(id = "serviceInfoCreateButton", subject = "clickListener")
     public void onServiceInfoCreateButtonClick1(final ClickEvent<JmixButton> event) {
         User user = userDc.getItem();

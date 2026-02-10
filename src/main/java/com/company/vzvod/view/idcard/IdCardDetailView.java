@@ -8,7 +8,7 @@ import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.model.InstanceLoader;
 import io.jmix.flowui.view.*;
 
-@Route(value = "id-cards/:id", layout = MainViewTopMenu.class)
+//@Route(value = "id-cards/:id", layout = MainViewTopMenu.class)
 @ViewController(id = "IdCard.detail")
 @ViewDescriptor(path = "id-card-detail-view.xml")
 @EditedEntityContainer("idCardDc")

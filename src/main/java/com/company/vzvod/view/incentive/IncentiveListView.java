@@ -1,6 +1,7 @@
 package com.company.vzvod.view.incentive;
 
 import com.company.vzvod.entity.Incentive;
+import com.company.vzvod.entity.Penalty;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.view.mainviewtopmenu.MainViewTopMenu;
 import com.vaadin.flow.router.Route;
@@ -28,5 +29,15 @@ public class IncentiveListView extends StandardListView<Incentive> {
     public void onBeforeShow(BeforeShowEvent event) {
         incentivesDl.setParameter("serviceInfo", serviceInfo);
         incentivesDl.load();
+    }
+
+
+    @Install(to = "incentivesDataGrid.createAction", subject = "initializer")
+    private void incentivesDataGridCreateInitializer(Incentive incentive) {
+        // берём параметр serviceInfo, которым фильтруется список
+        ServiceInfo serviceInfo = (ServiceInfo) incentivesDl.getParameter("serviceInfo");
+        if (serviceInfo != null) {
+            incentive.setUserServiceInfo(serviceInfo);
+        }
     }
 }

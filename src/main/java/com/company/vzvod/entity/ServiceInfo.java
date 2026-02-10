@@ -2,11 +2,9 @@ package com.company.vzvod.entity;
 
 import io.jmix.core.DeletePolicy;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
+import io.jmix.core.entity.annotation.OnDelete;
 import io.jmix.core.entity.annotation.OnDeleteInverse;
-import io.jmix.core.metamodel.annotation.DependsOnProperties;
-import io.jmix.core.metamodel.annotation.InstanceName;
-import io.jmix.core.metamodel.annotation.JmixEntity;
-import io.jmix.core.metamodel.annotation.JmixProperty;
+import io.jmix.core.metamodel.annotation.*;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -48,9 +46,10 @@ public class ServiceInfo {
     @Column(name = "POST")
     private String post;
 
-    @OnDeleteInverse(DeletePolicy.CASCADE)
-    @JoinColumn(name = "ID_CARD_ID")
+    @Composition
+    @OnDelete(DeletePolicy.CASCADE)
     @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ID_CARD_ID")
     private IdCard idCard;
 
     @NotBlank(message = "{msg://com.company.vzvod.entity/ServiceInfo.token.validation.NotBlank}")
@@ -84,6 +83,18 @@ public class ServiceInfo {
     @Column(name = "MEDICAL_EXAMINATION")
     private Boolean medicalExamination = false;
 
+    @Column(name = "QUALIFICATION_CLASS")
+    private Qualification qualificationClass;
+
+
+
+    public Qualification getQualificationClass() {
+        return qualificationClass;
+    }
+
+    public void setQualificationClass(Qualification qualificationClass) {
+        this.qualificationClass = qualificationClass;
+    }
 
     public Boolean getMedicalExamination() {
         return medicalExamination;

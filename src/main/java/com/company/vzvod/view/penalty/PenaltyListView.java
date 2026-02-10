@@ -29,4 +29,13 @@ public class PenaltyListView extends StandardListView<Penalty> {
         penaltiesDl.setParameter("serviceInfo", serviceInfo);
         penaltiesDl.load();
     }
+
+    @Install(to = "penaltiesDataGrid.createAction", subject = "initializer")
+    private void penaltiesDataGridCreateInitializer(Penalty penalty) {
+        // берём параметр serviceInfo, которым фильтруется список
+        ServiceInfo serviceInfo = (ServiceInfo) penaltiesDl.getParameter("serviceInfo");
+        if (serviceInfo != null) {
+            penalty.setUserServiceInfo(serviceInfo);
+        }
+    }
 }

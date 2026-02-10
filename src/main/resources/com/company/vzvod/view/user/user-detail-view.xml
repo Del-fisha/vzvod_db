@@ -16,6 +16,9 @@
                     <property name="startDate"/>
                     <property name="startOfPost"/>
                     <property name="medicalExamination"/>
+                    <property name="qualificationClass"/>
+                    <property name="incentive"/>
+                    <property name="penalty"/>
                 </property>
                 <property name="contactsInfo" fetchPlan="_base">
                     <property name="registration" fetchPlan="_base"/>
