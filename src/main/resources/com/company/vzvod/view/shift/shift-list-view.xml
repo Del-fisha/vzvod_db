@@ -12,7 +12,6 @@
                         <property name="firstName"/>
                         <property name="lastName"/>
                     </property>
-                    <property name="department" fetchPlan="_base"/>
                 </property>
             </fetchPlan>
             <loader id="shiftsDl" readOnly="true">
@@ -62,6 +61,7 @@
                 <columns resizable="true">
                     <column property="date"/>
                     <column property="number"/>
+                    <column property="departmentToday"/>
                     <column property="typeOfShift"/>
                     <column property="ibdWithMigrant"/>
                     <column property="ibdWithoutMigrant"/>

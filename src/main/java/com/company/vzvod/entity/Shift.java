@@ -36,6 +36,8 @@ public class Shift {
             inverseJoinColumns = @JoinColumn(name = "SERVICE_INFO_ID"))
     private Set<ServiceInfo> units;
 
+    @Column(name = "DEPARTMENT")
+    private Dep departmentToday;
 
     @Column(name = "DATE")
     private LocalDate date;
@@ -66,6 +68,14 @@ public class Shift {
     @Column(name = "IBD_WITHOUT_MIGRANT")
     private Integer ibdWithoutMigrant;
 
+
+    public Dep getDepartmentToday() {
+        return departmentToday;
+    }
+
+    public void setDepartmentToday(Dep departmentToday) {
+        this.departmentToday = departmentToday;
+    }
 
     public Set<ServiceInfo> getUnits() {
         return units;

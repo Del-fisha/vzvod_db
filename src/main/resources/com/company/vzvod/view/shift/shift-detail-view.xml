@@ -129,6 +129,7 @@
                     <select id="numberField" property="number"/>
                     <select id="typeOfShiftField" property="typeOfShift"/>
                     <datePicker id="dateField" property="date"/>
+                    <select id="department" property="departmentToday"/>
                     <textField id="countOfStatementsField" property="countOfStatements"/>
                     <textField id="ibdWithMigrantField" property="ibdWithMigrant"/>
                     <textField id="ibdWithoutMigrantField" property="ibdWithoutMigrant"/>

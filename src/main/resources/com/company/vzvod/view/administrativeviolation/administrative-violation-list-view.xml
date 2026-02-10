@@ -11,15 +11,13 @@
                     <property name="number"/>
                     <property name="date"/>
                     <property name="units">
-                        <property name="department">
-                            <property name="number"/>
-                        </property>
                         <property name="user">
                             <property name="firstName"/>
                             <property name="lastName"/>
                             <property name="patronymic"/>
                         </property>
                     </property>
+                    <property name="departmentToday"/>
                 </property>
             </fetchPlan>
             <loader id="administrativeViolationsDl" readOnly="true">
@@ -66,7 +64,7 @@
                 <columns resizable="true">
                     <column property="shift.date"/>
                     <column property="shift.number"/>
-                    <column property="shift.units.department.number"/>
+                    <column property="shift.departmentToday"/>
                     <column property="shift.units"/>
                     <column property="article"/>
                     <column property="impact"/>

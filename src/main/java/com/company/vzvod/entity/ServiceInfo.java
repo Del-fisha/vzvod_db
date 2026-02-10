@@ -223,17 +223,10 @@ public class ServiceInfo {
             return "";
         }
 
-        if (department == null) {
-            return String.format("%s %s %s",
-                    user.getLastName(),
-                    user.getFirstName(),
-                    user.getPatronymic());
-        }
-        return String.format("%s %s %s (%d отделение)",
+        return String.format("%s %s. %s.",
                 user.getLastName(),
-                user.getFirstName(),
-                user.getPatronymic(),
-                this.getDepartment().getNumber());
+                user.getFirstName().charAt(0),
+                user.getPatronymic().charAt(0));
     }
 
     public Set<Shift> getShifts() {
