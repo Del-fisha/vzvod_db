@@ -59,12 +59,12 @@
                 <action id="removeAction" type="list_remove"/>
             </actions>
             <columns resizable="true">
-                <column property="userServiceInfo"/>
-                <column property="type"/>
+                <column property="userServiceInfo" width="1%"/>
+                <column property="type" width="1%"/>
                 <column property="startDate"/>
                 <column property="endDate"/>
-                <column property="countOfDays"/>
-                <column property="allRemaindDays"/>
+<!--                <column property="countOfDays"/>-->
+<!--                <column property="allRemaindDays"/>-->
                 <column property="cityToDrive"/>
                 <column property="daysAddedByDeparture"/>
             </columns>

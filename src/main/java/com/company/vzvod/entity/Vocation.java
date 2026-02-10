@@ -25,7 +25,7 @@ public class Vocation {
     private ServiceInfo userServiceInfo;
 
     @Column(name = "VOCATION_TYPE")
-    private Integer type;
+    private VocationType type;
 
     @Column(name = "START_DATE")
     private LocalDate startDate;
@@ -56,11 +56,11 @@ public class Vocation {
         this.userServiceInfo = userServiceInfo;
     }
 
-    public Integer getType() {
+    public VocationType getType() {
         return type;
     }
 
-    public void setType(Integer type) {
+    public void setType(VocationType type) {
         this.type = type;
     }
 

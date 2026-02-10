@@ -38,7 +38,7 @@
                     <action id="entityClearAction" type="entity_clear"/>
                 </actions>
             </entityPicker>
-            <textField id="typeField" property="type"/>
+            <select id="typeField" property="type"/>
             <datePicker id="startDateField" property="startDate"/>
             <datePicker id="endDateField" property="endDate"/>
             <textField id="countOfDaysField" property="countOfDays"/>
