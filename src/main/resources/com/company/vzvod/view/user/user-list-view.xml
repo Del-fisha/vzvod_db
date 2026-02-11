@@ -50,6 +50,7 @@
                 <action id="createAction" type="list_create"/>
                 <action id="editAction" type="list_edit"/>
                 <action id="removeAction" type="list_remove"/>
+                <action id="showRoleAssignmentsAction" type="sec_showRoleAssignments"/>
             </actions>
             <columns resizable="true">
                 <column property="lastName"/>
@@ -67,6 +68,7 @@
                 <button id="createButton" action="usersDataGrid.createAction"/>
                 <button id="editButton" action="usersDataGrid.editAction"/>
                 <button id="removeButton" action="usersDataGrid.removeAction"/>
+                <button id="showRoleAssignmentsButton" action="usersDataGrid.showRoleAssignmentsAction"/>
             </startSlot>
             <endSlot>
                 <simplePagination id="pagination" dataLoader="usersDl"/>
