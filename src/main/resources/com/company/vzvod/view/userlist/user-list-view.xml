@@ -58,7 +58,7 @@
 
     <layout padding="true" spacing="true" width="100%">
 
-        <h2 text="Список сотрудников"/>
+<!--        <h2 text="Список сотрудников"/>-->
 
         <!-- Сотрудники без отдела -->
         <details summaryText="Командиры" opened="true" width="100%">

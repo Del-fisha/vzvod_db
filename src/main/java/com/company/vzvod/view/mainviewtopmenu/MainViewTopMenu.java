@@ -2,6 +2,7 @@ package com.company.vzvod.view.mainviewtopmenu;
 
 import com.google.common.base.Strings;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import io.jmix.flowui.app.main.StandardMainView;
 import io.jmix.flowui.component.UiComponentUtils;
 import io.jmix.flowui.view.ViewController;

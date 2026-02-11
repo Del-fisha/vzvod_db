@@ -19,7 +19,6 @@
                     <property name="department"/>
                 </property>
                 <property name="contactsInfo" fetchPlan="_base">
-                    <property name="phoneNumber"/>
                 </property>
                 <property name="education" fetchPlan="_base"/>
                 <property name="vehicleInfo" fetchPlan="_base"/>
