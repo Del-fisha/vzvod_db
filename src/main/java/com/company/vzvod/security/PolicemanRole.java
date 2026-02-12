@@ -6,6 +6,8 @@ import io.jmix.security.model.EntityPolicyAction;
 import io.jmix.security.role.annotation.EntityAttributePolicy;
 import io.jmix.security.role.annotation.EntityPolicy;
 import io.jmix.security.role.annotation.ResourceRole;
+import io.jmix.securityflowui.role.annotation.MenuPolicy;
+import io.jmix.securityflowui.role.annotation.ViewPolicy;
 
 @ResourceRole(name = "PolicemanRole", code = PolicemanRole.CODE)
 public interface PolicemanRole {
@@ -28,4 +30,17 @@ public interface PolicemanRole {
             action = EntityAttributePolicyAction.MODIFY
     )
     void userCredentials();
+
+
+    @ViewPolicy(viewIds = {
+            "User.list",
+            "User.detail",
+            "UserListView",
+            "UserCardView"
+    })
+    @MenuPolicy(menuIds = {
+            "User.list",
+            "UserListView"
+    })
+    void userViews();
 }
