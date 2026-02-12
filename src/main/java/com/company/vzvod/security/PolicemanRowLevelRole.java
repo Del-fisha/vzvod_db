@@ -1,18 +1,62 @@
-//package com.company.vzvod.security;
-//
-//import com.company.vzvod.entity.User;
-//import io.jmix.security.role.annotation.JpqlRowLevelPolicy;
-//import io.jmix.security.role.annotation.RowLevelRole;
-//
-//@RowLevelRole(name = "PolicemanRowLevel", code = PolicemanRowLevelRole.CODE)
-//public interface PolicemanRowLevelRole {
-//    String CODE = "policeman-row-level";
-//
-//    // Ограничиваем только UPDATE своей записью
-//    @JpqlRowLevelPolicy(
-//            entityClass = User.class,
-//            where = "{E}.id = :current_user_id"
-//    )
-//    void userUpdateOnlySelf();
-//
-//}
+package com.company.vzvod.security;
+
+import com.company.vzvod.entity.IdCard;
+import com.company.vzvod.entity.ServiceInfo;
+import com.company.vzvod.entity.User;
+import io.jmix.core.security.CurrentAuthentication;
+import io.jmix.security.model.RowLevelBiPredicate;
+import io.jmix.security.model.RowLevelPolicyAction;
+import io.jmix.security.role.annotation.PredicateRowLevelPolicy;
+import io.jmix.security.role.annotation.RowLevelRole;
+import org.springframework.context.ApplicationContext;
+
+@RowLevelRole(name = "PolicemanRowLevel", code = PolicemanRowLevelRole.CODE)
+public interface PolicemanRowLevelRole {
+    String CODE = "policeman-row-level";
+
+    @PredicateRowLevelPolicy(
+            entityClass = User.class,
+            actions = {RowLevelPolicyAction.UPDATE}
+    )
+    default RowLevelBiPredicate<User, ApplicationContext> userUpdateOnlySelf() {
+        return (user, applicationContext) -> {
+            CurrentAuthentication currentAuth =
+                    applicationContext.getBean(CurrentAuthentication.class);
+            User currentUser = (User) currentAuth.getUser();
+            return user.getId() != null
+                    && user.getId().equals(currentUser.getId());
+        };
+    }
+
+    @PredicateRowLevelPolicy(
+            entityClass = ServiceInfo.class,
+            actions = {RowLevelPolicyAction.UPDATE}
+    )
+    default RowLevelBiPredicate<ServiceInfo, ApplicationContext> serviceInfoUpdateOnlySelf() {
+        return (serviceInfo, applicationContext) -> {
+            CurrentAuthentication currentAuthentication =
+                    applicationContext.getBean(CurrentAuthentication.class);
+            User currentUser = (User) currentAuthentication.getUser();
+
+            return serviceInfo.getUser() != null
+                    && serviceInfo.getUser().getId().equals(currentUser.getId());
+        };
+    }
+
+    @PredicateRowLevelPolicy(
+            entityClass = IdCard.class,
+            actions = {RowLevelPolicyAction.UPDATE}
+    )
+    default RowLevelBiPredicate<IdCard, ApplicationContext> idCardUpdateOnlySelf() {
+        return (idCard, applicationContext) -> {
+            CurrentAuthentication currentAuthentication =
+                    applicationContext.getBean(CurrentAuthentication.class);
+            User currentUser = (User) currentAuthentication.getUser();
+
+            ServiceInfo serviceInfo = currentUser.getServiceInfo();
+            return serviceInfo != null
+                    && serviceInfo.getIdCard() != null
+                    && serviceInfo.getIdCard().getId().equals(idCard.getId());
+        };
+    }
+}
