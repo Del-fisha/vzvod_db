@@ -1,5 +1,7 @@
 package com.company.vzvod.security;
 
+import com.company.vzvod.entity.IdCard;
+import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.User;
 import io.jmix.security.model.EntityAttributePolicyAction;
 import io.jmix.security.model.EntityPolicyAction;
@@ -13,9 +15,14 @@ import io.jmix.securityflowui.role.annotation.ViewPolicy;
 public interface PolicemanRole {
     String CODE = "policeman-role";
 
-    @EntityPolicy(entityClass = User.class, actions = {EntityPolicyAction.READ, EntityPolicyAction.UPDATE})
+    @EntityPolicy(entityClass = User.class, actions = {EntityPolicyAction.READ})
     void userEntity();
 
+    @EntityPolicy(entityClass = ServiceInfo.class, actions = {EntityPolicyAction.READ})
+    void serviceEntity();
+
+    @EntityPolicy(entityClass = IdCard.class, actions = {EntityPolicyAction.READ})
+    void idCardEntity();
 
     @EntityAttributePolicy(
             entityClass = User.class,
@@ -31,12 +38,28 @@ public interface PolicemanRole {
     )
     void userCredentials();
 
+    @EntityAttributePolicy(
+            entityClass = ServiceInfo.class,
+            attributes = {"*"},
+            action = EntityAttributePolicyAction.VIEW
+    )
+    void serviceInfoSelfFields();
+
+    @EntityAttributePolicy(
+            entityClass = IdCard.class,
+            attributes = {"*"},
+            action = EntityAttributePolicyAction.VIEW
+    )
+    void idCardSelfFields();
+
 
     @ViewPolicy(viewIds = {
             "User.list",
             "User.detail",
             "UserListView",
-            "UserCardView"
+            "UserCardView",
+            "ServiceInfo.detail",
+            "IdCard.detail"
     })
     @MenuPolicy(menuIds = {
             "User.list",
