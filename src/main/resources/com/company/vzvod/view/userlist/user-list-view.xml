@@ -89,8 +89,8 @@
                 </dataGrid>
             </vbox>
 
-            <vbox width="50%">
-                <h3 text="Отделение 2"/>
+            <vbox width="50%" >
+                <h3 text="Отделение 2" alignSelf="CENTER"/>
                 <dataGrid id="dept2DataGrid"
                           dataContainer="dept2UsersDc"
                           width="100%"
