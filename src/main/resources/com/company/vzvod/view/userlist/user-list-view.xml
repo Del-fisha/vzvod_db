@@ -76,7 +76,7 @@
         <!-- Две колонки: отдел 1 и отдел 2 -->
         <hbox width="100%" spacing="true">
             <vbox width="50%">
-                <h3 text="Отделение 1"/>
+                <h3 text="Отделение 1" alignSelf="CENTER"/>
                 <dataGrid id="dept1DataGrid"
                           dataContainer="dept1UsersDc"
                           width="100%"
