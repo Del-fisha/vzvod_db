@@ -1,9 +1,6 @@
 package com.company.vzvod.security;
 
-import com.company.vzvod.entity.IdCard;
-import com.company.vzvod.entity.ServiceInfo;
-import com.company.vzvod.entity.Shift;
-import com.company.vzvod.entity.User;
+import com.company.vzvod.entity.*;
 import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.security.model.RowLevelBiPredicate;
 import io.jmix.security.model.RowLevelPolicyAction;
@@ -13,7 +10,9 @@ import org.springframework.context.ApplicationContext;
 
 @RowLevelRole(name = "PolicemanRowLevel", code = PolicemanRowLevelRole.CODE)
 public interface PolicemanRowLevelRole {
+
     String CODE = "policeman-row-level";
+
 
     @PredicateRowLevelPolicy(
             entityClass = User.class,
@@ -29,6 +28,7 @@ public interface PolicemanRowLevelRole {
         };
     }
 
+
     @PredicateRowLevelPolicy(
             entityClass = ServiceInfo.class,
             actions = {RowLevelPolicyAction.UPDATE}
@@ -43,6 +43,7 @@ public interface PolicemanRowLevelRole {
                     && serviceInfo.getUser().getId().equals(currentUser.getId());
         };
     }
+
 
     @PredicateRowLevelPolicy(
             entityClass = IdCard.class,
@@ -60,6 +61,8 @@ public interface PolicemanRowLevelRole {
                     && serviceInfo.getIdCard().getId().equals(idCard.getId());
         };
     }
+
+
     @PredicateRowLevelPolicy(
             entityClass = Shift.class,
             actions = {RowLevelPolicyAction.UPDATE}
@@ -80,6 +83,30 @@ public interface PolicemanRowLevelRole {
             }
 
             return shift.getUnits().contains(serviceInfo);
+        };
+    }
+
+
+    @PredicateRowLevelPolicy(
+            entityClass = Shift.class,
+            actions = {RowLevelPolicyAction.UPDATE}
+    )
+    default RowLevelBiPredicate<Vocation, ApplicationContext> vocationUpdateOnlySelf() {
+        return (vocation, applicationContext) -> {
+            CurrentAuthentication currentAuthentication =
+                    applicationContext.getBean(CurrentAuthentication.class);
+            User currentUser = (User) currentAuthentication.getUser();
+
+            ServiceInfo serviceInfo = currentUser.getServiceInfo();
+            if (serviceInfo == null) {
+                return false;
+            }
+
+            if (vocation.getUserServiceInfo() == null) {
+                return false;
+            }
+
+            return vocation.getUserServiceInfo().equals(serviceInfo);
         };
     }
 
