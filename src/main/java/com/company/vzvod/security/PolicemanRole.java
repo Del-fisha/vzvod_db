@@ -1,6 +1,7 @@
 package com.company.vzvod.security;
 
 import com.company.vzvod.entity.IdCard;
+import com.company.vzvod.entity.Penalty;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.User;
 import io.jmix.security.model.EntityAttributePolicyAction;
@@ -23,6 +24,9 @@ public interface PolicemanRole {
 
     @EntityPolicy(entityClass = IdCard.class, actions = {EntityPolicyAction.READ})
     void idCardEntity();
+
+    @EntityPolicy(entityClass = Penalty.class, actions = {EntityPolicyAction.READ})
+    void penaltyEntity();
 
     @EntityAttributePolicy(
             entityClass = User.class,
@@ -52,6 +56,12 @@ public interface PolicemanRole {
     )
     void idCardSelfFields();
 
+    @EntityAttributePolicy(
+            entityClass = Penalty.class,
+            attributes = {"*"},
+            action = EntityAttributePolicyAction.VIEW
+    )
+    void penaltySelfFields();
 
     @ViewPolicy(viewIds = {
             "User.list",
@@ -59,7 +69,9 @@ public interface PolicemanRole {
             "UserListView",
             "UserCardView",
             "ServiceInfo.detail",
-            "IdCard.detail"
+            "IdCard.detail",
+            "Penalty.detail",
+            "Penalty.list"
     })
     @MenuPolicy(menuIds = {
             "User.list",
