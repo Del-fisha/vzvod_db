@@ -1,8 +1,6 @@
 package com.company.vzvod.security;
 
-import com.company.vzvod.entity.IdCard;
-import com.company.vzvod.entity.ServiceInfo;
-import com.company.vzvod.entity.User;
+import com.company.vzvod.entity.*;
 import io.jmix.security.model.EntityAttributePolicyAction;
 import io.jmix.security.model.EntityPolicyAction;
 import io.jmix.security.role.annotation.EntityAttributePolicy;
@@ -23,6 +21,17 @@ public interface PolicemanRole {
 
     @EntityPolicy(entityClass = IdCard.class, actions = {EntityPolicyAction.READ})
     void idCardEntity();
+
+    @EntityPolicy(entityClass = Penalty.class, actions = {EntityPolicyAction.READ})
+    void penaltyEntity();
+
+    @EntityPolicy(entityClass = Incentive.class, actions = {EntityPolicyAction.READ})
+    void incentiveEntity();
+
+    @EntityPolicy(entityClass = Shift.class, actions = {EntityPolicyAction.READ})
+    void shiftEntity();
+
+    @EntityPolicy(entityClass = Vocation.class, actions = {EntityPolicyAction.READ})
 
     @EntityAttributePolicy(
             entityClass = User.class,
@@ -52,6 +61,31 @@ public interface PolicemanRole {
     )
     void idCardSelfFields();
 
+    @EntityAttributePolicy(
+            entityClass = Penalty.class,
+            attributes = {"*"},
+            action = EntityAttributePolicyAction.VIEW
+    )
+    void penaltySelfFields();
+
+    @EntityAttributePolicy(
+            entityClass = Incentive.class,
+            attributes = "*",
+            action = EntityAttributePolicyAction.VIEW)
+    void incentiveSelfFields();
+
+    @EntityAttributePolicy(
+            entityClass = Shift.class,
+            attributes = "*",
+            action = EntityAttributePolicyAction.VIEW
+    )
+    void shiftSelfFields();
+
+    @EntityAttributePolicy(
+            entityClass = Vocation.class,
+            attributes = "*",
+            action = EntityAttributePolicyAction.VIEW)
+    void vocationTypeSelfFields();
 
     @ViewPolicy(viewIds = {
             "User.list",
@@ -59,7 +93,15 @@ public interface PolicemanRole {
             "UserListView",
             "UserCardView",
             "ServiceInfo.detail",
-            "IdCard.detail"
+            "IdCard.detail",
+            "Penalty.detail",
+            "Penalty.list",
+            "Incentive.detail",
+            "Incentive.list",
+            "Shift.detail",
+            "Shift.list",
+            "Vocation.list",
+            "Vocation.detail"
     })
     @MenuPolicy(menuIds = {
             "User.list",

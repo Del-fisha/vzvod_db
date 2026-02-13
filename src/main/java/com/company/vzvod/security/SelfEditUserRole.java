@@ -1,8 +1,6 @@
 package com.company.vzvod.security;
 
-import com.company.vzvod.entity.IdCard;
-import com.company.vzvod.entity.ServiceInfo;
-import com.company.vzvod.entity.User;
+import com.company.vzvod.entity.*;
 import io.jmix.security.model.EntityAttributePolicyAction;
 import io.jmix.security.model.EntityPolicyAction;
 import io.jmix.security.role.annotation.EntityAttributePolicy;
@@ -22,6 +20,11 @@ public interface SelfEditUserRole {
     @EntityPolicy(entityClass = IdCard.class, actions = {EntityPolicyAction.UPDATE})
     void idCardUpdate();
 
+    @EntityPolicy(entityClass = Shift.class, actions = {EntityPolicyAction.UPDATE})
+    void shiftEntity();
+
+    @EntityPolicy(entityClass = Vocation.class, actions = {EntityPolicyAction.CREATE, EntityPolicyAction.UPDATE})
+    void vocationEntity();
 
 
     @EntityAttributePolicy(
@@ -44,6 +47,20 @@ public interface SelfEditUserRole {
             action = EntityAttributePolicyAction.MODIFY
     )
     void idCardSelfFields();
+
+    @EntityAttributePolicy(
+            entityClass = Shift.class,
+            attributes = "*",
+            action = EntityAttributePolicyAction.MODIFY
+    )
+    void shiftSelfFields();
+
+    @EntityAttributePolicy(
+            entityClass = Vocation.class,
+            attributes = "*",
+            action = EntityAttributePolicyAction.MODIFY
+    )
+    void vocationSelfFields();
 
 
 }
