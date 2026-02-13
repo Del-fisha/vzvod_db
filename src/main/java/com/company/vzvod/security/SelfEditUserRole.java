@@ -20,11 +20,14 @@ public interface SelfEditUserRole {
     @EntityPolicy(entityClass = IdCard.class, actions = {EntityPolicyAction.UPDATE})
     void idCardUpdate();
 
-    @EntityPolicy(entityClass = Shift.class, actions = {EntityPolicyAction.UPDATE})
+    @EntityPolicy(entityClass = Shift.class, actions = {EntityPolicyAction.CREATE, EntityPolicyAction.UPDATE})
     void shiftEntity();
 
     @EntityPolicy(entityClass = Vocation.class, actions = {EntityPolicyAction.CREATE, EntityPolicyAction.UPDATE})
     void vocationEntity();
+
+    @EntityPolicy(entityClass = Contacts.class, actions = {EntityPolicyAction.UPDATE})
+    void contactsEntity();
 
 
     @EntityAttributePolicy(
@@ -61,6 +64,13 @@ public interface SelfEditUserRole {
             action = EntityAttributePolicyAction.MODIFY
     )
     void vocationSelfFields();
+
+    @EntityAttributePolicy(
+            entityClass = Contacts.class,
+            attributes = "*",
+            action = EntityAttributePolicyAction.MODIFY
+    )
+    void contactsSelfFields();
 
 
 }

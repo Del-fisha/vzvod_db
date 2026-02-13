@@ -110,4 +110,19 @@ public interface PolicemanRowLevelRole {
         };
     }
 
+
+    @PredicateRowLevelPolicy(
+            entityClass = Contacts.class,
+            actions = {RowLevelPolicyAction.UPDATE}
+    )
+    default RowLevelBiPredicate<Contacts, ApplicationContext> contactsUpdateOnlySelf() {
+        return (contact, applicationContext) -> {
+            CurrentAuthentication currentAuthentication =
+                    applicationContext.getBean(CurrentAuthentication.class);
+            User currentUser = (User) currentAuthentication.getUser();
+
+            return currentUser.getContactsInfo().getId().equals(contact.getId());
+        };
+    }
+
 }
