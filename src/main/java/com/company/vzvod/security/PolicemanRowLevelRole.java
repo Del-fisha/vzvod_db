@@ -2,6 +2,7 @@ package com.company.vzvod.security;
 
 import com.company.vzvod.entity.IdCard;
 import com.company.vzvod.entity.ServiceInfo;
+import com.company.vzvod.entity.Shift;
 import com.company.vzvod.entity.User;
 import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.security.model.RowLevelBiPredicate;
@@ -59,4 +60,27 @@ public interface PolicemanRowLevelRole {
                     && serviceInfo.getIdCard().getId().equals(idCard.getId());
         };
     }
+    @PredicateRowLevelPolicy(
+            entityClass = Shift.class,
+            actions = {RowLevelPolicyAction.UPDATE}
+    )
+    default RowLevelBiPredicate<Shift, ApplicationContext> shiftUpdateOnlySelf() {
+        return (shift, applicationContext) -> {
+            CurrentAuthentication currentAuthentication =
+                    applicationContext.getBean(CurrentAuthentication.class);
+            User currentUser = (User) currentAuthentication.getUser();
+
+            ServiceInfo serviceInfo = currentUser.getServiceInfo();
+            if (serviceInfo == null) {
+                return false;
+            }
+
+            if (shift.getUnits() == null) {
+                return false;
+            }
+
+            return shift.getUnits().contains(serviceInfo);
+        };
+    }
+
 }

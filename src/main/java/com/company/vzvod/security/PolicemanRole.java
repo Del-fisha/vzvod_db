@@ -28,6 +28,9 @@ public interface PolicemanRole {
     @EntityPolicy(entityClass = Incentive.class, actions = {EntityPolicyAction.READ})
     void incentiveEntity();
 
+    @EntityPolicy(entityClass = Shift.class, actions = {EntityPolicyAction.READ})
+    void shiftEntity();
+
     @EntityAttributePolicy(
             entityClass = User.class,
             attributes = {"firstName", "lastName", "patronymic", "dateOfBirth"},
@@ -67,6 +70,13 @@ public interface PolicemanRole {
             entityClass = Incentive.class,
             attributes = "*",
             action = EntityAttributePolicyAction.VIEW)
+    void incentiveSelfFields();
+
+    @EntityAttributePolicy(
+            entityClass = Shift.class,
+            attributes = "*",
+            action = EntityAttributePolicyAction.VIEW
+    )
 
     @ViewPolicy(viewIds = {
             "User.list",
@@ -78,7 +88,9 @@ public interface PolicemanRole {
             "Penalty.detail",
             "Penalty.list",
             "Incentive.detail",
-            "Incentive.list"
+            "Incentive.list",
+            "Shift.detail",
+            "Shift.list"
     })
     @MenuPolicy(menuIds = {
             "User.list",
