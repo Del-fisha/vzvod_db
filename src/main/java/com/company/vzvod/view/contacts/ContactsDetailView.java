@@ -3,12 +3,14 @@ package com.company.vzvod.view.contacts;
 import com.company.vzvod.entity.Address;
 import com.company.vzvod.entity.Contacts;
 import com.company.vzvod.entity.ServiceInfo;
+import com.company.vzvod.entity.User;
 import com.company.vzvod.view.address.AddressDetailView;
 import com.company.vzvod.view.mainviewtopmenu.MainViewTopMenu;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.router.Route;
 import io.jmix.core.DataManager;
+import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.component.checkbox.JmixCheckbox;
 import io.jmix.flowui.kit.component.button.JmixButton;
@@ -27,6 +29,9 @@ public class ContactsDetailView extends StandardDetailView<Contacts> {
 
     @ViewComponent
     private InstanceContainer<Contacts> contactsDc;
+
+    @Autowired
+    private CurrentAuthentication currentAuthentication;
 
     @Autowired
     private DialogWindows dialogWindows;
@@ -226,10 +231,16 @@ public class ContactsDetailView extends StandardDetailView<Contacts> {
         initSameCheckboxFromEntity();
     }
 
-    // 3) Когда View полностью готово (данные уже в контейнерах)
+
     @Subscribe
     public void onReady(final ReadyEvent event) {
-        initSameCheckboxFromEntity();
+        Contacts contacts = getEditedEntity();
+        User currentUser = (User) currentAuthentication.getUser();
+
+        boolean isOwnContacts = currentUser.getContactsInfo() != null
+                && currentUser.getContactsInfo().getId().equals(contacts.getId());
+
+        sameAddressCheckbox.setReadOnly(!isOwnContacts);
     }
 
     @Subscribe
