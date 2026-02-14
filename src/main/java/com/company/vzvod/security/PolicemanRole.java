@@ -32,6 +32,13 @@ public interface PolicemanRole {
     void shiftEntity();
 
     @EntityPolicy(entityClass = Vocation.class, actions = {EntityPolicyAction.READ})
+    void vocationEntity();
+
+    @EntityPolicy(entityClass = Contacts.class, actions = {EntityPolicyAction.READ})
+    void contactsEntity();
+
+    @EntityPolicy(entityClass = Address.class, actions = {EntityPolicyAction.READ})
+    void addressEntity();
 
     @EntityAttributePolicy(
             entityClass = User.class,
@@ -87,6 +94,20 @@ public interface PolicemanRole {
             action = EntityAttributePolicyAction.VIEW)
     void vocationTypeSelfFields();
 
+    @EntityAttributePolicy(
+            entityClass = Contacts.class,
+            attributes = "*",
+            action = EntityAttributePolicyAction.VIEW
+    )
+    void contactsTypeSelfFields();
+
+    @EntityAttributePolicy(
+            entityClass = Address.class,
+            attributes = "*",
+            action = EntityAttributePolicyAction.VIEW
+    )
+    void addressTypeSelfFields();
+
     @ViewPolicy(viewIds = {
             "User.list",
             "User.detail",
@@ -101,7 +122,9 @@ public interface PolicemanRole {
             "Shift.detail",
             "Shift.list",
             "Vocation.list",
-            "Vocation.detail"
+            "Vocation.detail",
+            "Contacts.detail",
+            "Address.detail"
     })
     @MenuPolicy(menuIds = {
             "User.list",

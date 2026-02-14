@@ -110,4 +110,42 @@ public interface PolicemanRowLevelRole {
         };
     }
 
+
+    @PredicateRowLevelPolicy(
+            entityClass = Contacts.class,
+            actions = {RowLevelPolicyAction.UPDATE}
+    )
+    default RowLevelBiPredicate<Contacts, ApplicationContext> contactsUpdateOnlySelf() {
+        return (contact, applicationContext) -> {
+            CurrentAuthentication currentAuthentication =
+                    applicationContext.getBean(CurrentAuthentication.class);
+            User currentUser = (User) currentAuthentication.getUser();
+
+            return currentUser.getContactsInfo() != null
+                    && currentUser.getContactsInfo().getId().equals(contact.getId());
+        };
+    }
+
+
+    @PredicateRowLevelPolicy(
+            entityClass = Address.class,
+            actions = {RowLevelPolicyAction.UPDATE}
+    )
+    default RowLevelBiPredicate<Address, ApplicationContext> addressUpdateOnlySelf() {
+        return (address, applicationContext) -> {
+            CurrentAuthentication currentAuthentication =
+                    applicationContext.getBean(CurrentAuthentication.class);
+            User currentUser = (User) currentAuthentication.getUser();
+
+            Contacts currentContacts = currentUser.getContactsInfo();
+            if (currentContacts == null) {
+                return false;
+            }
+
+            return (currentContacts.getRegistration() != null && currentContacts.getRegistration().getId().equals(address.getId()))
+                    || (currentContacts.getHabitation() != null && currentContacts.getHabitation().getId().equals(address.getId()));
+        };
+    }
+
+
 }
