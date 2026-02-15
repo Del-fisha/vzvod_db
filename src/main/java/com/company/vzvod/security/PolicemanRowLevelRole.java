@@ -88,7 +88,7 @@ public interface PolicemanRowLevelRole {
 
 
     @PredicateRowLevelPolicy(
-            entityClass = Shift.class,
+            entityClass = Vocation.class,
             actions = {RowLevelPolicyAction.UPDATE}
     )
     default RowLevelBiPredicate<Vocation, ApplicationContext> vocationUpdateOnlySelf() {

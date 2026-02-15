@@ -26,10 +26,10 @@ public interface SelfEditUserRole {
     @EntityPolicy(entityClass = Vocation.class, actions = {EntityPolicyAction.CREATE, EntityPolicyAction.UPDATE})
     void vocationEntity();
 
-    @EntityPolicy(entityClass = Contacts.class, actions = {EntityPolicyAction.UPDATE})
+    @EntityPolicy(entityClass = Contacts.class, actions = {EntityPolicyAction.CREATE, EntityPolicyAction.UPDATE})
     void contactsEntity();
 
-    @EntityPolicy(entityClass = Address.class, actions = {EntityPolicyAction.UPDATE})
+    @EntityPolicy(entityClass = Address.class, actions = {EntityPolicyAction.CREATE, EntityPolicyAction.UPDATE})
     void addressEntity();
 
 
