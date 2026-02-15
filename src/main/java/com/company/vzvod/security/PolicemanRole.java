@@ -1,6 +1,7 @@
 package com.company.vzvod.security;
 
 import com.company.vzvod.entity.*;
+import com.company.vzvod.view.usercard.UserCardView;
 import io.jmix.security.model.EntityAttributePolicyAction;
 import io.jmix.security.model.EntityPolicyAction;
 import io.jmix.security.role.annotation.EntityAttributePolicy;
@@ -39,6 +40,9 @@ public interface PolicemanRole {
 
     @EntityPolicy(entityClass = Address.class, actions = {EntityPolicyAction.READ})
     void addressEntity();
+
+    @EntityPolicy(entityClass = Education.class, actions = {EntityPolicyAction.READ})
+    void educationEntity();
 
     @EntityAttributePolicy(
             entityClass = User.class,
@@ -108,6 +112,14 @@ public interface PolicemanRole {
     )
     void addressTypeSelfFields();
 
+    @EntityAttributePolicy(
+            entityClass = Education.class,
+            attributes = "*",
+            action = EntityAttributePolicyAction.VIEW
+    )
+    void educationTypeSelfFields();
+
+
     @ViewPolicy(viewIds = {
             "User.list",
             "User.detail",
@@ -124,7 +136,8 @@ public interface PolicemanRole {
             "Vocation.list",
             "Vocation.detail",
             "Contacts.detail",
-            "Address.detail"
+            "Address.detail",
+            "Education.detail",
     })
     @MenuPolicy(menuIds = {
             "User.list",
