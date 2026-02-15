@@ -68,22 +68,23 @@ public interface PolicemanRowLevelRole {
             actions = {RowLevelPolicyAction.UPDATE}
     )
     default RowLevelBiPredicate<Shift, ApplicationContext> shiftUpdateOnlySelf() {
-        return (shift, applicationContext) -> {
-            CurrentAuthentication currentAuthentication =
-                    applicationContext.getBean(CurrentAuthentication.class);
-            User currentUser = (User) currentAuthentication.getUser();
-
-            ServiceInfo serviceInfo = currentUser.getServiceInfo();
-            if (serviceInfo == null) {
-                return false;
-            }
-
-            if (shift.getUnits() == null) {
-                return false;
-            }
-
-            return shift.getUnits().contains(serviceInfo);
-        };
+      return (shift, applicationContext) -> true;
+//        {
+//            CurrentAuthentication currentAuthentication =
+//                    applicationContext.getBean(CurrentAuthentication.class);
+//            User currentUser = (User) currentAuthentication.getUser();
+//
+//            ServiceInfo serviceInfo = currentUser.getServiceInfo();
+//            if (serviceInfo == null) {
+//                return false;
+//            }
+//
+//            if (shift.getId() == null) {
+//                return false;
+//            }
+//
+//            return shift.getUnits().contains(serviceInfo);
+//        };
     }
 
 

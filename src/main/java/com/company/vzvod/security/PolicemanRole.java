@@ -6,6 +6,7 @@ import io.jmix.security.model.EntityAttributePolicyAction;
 import io.jmix.security.model.EntityPolicyAction;
 import io.jmix.security.role.annotation.EntityAttributePolicy;
 import io.jmix.security.role.annotation.EntityPolicy;
+import io.jmix.security.role.annotation.JpqlRowLevelPolicy;
 import io.jmix.security.role.annotation.ResourceRole;
 import io.jmix.securityflowui.role.annotation.MenuPolicy;
 import io.jmix.securityflowui.role.annotation.ViewPolicy;
@@ -138,6 +139,8 @@ public interface PolicemanRole {
             "Contacts.detail",
             "Address.detail",
             "Education.detail",
+            "UserCardView",
+            "ShiftBlankView"
     })
     @MenuPolicy(menuIds = {
             "User.list",
