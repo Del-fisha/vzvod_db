@@ -26,12 +26,14 @@ public interface SelfEditUserRole {
     @EntityPolicy(entityClass = Vocation.class, actions = {EntityPolicyAction.CREATE, EntityPolicyAction.UPDATE})
     void vocationEntity();
 
-    @EntityPolicy(entityClass = Contacts.class, actions = {EntityPolicyAction.UPDATE})
+    @EntityPolicy(entityClass = Contacts.class, actions = {EntityPolicyAction.CREATE, EntityPolicyAction.UPDATE})
     void contactsEntity();
 
-    @EntityPolicy(entityClass = Address.class, actions = {EntityPolicyAction.UPDATE})
+    @EntityPolicy(entityClass = Address.class, actions = {EntityPolicyAction.CREATE, EntityPolicyAction.UPDATE})
     void addressEntity();
 
+    @EntityPolicy(entityClass = Education.class, actions = {EntityPolicyAction.CREATE, EntityPolicyAction.UPDATE})
+    void educationEntity();
 
     @EntityAttributePolicy(
             entityClass = User.class,
@@ -81,5 +83,12 @@ public interface SelfEditUserRole {
             action = EntityAttributePolicyAction.MODIFY
     )
     void addressSelfFields();
+
+    @EntityAttributePolicy(
+            entityClass = Education.class,
+            attributes = "*",
+            action = EntityAttributePolicyAction.MODIFY
+    )
+    void educationSelfFields();
 
 }

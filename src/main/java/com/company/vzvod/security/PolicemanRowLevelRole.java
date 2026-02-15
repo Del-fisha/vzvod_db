@@ -88,7 +88,7 @@ public interface PolicemanRowLevelRole {
 
 
     @PredicateRowLevelPolicy(
-            entityClass = Shift.class,
+            entityClass = Vocation.class,
             actions = {RowLevelPolicyAction.UPDATE}
     )
     default RowLevelBiPredicate<Vocation, ApplicationContext> vocationUpdateOnlySelf() {
@@ -148,4 +148,22 @@ public interface PolicemanRowLevelRole {
     }
 
 
+    @PredicateRowLevelPolicy(
+            entityClass = Education.class,
+            actions = {RowLevelPolicyAction.UPDATE}
+    )
+    default RowLevelBiPredicate<Education, ApplicationContext> educationUpdateOnlySelf() {
+        return (education, applicationContext) -> {
+            CurrentAuthentication currentAuthentication =
+                    applicationContext.getBean(CurrentAuthentication.class);
+            User currentUser = (User) currentAuthentication.getUser();
+
+            if (currentUser.getEducation() == null) {
+                return false;
+            }
+
+            return currentUser.getEducation() != null
+                    && currentUser.getEducation().getId().equals(education.getId());
+        };
+    }
 }
