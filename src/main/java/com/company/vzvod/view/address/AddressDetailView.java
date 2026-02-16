@@ -14,8 +14,11 @@ import io.jmix.flowui.view.*;
 public class AddressDetailView extends StandardDetailView<Address> {
     @Subscribe
     public void onInitEntity(final InitEntityEvent<Address> event) {
-        event.getEntity().setCity("Санкт-Петербург");
-        event.getEntity().setTypeOfHousing(TypeOfHousing.FLAT);
-        event.getEntity().setStatusOfHousing(StatusOfHousing.OWNER);
+
+        Address address = event.getEntity();
+
+        address.setCity("Санкт-Петербург");
+        address.setTypeOfHousing(TypeOfHousing.FLAT);
+        address.setStatusOfHousing(StatusOfHousing.OWNER);
     }
 }
