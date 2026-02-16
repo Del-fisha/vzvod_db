@@ -3,6 +3,7 @@ package com.company.vzvod.view.shift;
 import com.company.vzvod.entity.AdministrativeViolation;
 import com.company.vzvod.entity.CriminalViolation;
 import com.company.vzvod.entity.Shift;
+import com.company.vzvod.entity.User;
 import com.company.vzvod.view.administrativeviolation.AdministrativeViolationDetailView;
 import com.company.vzvod.view.criminalviolation.CriminalViolationDetailView;
 import com.company.vzvod.view.main.MainView;
@@ -14,12 +15,18 @@ import io.jmix.flowui.model.CollectionPropertyContainer;
 import io.jmix.flowui.model.DataContext;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import io.jmix.core.security.CurrentAuthentication;
+
+import java.time.LocalDate;
 
 @Route(value = "shifts/:id", layout = MainView.class)
 @ViewController(id = "Shift.detail")
 @ViewDescriptor("shift-detail-view.xml")
 @EditedEntityContainer("shiftDc")
 public class ShiftDetailView extends StandardDetailView<Shift> {
+
+    @Autowired  // ← Добавь это
+    private CurrentAuthentication currentAuthentication;
 
     @ViewComponent
     private DataGrid<AdministrativeViolation> adminViolationsDataGrid;
@@ -38,6 +45,22 @@ public class ShiftDetailView extends StandardDetailView<Shift> {
 
     @Autowired
     private DialogWindows dialogWindows;
+
+    @Subscribe
+    public void onInitEntity(final InitEntityEvent<Shift> event) {
+
+        Shift shift = event.getEntity();
+
+        User user = (User) currentAuthentication.getUser();
+
+        shift.setDate(LocalDate.now());
+        shift.setCountOfClaims(0);
+        shift.setIbdWithMigrant(0);
+        shift.setIbdWithoutMigrant(0);
+        shift.setCountOfStatements(0);
+        // ToDo Написать логику автозаполнения отделения
+
+    }
 
     // КНОПКА "Добавить/Редактировать АП"
     @Subscribe("adminViolationsDataGrid.create")
