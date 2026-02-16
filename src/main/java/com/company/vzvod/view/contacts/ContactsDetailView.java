@@ -52,7 +52,6 @@ public class ContactsDetailView extends StandardDetailView<Contacts> {
     @Subscribe
     public void onInit(final InitEvent event) {
         Contacts contact = contactsDc.getItemOrNull();
-
         // Проверяем, совпадают ли данные адресов
         boolean same = contact != null
                 && contact.getRegistration() != null
@@ -245,6 +244,7 @@ public class ContactsDetailView extends StandardDetailView<Contacts> {
 
     @Subscribe
     public void onInitEntity(InitEntityEvent<Contacts> event) {
+        event.getEntity().setPhoneNumber("+7");
         sameAddressCheckbox.setValue(false);
         habitationAddressCreateButton.setEnabled(true);
     }

@@ -1,7 +1,6 @@
 package com.company.vzvod.security;
 
 import com.company.vzvod.entity.*;
-import com.company.vzvod.view.usercard.UserCardView;
 import io.jmix.security.model.EntityAttributePolicyAction;
 import io.jmix.security.model.EntityPolicyAction;
 import io.jmix.security.role.annotation.EntityAttributePolicy;
@@ -138,6 +137,8 @@ public interface PolicemanRole {
             "Contacts.detail",
             "Address.detail",
             "Education.detail",
+            "UserCardView",
+            "ShiftBlankView"
     })
     @MenuPolicy(menuIds = {
             "User.list",
