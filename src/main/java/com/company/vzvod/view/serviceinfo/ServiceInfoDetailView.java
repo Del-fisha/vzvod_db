@@ -1,6 +1,9 @@
 package com.company.vzvod.view.serviceinfo;
 
+import com.company.vzvod.entity.Post;
+import com.company.vzvod.entity.Qualification;
 import com.company.vzvod.entity.ServiceInfo;
+import com.company.vzvod.entity.StatusInService;
 import com.company.vzvod.view.incentive.IncentiveListView;
 import com.company.vzvod.view.mainviewtopmenu.MainViewTopMenu;
 import com.company.vzvod.view.penalty.PenaltyListView;
@@ -19,6 +22,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 @ViewDescriptor(path = "service-info-detail-view.xml")
 @EditedEntityContainer("serviceInfoDc")
 public class ServiceInfoDetailView extends StandardDetailView<ServiceInfo> {
+
+    @Subscribe
+    public void onInitEntity(final InitEntityEvent<ServiceInfo> event) {
+        ServiceInfo serviceInfo = event.getEntity();
+        serviceInfo.setStatus(StatusInService.ACTIVE);
+        serviceInfo.setPost(Post.POLICEMAN);
+        serviceInfo.setMedicalExamination(false);
+        serviceInfo.setQualificationClass(Qualification.NONE);
+
+    }
 
     @ViewComponent
     private InstanceContainer<ServiceInfo> serviceInfoDc;

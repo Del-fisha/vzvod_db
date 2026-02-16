@@ -34,14 +34,15 @@ public interface PolicemanRowLevelRole {
             actions = {RowLevelPolicyAction.UPDATE}
     )
     default RowLevelBiPredicate<ServiceInfo, ApplicationContext> serviceInfoUpdateOnlySelf() {
-        return (serviceInfo, applicationContext) -> {
-            CurrentAuthentication currentAuthentication =
-                    applicationContext.getBean(CurrentAuthentication.class);
-            User currentUser = (User) currentAuthentication.getUser();
-
-            return serviceInfo.getUser() != null
-                    && serviceInfo.getUser().getId().equals(currentUser.getId());
-        };
+        return (serviceInfo, applicationContext) -> true;
+//        {
+//            CurrentAuthentication currentAuthentication =
+//                    applicationContext.getBean(CurrentAuthentication.class);
+//            User currentUser = (User) currentAuthentication.getUser();
+//
+//            return serviceInfo.getUser() != null
+//                    && serviceInfo.getUser().getId().equals(currentUser.getId());
+//        };
     }
 
 
