@@ -4,6 +4,7 @@ import com.company.vzvod.entity.AdministrativeViolation;
 import com.company.vzvod.entity.CriminalViolation;
 import com.company.vzvod.entity.Shift;
 import com.company.vzvod.entity.User;
+import com.company.vzvod.service.DepartmentConverter;
 import com.company.vzvod.view.administrativeviolation.AdministrativeViolationDetailView;
 import com.company.vzvod.view.criminalviolation.CriminalViolationDetailView;
 import com.company.vzvod.view.main.MainView;
@@ -58,7 +59,7 @@ public class ShiftDetailView extends StandardDetailView<Shift> {
         shift.setIbdWithMigrant(0);
         shift.setIbdWithoutMigrant(0);
         shift.setCountOfStatements(0);
-        // ToDo Написать логику автозаполнения отделения
+        shift.setDepartmentToday(DepartmentConverter.convert(user.getServiceInfo().getDepartment()));
 
     }
 
