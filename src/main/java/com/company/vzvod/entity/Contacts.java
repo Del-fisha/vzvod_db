@@ -1,7 +1,10 @@
 package com.company.vzvod.entity;
 
+import io.jmix.core.DeletePolicy;
 import io.jmix.core.MetadataTools;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
+import io.jmix.core.entity.annotation.OnDelete;
+import io.jmix.core.metamodel.annotation.Composition;
 import io.jmix.core.metamodel.annotation.DependsOnProperties;
 import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
@@ -24,10 +27,14 @@ public class Contacts {
     @Column(name = "PHONE_NUMBER", length = 28)
     private String phoneNumber;
 
+    @Composition                              // ← ДОБАВИТЬ
+    @OnDelete(DeletePolicy.CASCADE)
     @JoinColumn(name = "REGISTRATION_ID")
     @OneToOne(fetch = FetchType.LAZY)
     private Address registration;
 
+    @Composition                              // ← ДОБАВИТЬ
+    @OnDelete(DeletePolicy.CASCADE)
     @JoinColumn(name = "HABITATION_ID")
     @OneToOne(fetch = FetchType.LAZY)
     private Address habitation;

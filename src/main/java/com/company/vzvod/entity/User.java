@@ -3,8 +3,10 @@ package com.company.vzvod.entity;
 import io.jmix.core.DeletePolicy;
 import io.jmix.core.annotation.Secret;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
+import io.jmix.core.entity.annotation.OnDelete;
 import io.jmix.core.entity.annotation.OnDeleteInverse;
 import io.jmix.core.entity.annotation.SystemLevel;
+import io.jmix.core.metamodel.annotation.Composition;
 import io.jmix.core.metamodel.annotation.DependsOnProperties;
 import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
@@ -67,6 +69,8 @@ public class User implements JmixUserDetails {
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "user", optional = false)
     private ServiceInfo serviceInfo;
 
+    @Composition                              // ← ДОБАВИТЬ
+    @OnDelete(DeletePolicy.CASCADE)
     @OnDeleteInverse(DeletePolicy.CASCADE)
     @JoinColumn(name = "CONTACTS_INFO_ID")
     @OneToOne(fetch = FetchType.LAZY)
