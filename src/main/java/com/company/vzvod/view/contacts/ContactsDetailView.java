@@ -84,9 +84,9 @@ public class ContactsDetailView extends StandardDetailView<Contacts> {
     public void onSameAddressCheckboxComponentValueChange(
             AbstractField.ComponentValueChangeEvent<JmixCheckbox, Boolean> event) {
 
-        if (!event.isFromClient()) { // чтобы инициализация из кода не запускала логику
-            return;
-        }
+//        if (!event.isFromClient()) {
+//            return;
+//        }
 
         boolean same = Boolean.TRUE.equals(event.getValue());
         Contacts contact = contactsDc.getItemOrNull();
@@ -95,17 +95,14 @@ public class ContactsDetailView extends StandardDetailView<Contacts> {
         }
 
         if (same) {
-            // Копируем текущий адрес регистрации в адрес проживания
             Address reg = contact.getRegistration();
             if (reg != null) {
                 contact.setHabitation(copyAddress(reg));
             } else {
-                // при желании тут можно показать уведомление, что регистрация пустая
                 contact.setHabitation(null);
             }
             habitationAddressCreateButton.setEnabled(false);
         } else {
-            // Отключили режим "одинаковые адреса" -> чистим адрес проживания и даём редактировать
             contact.setHabitation(null);
             habitationAddressCreateButton.setEnabled(true);
         }
