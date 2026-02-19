@@ -132,4 +132,8 @@ public class UserDetailView extends StandardDetailView<User> {
                 .open();
 
     }
+
+    public User getEditedUser() {
+        return userDc.getItem();
+    }
 }

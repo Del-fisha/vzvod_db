@@ -72,7 +72,7 @@ public interface SelfEditUserRole {
 
     @EntityAttributePolicy(
             entityClass = Contacts.class,
-            attributes = {"registration", "habitation", "phoneNumber", "nearestMetroStation"},
+            attributes = {"*"},
             action = EntityAttributePolicyAction.MODIFY
     )
     void contactsSelfFields();
