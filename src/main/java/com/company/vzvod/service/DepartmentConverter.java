@@ -8,8 +8,7 @@ public class DepartmentConverter {
     public static Dep convert(Department department) {
         Dep dep = null;
         if (department != null) {
-            dep = Dep.fromId(department.getNumber());
-        }
-        return dep;
+            return Dep.fromId(department.getNumber());
+        } else return Dep.fromId(1);
     }
 }
