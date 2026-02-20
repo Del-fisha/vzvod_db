@@ -1,7 +1,7 @@
 package com.company.vzvod.aop;
 
 import com.company.vzvod.entity.User;
-import com.company.vzvod.view.user.UserDetailView;
+import com.company.vzvod.view.usercard.UserCardView;
 import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.flowui.view.StandardView;
 import org.aspectj.lang.JoinPoint;
@@ -13,18 +13,18 @@ import org.slf4j.LoggerFactory;
 
 @Aspect
 @Component
-public class ViewEnterLoggingAspect {
+public class UserCardViewEnterLoggingAspect {
 
-    private static final Logger log = LoggerFactory.getLogger(ViewEnterLoggingAspect.class);
+    private static final Logger log = LoggerFactory.getLogger(UserCardViewEnterLoggingAspect.class);
 
     private final CurrentAuthentication currentAuthentication;
 
-    public ViewEnterLoggingAspect(CurrentAuthentication currentAuthentication) {
+    public UserCardViewEnterLoggingAspect(CurrentAuthentication currentAuthentication) {
         this.currentAuthentication = currentAuthentication;
     }
 
-    @After("execution(* com.company.vzvod.view..*.onBeforeShow(..))")
-    public void logViewEnter(JoinPoint jp) {
+    @After("execution(* com.company.vzvod.view.usercard.UserCardView.onBeforeShow(..))")
+    public void logUserCardEnter(JoinPoint jp) {
         Object principal = currentAuthentication.getUser();
         String actor = principal instanceof User u
                 ? u.getLastName() + " " + u.getFirstName()
@@ -33,8 +33,8 @@ public class ViewEnterLoggingAspect {
         Object target = jp.getTarget();
 
         String details = "";
-        if (target instanceof UserDetailView userDetailView) {
-            User viewed = userDetailView.getViewedUser();
+        if (target instanceof UserCardView userCardView) {
+            User viewed = userCardView.getViewedUser();
             if (viewed != null) {
                 details = String.format(
                         " карточку пользователя %s %s",
