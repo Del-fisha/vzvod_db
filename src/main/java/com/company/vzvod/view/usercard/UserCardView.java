@@ -83,6 +83,10 @@ public class UserCardView extends StandardView {
         }
     }
 
+    public User getViewedUser() {
+        return userDc.getItemOrNull();
+    }
+
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         refreshUserData();

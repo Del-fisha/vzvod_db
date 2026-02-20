@@ -40,7 +40,6 @@ public class UserDetailView extends StandardDetailView<User> {
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        // Делаем кнопку неактивной сразу при открытии экрана
         vehicleCreateButton.setEnabled(false);
     }
 
@@ -133,7 +132,7 @@ public class UserDetailView extends StandardDetailView<User> {
 
     }
 
-    public User getEditedUser() {
-        return userDc.getItem();
+    public User getViewedUser() {
+        return userDc.getItemOrNull();
     }
 }
