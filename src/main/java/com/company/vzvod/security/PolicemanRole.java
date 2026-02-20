@@ -43,6 +43,10 @@ public interface PolicemanRole {
     @EntityPolicy(entityClass = Education.class, actions = {EntityPolicyAction.READ})
     void educationEntity();
 
+    @EntityPolicy(entityClass = AdministrativeViolation.class, actions = {EntityPolicyAction.READ})
+    void administrativeViolationEntity();
+
+
     @EntityAttributePolicy(
             entityClass = User.class,
             attributes = {"firstName", "lastName", "patronymic", "dateOfBirth"},
@@ -118,6 +122,12 @@ public interface PolicemanRole {
     )
     void educationTypeSelfFields();
 
+    @EntityAttributePolicy(
+            entityClass = AdministrativeViolation.class,
+            attributes = "*",
+            action = EntityAttributePolicyAction.VIEW
+    )
+
 
     @ViewPolicy(viewIds = {
             "User.list",
@@ -138,7 +148,9 @@ public interface PolicemanRole {
             "Address.detail",
             "Education.detail",
             "UserCardView",
-            "ShiftBlankView"
+            "ShiftBlankView",
+            "AdministrativeViolation.detail",
+            "AdministrativeViolation.list"
     })
     @MenuPolicy(menuIds = {
             "User.list",
