@@ -154,7 +154,8 @@ public interface PolicemanRole {
     })
     @MenuPolicy(menuIds = {
             "User.list",
-            "UserListView"
+            "UserListView",
+            "AdministrativeViolation.list"
     })
     void userViews();
 }

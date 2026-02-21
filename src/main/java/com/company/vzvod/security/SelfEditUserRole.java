@@ -97,7 +97,7 @@ public interface SelfEditUserRole {
     @EntityAttributePolicy(
             entityClass = AdministrativeViolation.class,
             attributes = "*",
-            action = EntityAttributePolicyAction.MODIFY
+            action = EntityAttributePolicyAction.VIEW
     )
     void administrativeViolationSelfFields();
 
