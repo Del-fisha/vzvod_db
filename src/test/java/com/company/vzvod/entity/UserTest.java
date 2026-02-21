@@ -13,16 +13,6 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * UNIT-тесты для класса User.
- * <p>
- * Структура тестов:
- * 1. Тесты getter/setter методов (простые данные)
- * 2. Тесты валидации (проверка @NotEmpty, @NotBlank, @Past)
- * 3. Тесты для связанных сущностей (OneToOne, OneToMany отношения)
- * 4. Тесты метода getDisplayName()
- * 5. Тесты реализации JmixUserDetails интерфейса
- */
 @SpringBootTest
 @DisplayName("Unit-тесты для User Entity")
 class UserTest {
