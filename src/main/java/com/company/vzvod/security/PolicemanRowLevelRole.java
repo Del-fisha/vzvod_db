@@ -168,4 +168,23 @@ public interface PolicemanRowLevelRole {
                     && currentUser.getEducation().getId().equals(education.getId());
         };
     }
+
+    @PredicateRowLevelPolicy(
+            entityClass = AdministrativeViolation.class,
+            actions = {RowLevelPolicyAction.UPDATE, RowLevelPolicyAction.CREATE}
+    )
+    default RowLevelBiPredicate<AdministrativeViolation, ApplicationContext> administrativeViolationUpdateOnlySelf() {
+        return (administrativeViolation, applicationContext) -> {
+            CurrentAuthentication currentAuthentication = applicationContext.getBean(CurrentAuthentication.class);
+            User currentUser = (User) currentAuthentication.getUser();
+
+            ServiceInfo serviceInfo = currentUser.getServiceInfo();
+
+            if (serviceInfo == null) {
+                return false;
+            }
+
+            return administrativeViolation.getShift().getUnits().contains(serviceInfo);
+        } ;
+    }
 }

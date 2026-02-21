@@ -35,6 +35,9 @@ public interface SelfEditUserRole {
     @EntityPolicy(entityClass = Education.class, actions = {EntityPolicyAction.CREATE, EntityPolicyAction.UPDATE})
     void educationEntity();
 
+    @EntityPolicy(entityClass = AdministrativeViolation.class, actions = {EntityPolicyAction.CREATE, EntityPolicyAction.UPDATE})
+    void administrativeViolationEntity();
+
     @EntityAttributePolicy(
             entityClass = User.class,
             attributes = {"username", "password", "firstName", "lastName", "patronymic", "dateOfBirth"},
@@ -90,5 +93,12 @@ public interface SelfEditUserRole {
             action = EntityAttributePolicyAction.MODIFY
     )
     void educationSelfFields();
+
+    @EntityAttributePolicy(
+            entityClass = AdministrativeViolation.class,
+            attributes = "*",
+            action = EntityAttributePolicyAction.VIEW
+    )
+    void administrativeViolationSelfFields();
 
 }
