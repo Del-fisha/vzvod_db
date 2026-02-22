@@ -79,12 +79,33 @@ public class EducationTest extends EntityTestSupport {
 
     @Test
     @DisplayName("Started не может быть в будущем")
-    void testStartedValidation() {
+    void testStartedValidationFuture() {
         LocalDate future = LocalDate.now().plusDays(1);
         education.setStarted(future);
 
         var violations = validator.validate(education);
         assertFalse(violations.isEmpty());
+    }
+
+
+    @Test
+    @DisplayName("Started может быть в прошлом")
+    void testStartedValidationPast() {
+        LocalDate past = LocalDate.now().minusDays(1);
+        education.setStarted(past);
+
+        var violation = validator.validate(education);
+        assertTrue(violation.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Started может быть сегодня")
+    void testStartedValidationToday() {
+        LocalDate today = LocalDate.now();
+        education.setStarted(today);
+
+        var violation = validator.validate(education);
+        assertTrue(violation.isEmpty());
     }
 
     @Test
@@ -104,5 +125,4 @@ public class EducationTest extends EntityTestSupport {
                 () -> assertNull(education.getNameOfInstitution())
         );
     }
-
 }
