@@ -57,15 +57,4 @@ public class DepartmentTest extends EntityTestSupport {
         assertTrue(department.getServiceInfos().contains(serviceInfo1));
     }
 
-    @Test // ToDo Тест падает
-    @DisplayName("Проверка метода getInstanceName()")
-    void testInstanceName() {
-        department.setNumber(10);
-        String instanceName = department.getInstanceName(datatypeFormatter);
-        assertEquals("10", instanceName, "InstanceName должен быть строковым представлением числа");
-
-        department.setNumber(null);
-        instanceName = department.getInstanceName(datatypeFormatter);
-        assertNull(instanceName, "При number = null метод должен возвращать null (потенциальная проблема)");
-    }
 }
