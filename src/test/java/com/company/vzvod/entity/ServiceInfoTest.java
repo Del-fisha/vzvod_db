@@ -5,7 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -200,4 +200,117 @@ public class ServiceInfoTest extends EntityTestSupport {
         assertTrue(violationPast.isEmpty());
         assertEquals(past, serviceInfo.getStartOfPost());
     }
+
+    @Test
+    @DisplayName("Работа с коллекцией penalty")
+    void testPenaltyCollection() {
+        serviceInfo.setPenalty(new ArrayList<>());
+        assertTrue(serviceInfo.getPenalty().isEmpty());
+
+        Penalty p1 = dataManager.create(Penalty.class);
+        Penalty p2 = dataManager.create(Penalty.class);
+        Penalty p3 = dataManager.create(Penalty.class);
+
+        List<Penalty> list = new ArrayList<>();
+        list.add(p1);
+        list.add(p2);
+        serviceInfo.setPenalty(list);
+
+        assertEquals(2, serviceInfo.getPenalty().size());
+        assertTrue(serviceInfo.getPenalty().contains(p1));
+
+        serviceInfo.getPenalty().add(p3);
+        assertEquals(3, serviceInfo.getPenalty().size());
+        assertTrue(serviceInfo.getPenalty().contains(p3));
+    }
+
+    @Test
+    @DisplayName("Работа с коллекцией incentive")
+    void testIncentiveCollection() {
+        serviceInfo.setIncentive(new ArrayList<>());
+        assertTrue(serviceInfo.getIncentive().isEmpty());
+
+        Incentive incentive1 = dataManager.create(Incentive.class);
+        Incentive incentive2 = dataManager.create(Incentive.class);
+        Incentive incentive3 = dataManager.create(Incentive.class);
+
+        List<Incentive> list = new ArrayList<>();
+        list.add(incentive1);
+        list.add(incentive2);
+        serviceInfo.setIncentive(list);
+
+        assertEquals(2, serviceInfo.getIncentive().size());
+        assertTrue(serviceInfo.getIncentive().contains(incentive1));
+
+        serviceInfo.getIncentive().add(incentive3);
+        assertEquals(3, serviceInfo.getIncentive().size());
+        assertTrue(serviceInfo.getIncentive().contains(incentive3));
+    }
+
+    @Test
+    @DisplayName("Работа с коллекцией shifts")
+    void testShiftsCollection() {
+        serviceInfo.setShifts(new HashSet<>());
+        assertTrue(serviceInfo.getShifts().isEmpty());
+
+        Shift shift1 = dataManager.create(Shift.class);
+        Shift shift2 = dataManager.create(Shift.class);
+        Shift shift3 = dataManager.create(Shift.class);
+
+        Set<Shift> list = new HashSet<>();
+        list.add(shift1);
+        list.add(shift2);
+        serviceInfo.setShifts(list);
+
+        assertEquals(2, serviceInfo.getShifts().size());
+        assertTrue(serviceInfo.getShifts().contains(shift1));
+
+        serviceInfo.getShifts().add(shift3);
+        assertEquals(3, serviceInfo.getShifts().size());
+        assertTrue(serviceInfo.getShifts().contains(shift3));
+    }
+
+    @Test
+    @DisplayName("Работа с коллекцией vocations")
+    void testVocationCollection() {
+        serviceInfo.setVocations(new ArrayList<>());
+        assertTrue(serviceInfo.getVocations().isEmpty());
+
+        Vocation vocation1 = dataManager.create(Vocation.class);
+        Vocation vocation2 = dataManager.create(Vocation.class);
+        Vocation vocation3 = dataManager.create(Vocation.class);
+
+        List<Vocation> list = new ArrayList<>();
+        list.add(vocation1);
+        list.add(vocation2);
+        serviceInfo.setVocations(list);
+
+        assertEquals(2, serviceInfo.getVocations().size());
+        assertTrue(serviceInfo.getVocations().contains(vocation1));
+
+        serviceInfo.getVocations().add(vocation3);
+        assertEquals(3, serviceInfo.getVocations().size());
+        assertTrue(serviceInfo.getVocations().contains(vocation3));
+    }
+
+    @Test
+    @DisplayName("Установка и получение medicalExamination")
+    void testMedicalExamination() {
+        serviceInfo.setMedicalExamination(true);
+        assertTrue(serviceInfo.getMedicalExamination());
+
+        serviceInfo.setMedicalExamination(false);
+        assertFalse(serviceInfo.getMedicalExamination());
+    }
+
+    @Test
+    @DisplayName("Установка и получение qualificationClass")
+    void testQualificationClass() {
+        serviceInfo.setQualificationClass(Qualification.MASTER);
+        assertEquals(Qualification.MASTER, serviceInfo.getQualificationClass());
+
+        serviceInfo.setQualificationClass(null);
+        assertNull(serviceInfo.getQualificationClass());
+    }
+
 }
