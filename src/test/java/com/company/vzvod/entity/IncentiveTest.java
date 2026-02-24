@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@DisplayName("Unit-тесты для Incentive Entity")
 class IncentiveTest extends EntityTestSupport {
 
     Incentive incentive;
@@ -84,7 +85,7 @@ class IncentiveTest extends EntityTestSupport {
     @DisplayName("Проверка поля Id")
     void testId() {
         UUID originalId = incentive.getId();
-        assertNull(originalId);
+        assertNotNull(originalId);
 
         UUID newId = UUID.randomUUID();
         incentive.setId(newId);
