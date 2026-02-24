@@ -96,6 +96,12 @@ class VocationTest extends EntityTestSupport {
 
     @Test
     void testDaysAddedByDeparture() {
+        assertNull(vocation.getDaysAddedByDeparture());
+
+        Integer addedDays = 2;
+        vocation.setDaysAddedByDeparture(addedDays);
+
+        assertEquals(addedDays, vocation.getDaysAddedByDeparture());
     }
 
     @Test
