@@ -9,6 +9,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@DisplayName("Unit-тесты для ServiceInfo Entity")
 public class ServiceInfoTest extends EntityTestSupport {
 
     private ServiceInfo serviceInfo;
