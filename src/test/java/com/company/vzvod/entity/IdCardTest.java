@@ -10,7 +10,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Unit-тесты для IdCard Entity")
-public class IdClassTest extends EntityTestSupport {
+public class IdCardTest extends EntityTestSupport {
 
     private IdCard idCard;
 
