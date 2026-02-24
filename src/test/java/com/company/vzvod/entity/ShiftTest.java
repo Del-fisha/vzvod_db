@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Unit-тесты для Shift Entity")
@@ -84,5 +86,11 @@ class ShiftTest extends EntityTestSupport {
     @Test
     @DisplayName("Проверка поля id")
     void getId() {
+        UUID originalId = shift.getId();
+        assertNotNull(originalId);
+
+        UUID newId = UUID.randomUUID();
+        shift.setId(newId);
+        assertEquals(newId, shift.getId());
     }
 }
