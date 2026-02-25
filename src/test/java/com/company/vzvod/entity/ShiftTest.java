@@ -25,11 +25,33 @@ class ShiftTest extends EntityTestSupport {
     @Test
     @DisplayName("Проверка поля departmentToday")
     void testDepartmentToday() {
+        assertNull(shift.getDepartmentToday());
+
+        shift.setDepartmentToday(Dep.FIRST);
+        assertEquals(Dep.FIRST, shift.getDepartmentToday());
     }
 
     @Test
     @DisplayName("Проверка поля units")
     void testUnits() {
+        assertNull(shift.getUnits());
+
+        shift.setUnits(new HashSet<>());
+        assertTrue(shift.getUnits().isEmpty());
+
+        ServiceInfo unit1 = dataManager.create(ServiceInfo.class);
+        ServiceInfo unit2 = dataManager.create(ServiceInfo.class);
+        ServiceInfo unit3 = dataManager.create(ServiceInfo.class);
+
+        shift.getUnits().add(unit1);
+        shift.getUnits().add(unit2);
+
+        assertTrue(shift.getUnits().contains(unit1));
+        assertEquals(2, shift.getUnits().size());
+
+        shift.getUnits().add(unit3);
+        assertTrue(shift.getUnits().contains(unit3));
+        assertEquals(3, shift.getUnits().size());
     }
 
     @Test
