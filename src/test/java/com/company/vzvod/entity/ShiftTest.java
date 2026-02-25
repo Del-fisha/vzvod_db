@@ -56,21 +56,41 @@ class ShiftTest extends EntityTestSupport {
     @Test
     @DisplayName("Проверка поля countOfStatements")
     void getCountOfStatements() {
+        assertNull(shift.getCountOfStatements());
+
+        Integer num = 10;
+        shift.setCountOfStatements(num);
+        assertEquals(num, shift.getCountOfStatements());
     }
 
     @Test
     @DisplayName("Проверка поля countOfClaims")
     void getCountOfClaims() {
+        assertNull(shift.getCountOfClaims());
+
+        Integer num = 10;
+        shift.setCountOfClaims(num);
+        assertEquals(num, shift.getCountOfClaims());
     }
 
     @Test
     @DisplayName("Проверка поля ibdWithMigrant")
     void getIbdWithMigrant() {
+        assertNull(shift.getIbdWithMigrant());
+
+        Integer num = 10;
+        shift.setIbdWithMigrant(num);
+        assertEquals(num, shift.getIbdWithMigrant());
     }
 
     @Test
     @DisplayName("Проверка поля ibdWithoutMigrant")
     void getIbdWithoutMigrant() {
+        assertNull(shift.getIbdWithoutMigrant());
+
+        Integer num = 10;
+        shift.setIbdWithoutMigrant(num);
+        assertEquals(num, shift.getIbdWithoutMigrant());
     }
 
     @Test

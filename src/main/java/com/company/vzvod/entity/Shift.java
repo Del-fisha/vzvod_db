@@ -23,7 +23,6 @@ public class Shift {
     @Id
     private UUID id;
 
-
     @Column(name = "NUMBER")
     private NumberOfShift number;
 
