@@ -76,11 +76,19 @@ class ShiftTest extends EntityTestSupport {
     @Test
     @DisplayName("Проверка поля typeOfShift")
     void getTypeOfShift() {
+        assertNull(shift.getTypeOfShift());
+
+        shift.setTypeOfShift(TypeOfShift.BAT_POST);
+        assertEquals(TypeOfShift.BAT_POST, shift.getTypeOfShift());
     }
 
     @Test
     @DisplayName("Проверка поля number")
     void getNumber() {
+        assertNull(shift.getNumber());
+
+        shift.setNumber(NumberOfShift._3);
+        assertSame(NumberOfShift._3, shift.getNumber());
     }
 
     @Test
