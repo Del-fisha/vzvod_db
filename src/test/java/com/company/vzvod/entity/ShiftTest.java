@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashSet;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,42 +21,78 @@ class ShiftTest extends EntityTestSupport {
 
     @Test
     @DisplayName("Проверка поля departmentToday")
-    void getDepartmentToday() {
+    void testDepartmentToday() {
     }
 
     @Test
     @DisplayName("Проверка поля units")
-    void getUnits() {
+    void testUnits() {
     }
 
     @Test
     @DisplayName("Проверка поля date")
-    void getDate() {
+    void testDate() {
     }
 
     @Test
     @DisplayName("Проверка поля startTime")
-    void getStartTime() {
+    void testStartTime() {
     }
 
     @Test
     @DisplayName("Проверка поля endTime")
-    void getEndTime() {
+    void testEndTime() {
     }
 
     @Test
     @DisplayName("Проверка поля criminalViolations")
-    void getCriminalViolations() {
+    void testCriminalViolations() {
+        assertNull(shift.getCriminalViolations());
+
+        shift.setCriminalViolations(new HashSet<>());
+        assertTrue(shift.getCriminalViolations().isEmpty());
+
+        CriminalViolation violation1 = dataManager.create(CriminalViolation.class);
+        CriminalViolation violation2 = dataManager.create(CriminalViolation.class);
+        CriminalViolation violation3 = dataManager.create(CriminalViolation.class);
+
+        shift.getCriminalViolations().add(violation1);
+        shift.getCriminalViolations().add(violation2);
+
+        assertTrue(shift.getCriminalViolations().contains(violation1));
+        assertEquals(2, shift.getCriminalViolations().size());
+
+        shift.getCriminalViolations().add(violation3);
+        assertTrue(shift.getCriminalViolations().contains(violation3));
+        assertEquals(3, shift.getCriminalViolations().size());
     }
 
     @Test
     @DisplayName("Проверка поля administrativeViolations")
-    void getAdministrativeViolations() {
+    void testAdministrativeViolations() {
+        assertNull(shift.getAdministrativeViolations());
+
+        shift.setAdministrativeViolations(new HashSet<>());
+        assertTrue(shift.getAdministrativeViolations().isEmpty());
+
+        AdministrativeViolation violation1 = dataManager.create(AdministrativeViolation.class);
+        AdministrativeViolation violation2 = dataManager.create(AdministrativeViolation.class);
+        AdministrativeViolation violation3 = dataManager.create(AdministrativeViolation.class);
+
+        shift.getAdministrativeViolations().add(violation1);
+        shift.getAdministrativeViolations().add(violation2);
+
+        assertTrue(shift.getAdministrativeViolations().contains(violation1));
+        assertEquals(2, shift.getAdministrativeViolations().size());
+
+        shift.getAdministrativeViolations().add(violation3);
+        assertTrue(shift.getAdministrativeViolations().contains(violation3));
+        assertEquals(3, shift.getAdministrativeViolations().size());
     }
 
     @Test
     @DisplayName("Проверка поля countOfStatements")
-    void getCountOfStatements() {
+    void testCountOfStatements() {
         assertNull(shift.getCountOfStatements());
 
         Integer num = 10;
@@ -65,7 +102,7 @@ class ShiftTest extends EntityTestSupport {
 
     @Test
     @DisplayName("Проверка поля countOfClaims")
-    void getCountOfClaims() {
+    void testCountOfClaims() {
         assertNull(shift.getCountOfClaims());
 
         Integer num = 10;
@@ -75,7 +112,7 @@ class ShiftTest extends EntityTestSupport {
 
     @Test
     @DisplayName("Проверка поля ibdWithMigrant")
-    void getIbdWithMigrant() {
+    void testIbdWithMigrant() {
         assertNull(shift.getIbdWithMigrant());
 
         Integer num = 10;
@@ -85,7 +122,7 @@ class ShiftTest extends EntityTestSupport {
 
     @Test
     @DisplayName("Проверка поля ibdWithoutMigrant")
-    void getIbdWithoutMigrant() {
+    void testIbdWithoutMigrant() {
         assertNull(shift.getIbdWithoutMigrant());
 
         Integer num = 10;
@@ -95,7 +132,7 @@ class ShiftTest extends EntityTestSupport {
 
     @Test
     @DisplayName("Проверка поля typeOfShift")
-    void getTypeOfShift() {
+    void testTypeOfShift() {
         assertNull(shift.getTypeOfShift());
 
         shift.setTypeOfShift(TypeOfShift.BAT_POST);
@@ -104,7 +141,7 @@ class ShiftTest extends EntityTestSupport {
 
     @Test
     @DisplayName("Проверка поля number")
-    void getNumber() {
+    void testNumber() {
         assertNull(shift.getNumber());
 
         shift.setNumber(NumberOfShift._3);
@@ -113,7 +150,7 @@ class ShiftTest extends EntityTestSupport {
 
     @Test
     @DisplayName("Проверка поля id")
-    void getId() {
+    void testId() {
         UUID originalId = shift.getId();
         assertNotNull(originalId);
 
