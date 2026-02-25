@@ -4,6 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.UUID;
 
@@ -32,16 +35,34 @@ class ShiftTest extends EntityTestSupport {
     @Test
     @DisplayName("Проверка поля date")
     void testDate() {
+        assertNull(shift.getDate());
+
+        LocalDate date = LocalDate.now().minusDays(4);
+        shift.setDate(date);
+
+        assertEquals(date, shift.getDate());
     }
 
     @Test
     @DisplayName("Проверка поля startTime")
     void testStartTime() {
+        assertNull(shift.getStartTime());
+
+        LocalTime endTime = LocalTime.now().minusHours(4);
+        shift.setStartTime(endTime);
+
+        assertEquals(endTime, shift.getStartTime());
     }
 
     @Test
     @DisplayName("Проверка поля endTime")
     void testEndTime() {
+        assertNull(shift.getEndTime());
+
+        LocalTime endTime = LocalTime.now().minusHours(4);
+        shift.setEndTime(endTime);
+
+        assertEquals(endTime, shift.getEndTime());
     }
 
     @Test
