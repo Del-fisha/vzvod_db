@@ -36,6 +36,8 @@ dependencies {
     implementation 'io.jmix.flowui:jmix-flowui-themes'
     implementation 'org.springframework:spring-aspects'
     implementation 'org.postgresql:postgresql:42.7.3'
+    testImplementation 'org.testcontainers:junit-jupiter:1.19.7'
+    testImplementation 'org.testcontainers:postgresql:1.19.7'
 
 
     implementation 'org.springframework.boot:spring-boot-starter-web'

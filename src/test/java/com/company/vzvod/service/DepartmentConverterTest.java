@@ -45,6 +45,5 @@ class DepartmentConverterTest {
         assertEquals(Dep.FIRST, DepartmentConverter.departmentFromDate(date12));
         assertEquals(Dep.SECOND, DepartmentConverter.departmentFromDate(date21));
         assertEquals(Dep.SECOND, DepartmentConverter.departmentFromDate(date22));
-
     }
 }
