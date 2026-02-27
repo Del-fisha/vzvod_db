@@ -1,5 +1,6 @@
 package com.company.vzvod.entity;
 
+import com.company.vzvod.service.PhoneNormalizer;
 import io.jmix.core.DeletePolicy;
 import io.jmix.core.MetadataTools;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
@@ -27,13 +28,13 @@ public class Contacts {
     @Column(name = "PHONE_NUMBER", length = 28)
     private String phoneNumber;
 
-    @Composition                              // ← ДОБАВИТЬ
+    @Composition
     @OnDelete(DeletePolicy.CASCADE)
     @JoinColumn(name = "REGISTRATION_ID")
     @OneToOne(fetch = FetchType.LAZY)
     private Address registration;
 
-    @Composition                              // ← ДОБАВИТЬ
+    @Composition
     @OnDelete(DeletePolicy.CASCADE)
     @JoinColumn(name = "HABITATION_ID")
     @OneToOne(fetch = FetchType.LAZY)
@@ -71,7 +72,7 @@ public class Contacts {
     }
 
     public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
+        this.phoneNumber = new PhoneNormalizer().normalize(phoneNumber);
     }
 
     public UUID getId() {
