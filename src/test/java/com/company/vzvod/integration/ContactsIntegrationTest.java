@@ -5,10 +5,7 @@ import com.company.vzvod.entity.Contacts;
 import com.company.vzvod.entity.MetroStation;
 import com.company.vzvod.test_support.AuthenticatedAsAdmin;
 import io.jmix.core.DataManager;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -76,10 +73,10 @@ public class ContactsIntegrationTest {
 
         Contacts loadedContacts = dataManager.load(Contacts.class).id(savedContacts.getId()).one();
 
-        assertEquals(loadedContacts.getHabitation(), savedContacts.getHabitation());
+        assertEquals(loadedContacts.getHabitation().getId(), savedContacts.getHabitation().getId());
         assertEquals(loadedContacts.getPhoneNumber(), savedContacts.getPhoneNumber());
         assertEquals(loadedContacts.getNearestMetroStation(), savedContacts.getNearestMetroStation());
-        assertEquals(loadedContacts.getRegistration(), savedContacts.getRegistration());
+        assertEquals(loadedContacts.getRegistration().getId(), savedContacts.getRegistration().getId());
 
         assertEquals(MetroStation.BALTIYSKAYA, savedContacts.getNearestMetroStation());
         assertEquals("+79112291515", savedContacts.getPhoneNumber());
@@ -109,8 +106,8 @@ public class ContactsIntegrationTest {
 
         assertEquals("+79995250228", fromDb.getPhoneNumber());
         assertEquals(MetroStation.AKADEMICHESKAYA, fromDb.getNearestMetroStation());
-        assertEquals(newHabitation, fromDb.getHabitation());
-        assertEquals(newRegistration, fromDb.getRegistration());
+        assertEquals(newHabitation.getId(), fromDb.getHabitation().getId());
+        assertEquals(newRegistration.getId(), fromDb.getRegistration().getId());
     }
 
     @Test
