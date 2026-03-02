@@ -113,6 +113,19 @@ public class ContactsIntegrationTest {
         assertEquals(newRegistration, fromDb.getRegistration());
     }
 
+    @Test
+    @DisplayName("Тест удаления из БД")
+    void testDelete() {
+        Contacts saved = dataManager.save(contacts);
+        UUID contactsId = saved.getId();
 
+        dataManager.remove(saved);
 
+        Contacts loaded = dataManager.load(Contacts.class)
+                .id(contactsId)
+                .optional()
+                .orElse(null);
+
+        assertNull(loaded);
+    }
 }
