@@ -18,8 +18,9 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @Testcontainers
 @SpringBootTest
@@ -55,6 +56,13 @@ public class ContactsIntegrationTest {
     @BeforeEach
     void setUp() {
         contacts = dataManager.create(Contacts.class);
+        Address address = dataManager.create(Address.class);
+        Address savedAddress = dataManager.save(address);
+
+        contacts.setPhoneNumber("89112291515");
+        contacts.setHabitation(savedAddress);
+        contacts.setRegistration(savedAddress);
+        contacts.setNearestMetroStation(MetroStation.BALTIYSKAYA);
     }
 
     @Test
@@ -64,23 +72,47 @@ public class ContactsIntegrationTest {
     @Test
     @DisplayName("Тест сохранения в БД")
     void testSave() {
-        Address address = dataManager.create(Address.class);
-        Address savedAddress = dataManager.save(address);
-
-        contacts.setPhoneNumber("89112291515");
-        contacts.setHabitation(savedAddress);
-        contacts.setRegistration(savedAddress);
-        contacts.setNearestMetroStation(MetroStation.BALTIYSKAYA);
-
         Contacts savedContacts = dataManager.save(contacts);
 
         Contacts loadedContacts = dataManager.load(Contacts.class).id(savedContacts.getId()).one();
 
         assertEquals(loadedContacts.getHabitation(), savedContacts.getHabitation());
-        assertEquals("+79112291515", savedContacts.getPhoneNumber());
+        assertEquals(loadedContacts.getPhoneNumber(), savedContacts.getPhoneNumber());
         assertEquals(loadedContacts.getNearestMetroStation(), savedContacts.getNearestMetroStation());
         assertEquals(loadedContacts.getRegistration(), savedContacts.getRegistration());
+
+        assertEquals(MetroStation.BALTIYSKAYA, savedContacts.getNearestMetroStation());
+        assertEquals("+79112291515", savedContacts.getPhoneNumber());
     }
+
+    @Test
+    @DisplayName("Тест изменения в БД")
+    void testUpdate() {
+        Contacts savedContacts = dataManager.save(contacts);
+        UUID id = savedContacts.getId();
+
+        Contacts loadedContacts = dataManager.load(Contacts.class).id(id).one();
+
+        Address newHabitation = dataManager.create(Address.class);
+        Address newRegistration = dataManager.create(Address.class);
+        dataManager.save(newHabitation);
+        dataManager.save(newRegistration);
+
+        loadedContacts.setPhoneNumber("9995250228");
+        loadedContacts.setNearestMetroStation(MetroStation.AKADEMICHESKAYA);
+        loadedContacts.setHabitation(newHabitation);
+        loadedContacts.setRegistration(newRegistration);
+
+        Contacts updatedContacts = dataManager.save(loadedContacts);
+
+        Contacts fromDb = dataManager.load(Contacts.class).id(id).one();
+
+        assertEquals("+79995250228", fromDb.getPhoneNumber());
+        assertEquals(MetroStation.AKADEMICHESKAYA, fromDb.getNearestMetroStation());
+        assertEquals(newHabitation, fromDb.getHabitation());
+        assertEquals(newRegistration, fromDb.getRegistration());
+    }
+
 
 
 }
