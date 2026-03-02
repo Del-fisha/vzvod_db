@@ -5,6 +5,8 @@ import com.company.vzvod.entity.Contacts;
 import com.company.vzvod.entity.MetroStation;
 import com.company.vzvod.test_support.AuthenticatedAsAdmin;
 import io.jmix.core.DataManager;
+import io.jmix.core.security.SystemAuthenticator;
+import org.junit.After;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,13 +17,13 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.sql.Connection;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @Testcontainers
 @SpringBootTest
-@ExtendWith(AuthenticatedAsAdmin.class)
 @DisplayName("Интеграционный тест Contacts")
 public class ContactsIntegrationTest {
 
@@ -43,6 +45,9 @@ public class ContactsIntegrationTest {
     @Autowired
     private DataManager dataManager;
 
+    @Autowired
+    private SystemAuthenticator systemAuthenticator;
+
     private Contacts contacts;
 
     @BeforeAll
@@ -52,6 +57,7 @@ public class ContactsIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        systemAuthenticator.begin();
         contacts = dataManager.create(Contacts.class);
         Address address = dataManager.create(Address.class);
         Address savedAddress = dataManager.save(address);
@@ -60,6 +66,11 @@ public class ContactsIntegrationTest {
         contacts.setHabitation(savedAddress);
         contacts.setRegistration(savedAddress);
         contacts.setNearestMetroStation(MetroStation.BALTIYSKAYA);
+    }
+
+    @AfterEach
+    void tearDown() {
+        systemAuthenticator.end();
     }
 
     @Test
