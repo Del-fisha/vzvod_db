@@ -1,8 +1,11 @@
 package com.company.vzvod.integration;
 
-import com.company.vzvod.entity.*;
+import com.company.vzvod.entity.Address;
+import com.company.vzvod.entity.StatusOfHousing;
+import com.company.vzvod.entity.TypeOfHousing;
 import io.jmix.core.DataManager;
 import io.jmix.core.security.SystemAuthenticator;
+import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,7 +15,10 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Testcontainers
 @SpringBootTest(properties = "spring.profiles.active=test-postgres")
@@ -66,7 +72,8 @@ public class AddressIntegrationTest {
     }
 
     @Test
-    void testConnection() {}
+    void testConnection() {
+    }
 
 
     @Test
@@ -88,5 +95,50 @@ public class AddressIntegrationTest {
 
         assertEquals(TypeOfHousing.FLAT, savedAddress.getTypeOfHousing());
         assertEquals(StatusOfHousing.OWNER, savedAddress.getStatusOfHousing());
+    }
+
+    @Test
+    @DisplayName("Тест изменения в БД")
+    void updateTest() {
+        Address savedAddress = dataManager.save(address);
+        UUID addressId = savedAddress.getId();
+
+        String indexError = "7894563";
+        String newIndex = "789456";
+        String newCity = "Москва";
+        String newStreet = "Соломина";
+        String newHouseNumber = "98";
+        String newBody = "1";
+        String newFlat = "64";
+
+        savedAddress.setTypeOfHousing(TypeOfHousing.ROOM);
+        savedAddress.setStatusOfHousing(StatusOfHousing.SHARED);
+        savedAddress.setIndex(indexError);
+        savedAddress.setCity(newCity);
+        savedAddress.setStreet(newStreet);
+        savedAddress.setHouseNumber(newHouseNumber);
+        savedAddress.setBody(newBody);
+        savedAddress.setFlat(newFlat);
+
+        assertThrows(ConstraintViolationException.class, () ->
+                dataManager.save(savedAddress));
+
+        savedAddress.setIndex(newIndex);
+
+        Address newAddress = dataManager.save(savedAddress);
+        Address loadedAddress = dataManager.load(Address.class).id(addressId).one();
+
+        assertEquals(addressId, loadedAddress.getId());
+        assertEquals(newIndex, loadedAddress.getIndex());
+        assertEquals(newCity, loadedAddress.getCity());
+        assertEquals(newStreet, loadedAddress.getStreet());
+        assertEquals(newHouseNumber, loadedAddress.getHouseNumber());
+        assertEquals(newBody, loadedAddress.getBody());
+        assertEquals(newFlat, loadedAddress.getFlat());
+        assertEquals(savedAddress.getTypeOfHousing(), loadedAddress.getTypeOfHousing());
+        assertEquals(savedAddress.getStatusOfHousing(), loadedAddress.getStatusOfHousing());
+
+        assertEquals(TypeOfHousing.ROOM, loadedAddress.getTypeOfHousing());
+        assertEquals(StatusOfHousing.SHARED, loadedAddress.getStatusOfHousing());
     }
 }
