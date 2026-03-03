@@ -31,13 +31,13 @@ public class Contacts {
     @Composition
     @OnDelete(DeletePolicy.CASCADE)
     @JoinColumn(name = "REGISTRATION_ID")
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Address registration;
 
     @Composition
     @OnDelete(DeletePolicy.CASCADE)
     @JoinColumn(name = "HABITATION_ID")
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Address habitation;
 
     @Column(name = "NEAREST_METRO_STATION")
