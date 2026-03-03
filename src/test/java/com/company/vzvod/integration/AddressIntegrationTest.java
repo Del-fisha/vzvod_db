@@ -1,6 +1,7 @@
 package com.company.vzvod.integration;
 
 import com.company.vzvod.entity.Address;
+import com.company.vzvod.entity.Contacts;
 import com.company.vzvod.entity.StatusOfHousing;
 import com.company.vzvod.entity.TypeOfHousing;
 import io.jmix.core.DataManager;
@@ -151,5 +152,26 @@ public class AddressIntegrationTest {
 
         Address deletedAddress = dataManager.load(Address.class).id(addressId).optional().orElse(null);
         assertNull(deletedAddress);
+    }
+
+    @Test
+    @DisplayName("Тест каскадного удаления")
+    void cascadeDeleteTest() {
+        Contacts contact = dataManager.create(Contacts.class);
+        contact.setRegistration(address);
+        Contacts savedContact = dataManager.save(contact);
+
+        Address savedAddress = savedContact.getRegistration();
+        UUID addressId = savedAddress.getId();
+
+        assertEquals(address.getIndex(), savedAddress.getIndex());
+
+        dataManager.remove(savedContact);
+
+        Address loadedAddress = dataManager.load(Address.class)
+                .id(addressId)
+                .optional()
+                .orElse(null);
+        assertNull(loadedAddress);
     }
 }
