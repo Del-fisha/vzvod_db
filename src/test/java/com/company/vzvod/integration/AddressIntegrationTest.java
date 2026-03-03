@@ -17,8 +17,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Testcontainers
 @SpringBootTest(properties = "spring.profiles.active=test-postgres")
@@ -140,5 +139,17 @@ public class AddressIntegrationTest {
 
         assertEquals(TypeOfHousing.ROOM, loadedAddress.getTypeOfHousing());
         assertEquals(StatusOfHousing.SHARED, loadedAddress.getStatusOfHousing());
+    }
+
+    @Test
+    @DisplayName("Тест удаления из БД")
+    void testDelete() {
+        Address savedAddress = dataManager.save(address);
+        UUID addressId = savedAddress.getId();
+
+        dataManager.remove(address);
+
+        Address deletedAddress = dataManager.load(Address.class).id(addressId).optional().orElse(null);
+        assertNull(deletedAddress);
     }
 }
