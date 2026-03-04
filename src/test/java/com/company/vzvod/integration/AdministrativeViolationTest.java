@@ -17,8 +17,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(properties = "spring.profiles.active=test-postgres")
 @Testcontainers
@@ -113,6 +112,37 @@ public class AdministrativeViolationTest {
         assertEquals(ArticleOfAdministrative._20_1_2, updatedViolation.getArticle());
     }
 
+    @Test
+    @DisplayName("Тест удаления из БД")
+    void testDelete() {
+        AdministrativeViolation savedViolation = dataManager.save(violation);
+        UUID savedViolationId = savedViolation.getId();
+
+        dataManager.remove(savedViolation);
+
+        AdministrativeViolation removedViolation = dataManager.load(AdministrativeViolation.class)
+                .id(savedViolationId)
+                .optional()
+                .orElse(null);
+        assertNull(removedViolation);
+    }
+
+    @Test
+    @DisplayName("Тест UNLINK удаления")
+    void cascadeDeleteTest() {
+        AdministrativeViolation savedViolation = dataManager.save(violation);
+        Shift shift = savedViolation.getShift();
+
+        dataManager.remove(shift);
+
+        AdministrativeViolation loadedViolation = dataManager.load(AdministrativeViolation.class)
+                .id(savedViolation.getId())
+                .optional()
+                .orElse(null);
+
+        assertNotNull(loadedViolation);
+        assertNull(loadedViolation.getShift());
+    }
 
 
     @AfterEach

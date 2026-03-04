@@ -3,11 +3,15 @@ package com.company.vzvod.entity;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.UUID;
 
 @JmixEntity
 @MappedSuperclass
+@Getter
+@Setter
 public class Violation {
 
     @JmixGeneratedValue
@@ -22,24 +26,12 @@ public class Violation {
     @JoinColumn(name = "SHIFT_ID")
     private Shift shift;
 
-    public UUID getId() {
-        return id;
-    }
-
     public void setId(UUID id) {
         this.id = id;
     }
 
-    public Shift getShift() {
-        return shift;
-    }
-
     public void setShift(Shift shift) {
         this.shift = shift;
-    }
-
-    public Impact getImpact() {
-        return impact;
     }
 
     public void setImpact(Impact impact) {
