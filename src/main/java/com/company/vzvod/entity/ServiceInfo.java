@@ -1,10 +1,10 @@
 package com.company.vzvod.entity;
 
-import io.jmix.core.DeletePolicy;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
-import io.jmix.core.entity.annotation.OnDelete;
-import io.jmix.core.entity.annotation.OnDeleteInverse;
-import io.jmix.core.metamodel.annotation.*;
+import io.jmix.core.metamodel.annotation.Composition;
+import io.jmix.core.metamodel.annotation.DependsOnProperties;
+import io.jmix.core.metamodel.annotation.InstanceName;
+import io.jmix.core.metamodel.annotation.JmixEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -28,7 +28,7 @@ public class ServiceInfo {
     @Id
     private UUID id;
 
-//    @OnDeleteInverse(DeletePolicy.CASCADE)
+    //    @OnDeleteInverse(DeletePolicy.CASCADE)
     @JoinColumn(name = "USER_ID", nullable = false)
     @OneToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.ALL)
     private User user;
@@ -85,7 +85,6 @@ public class ServiceInfo {
 
     @Column(name = "QUALIFICATION_CLASS")
     private Qualification qualificationClass;
-
 
 
     public Qualification getQualificationClass() {
