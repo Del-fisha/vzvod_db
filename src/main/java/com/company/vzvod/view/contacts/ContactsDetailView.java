@@ -52,7 +52,6 @@ public class ContactsDetailView extends StandardDetailView<Contacts> {
     @Subscribe
     public void onInit(final InitEvent event) {
         Contacts contact = contactsDc.getItemOrNull();
-        // Проверяем, совпадают ли данные адресов
         boolean same = contact != null
                 && contact.getRegistration() != null
                 && contact.getHabitation() != null
@@ -62,32 +61,25 @@ public class ContactsDetailView extends StandardDetailView<Contacts> {
         applySameAddressMode(same);
     }
 
-    // Вспомогательный метод для сравнения адресов по содержимому
-    private boolean addressesAreEqual(Address addr1, Address addr2) {
-        if (addr1 == null || addr2 == null) {
+    private boolean addressesAreEqual(Address address1, Address address2) {
+        if (address1 == null || address2 == null) {
             return false;
         }
 
-        // Сравниваем все поля
-        return Objects.equals(addr1.getIndex(), addr2.getIndex())
-                && Objects.equals(addr1.getCity(), addr2.getCity())
-                && Objects.equals(addr1.getStreet(), addr2.getStreet())
-                && Objects.equals(addr1.getHouseNumber(), addr2.getHouseNumber())
-                && Objects.equals(addr1.getBody(), addr2.getBody())
-                && Objects.equals(addr1.getFlat(), addr2.getFlat())
-                && Objects.equals(addr1.getTypeOfHousing(), addr2.getTypeOfHousing())
-                && Objects.equals(addr1.getStatusOfHousing(), addr2.getStatusOfHousing());
+        return Objects.equals(address1.getIndex(), address2.getIndex())
+                && Objects.equals(address1.getCity(), address2.getCity())
+                && Objects.equals(address1.getStreet(), address2.getStreet())
+                && Objects.equals(address1.getHouseNumber(), address2.getHouseNumber())
+                && Objects.equals(address1.getBody(), address2.getBody())
+                && Objects.equals(address1.getFlat(), address2.getFlat())
+                && Objects.equals(address1.getTypeOfHousing(), address2.getTypeOfHousing())
+                && Objects.equals(address1.getStatusOfHousing(), address2.getStatusOfHousing());
     }
 
 
     @Subscribe("sameAddressCheckbox")
     public void onSameAddressCheckboxComponentValueChange(
             AbstractField.ComponentValueChangeEvent<JmixCheckbox, Boolean> event) {
-
-//        if (!event.isFromClient()) {
-//            return;
-//        }
-
         boolean same = Boolean.TRUE.equals(event.getValue());
         Contacts contact = contactsDc.getItemOrNull();
         if (contact == null) {
@@ -120,11 +112,9 @@ public class ContactsDetailView extends StandardDetailView<Contacts> {
         }
 
         Contacts contact = event.getItem();
-        Address newReg = (Address) event.getValue(); // новое значение registration
+        Address newReg = (Address) event.getValue();
 
-        if (contact != null) {
-            contact.setHabitation(newReg != null ? copyAddress(newReg) : null);
-        }
+        contact.setHabitation(newReg != null ? copyAddress(newReg) : null);
     }
 
 
@@ -135,26 +125,19 @@ public class ContactsDetailView extends StandardDetailView<Contacts> {
         }
 
         if (same) {
-            // Если регистрации существует, создаём копию для проживания
             if (contact.getRegistration() != null) {
-                // Создаём копию адреса регистрации
                 Address registrationCopy = copyAddress(contact.getRegistration());
                 contact.setHabitation(registrationCopy);
             }
-            // Отключаем кнопку, т.к. адрес проживания связан с адресом регистрации
             habitationAddressCreateButton.setEnabled(false);
         } else {
-            // При выключенном чекбоксе включаем кнопку редактирования адреса проживания
             habitationAddressCreateButton.setEnabled(true);
         }
     }
 
-
-    // регистр. адрес
     @Subscribe(id = "registerAddressCreateButton", subject = "clickListener")
     public void onRegisterAddressCreateButtonClick(final ClickEvent<JmixButton> event) {
         Contacts contact = contactsDc.getItem();
-        if (contact == null) return;
         Address addressRegistration = contact.getRegistration();
         if (addressRegistration == null) {
             addressRegistration = dataManager.create(Address.class);
@@ -162,16 +145,14 @@ public class ContactsDetailView extends StandardDetailView<Contacts> {
         }
         dialogWindows.detail(this, Address.class)
                 .withViewClass(AddressDetailView.class)
-                .withParentDataContext(getViewData().getDataContext())   // добавили общий DataContext
+                .withParentDataContext(getViewData().getDataContext())
                 .editEntity(addressRegistration)
                 .open();
     }
 
-    // адрес проживания
     @Subscribe(id = "habitationAddressCreateButton", subject = "clickListener")
     public void onHabitationAddressCreateButtonClick(final ClickEvent<JmixButton> event) {
         Contacts contact = contactsDc.getItem();
-        if (contact == null) return;
         Address addressHabitation = contact.getHabitation();
         if (addressHabitation == null) {
             addressHabitation = dataManager.create(Address.class);
@@ -179,7 +160,7 @@ public class ContactsDetailView extends StandardDetailView<Contacts> {
         }
         dialogWindows.detail(this, Address.class)
                 .withViewClass(AddressDetailView.class)
-                .withParentDataContext(getViewData().getDataContext())   // добавили общий DataContext
+                .withParentDataContext(getViewData().getDataContext())
                 .editEntity(addressHabitation)
                 .open();
     }
@@ -190,11 +171,8 @@ public class ContactsDetailView extends StandardDetailView<Contacts> {
             return null;
         }
 
-        // Создаём новый Address с помощью dataManager
-        // dataManager.create() автоматически генерирует новый UUID
         Address copy = dataManager.create(Address.class);
 
-        // Копируем все поля из source в copy
         copy.setIndex(source.getIndex());
         copy.setCity(source.getCity());
         copy.setStreet(source.getStreet());
@@ -218,7 +196,7 @@ public class ContactsDetailView extends StandardDetailView<Contacts> {
                 && contact.getHabitation() != null
                 && addressesAreEqual(contact.getRegistration(), contact.getHabitation());
 
-        sameAddressCheckbox.setValue(same); // isFromClient=false, логика копирования не запустится
+        sameAddressCheckbox.setValue(same);
         habitationAddressCreateButton.setEnabled(!same);
     }
 
@@ -241,7 +219,6 @@ public class ContactsDetailView extends StandardDetailView<Contacts> {
 
     @Subscribe
     public void onInitEntity(InitEntityEvent<Contacts> event) {
-        event.getEntity().setPhoneNumber("+7");
         sameAddressCheckbox.setValue(false);
         habitationAddressCreateButton.setEnabled(true);
     }
