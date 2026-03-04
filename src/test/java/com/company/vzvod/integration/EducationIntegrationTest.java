@@ -4,6 +4,7 @@ import com.company.vzvod.entity.Education;
 import com.company.vzvod.entity.EducationStatus;
 import com.company.vzvod.entity.TypeOfEducation;
 import com.company.vzvod.entity.User;
+import com.company.vzvod.test_support.PreTestEntities;
 import io.jmix.core.DataManager;
 import io.jmix.core.security.SystemAuthenticator;
 import org.junit.jupiter.api.*;

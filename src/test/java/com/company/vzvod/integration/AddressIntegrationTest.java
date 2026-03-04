@@ -4,6 +4,7 @@ import com.company.vzvod.entity.Address;
 import com.company.vzvod.entity.Contacts;
 import com.company.vzvod.entity.StatusOfHousing;
 import com.company.vzvod.entity.TypeOfHousing;
+import com.company.vzvod.test_support.PreTestEntities;
 import io.jmix.core.DataManager;
 import io.jmix.core.security.SystemAuthenticator;
 import jakarta.validation.ConstraintViolationException;

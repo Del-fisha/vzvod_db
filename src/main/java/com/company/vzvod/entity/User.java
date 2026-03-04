@@ -15,6 +15,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Past;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.time.LocalDate;
@@ -32,43 +34,60 @@ import java.util.UUID;
 })
 public class User implements JmixUserDetails {
 
+    @Setter
+    @Getter
     @Id
     @Column(name = "ID", nullable = false)
     @JmixGeneratedValue
     private UUID id;
 
+    @Setter
     @NotEmpty(message = "{msg://com.company.vzvod.entity/User.username.validation.NotEmpty}")
     @NotBlank(message = "{msg://com.company.vzvod.entity/User.username.validation.NotBlank}")
     @Column(name = "USERNAME", nullable = false)
     private String username;
 
+    @Setter
+    @Getter
     @Secret
     @SystemLevel
     @Column(name = "PASSWORD")
     private String password;
 
+    @Getter
+    @Setter
     @NotEmpty(message = "{msg://com.company.vzvod.entity/User.firstName.validation.NotEmpty}")
     @NotBlank(message = "{msg://com.company.vzvod.entity/User.firstName.validation.NotBlank}")
     @Column(name = "FIRST_NAME", nullable = false, length = 20)
     private String firstName;
 
+    @Setter
+    @Getter
     @NotEmpty(message = "{msg://com.company.vzvod.entity/User.lastName.validation.NotEmpty}")
     @NotBlank(message = "{msg://com.company.vzvod.entity/User.lastName.validation.NotBlank}")
     @Column(name = "LAST_NAME", nullable = false, length = 20)
     private String lastName;
 
+    @Setter
+    @Getter
     @NotEmpty(message = "{msg://com.company.vzvod.entity/User.patronymic.validation.NotEmpty}")
     @NotBlank(message = "{msg://com.company.vzvod.entity/User.patronymic.validation.NotBlank}")
     @Column(name = "PATRONYMIC", nullable = false, length = 20)
     private String patronymic;
 
+    @Setter
+    @Getter
     @Past(message = "{msg://com.company.vzvod.entity/User.dateOfBirth.validation.Past}")
     @Column(name = "DATE_OF_BIRTH", nullable = false)
     private LocalDate dateOfBirth;
 
+    @Getter
+    @Setter
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "user", optional = false)
     private ServiceInfo serviceInfo;
 
+    @Setter
+    @Getter
     @Composition                              // ← ДОБАВИТЬ
     @OnDelete(DeletePolicy.CASCADE)
     @OnDeleteInverse(DeletePolicy.CASCADE)
@@ -76,105 +95,25 @@ public class User implements JmixUserDetails {
     @OneToOne(fetch = FetchType.LAZY)
     private Contacts contactsInfo;
 
+    @Setter
+    @Getter
     @OnDeleteInverse(DeletePolicy.CASCADE)
     @JoinColumn(name = "EDUCATION_ID")
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Education education;
 
 
+    @Setter
+    @Getter
     @OneToMany(mappedBy = "user")
     private List<Vehicle> vehicleInfo;
 
     @Transient
     private Collection<? extends GrantedAuthority> authorities;
 
-    public Education getEducation() {
-        return education;
-    }
-
-    public void setEducation(Education education) {
-        this.education = education;
-    }
-
-    public List<Vehicle> getVehicleInfo() {
-        return vehicleInfo;
-    }
-
-    public void setVehicleInfo(List<Vehicle> vehicleInfo) {
-        this.vehicleInfo = vehicleInfo;
-    }
-
-    public Contacts getContactsInfo() {
-        return contactsInfo;
-    }
-
-    public void setContactsInfo(Contacts contactsInfo) {
-        this.contactsInfo = contactsInfo;
-    }
-
-    public ServiceInfo getServiceInfo() {
-        return serviceInfo;
-    }
-
-    public void setServiceInfo(ServiceInfo serviceInfo) {
-        this.serviceInfo = serviceInfo;
-    }
-
-    public LocalDate getDateOfBirth() {
-        return dateOfBirth;
-    }
-
-    public void setDateOfBirth(LocalDate dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
-    }
-
-    public String getPatronymic() {
-        return patronymic;
-    }
-
-    public void setPatronymic(String patronymic) {
-        this.patronymic = patronymic;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(final UUID id) {
-        this.id = id;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
     @Override
     public String getUsername() {
         return username;
-    }
-
-    public void setUsername(final String username) {
-        this.username = username;
-    }
-
-    public void setPassword(final String password) {
-        this.password = password;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(final String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(final String lastName) {
-        this.lastName = lastName;
     }
 
     @Override

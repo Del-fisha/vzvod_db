@@ -1,4 +1,4 @@
-package com.company.vzvod.integration;
+package com.company.vzvod.test_support;
 
 import com.company.vzvod.entity.Contacts;
 import com.company.vzvod.entity.MetroStation;
@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public class PreTestEntities {
 
-    static User getNewUser() {
+    public static User getNewUser() {
         User user = new User();
         user.setFirstName("Пётр");
         user.setLastName("Петров");
@@ -22,7 +22,7 @@ public class PreTestEntities {
         return user;
     }
 
-    static Contacts getContacts() {
+    public static Contacts getContacts() {
         Contacts contacts = new Contacts();
         contacts.setPhoneNumber("89112291515");
         contacts.setNearestMetroStation(MetroStation.BALTIYSKAYA);

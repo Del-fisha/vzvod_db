@@ -1,12 +1,12 @@
 package com.company.vzvod.user;
 
 import com.company.vzvod.entity.User;
-import com.company.vzvod.test_support.AuthenticatedAsAdmin;
+import com.company.vzvod.test_support.PreTestEntities;
 import io.jmix.core.DataManager;
+import io.jmix.core.security.SystemAuthenticator;
 import io.jmix.core.security.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,11 +18,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Sample integration test for the User entity.
  */
 @SpringBootTest
-@ExtendWith(AuthenticatedAsAdmin.class)
+//@ExtendWith(AuthenticatedAsAdmin.class)
 public class UserTest {
 
     @Autowired
     DataManager dataManager;
+
+    @Autowired
+    private SystemAuthenticator systemAuthenticator;
 
     @Autowired
     PasswordEncoder passwordEncoder;
@@ -35,23 +38,24 @@ public class UserTest {
     @Test
     void test_saveAndLoad() {
         // Create and save a new User
-        User user = dataManager.create(User.class);
+        systemAuthenticator.begin();
+        User user = PreTestEntities.getNewUser();
         user.setUsername("test-user-" + System.currentTimeMillis());
         user.setPassword(passwordEncoder.encode("test-passwd"));
         savedUser = dataManager.save(user);
 
-        // Check the new user can be loaded
         User loadedUser = dataManager.load(User.class).id(user.getId()).one();
         assertThat(loadedUser).isEqualTo(user);
 
-        // Check the new user is available through UserRepository
         UserDetails userDetails = userRepository.loadUserByUsername(user.getUsername());
         assertThat(userDetails).isEqualTo(user);
     }
 
     @AfterEach
     void tearDown() {
-        if (savedUser != null)
+        if (savedUser != null) {
             dataManager.remove(savedUser);
+        }
+        systemAuthenticator.end();
     }
 }
