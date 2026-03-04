@@ -11,6 +11,7 @@ public class PreTestEntities {
 
     public static User getNewUser() {
         User user = new User();
+
         user.setFirstName("Пётр");
         user.setLastName("Петров");
         user.setPatronymic("Петрович");
@@ -24,6 +25,7 @@ public class PreTestEntities {
 
     public static Contacts getNewContact() {
         Contacts contacts = new Contacts();
+
         contacts.setPhoneNumber("89112291515");
         contacts.setNearestMetroStation(MetroStation.BALTIYSKAYA);
         contacts.setId(UUID.randomUUID());
@@ -33,6 +35,7 @@ public class PreTestEntities {
 
     public static Shift getNewShift() {
         Shift shift = new Shift();
+
         shift.setDepartmentToday(DepartmentConverter.departmentFromDate(LocalDate.now()));
         shift.setId(UUID.randomUUID());
         shift.setDate(LocalDate.now());
@@ -46,5 +49,21 @@ public class PreTestEntities {
         shift.setNumber(NumberOfShift._28);
 
         return shift;
+    }
+
+    public static ServiceInfo getNewServiceInfo() {
+        ServiceInfo serviceInfo = new ServiceInfo();
+
+        serviceInfo.setStartOfPost(LocalDate.ofYearDay(2013, 56));
+        serviceInfo.setQualificationClass(Qualification.THIRD);
+        serviceInfo.setStatus(StatusInService.ACTIVE);
+        serviceInfo.setRank(Rank.SENIOR_SERGEANT);
+        serviceInfo.setMedicalExamination(false);
+        serviceInfo.setBreastplate("00659874");
+        serviceInfo.setId(UUID.randomUUID());
+        serviceInfo.setPost(Post.COM_OTD);
+        serviceInfo.setToken("65492");
+
+        return serviceInfo;
     }
 }
