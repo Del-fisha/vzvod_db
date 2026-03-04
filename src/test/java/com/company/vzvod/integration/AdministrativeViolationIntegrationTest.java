@@ -1,9 +1,9 @@
 package com.company.vzvod.integration;
 
-import com.company.vzvod.entity.CriminalViolation;
-import com.company.vzvod.entity.Shift;
-import com.company.vzvod.entity.TypeOfCriminal;
+import com.company.vzvod.entity.AdministrativeViolation;
+import com.company.vzvod.entity.ArticleOfAdministrative;
 import com.company.vzvod.entity.Impact;
+import com.company.vzvod.entity.Shift;
 import com.company.vzvod.test_support.PreTestEntities;
 import io.jmix.core.DataManager;
 import io.jmix.core.security.SystemAuthenticator;
@@ -18,13 +18,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 @SpringBootTest(properties = "spring.profiles.active=test-postgres")
 @Testcontainers
-@DisplayName("Интеграционный тест CriminalViolation")
-public class CriminalViolationTest {
+@DisplayName("Интеграционный тест AdministrativeViolation")
+public class AdministrativeViolationIntegrationTest {
 
     static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:16")
             .withDatabaseName("testdb")
@@ -50,7 +48,7 @@ public class CriminalViolationTest {
         postgreSQLContainer.start();
     }
 
-    CriminalViolation violation;
+    AdministrativeViolation violation;
 
     @BeforeEach
     void setUp() {
@@ -58,8 +56,8 @@ public class CriminalViolationTest {
         Shift shift = PreTestEntities.getNewShift();
         shift = dataManager.save(shift);
 
-        violation = dataManager.create(CriminalViolation.class);
-        violation.setType(TypeOfCriminal.FEDERAL_WANTED);
+        violation = dataManager.create(AdministrativeViolation.class);
+        violation.setArticle(ArticleOfAdministrative._18_8);
         violation.setImpact(Impact.WITHOUT_IMPACT);
         violation.setShift(shift);
     }
@@ -73,17 +71,17 @@ public class CriminalViolationTest {
     @Test
     @DisplayName("Тест сохранения в БД")
     void testSave() {
-        CriminalViolation savedViolation = dataManager.save(violation);
+        AdministrativeViolation savedViolation = dataManager.save(violation);
         UUID savedViolationId = savedViolation.getId();
         assertNotNull(savedViolationId);
 
-        CriminalViolation loadedViolation = dataManager.load(CriminalViolation.class)
+        AdministrativeViolation loadedViolation = dataManager.load(AdministrativeViolation.class)
                 .id(savedViolationId)
                 .one();
 
         assertEquals(savedViolationId, loadedViolation.getId());
         assertEquals(savedViolation.getShift(), loadedViolation.getShift());
-        assertEquals(savedViolation.getType(), loadedViolation.getType());
+        assertEquals(savedViolation.getArticle(), loadedViolation.getArticle());
         assertEquals(savedViolation.getImpact(), loadedViolation.getImpact());
 
         assertEquals(Impact.WITHOUT_IMPACT, loadedViolation.getImpact());
@@ -92,37 +90,37 @@ public class CriminalViolationTest {
     @Test
     @DisplayName("Тест изменения в БД")
     void updateTest() {
-        CriminalViolation savedViolation = dataManager.save(violation);
+        AdministrativeViolation savedViolation = dataManager.save(violation);
         UUID savedViolationId = savedViolation.getId();
 
-        CriminalViolation loadedViolation = dataManager.load(CriminalViolation.class)
+        AdministrativeViolation loadedViolation = dataManager.load(AdministrativeViolation.class)
                 .id(savedViolationId)
                 .one();
 
         loadedViolation.setShift(dataManager.create(Shift.class));
         loadedViolation.setImpact(Impact.SPECIAL_TOOLS);
-        loadedViolation.setType(TypeOfCriminal.WATCH_LIST);
+        loadedViolation.setArticle(ArticleOfAdministrative._20_1_2);
 
-        CriminalViolation updatedViolation = dataManager.save(loadedViolation);
+        AdministrativeViolation updatedViolation = dataManager.save(loadedViolation);
 
         assertEquals(loadedViolation.getId(), updatedViolation.getId());
         assertEquals(loadedViolation.getImpact(), updatedViolation.getImpact());
-        assertEquals(loadedViolation.getType(), updatedViolation.getType());
+        assertEquals(loadedViolation.getArticle(), updatedViolation.getArticle());
         assertEquals(loadedViolation.getShift(), updatedViolation.getShift());
 
         assertEquals(Impact.SPECIAL_TOOLS, updatedViolation.getImpact());
-        assertEquals(TypeOfCriminal.WATCH_LIST, updatedViolation.getType());
+        assertEquals(ArticleOfAdministrative._20_1_2, updatedViolation.getArticle());
     }
 
     @Test
     @DisplayName("Тест удаления из БД")
     void testDelete() {
-        CriminalViolation savedViolation = dataManager.save(violation);
+        AdministrativeViolation savedViolation = dataManager.save(violation);
         UUID savedViolationId = savedViolation.getId();
 
         dataManager.remove(savedViolation);
 
-        CriminalViolation removedViolation = dataManager.load(CriminalViolation.class)
+        AdministrativeViolation removedViolation = dataManager.load(AdministrativeViolation.class)
                 .id(savedViolationId)
                 .optional()
                 .orElse(null);
@@ -132,12 +130,12 @@ public class CriminalViolationTest {
     @Test
     @DisplayName("Тест UNLINK удаления")
     void unlinkDeleteTest() {
-        CriminalViolation savedViolation = dataManager.save(violation);
+        AdministrativeViolation savedViolation = dataManager.save(violation);
         Shift shift = savedViolation.getShift();
 
         dataManager.remove(shift);
 
-        CriminalViolation loadedViolation = dataManager.load(CriminalViolation.class)
+        AdministrativeViolation loadedViolation = dataManager.load(AdministrativeViolation.class)
                 .id(savedViolation.getId())
                 .optional()
                 .orElse(null);
