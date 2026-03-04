@@ -83,7 +83,6 @@ class UserTest {
     @Test
     @DisplayName("Password может быть null (это нормально для пользователей)")
     void testPasswordIsNullByDefault() {
-
         assertNull(user.getPassword(), "Password должен быть null по умолчанию");
     }
 
@@ -92,7 +91,6 @@ class UserTest {
     void testSetPasswordToNull() {
 
         user.setPassword("somePassword");
-
 
         user.setPassword(null);
 

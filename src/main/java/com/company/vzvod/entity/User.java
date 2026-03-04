@@ -78,7 +78,7 @@ public class User implements JmixUserDetails {
 
     @OnDeleteInverse(DeletePolicy.CASCADE)
     @JoinColumn(name = "EDUCATION_ID")
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Education education;
 
 
