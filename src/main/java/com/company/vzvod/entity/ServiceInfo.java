@@ -28,9 +28,9 @@ public class ServiceInfo {
     @Id
     private UUID id;
 
-    @OnDeleteInverse(DeletePolicy.CASCADE)
+//    @OnDeleteInverse(DeletePolicy.CASCADE)
     @JoinColumn(name = "USER_ID", nullable = false)
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @OneToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.ALL)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -47,8 +47,8 @@ public class ServiceInfo {
     private String post;
 
     @Composition
-    @OnDelete(DeletePolicy.CASCADE)
-    @OneToOne(fetch = FetchType.LAZY)
+//    @OnDelete(DeletePolicy.CASCADE)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "ID_CARD_ID")
     private IdCard idCard;
 
@@ -68,16 +68,16 @@ public class ServiceInfo {
     @Column(name = "START_OF_POST")
     private LocalDate startOfPost;
 
-    @OneToMany(mappedBy = "userServiceInfo")
+    @OneToMany(mappedBy = "userServiceInfo", cascade = CascadeType.ALL)
     private List<Penalty> penalty;
 
-    @OneToMany(mappedBy = "userServiceInfo")
+    @OneToMany(mappedBy = "userServiceInfo", cascade = CascadeType.ALL)
     private List<Incentive> incentive;
 
     @ManyToMany(mappedBy = "units")
     private Set<Shift> shifts;
 
-    @OneToMany(mappedBy = "userServiceInfo")
+    @OneToMany(mappedBy = "userServiceInfo", cascade = CascadeType.ALL)
     private List<Vocation> vocations;
 
     @Column(name = "MEDICAL_EXAMINATION")
