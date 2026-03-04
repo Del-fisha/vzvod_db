@@ -20,8 +20,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(properties = "spring.profiles.active=test-postgres")
 @Testcontainers
@@ -60,15 +59,15 @@ public class ShiftIntegrationTest {
         shift = dataManager.create(Shift.class);
 
         shift.setDepartmentToday(DepartmentConverter.departmentFromDate(LocalDate.now()));
-        shift.setDate(LocalDate.now());
         shift.setStartTime(LocalTime.of(10,0));
         shift.setEndTime(LocalTime.of(22,0));
-        shift.setIbdWithoutMigrant(45);
         shift.setTypeOfShift(TypeOfShift.VZVOD_ROUTE);
-        shift.setCountOfClaims(1);
+        shift.setNumber(NumberOfShift._28);
+        shift.setDate(LocalDate.now());
+        shift.setIbdWithoutMigrant(45);
         shift.setCountOfStatements(2);
         shift.setIbdWithMigrant(60);
-        shift.setNumber(NumberOfShift._28);
+        shift.setCountOfClaims(1);
     }
 
     @Test
@@ -133,7 +132,6 @@ public class ShiftIntegrationTest {
         assertEquals(loadedShift.getDate(), updatedShift.getDate());
         assertEquals(loadedShift.getId(), updatedShift.getId());
 
-
         assertEquals(TypeOfShift.BAT_POST, updatedShift.getTypeOfShift());
         assertEquals(30, updatedShift.getIbdWithoutMigrant());
         assertEquals(3, updatedShift.getCountOfStatements());
@@ -141,7 +139,19 @@ public class ShiftIntegrationTest {
         assertEquals(Dep.FIRST, updatedShift.getDepartmentToday());
         assertEquals(0, updatedShift.getCountOfClaims());
         assertEquals(NumberOfShift._6, updatedShift.getNumber());
+    }
 
+    @Test
+    @DisplayName("Тест удаления из БД")
+    void testDelete() {
+        Shift savedShift = dataManager.save(shift);
+        UUID savedShiftId = savedShift.getId();
+
+        dataManager.remove(savedShift);
+
+        Shift removedShift = dataManager.load(Shift.class).id(savedShiftId).optional().orElse(null);
+
+        assertNull(removedShift);
     }
 
     @AfterEach
