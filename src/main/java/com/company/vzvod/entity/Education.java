@@ -7,6 +7,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.PastOrPresent;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -14,6 +16,8 @@ import java.util.UUID;
 @JmixEntity
 @Table(name = "EDUCATION")
 @Entity
+@Getter
+@Setter
 public class Education {
     @JmixGeneratedValue
     @Column(name = "ID", nullable = false)
@@ -36,14 +40,6 @@ public class Education {
     @Column(name = "NAME_OF_INSTITUTION")
     private String nameOfInstitution;
 
-    public String getNameOfInstitution() {
-        return nameOfInstitution;
-    }
-
-    public void setNameOfInstitution(String nameOfInstitution) {
-        this.nameOfInstitution = nameOfInstitution;
-    }
-
     public EducationStatus getStatus() {
         return status == null ? null : EducationStatus.fromId(status);
     }
@@ -58,30 +54,6 @@ public class Education {
 
     public void setType(TypeOfEducation type) {
         this.type = type == null ? null : type.getId();
-    }
-
-    public LocalDate getUntil() {
-        return until;
-    }
-
-    public void setUntil(LocalDate until) {
-        this.until = until;
-    }
-
-    public LocalDate getStarted() {
-        return started;
-    }
-
-    public void setStarted(LocalDate started) {
-        this.started = started;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
     }
 
 }

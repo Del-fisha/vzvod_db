@@ -60,11 +60,10 @@ public class ContactsIntegrationTest {
         systemAuthenticator.begin();
         contacts = dataManager.create(Contacts.class);
         Address address = dataManager.create(Address.class);
-        Address savedAddress = dataManager.save(address);
 
         contacts.setPhoneNumber("89112291515");
-        contacts.setHabitation(savedAddress);
-        contacts.setRegistration(savedAddress);
+        contacts.setHabitation(address);
+        contacts.setRegistration(address);
         contacts.setNearestMetroStation(MetroStation.BALTIYSKAYA);
     }
 

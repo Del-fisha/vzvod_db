@@ -33,13 +33,13 @@ public class Contacts {
     private String phoneNumber;
 
     @Composition
-    @OnDelete(DeletePolicy.CASCADE)
+//    @OnDelete(DeletePolicy.CASCADE)
     @JoinColumn(name = "REGISTRATION_ID")
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Address registration;
 
     @Composition
-    @OnDelete(DeletePolicy.CASCADE)
+//    @OnDelete(DeletePolicy.CASCADE)
     @JoinColumn(name = "HABITATION_ID")
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Address habitation;
