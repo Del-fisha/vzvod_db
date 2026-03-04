@@ -83,12 +83,12 @@ public class User implements JmixUserDetails {
 
     @Getter
     @Setter
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "user", optional = false)
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "user", optional = false, cascade = CascadeType.ALL)
     private ServiceInfo serviceInfo;
 
     @Setter
     @Getter
-    @Composition                              // ← ДОБАВИТЬ
+    @Composition
     @OnDelete(DeletePolicy.CASCADE)
     @OnDeleteInverse(DeletePolicy.CASCADE)
     @JoinColumn(name = "CONTACTS_INFO_ID")

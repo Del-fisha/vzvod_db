@@ -34,7 +34,7 @@ class ShiftTest extends EntityTestSupport {
     @Test
     @DisplayName("Проверка поля units")
     void testUnits() {
-        assertNull(shift.getUnits());
+        assertTrue(shift.getUnits().isEmpty());
 
         shift.setUnits(new HashSet<>());
         assertTrue(shift.getUnits().isEmpty());

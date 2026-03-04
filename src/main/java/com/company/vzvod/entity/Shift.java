@@ -12,6 +12,7 @@ import lombok.Setter;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -37,7 +38,7 @@ public class Shift {
     @JoinTable(name = "SHIFT_SERVICE_INFO",
             joinColumns = @JoinColumn(name = "SHIFT_ID"),
             inverseJoinColumns = @JoinColumn(name = "SERVICE_INFO_ID"))
-    private Set<ServiceInfo> units;
+    private Set<ServiceInfo> units = new HashSet<>();;
 
     @Column(name = "DEPARTMENT")
     private Dep departmentToday;

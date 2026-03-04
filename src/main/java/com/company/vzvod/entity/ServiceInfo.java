@@ -30,7 +30,7 @@ public class ServiceInfo {
 
     //    @OnDeleteInverse(DeletePolicy.CASCADE)
     @JoinColumn(name = "USER_ID", nullable = false)
-    @OneToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
