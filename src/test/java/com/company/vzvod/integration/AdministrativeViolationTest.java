@@ -3,12 +3,11 @@ package com.company.vzvod.integration;
 import com.company.vzvod.entity.AdministrativeViolation;
 import com.company.vzvod.entity.ArticleOfAdministrative;
 import com.company.vzvod.entity.Impact;
+import com.company.vzvod.test_support.PreTestEntities;
 import io.jmix.core.DataManager;
+import io.jmix.core.security.PreAuthenticationChecks;
 import io.jmix.core.security.SystemAuthenticator;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -54,7 +53,13 @@ public class AdministrativeViolationTest {
         administrativeViolation = dataManager.create(AdministrativeViolation.class);
         administrativeViolation.setArticle(ArticleOfAdministrative._18_8);
         administrativeViolation.setImpact(Impact.WITHOUT_IMPACT);
-        administrativeViolation.setShift();
+        administrativeViolation.setShift(PreTestEntities.getNewShift());
+    }
+
+    @Test
+    @DisplayName("Проверка соединения")
+    void connectionTest() {
+
     }
 
 
