@@ -6,6 +6,8 @@ import io.jmix.core.entity.annotation.OnDeleteInverse;
 import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -13,6 +15,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Set;
 import java.util.UUID;
 
+@Setter
+@Getter
 @JmixEntity
 @Table(name = "SHIFT")
 @Entity
@@ -68,118 +72,6 @@ public class Shift {
     private Integer ibdWithoutMigrant;
 
 
-    public Dep getDepartmentToday() {
-        return departmentToday;
-    }
-
-    public void setDepartmentToday(Dep departmentToday) {
-        this.departmentToday = departmentToday;
-    }
-
-    public Set<ServiceInfo> getUnits() {
-        return units;
-    }
-
-    public void setUnits(Set<ServiceInfo> units) {
-        this.units = units;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
-    public LocalTime getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(LocalTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public LocalTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalTime endTime) {
-        this.endTime = endTime;
-    }
-
-    public Set<CriminalViolation> getCriminalViolations() {
-        return criminalViolations;
-    }
-
-    public void setCriminalViolations(Set<CriminalViolation> criminalViolations) {
-        this.criminalViolations = criminalViolations;
-    }
-
-    public Set<AdministrativeViolation> getAdministrativeViolations() {
-        return administrativeViolations;
-    }
-
-    public void setAdministrativeViolations(Set<AdministrativeViolation> administrativeViolations) {
-        this.administrativeViolations = administrativeViolations;
-    }
-
-    public Integer getCountOfStatements() {
-        return countOfStatements;
-    }
-
-    public void setCountOfStatements(Integer countOfStatements) {
-        this.countOfStatements = countOfStatements;
-    }
-
-    public Integer getCountOfClaims() {
-        return countOfClaims;
-    }
-
-    public void setCountOfClaims(Integer countOfClaims) {
-        this.countOfClaims = countOfClaims;
-    }
-
-    public Integer getIbdWithMigrant() {
-        return ibdWithMigrant;
-    }
-
-    public void setIbdWithMigrant(Integer ibdWithMigrant) {
-        this.ibdWithMigrant = ibdWithMigrant;
-    }
-
-    public Integer getIbdWithoutMigrant() {
-        return ibdWithoutMigrant;
-    }
-
-    public void setIbdWithoutMigrant(Integer ibdWithoutMigrant) {
-        this.ibdWithoutMigrant = ibdWithoutMigrant;
-    }
-
-    public TypeOfShift getTypeOfShift() {
-        return typeOfShift;
-    }
-
-    public void setTypeOfShift(TypeOfShift typeOfShift) {
-        this.typeOfShift = typeOfShift;
-    }
-
-    public NumberOfShift getNumber() {
-        return number;
-    }
-
-    public void setNumber(NumberOfShift number) {
-        this.number = number;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
     @InstanceName
     public String getInstanceName() {
         StringBuilder stringBuilder = new StringBuilder();
@@ -192,6 +84,4 @@ public class Shift {
         return String.format("%s (%s) %s",
                 this.date.format(DateTimeFormatter.ofPattern("yyyy dd MMMM")), this.number.getId(), stringBuilder);
     }
-
-
 }
