@@ -48,6 +48,12 @@ dependencies {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
     testImplementation 'io.jmix.flowui:jmix-flowui-test-assist'
+
+    compileOnly 'org.projectlombok:lombok:1.18.34'  // Только для компиляции
+    annotationProcessor 'org.projectlombok:lombok:1.18.34'  // Для обработки аннотаций
+
+    testCompileOnly 'org.projectlombok:lombok:1.18.34'     // Для тестов
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.34'
 }
 
 configurations.implementation {

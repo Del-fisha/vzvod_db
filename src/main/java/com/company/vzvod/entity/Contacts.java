@@ -10,6 +10,8 @@ import io.jmix.core.metamodel.annotation.DependsOnProperties;
 import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.UUID;
 
@@ -19,6 +21,8 @@ import java.util.UUID;
         @Index(name = "IDX_CONTACTS_HABITATION", columnList = "HABITATION_ID")
 })
 @Entity
+@Getter
+@Setter
 public class Contacts {
     @JmixGeneratedValue
     @Column(name = "ID", nullable = false)
@@ -51,36 +55,8 @@ public class Contacts {
         return nearestMetroStation == null ? null : MetroStation.fromId(nearestMetroStation);
     }
 
-    public Address getHabitation() {
-        return habitation;
-    }
-
-    public void setHabitation(Address habitation) {
-        this.habitation = habitation;
-    }
-
-    public Address getRegistration() {
-        return registration;
-    }
-
-    public void setRegistration(Address registration) {
-        this.registration = registration;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = new PhoneNormalizer().normalize(phoneNumber);
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
     }
 
     @InstanceName
