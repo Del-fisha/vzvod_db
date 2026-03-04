@@ -12,13 +12,13 @@ public class PreTestEntities {
     public static User getNewUser() {
         User user = new User();
 
-        user.setFirstName("Пётр");
-        user.setLastName("Петров");
-        user.setPatronymic("Петрович");
         user.setDateOfBirth(LocalDate.now().minusYears(30));
+        user.setPatronymic("Петрович");
+        user.setId(UUID.randomUUID());
+        user.setLastName("Петров");
+        user.setFirstName("Пётр");
         user.setPassword("123");
         user.setUsername("123");
-        user.setId(UUID.randomUUID());
 
         return user;
     }
@@ -26,8 +26,8 @@ public class PreTestEntities {
     public static Contacts getNewContact() {
         Contacts contacts = new Contacts();
 
-        contacts.setPhoneNumber("89112291515");
         contacts.setNearestMetroStation(MetroStation.BALTIYSKAYA);
+        contacts.setPhoneNumber("89112291515");
         contacts.setId(UUID.randomUUID());
 
         return contacts;
@@ -37,16 +37,16 @@ public class PreTestEntities {
         Shift shift = new Shift();
 
         shift.setDepartmentToday(DepartmentConverter.departmentFromDate(LocalDate.now()));
-        shift.setId(UUID.randomUUID());
-        shift.setDate(LocalDate.now());
         shift.setStartTime(LocalTime.of(10,0));
         shift.setEndTime(LocalTime.of(22,0));
-        shift.setIbdWithoutMigrant(45);
         shift.setTypeOfShift(TypeOfShift.VZVOD_ROUTE);
-        shift.setCountOfClaims(1);
+        shift.setNumber(NumberOfShift._28);
+        shift.setId(UUID.randomUUID());
+        shift.setDate(LocalDate.now());
+        shift.setIbdWithoutMigrant(45);
         shift.setCountOfStatements(2);
         shift.setIbdWithMigrant(60);
-        shift.setNumber(NumberOfShift._28);
+        shift.setCountOfClaims(1);
 
         return shift;
     }
