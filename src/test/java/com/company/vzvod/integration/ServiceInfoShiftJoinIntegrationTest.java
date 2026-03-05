@@ -86,19 +86,15 @@ public class ServiceInfoShiftJoinIntegrationTest {
     @Test
     @DisplayName("Проверка создания связи ManyToMany через соединительную таблицу")
     void testManyToManyJoin() {
-        // Сохраняем ServiceInfo (получаем ID)
+
         ServiceInfo savedServiceInfo = dataManager.save(serviceInfo);
 
-        // Добавляем ServiceInfo в коллекцию units смены
         shift.getUnits().add(savedServiceInfo);
 
-        // Сохраняем Shift – запись в соединительной таблице создаётся автоматически
         Shift savedShift = dataManager.save(shift);
 
-        // Очищаем Persistence Context, чтобы следующие загрузки шли из БД
         entityManager.clear();
 
-        // Загружаем Shift с фетч-планом, включающим коллекцию units
         FetchPlan shiftPlan = fetchPlans.builder(Shift.class)
                 .add("units")
                 .build();
@@ -107,12 +103,10 @@ public class ServiceInfoShiftJoinIntegrationTest {
                 .fetchPlan(shiftPlan)
                 .one();
 
-        // Проверяем, что в коллекции units присутствует наш ServiceInfo
         assertThat(loadedShift.getUnits())
                 .isNotEmpty()
                 .anyMatch(si -> si.getId().equals(savedServiceInfo.getId()));
 
-        // Загружаем ServiceInfo с фетч-планом, включающим коллекцию shifts
         FetchPlan serviceInfoPlan = fetchPlans.builder(ServiceInfo.class)
                 .add("shifts")
                 .build();
@@ -121,7 +115,6 @@ public class ServiceInfoShiftJoinIntegrationTest {
                 .fetchPlan(serviceInfoPlan)
                 .one();
 
-        // Проверяем обратную сторону связи
         assertThat(loadedServiceInfo.getShifts())
                 .isNotEmpty()
                 .anyMatch(s -> s.getId().equals(savedShift.getId()));
