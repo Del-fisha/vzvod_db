@@ -13,11 +13,11 @@ public class PreTestEntities {
     public static void updateUser(User user) {
 
         user.setDateOfBirth(LocalDate.now().minusYears(30));
+        user.setUsername("123" + System.currentTimeMillis());
         user.setPatronymic("Петрович");
         user.setLastName("Петров");
         user.setFirstName("Пётр");
         user.setPassword("123");
-        user.setUsername("123");
     }
 
     public static void updateContact(Contacts contact) {
