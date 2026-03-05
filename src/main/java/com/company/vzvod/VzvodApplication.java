@@ -15,6 +15,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
 
@@ -36,6 +37,7 @@ public class VzvodApplication implements AppShellConfigurator {
     @Bean
     @Primary
     @ConfigurationProperties("main.datasource")
+    @Profile({"test", "prod"})
     DataSourceProperties dataSourceProperties() {
         return new DataSourceProperties();
     }
@@ -43,6 +45,7 @@ public class VzvodApplication implements AppShellConfigurator {
     @Bean
     @Primary
     @ConfigurationProperties("main.datasource.hikari")
+    @Profile({"test", "prod"})
     DataSource dataSource(final DataSourceProperties dataSourceProperties) {
         return dataSourceProperties.initializeDataSourceBuilder().build();
     }

@@ -37,9 +37,9 @@ public class UserTest {
 
     @Test
     void test_saveAndLoad() {
-        // Create and save a new User
         systemAuthenticator.begin();
-        User user = PreTestEntities.getNewUser();
+        User user = dataManager.create(User.class);
+        PreTestEntities.updateUser(user);
         user.setUsername("test-user-" + System.currentTimeMillis());
         user.setPassword(passwordEncoder.encode("test-passwd"));
         savedUser = dataManager.save(user);

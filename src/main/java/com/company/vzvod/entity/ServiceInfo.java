@@ -1,19 +1,19 @@
 package com.company.vzvod.entity;
 
-import io.jmix.core.DeletePolicy;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
-import io.jmix.core.entity.annotation.OnDelete;
-import io.jmix.core.entity.annotation.OnDeleteInverse;
-import io.jmix.core.metamodel.annotation.*;
+import io.jmix.core.metamodel.annotation.Composition;
+import io.jmix.core.metamodel.annotation.DependsOnProperties;
+import io.jmix.core.metamodel.annotation.InstanceName;
+import io.jmix.core.metamodel.annotation.JmixEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.PastOrPresent;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @JmixEntity
 @Table(name = "SERVICE_INFO", indexes = {
@@ -22,13 +22,15 @@ import java.util.UUID;
         @Index(name = "IDX_SERVICE_INFO_DEPARTMENT", columnList = "DEPARTMENT_ID")
 })
 @Entity
+@Getter
+@Setter
 public class ServiceInfo {
     @JmixGeneratedValue
     @Column(name = "ID", nullable = false)
     @Id
     private UUID id;
 
-    @OnDeleteInverse(DeletePolicy.CASCADE)
+    //    @OnDeleteInverse(DeletePolicy.CASCADE)
     @JoinColumn(name = "USER_ID", nullable = false)
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     private User user;
@@ -47,8 +49,8 @@ public class ServiceInfo {
     private String post;
 
     @Composition
-    @OnDelete(DeletePolicy.CASCADE)
-    @OneToOne(fetch = FetchType.LAZY)
+//    @OnDelete(DeletePolicy.CASCADE)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "ID_CARD_ID")
     private IdCard idCard;
 
@@ -68,16 +70,16 @@ public class ServiceInfo {
     @Column(name = "START_OF_POST")
     private LocalDate startOfPost;
 
-    @OneToMany(mappedBy = "userServiceInfo")
+    @OneToMany(mappedBy = "userServiceInfo", cascade = CascadeType.ALL)
     private List<Penalty> penalty;
 
-    @OneToMany(mappedBy = "userServiceInfo")
+    @OneToMany(mappedBy = "userServiceInfo", cascade = CascadeType.ALL)
     private List<Incentive> incentive;
 
     @ManyToMany(mappedBy = "units")
     private Set<Shift> shifts;
 
-    @OneToMany(mappedBy = "userServiceInfo")
+    @OneToMany(mappedBy = "userServiceInfo", cascade = CascadeType.ALL)
     private List<Vocation> vocations;
 
     @Column(name = "MEDICAL_EXAMINATION")
@@ -87,101 +89,12 @@ public class ServiceInfo {
     private Qualification qualificationClass;
 
 
-
-    public Qualification getQualificationClass() {
-        return qualificationClass;
-    }
-
-    public void setQualificationClass(Qualification qualificationClass) {
-        this.qualificationClass = qualificationClass;
-    }
-
-    public Boolean getMedicalExamination() {
-        return medicalExamination;
-    }
-
-    public void setMedicalExamination(Boolean medicalExamination) {
-        this.medicalExamination = medicalExamination;
-    }
-
-    public List<Vocation> getVocations() {
-        return vocations;
-    }
-
-    public void setVocations(List<Vocation> vocations) {
-        this.vocations = vocations;
-    }
-
-    public List<Incentive> getIncentive() {
-        return incentive;
-    }
-
-    public void setIncentive(List<Incentive> incentive) {
-        this.incentive = incentive;
-    }
-
-    public List<Penalty> getPenalty() {
-        return penalty;
-    }
-
-    public void setPenalty(List<Penalty> penalty) {
-        this.penalty = penalty;
-    }
-
-    public void setStartOfPost(LocalDate startOfPost) {
-        this.startOfPost = startOfPost;
-    }
-
-    public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
-    }
-
-    public Department getDepartment() {
-        return this.department;
-    }
-
-    public void setDepartment(Department department) {
-        this.department = department;
-    }
-
     public Rank getRank() {
         return rank == null ? null : Rank.fromId(rank);
     }
 
     public void setRank(Rank rank) {
         this.rank = rank == null ? null : rank.getId();
-    }
-
-    public IdCard getIdCard() {
-        return idCard;
-    }
-
-    public void setIdCard(IdCard idCard) {
-        this.idCard = idCard;
-    }
-
-    public LocalDate getStartOfPost() {
-        return startOfPost;
-    }
-
-    public LocalDate getStartDate() {
-        return startDate;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public String getBreastplate() {
-        return breastplate;
-    }
-
-    public void setBreastplate(String breastplate) {
-        this.breastplate = breastplate;
     }
 
     public Post getPost() {
@@ -200,22 +113,6 @@ public class ServiceInfo {
         this.status = statusInService == null ? null : statusInService.getId();
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
     @InstanceName
     @DependsOnProperties("user")
     public String getInstanceName() {
@@ -227,13 +124,5 @@ public class ServiceInfo {
                 user.getLastName(),
                 user.getFirstName().charAt(0),
                 user.getPatronymic().charAt(0));
-    }
-
-    public Set<Shift> getShifts() {
-        return shifts;
-    }
-
-    public void setShifts(Set<Shift> shifts) {
-        this.shifts = shifts;
     }
 }

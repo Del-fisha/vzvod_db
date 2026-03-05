@@ -7,35 +7,24 @@ import com.company.vzvod.entity.Shift;
 import com.company.vzvod.test_support.PreTestEntities;
 import io.jmix.core.DataManager;
 import io.jmix.core.security.SystemAuthenticator;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(properties = "spring.profiles.active=test-postgres")
-@Testcontainers
+@SpringBootTest
+@ActiveProfiles("test-postgres")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @DisplayName("Интеграционный тест AdministrativeViolation")
 public class AdministrativeViolationIntegrationTest {
-
-    static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:16")
-            .withDatabaseName("testdb")
-            .withUsername("test")
-            .withPassword("test");
-
-    @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
-        registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
-        registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
-        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
-    }
 
     @Autowired
     DataManager dataManager;
@@ -43,17 +32,13 @@ public class AdministrativeViolationIntegrationTest {
     @Autowired
     SystemAuthenticator systemAuthenticator;
 
-    @BeforeAll
-    static void startContainer() {
-        postgreSQLContainer.start();
-    }
-
     AdministrativeViolation violation;
 
     @BeforeEach
     void setUp() {
         systemAuthenticator.begin();
-        Shift shift = PreTestEntities.getNewShift();
+        Shift shift = dataManager.create(Shift.class);
+        PreTestEntities.updateShift(shift);
         shift = dataManager.save(shift);
 
         violation = dataManager.create(AdministrativeViolation.class);

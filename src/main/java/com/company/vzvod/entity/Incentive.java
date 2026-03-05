@@ -9,6 +9,8 @@ import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.PastOrPresent;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -18,7 +20,10 @@ import java.util.UUID;
         @Index(name = "IDX_INCENTIVE_USER_SERVICE_INFO", columnList = "USER_SERVICE_INFO_ID")
 })
 @Entity
+@Setter
+@Getter
 public class Incentive {
+
     @JmixGeneratedValue
     @Column(name = "ID", nullable = false)
     @Id
@@ -45,30 +50,6 @@ public class Incentive {
     @Column(name = "DESCRIPTION", length = 400)
     private String description;
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getOrderNumber() {
-        return orderNumber;
-    }
-
-    public void setOrderNumber(String orderNumber) {
-        this.orderNumber = orderNumber;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
     public IncentiveType getIncentiveType() {
         return incentiveType == null ? null : IncentiveType.fromId(incentiveType);
     }
@@ -83,22 +64,6 @@ public class Incentive {
 
     public void setInitiator(Initiator initiator) {
         this.initiator = initiator == null ? null : initiator.getId();
-    }
-
-    public ServiceInfo getUserServiceInfo() {
-        return userServiceInfo;
-    }
-
-    public void setUserServiceInfo(ServiceInfo userServiceInfo) {
-        this.userServiceInfo = userServiceInfo;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
     }
 
     @InstanceName

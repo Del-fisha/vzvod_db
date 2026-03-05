@@ -7,14 +7,14 @@ import com.company.vzvod.entity.TypeOfShift;
 import com.company.vzvod.service.DepartmentConverter;
 import io.jmix.core.DataManager;
 import io.jmix.core.security.SystemAuthenticator;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -22,23 +22,11 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(properties = "spring.profiles.active=test-postgres")
-@Testcontainers
+@SpringBootTest
+@ActiveProfiles("test-postgres")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @DisplayName("Интеграционный тест Shift")
 public class ShiftIntegrationTest {
-    @Container
-    static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer("postgres:16")
-            .withDatabaseName("testdb")
-            .withUsername("test")
-            .withPassword("test");
-
-    @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
-        registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
-        registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
-        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
-    }
 
     @Autowired
     private SystemAuthenticator systemAuthenticator;
@@ -48,19 +36,14 @@ public class ShiftIntegrationTest {
 
     Shift shift;
 
-    @BeforeAll
-    static void startContainer() {
-        postgreSQLContainer.start();
-    }
-
     @BeforeEach
     void setUp() {
         systemAuthenticator.begin();
         shift = dataManager.create(Shift.class);
 
         shift.setDepartmentToday(DepartmentConverter.departmentFromDate(LocalDate.now()));
-        shift.setStartTime(LocalTime.of(10,0));
-        shift.setEndTime(LocalTime.of(22,0));
+        shift.setStartTime(LocalTime.of(10, 0));
+        shift.setEndTime(LocalTime.of(22, 0));
         shift.setTypeOfShift(TypeOfShift.VZVOD_ROUTE);
         shift.setNumber(NumberOfShift._28);
         shift.setDate(LocalDate.now());
@@ -107,8 +90,8 @@ public class ShiftIntegrationTest {
         Shift loadedShift = dataManager.load(Shift.class).id(savedShiftId).one();
 
         loadedShift.setDate(LocalDate.now().minusDays(2));
-        loadedShift.setStartTime(LocalTime.of(9,0));
-        loadedShift.setEndTime(LocalTime.of(21,0));
+        loadedShift.setStartTime(LocalTime.of(9, 0));
+        loadedShift.setEndTime(LocalTime.of(21, 0));
         loadedShift.setTypeOfShift(TypeOfShift.BAT_POST);
         loadedShift.setDepartmentToday(Dep.FIRST);
         loadedShift.setNumber(NumberOfShift._6);
