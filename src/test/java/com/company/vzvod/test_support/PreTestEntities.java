@@ -64,4 +64,26 @@ public class PreTestEntities {
         incentive.setDate(LocalDate.now());
         incentive.setDescription("To all");
     }
+
+    public static void updatePenalty(Penalty penalty) {
+
+        penalty.setPenaltyType(PenaltyType.REPRIMAND);
+        penalty.setPenaltyStatus(PenaltyStatus.ACTIVE);
+        penalty.setInitiator(Initiator.METRO);
+        penalty.setDate(LocalDate.now());
+        penalty.setOrderNumber("12345");
+        penalty.setDescription("Test penalty");
+    }
+
+    public static void updateVocation(Vocation vocation) {
+
+        vocation.setType(VocationType.MAIN);
+        vocation.setStartDate(LocalDate.now());
+        vocation.setEndDate(LocalDate.now().plusDays(14));
+        vocation.setCountOfDays(14);
+        vocation.setAllRemaindDays(28);
+        vocation.setHasDeparture(false);
+        vocation.setCityToDrive("Moscow");
+        vocation.setDaysAddedByDeparture(0);
+    }
 }
