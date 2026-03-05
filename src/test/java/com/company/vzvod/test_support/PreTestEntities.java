@@ -5,6 +5,8 @@ import com.company.vzvod.service.DepartmentConverter;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 
 public class PreTestEntities {
 
@@ -16,14 +18,12 @@ public class PreTestEntities {
         user.setFirstName("Пётр");
         user.setPassword("123");
         user.setUsername("123");
-
     }
 
     public static void updateContact(Contacts contact) {
 
         contact.setNearestMetroStation(MetroStation.BALTIYSKAYA);
         contact.setPhoneNumber("89112291515");
-
     }
 
     public static void updateShift(Shift shift) {
@@ -38,20 +38,30 @@ public class PreTestEntities {
         shift.setCountOfStatements(2);
         shift.setIbdWithMigrant(60);
         shift.setCountOfClaims(1);
-
     }
 
-    public static ServiceInfo updateServiceInfo(ServiceInfo serviceInfo) {
+    public static void updateServiceInfo(ServiceInfo serviceInfo) {
 
         serviceInfo.setStartOfPost(LocalDate.ofYearDay(2013, 56));
         serviceInfo.setQualificationClass(Qualification.THIRD);
         serviceInfo.setStatus(StatusInService.ACTIVE);
+        serviceInfo.setVocations(new ArrayList<>());
+        serviceInfo.setIncentive(new ArrayList<>());
+        serviceInfo.setPenalty(new ArrayList<>());
         serviceInfo.setRank(Rank.SENIOR_SERGEANT);
         serviceInfo.setMedicalExamination(false);
         serviceInfo.setBreastplate("00659874");
+        serviceInfo.setShifts(new HashSet<>());
         serviceInfo.setPost(Post.COM_OTD);
         serviceInfo.setToken("65492");
+    }
 
-        return serviceInfo;
+    public static void updateIncentive(Incentive incentive) {
+
+        incentive.setIncentiveType(IncentiveType.BONUS);
+        incentive.setOrderNumber("9874561316546");
+        incentive.setInitiator(Initiator.METRO);
+        incentive.setDate(LocalDate.now());
+        incentive.setDescription("To all");
     }
 }

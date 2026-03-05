@@ -25,6 +25,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+@Setter
+@Getter
 @JmixEntity
 @Entity
 @Table(name = "USER_", indexes = {
@@ -34,60 +36,43 @@ import java.util.UUID;
 })
 public class User implements JmixUserDetails {
 
-    @Setter
-    @Getter
     @Id
     @Column(name = "ID", nullable = false)
     @JmixGeneratedValue
     private UUID id;
 
-    @Setter
     @NotEmpty(message = "{msg://com.company.vzvod.entity/User.username.validation.NotEmpty}")
     @NotBlank(message = "{msg://com.company.vzvod.entity/User.username.validation.NotBlank}")
     @Column(name = "USERNAME", nullable = false)
     private String username;
 
-    @Setter
-    @Getter
     @Secret
     @SystemLevel
     @Column(name = "PASSWORD")
     private String password;
 
-    @Getter
-    @Setter
     @NotEmpty(message = "{msg://com.company.vzvod.entity/User.firstName.validation.NotEmpty}")
     @NotBlank(message = "{msg://com.company.vzvod.entity/User.firstName.validation.NotBlank}")
     @Column(name = "FIRST_NAME", nullable = false, length = 20)
     private String firstName;
 
-    @Setter
-    @Getter
     @NotEmpty(message = "{msg://com.company.vzvod.entity/User.lastName.validation.NotEmpty}")
     @NotBlank(message = "{msg://com.company.vzvod.entity/User.lastName.validation.NotBlank}")
     @Column(name = "LAST_NAME", nullable = false, length = 20)
     private String lastName;
 
-    @Setter
-    @Getter
     @NotEmpty(message = "{msg://com.company.vzvod.entity/User.patronymic.validation.NotEmpty}")
     @NotBlank(message = "{msg://com.company.vzvod.entity/User.patronymic.validation.NotBlank}")
     @Column(name = "PATRONYMIC", nullable = false, length = 20)
     private String patronymic;
 
-    @Setter
-    @Getter
     @Past(message = "{msg://com.company.vzvod.entity/User.dateOfBirth.validation.Past}")
     @Column(name = "DATE_OF_BIRTH", nullable = false)
     private LocalDate dateOfBirth;
 
-    @Getter
-    @Setter
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "user", optional = false, cascade = CascadeType.ALL)
     private ServiceInfo serviceInfo;
 
-    @Setter
-    @Getter
     @Composition
     @OnDelete(DeletePolicy.CASCADE)
     @OnDeleteInverse(DeletePolicy.CASCADE)
@@ -95,16 +80,11 @@ public class User implements JmixUserDetails {
     @OneToOne(fetch = FetchType.LAZY)
     private Contacts contactsInfo;
 
-    @Setter
-    @Getter
     @OnDeleteInverse(DeletePolicy.CASCADE)
     @JoinColumn(name = "EDUCATION_ID")
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Education education;
 
-
-    @Setter
-    @Getter
     @OneToMany(mappedBy = "user")
     private List<Vehicle> vehicleInfo;
 

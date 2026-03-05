@@ -16,6 +16,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,6 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @ActiveProfiles("test-postgres")
 @DisplayName("Интеграционный тест JOIN-таблицы Shift:ServiceInfo")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class ServiceInfoShiftJoinIntegrationTest {
 
     @Autowired

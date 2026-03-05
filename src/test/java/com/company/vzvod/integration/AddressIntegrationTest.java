@@ -56,7 +56,6 @@ public class AddressIntegrationTest {
 
     @Test
     void testConnection() {
-        // просто проверяем, что контекст загрузился
     }
 
     @Test
@@ -149,6 +148,7 @@ public class AddressIntegrationTest {
         UUID addressId = savedAddress.getId();
 
         assertEquals(address.getIndex(), savedAddress.getIndex());
+        assertEquals(address.getId(), addressId);
 
         dataManager.remove(savedContact);
 
