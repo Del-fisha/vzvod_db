@@ -86,4 +86,25 @@ public class PreTestEntities {
         vocation.setCityToDrive("Moscow");
         vocation.setDaysAddedByDeparture(0);
     }
+
+    public static void updateDepartment(Department department) {
+
+        department.setNumber(1);
+    }
+
+    public static void updateIdCard(IdCard idCard) {
+
+        idCard.setIssued(LocalDate.now().minusYears(1));
+        idCard.setUntil(LocalDate.now().plusYears(4));
+        idCard.setSpl("123456");
+    }
+
+    public static void updateVehicle(Vehicle vehicle) {
+
+        vehicle.setInsurance(LocalDate.now().plusMonths(6));
+        vehicle.setRegistrationCertificate("78УТ123456");
+        vehicle.setStateNumber("А123ВВ178");
+        vehicle.setModel("Vesta");
+        vehicle.setBrand("Lada");
+    }
 }
