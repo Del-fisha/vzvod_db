@@ -1,0 +1,99 @@
+package com.company.vzvod.integration;
+
+import com.company.vzvod.entity.User;
+import com.company.vzvod.entity.Vehicle;
+import com.company.vzvod.test_support.PreTestEntities;
+import io.jmix.core.DataManager;
+import io.jmix.core.security.SystemAuthenticator;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
+
+import java.time.LocalDate;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+@SpringBootTest
+@ActiveProfiles("test-postgres")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DisplayName("Интеграционный тест Vehicle")
+public class VehicleIntegrationTest {
+
+    @Autowired
+    private DataManager dataManager;
+
+    @Autowired
+    private SystemAuthenticator systemAuthenticator;
+
+    private Vehicle vehicle;
+    private User user;
+
+    @BeforeEach
+    void setUp() {
+        systemAuthenticator.begin();
+
+        user = dataManager.create(User.class);
+        PreTestEntities.updateUser(user);
+        user = dataManager.save(user);
+
+        vehicle = dataManager.create(Vehicle.class);
+        PreTestEntities.updateVehicle(vehicle);
+        vehicle.setUser(user);
+    }
+
+    @AfterEach
+    void tearDown() {
+        systemAuthenticator.end();
+    }
+
+    @Test
+    @DisplayName("Тест сохранения в БД")
+    void testSave() {
+        Vehicle saved = dataManager.save(vehicle);
+        UUID id = saved.getId();
+        assertNotNull(id);
+
+        Vehicle loaded = dataManager.load(Vehicle.class).id(id).one();
+        assertEquals(saved.getStateNumber(), loaded.getStateNumber());
+        assertEquals(saved.getModel(), loaded.getModel());
+        assertEquals(saved.getBrand(), loaded.getBrand());
+        assertEquals(saved.getRegistrationCertificate(), loaded.getRegistrationCertificate());
+        assertEquals(saved.getInsurance(), loaded.getInsurance());
+        assertEquals(saved.getUser().getId(), loaded.getUser().getId());
+    }
+
+    @Test
+    @DisplayName("Тест изменения в БД")
+    void testUpdate() {
+        Vehicle saved = dataManager.save(vehicle);
+        UUID id = saved.getId();
+
+        Vehicle loaded = dataManager.load(Vehicle.class).id(id).one();
+        loaded.setStateNumber("В456ММ198");
+        loaded.setModel("Granta");
+        loaded.setBrand("Lada");
+        loaded.setRegistrationCertificate("98УТ456789");
+        loaded.setInsurance(LocalDate.now().plusYears(1));
+
+        Vehicle updated = dataManager.save(loaded);
+        assertEquals("В456ММ198", updated.getStateNumber());
+        assertEquals("Granta", updated.getModel());
+    }
+
+    @Test
+    @DisplayName("Тест удаления из БД")
+    void testDelete() {
+        Vehicle saved = dataManager.save(vehicle);
+        UUID id = saved.getId();
+
+        dataManager.remove(saved);
+        Vehicle deleted = dataManager.load(Vehicle.class).id(id).optional().orElse(null);
+        assertNull(deleted);
+    }
+}
