@@ -140,7 +140,8 @@ public class AddressIntegrationTest {
     @Test
     @DisplayName("Тест каскадного удаления")
     void cascadeDeleteTest() {
-        Contacts contact = PreTestEntities.getNewContact();
+        Contacts contact = dataManager.create(Contacts.class);
+        PreTestEntities.updateContact(contact);
         contact.setRegistration(address);
         Contacts savedContact = dataManager.save(contact);
 

@@ -121,7 +121,8 @@ public class EducationIntegrationTest {
     @DisplayName("Тест каскадного удаления")
     void cascadeDeleteTest() {
 
-        User user = PreTestEntities.getNewUser();
+        User user = dataManager.create(User.class);
+        PreTestEntities.updateUser(user);
         user.setEducation(education);
 
         User savedUser = dataManager.save(user);

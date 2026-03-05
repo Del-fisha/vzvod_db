@@ -5,54 +5,43 @@ import com.company.vzvod.service.DepartmentConverter;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.UUID;
 
 public class PreTestEntities {
 
-    public static User getNewUser() {
-        User user = new User();
+    public static void updateUser(User user) {
 
         user.setDateOfBirth(LocalDate.now().minusYears(30));
         user.setPatronymic("Петрович");
-        user.setId(UUID.randomUUID());
         user.setLastName("Петров");
         user.setFirstName("Пётр");
         user.setPassword("123");
         user.setUsername("123");
 
-        return user;
     }
 
-    public static Contacts getNewContact() {
-        Contacts contacts = new Contacts();
+    public static void updateContact(Contacts contact) {
 
-        contacts.setNearestMetroStation(MetroStation.BALTIYSKAYA);
-        contacts.setPhoneNumber("89112291515");
-        contacts.setId(UUID.randomUUID());
+        contact.setNearestMetroStation(MetroStation.BALTIYSKAYA);
+        contact.setPhoneNumber("89112291515");
 
-        return contacts;
     }
 
-    public static Shift getNewShift() {
-        Shift shift = new Shift();
+    public static void updateShift(Shift shift) {
 
         shift.setDepartmentToday(DepartmentConverter.departmentFromDate(LocalDate.now()));
         shift.setStartTime(LocalTime.of(10,0));
         shift.setEndTime(LocalTime.of(22,0));
         shift.setTypeOfShift(TypeOfShift.VZVOD_ROUTE);
         shift.setNumber(NumberOfShift._28);
-        shift.setId(UUID.randomUUID());
         shift.setDate(LocalDate.now());
         shift.setIbdWithoutMigrant(45);
         shift.setCountOfStatements(2);
         shift.setIbdWithMigrant(60);
         shift.setCountOfClaims(1);
 
-        return shift;
     }
 
-    public static ServiceInfo getNewServiceInfo() {
-        ServiceInfo serviceInfo = new ServiceInfo();
+    public static ServiceInfo updateServiceInfo(ServiceInfo serviceInfo) {
 
         serviceInfo.setStartOfPost(LocalDate.ofYearDay(2013, 56));
         serviceInfo.setQualificationClass(Qualification.THIRD);
@@ -60,7 +49,6 @@ public class PreTestEntities {
         serviceInfo.setRank(Rank.SENIOR_SERGEANT);
         serviceInfo.setMedicalExamination(false);
         serviceInfo.setBreastplate("00659874");
-        serviceInfo.setId(UUID.randomUUID());
         serviceInfo.setPost(Post.COM_OTD);
         serviceInfo.setToken("65492");
 

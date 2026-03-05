@@ -37,7 +37,8 @@ public class AdministrativeViolationIntegrationTest {
     @BeforeEach
     void setUp() {
         systemAuthenticator.begin();
-        Shift shift = PreTestEntities.getNewShift();
+        Shift shift = dataManager.create(Shift.class);
+        PreTestEntities.updateShift(shift);
         shift = dataManager.save(shift);
 
         violation = dataManager.create(AdministrativeViolation.class);
