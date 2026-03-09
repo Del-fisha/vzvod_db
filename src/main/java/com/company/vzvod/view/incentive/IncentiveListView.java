@@ -3,13 +3,14 @@ package com.company.vzvod.view.incentive;
 import com.company.vzvod.entity.Incentive;
 import com.company.vzvod.entity.Penalty;
 import com.company.vzvod.entity.ServiceInfo;
+import com.company.vzvod.view.main.MainView;
 import com.company.vzvod.view.mainviewtopmenu.MainViewTopMenu;
 import com.vaadin.flow.router.Route;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.view.*;
 
 
-@Route(value = "incentives", layout = MainViewTopMenu.class)
+@Route(value = "incentives", layout = MainView.class)
 @ViewController(id = "Incentive.list")
 @ViewDescriptor(path = "incentive-list-view.xml")
 @LookupComponent("incentivesDataGrid")
