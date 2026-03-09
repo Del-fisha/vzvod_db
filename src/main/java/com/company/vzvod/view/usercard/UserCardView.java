@@ -1,12 +1,6 @@
 package com.company.vzvod.view.usercard;
 
-import com.company.vzvod.entity.Address;
-import com.company.vzvod.entity.Contacts;
-import com.company.vzvod.entity.Department;
-import com.company.vzvod.entity.ServiceInfo;
-import com.company.vzvod.entity.Shift;
-import com.company.vzvod.entity.User;
-import com.company.vzvod.view.shift.ShiftDetailView; // скорректируй пакет
+import com.company.vzvod.entity.*;
 import com.company.vzvod.view.shiftblank.ShiftBlankView;
 import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.grid.ItemDoubleClickEvent;

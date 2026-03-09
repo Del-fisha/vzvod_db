@@ -3,7 +3,6 @@ package com.company.vzvod.view.incentive;
 import com.company.vzvod.entity.Incentive;
 import com.company.vzvod.entity.Initiator;
 import com.company.vzvod.view.main.MainView;
-import com.company.vzvod.view.mainviewtopmenu.MainViewTopMenu;
 import com.vaadin.flow.router.Route;
 import io.jmix.flowui.view.*;
 

@@ -2,7 +2,6 @@ package com.company.vzvod.view.department;
 
 import com.company.vzvod.entity.Department;
 import com.company.vzvod.view.main.MainView;
-import com.company.vzvod.view.mainviewtopmenu.MainViewTopMenu;
 import com.vaadin.flow.router.Route;
 import io.jmix.flowui.view.*;
 

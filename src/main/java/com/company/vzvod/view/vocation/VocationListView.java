@@ -3,7 +3,6 @@ package com.company.vzvod.view.vocation;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.Vocation;
 import com.company.vzvod.view.main.MainView;
-import com.company.vzvod.view.mainviewtopmenu.MainViewTopMenu;
 import com.vaadin.flow.router.Route;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.view.*;

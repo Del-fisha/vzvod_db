@@ -9,6 +9,7 @@ import com.company.vzvod.view.administrativeviolation.AdministrativeViolationDet
 import com.company.vzvod.view.criminalviolation.CriminalViolationDetailView;
 import com.company.vzvod.view.main.MainView;
 import com.vaadin.flow.router.Route;
+import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
@@ -16,7 +17,6 @@ import io.jmix.flowui.model.CollectionPropertyContainer;
 import io.jmix.flowui.model.DataContext;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import io.jmix.core.security.CurrentAuthentication;
 
 import java.time.LocalDate;
 

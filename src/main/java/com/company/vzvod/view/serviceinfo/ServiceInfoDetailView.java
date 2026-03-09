@@ -6,7 +6,6 @@ import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.StatusInService;
 import com.company.vzvod.view.incentive.IncentiveListView;
 import com.company.vzvod.view.main.MainView;
-import com.company.vzvod.view.mainviewtopmenu.MainViewTopMenu;
 import com.company.vzvod.view.penalty.PenaltyListView;
 import com.company.vzvod.view.shift.ShiftListView;
 import com.company.vzvod.view.vocation.VocationListView;

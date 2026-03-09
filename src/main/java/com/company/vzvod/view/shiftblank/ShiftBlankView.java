@@ -5,13 +5,16 @@ import com.company.vzvod.entity.CriminalViolation;
 import com.company.vzvod.entity.Shift;
 import com.company.vzvod.entity.User;
 import com.vaadin.flow.router.Route;
-import io.jmix.flowui.model.*;
+import io.jmix.flowui.model.CollectionContainer;
+import io.jmix.flowui.model.CollectionPropertyContainer;
+import io.jmix.flowui.model.InstanceContainer;
+import io.jmix.flowui.model.InstanceLoader;
 import io.jmix.flowui.view.*;
 
 import java.util.List;
 import java.util.UUID;
 
-@Route("shift-blank")                  // /shift-blank?shiftId=...
+@Route("shift-blank")
 @ViewController("ShiftBlankView")
 @ViewDescriptor("shift-blank-view.xml")
 public class ShiftBlankView extends StandardView {

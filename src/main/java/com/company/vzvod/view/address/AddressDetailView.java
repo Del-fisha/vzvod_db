@@ -4,7 +4,6 @@ import com.company.vzvod.entity.Address;
 import com.company.vzvod.entity.StatusOfHousing;
 import com.company.vzvod.entity.TypeOfHousing;
 import com.company.vzvod.view.main.MainView;
-import com.company.vzvod.view.mainviewtopmenu.MainViewTopMenu;
 import com.vaadin.flow.router.Route;
 import io.jmix.flowui.view.*;
 

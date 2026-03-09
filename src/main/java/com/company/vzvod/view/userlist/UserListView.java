@@ -2,7 +2,6 @@ package com.company.vzvod.view.userlist;
 
 import com.company.vzvod.entity.User;
 import com.company.vzvod.view.main.MainView;
-import com.company.vzvod.view.mainviewtopmenu.MainViewTopMenu;
 import com.company.vzvod.view.usercard.UserCardView;
 import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.router.QueryParameters;

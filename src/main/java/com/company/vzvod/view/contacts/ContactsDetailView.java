@@ -2,11 +2,9 @@ package com.company.vzvod.view.contacts;
 
 import com.company.vzvod.entity.Address;
 import com.company.vzvod.entity.Contacts;
-import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.User;
 import com.company.vzvod.view.address.AddressDetailView;
 import com.company.vzvod.view.main.MainView;
-import com.company.vzvod.view.mainviewtopmenu.MainViewTopMenu;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.router.Route;
