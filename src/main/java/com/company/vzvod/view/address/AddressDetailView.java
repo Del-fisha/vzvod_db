@@ -3,11 +3,12 @@ package com.company.vzvod.view.address;
 import com.company.vzvod.entity.Address;
 import com.company.vzvod.entity.StatusOfHousing;
 import com.company.vzvod.entity.TypeOfHousing;
+import com.company.vzvod.view.main.MainView;
 import com.company.vzvod.view.mainviewtopmenu.MainViewTopMenu;
 import com.vaadin.flow.router.Route;
 import io.jmix.flowui.view.*;
 
-@Route(value = "addresses/:id", layout = MainViewTopMenu.class)
+@Route(value = "addresses/:id", layout = MainView.class)
 @ViewController(id = "Address.detail")
 @ViewDescriptor(path = "address-detail-view.xml")
 @EditedEntityContainer("addressDc")
