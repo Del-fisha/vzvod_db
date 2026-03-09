@@ -5,6 +5,7 @@ import com.company.vzvod.entity.Qualification;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.StatusInService;
 import com.company.vzvod.view.incentive.IncentiveListView;
+import com.company.vzvod.view.main.MainView;
 import com.company.vzvod.view.mainviewtopmenu.MainViewTopMenu;
 import com.company.vzvod.view.penalty.PenaltyListView;
 import com.company.vzvod.view.shift.ShiftListView;
@@ -17,7 +18,7 @@ import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Route(value = "service-infoes/:id", layout = MainViewTopMenu.class)
+@Route(value = "service-infoes/:id", layout = MainView.class)
 @ViewController(id = "ServiceInfo.detail")
 @ViewDescriptor(path = "service-info-detail-view.xml")
 @EditedEntityContainer("serviceInfoDc")

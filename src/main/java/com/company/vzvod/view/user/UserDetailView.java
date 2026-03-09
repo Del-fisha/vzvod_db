@@ -3,6 +3,7 @@ package com.company.vzvod.view.user;
 import com.company.vzvod.entity.*;
 import com.company.vzvod.view.contacts.ContactsDetailView;
 import com.company.vzvod.view.education.EducationDetailView;
+import com.company.vzvod.view.main.MainView;
 import com.company.vzvod.view.mainviewtopmenu.MainViewTopMenu;
 import com.company.vzvod.view.serviceinfo.ServiceInfoDetailView;
 import com.company.vzvod.view.vehicle.VehicleDetailView;
@@ -20,7 +21,7 @@ import io.jmix.flowui.kit.action.Action;
 import java.util.ArrayList;
 import java.util.List;
 
-@Route(value = "users/:id", layout = MainViewTopMenu.class)
+@Route(value = "users/:id", layout = MainView.class)
 @ViewController(id = "User.detail")
 @ViewDescriptor(path = "user-detail-view.xml")
 @EditedEntityContainer("userDc")

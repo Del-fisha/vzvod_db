@@ -8,8 +8,6 @@ import io.jmix.flowui.component.UiComponentUtils;
 import io.jmix.flowui.view.ViewController;
 import io.jmix.flowui.view.ViewDescriptor;
 
-
-@Route("")
 @ViewController(id = "MainViewTopMenu")
 @ViewDescriptor(path = "main-view-top-menu.xml")
 public class MainViewTopMenu extends StandardMainView {

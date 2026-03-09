@@ -5,6 +5,7 @@ import com.company.vzvod.entity.Contacts;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.User;
 import com.company.vzvod.view.address.AddressDetailView;
+import com.company.vzvod.view.main.MainView;
 import com.company.vzvod.view.mainviewtopmenu.MainViewTopMenu;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ClickEvent;
@@ -21,7 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Objects;
 
-@Route(value = "contactses/:id", layout = MainViewTopMenu.class)
+@Route(value = "contactses/:id", layout = MainView.class)
 @ViewController(id = "Contacts.detail")
 @ViewDescriptor(path = "contacts-detail-view.xml")
 @EditedEntityContainer("contactsDc")

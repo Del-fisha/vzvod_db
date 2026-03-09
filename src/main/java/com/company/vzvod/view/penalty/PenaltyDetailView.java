@@ -3,11 +3,12 @@ package com.company.vzvod.view.penalty;
 import com.company.vzvod.entity.Initiator;
 import com.company.vzvod.entity.Penalty;
 import com.company.vzvod.entity.PenaltyStatus;
+import com.company.vzvod.view.main.MainView;
 import com.company.vzvod.view.mainviewtopmenu.MainViewTopMenu;
 import com.vaadin.flow.router.Route;
 import io.jmix.flowui.view.*;
 
-@Route(value = "penalties/:id", layout = MainViewTopMenu.class)
+@Route(value = "penalties/:id", layout = MainView.class)
 @ViewController(id = "Penalty.detail")
 @ViewDescriptor(path = "penalty-detail-view.xml")
 @EditedEntityContainer("penaltyDc")
