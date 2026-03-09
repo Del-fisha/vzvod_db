@@ -1,6 +1,7 @@
 package com.company.vzvod.view.userlist;
 
 import com.company.vzvod.entity.User;
+import com.company.vzvod.view.main.MainView;
 import com.company.vzvod.view.mainviewtopmenu.MainViewTopMenu;
 import com.company.vzvod.view.usercard.UserCardView;
 import com.vaadin.flow.component.grid.ItemClickEvent;
@@ -13,7 +14,7 @@ import io.jmix.flowui.view.ViewController;
 import io.jmix.flowui.view.ViewDescriptor;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Route(value = "user-list-view", layout = MainViewTopMenu.class)
+@Route(value = "user-list-view", layout = MainView.class)
 @ViewController("UserListView")
 @ViewDescriptor("user-list-view.xml")
 public class UserListView extends StandardView {
