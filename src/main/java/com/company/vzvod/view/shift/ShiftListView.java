@@ -2,6 +2,7 @@ package com.company.vzvod.view.shift;
 
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.Shift;
+import com.company.vzvod.view.main.MainView;
 import com.company.vzvod.view.mainviewtopmenu.MainViewTopMenu;
 import com.vaadin.flow.router.Route;
 import io.jmix.flowui.model.CollectionLoader;
@@ -9,7 +10,7 @@ import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 
-@Route(value = "shifts", layout = MainViewTopMenu.class)
+@Route(value = "shifts", layout = MainView.class)
 @ViewController(id = "Shift.list")
 @ViewDescriptor(path = "shift-list-view.xml")
 @LookupComponent("shiftsDataGrid")
