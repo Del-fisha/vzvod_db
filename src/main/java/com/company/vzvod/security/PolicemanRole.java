@@ -46,6 +46,9 @@ public interface PolicemanRole {
     @EntityPolicy(entityClass = AdministrativeViolation.class, actions = {EntityPolicyAction.READ})
     void administrativeViolationEntity();
 
+    @EntityPolicy(entityClass = CriminalViolation.class, actions = {EntityPolicyAction.READ})
+    void criminalViolationEntity();
+
 
     @EntityAttributePolicy(
             entityClass = User.class,
@@ -127,6 +130,14 @@ public interface PolicemanRole {
             attributes = "*",
             action = EntityAttributePolicyAction.VIEW
     )
+    void administrativeViolationSelfFields();
+
+    @EntityAttributePolicy(
+            entityClass = CriminalViolation.class,
+            attributes = "*",
+            action = EntityAttributePolicyAction.VIEW
+    )
+    void criminalViolationSelfFields();
 
 
     @ViewPolicy(viewIds = {
@@ -153,7 +164,9 @@ public interface PolicemanRole {
             "ShiftBlankView",
             "AdministrativeViolation.detail",
             "AdministrativeViolation.list",
-            "ProfileRedirect"
+            "ProfileRedirect",
+            "CriminalViolation.detail",
+            "CriminalViolation.list"
     })
     @MenuPolicy(menuIds = {
             "UserListView",
