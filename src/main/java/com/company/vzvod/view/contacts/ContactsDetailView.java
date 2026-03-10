@@ -221,5 +221,4 @@ public class ContactsDetailView extends StandardDetailView<Contacts> {
         sameAddressCheckbox.setValue(false);
         habitationAddressCreateButton.setEnabled(true);
     }
-
 }
