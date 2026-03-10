@@ -1,6 +1,7 @@
 package com.company.vzvod.security;
 
 import com.company.vzvod.entity.*;
+import com.company.vzvod.view.shift.MyShiftListView;
 import io.jmix.security.model.EntityAttributePolicyAction;
 import io.jmix.security.model.EntityPolicyAction;
 import io.jmix.security.role.annotation.EntityAttributePolicy;
@@ -139,7 +140,6 @@ public interface PolicemanRole {
     )
     void criminalViolationSelfFields();
 
-
     @ViewPolicy(viewIds = {
             "User.list",
             "MainView",
@@ -154,7 +154,7 @@ public interface PolicemanRole {
             "Incentive.detail",
             "Incentive.list",
             "Shift.detail",
-            "Shift.list",
+//            "Shift.list",
             "Vocation.list",
             "Vocation.detail",
             "Contacts.detail",
@@ -166,12 +166,13 @@ public interface PolicemanRole {
             "AdministrativeViolation.list",
             "ProfileRedirect",
             "CriminalViolation.detail",
-            "CriminalViolation.list"
+            "CriminalViolation.list",
+            "MyShift.list"
     })
     @MenuPolicy(menuIds = {
-            "UserListView",
-            "ProfileRedirect",
-            "Shift.list"
+            "all_employees_to_read",
+            "my_profile",
+            "my_shifts"
     })
     void userViews();
 }
