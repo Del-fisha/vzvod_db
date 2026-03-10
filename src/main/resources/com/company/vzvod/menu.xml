@@ -1,19 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <menu-config xmlns="http://jmix.io/schema/flowui/menu">
 
-    <menu id="application" title="msg://com.company.vzvod/menu.application.title" opened="true">
+    <menu id="my_data" title="Мои данные" opened="true">
+        <item id="my_profile" view="ProfileRedirect"
+              title="Мой профиль"/>
+        <item id="my_shifts" view="MyShift.list"
+              title="Мои смены"/>
+    </menu>
+
+    <menu id="application" title="msg://com.company.vzvod/menu.application.title" opened="false">
         <item view="User.list" title="msg://com.company.vzvod.view.user/userListView.title"/>
         <item view="Penalty.list" title="msg://com.company.vzvod.view.penalty/penaltyListView.title"/>
         <item view="Incentive.list" title="msg://com.company.vzvod.view.penalty/incentiveListView.title"/>
         <item view="Vocation.list" title="msg://com.company.vzvod.view.vocation/vocationListView.title"/>
         <item view="AdministrativeViolation.list"
               title="msg://com.company.vzvod.view.administrativeviolation/administrativeViolationListView.title"/>
-        <item view="Shift.list" title="msg://com.company.vzvod.view.shift/shiftListView.title"/>
+        <item id="menuAllShifts" view="Shift.list"
+              title="Все смены"/>
         <item view="CriminalViolation.list"
               title="msg://com.company.vzvod.view.criminalviolation/criminalViolationListView.title"/>
-        <item view="UserListView" title="msg://com.company.vzvod.view.userlist/userListView.title"/>
-        <item view="ProfileRedirect"
-              title="msg://com.company.vzvod.view.user.profileredirect/profileRedirectView.title"/>
+        <item id="all_employees_to_read" view="UserListView"
+              title="msg://com.company.vzvod.view.userlist/userListView.title"/>
     </menu>
-
 </menu-config>

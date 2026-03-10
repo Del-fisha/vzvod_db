@@ -54,6 +54,7 @@ public class ShiftDetailView extends StandardDetailView<Shift> {
 
         User user = (User) currentAuthentication.getUser();
 
+        shift.getUnits().add(user.getServiceInfo());
         shift.setDate(LocalDate.now());
         shift.setCountOfClaims(0);
         shift.setIbdWithMigrant(0);

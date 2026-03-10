@@ -1,6 +1,7 @@
 package com.company.vzvod.security;
 
 import com.company.vzvod.entity.*;
+import com.company.vzvod.view.shift.MyShiftListView;
 import io.jmix.security.model.EntityAttributePolicyAction;
 import io.jmix.security.model.EntityPolicyAction;
 import io.jmix.security.role.annotation.EntityAttributePolicy;

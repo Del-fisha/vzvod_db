@@ -38,7 +38,7 @@ public class Shift {
     @JoinTable(name = "SHIFT_SERVICE_INFO",
             joinColumns = @JoinColumn(name = "SHIFT_ID"),
             inverseJoinColumns = @JoinColumn(name = "SERVICE_INFO_ID"))
-    private Set<ServiceInfo> units = new HashSet<>();;
+    private Set<ServiceInfo> units = new HashSet<>();
 
     @Column(name = "DEPARTMENT")
     private Dep departmentToday;
