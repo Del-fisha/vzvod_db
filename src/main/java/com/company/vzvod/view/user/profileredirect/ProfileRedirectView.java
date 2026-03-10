@@ -2,6 +2,7 @@ package com.company.vzvod.view.user.profileredirect;
 
 
 import com.company.vzvod.entity.User;
+import com.company.vzvod.view.main.MainView;
 import com.company.vzvod.view.mainviewtopmenu.MainViewTopMenu;
 import com.company.vzvod.view.user.UserDetailView;
 import com.vaadin.flow.router.Route;
@@ -13,7 +14,7 @@ import io.jmix.flowui.view.ViewController;
 import io.jmix.flowui.view.ViewDescriptor;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Route(value = "profile", layout = MainViewTopMenu.class)
+@Route(value = "profile", layout = MainView.class)
 @ViewController("ProfileRedirect")
 @ViewDescriptor("profile-redirect.xml")
 public class ProfileRedirectView extends StandardView {
