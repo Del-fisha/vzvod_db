@@ -1,43 +1,42 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <mainView xmlns="http://jmix.io/schema/flowui/main-view"
-          title="msg://mainViewTopMenu.title">
+          title="msg://MainView.title">
     <actions>
-        <action id="logoutAction"
-                type="logout"/>
+        <action id="logoutAction" type="logout"/>
     </actions>
-    <appLayout classNames="jmix-main-view-top-menu-app-layout">
+    <appLayout>
         <navigationBar>
-            <vbox id="navigationBarBox"
-                  classNames="jmix-main-view-top-menu-navigation-bar-box">
-                <header id="navigationHeader"
-                        classNames="jmix-main-view-top-menu-header">
-                    <anchor href="."
-                            classNames="jmix-main-view-top-menu-logo-container">
-                        <image id="logoImage"
-                               resource="icons/icon.png"
-                               classNames="jmix-main-view-top-menu-logo"/>
-                    </anchor>
-                    <nav id="navigation"
-                         classNames="jmix-main-view-top-menu-navigation">
-                        <horizontalMenu id="horizontalMenu"
-                                        tabNavigation="true"
-                                        width="100%"/>
-                    </nav>
-                    <hbox id="userHeaderBox"
-                          classNames="jmix-main-view-top-menu-user-box">
-                        <userIndicator id="userIndicator"/>
-                        <button id="logoutButton"
-                                action="logoutAction"
-                                classNames="jmix-logout-button"/>
-                    </hbox>
-                </header>
-                <hbox id="viewHeaderBox"
-                      classNames="jmix-main-view-top-menu-view-header-box">
-                    <h1 id="viewTitle"
-                        classNames="jmix-main-view-top-menu-view-title"/>
-                </hbox>
-            </vbox>
+            <header id="header" classNames="jmix-main-view-header">
+                <drawerToggle id="drawerToggle"
+                              classNames="jmix-main-view-drawer-toggle"
+                              themeNames="contrast"
+                              ariaLabel="msg://drawerToggle.ariaLabel"/>
+                <h1 id="viewTitle" classNames="jmix-main-view-title"/>
+            </header>
         </navigationBar>
-        <initialLayout/>
+        <drawerLayout>
+            <section id="section" classNames="jmix-main-view-section">
+                <h2 id="applicationTitle"
+                    classNames="jmix-main-view-application-title">
+                    <anchor id="baseLink"
+                            href="."
+                            text="msg://applicationTitle.text"
+                            classNames="jmix-main-view-application-title-base-link"/>
+                </h2>
+                <nav id="navigation"
+                     classNames="jmix-main-view-navigation"
+                     ariaLabel="msg://navigation.ariaLabel">
+                    <listMenu id="menu"/>
+                </nav>
+                <footer id="footer" classNames="jmix-main-view-footer">
+                    <userIndicator id="userIndicator"/>
+                    <button id="logoutButton"
+                            action="logoutAction"
+                            classNames="jmix-logout-button"/>
+                </footer>
+            </section>
+        </drawerLayout>
+        <initialLayout>
+        </initialLayout>
     </appLayout>
 </mainView>

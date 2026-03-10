@@ -38,6 +38,12 @@ public interface SelfEditUserRole {
     @EntityPolicy(entityClass = AdministrativeViolation.class, actions = {EntityPolicyAction.CREATE, EntityPolicyAction.UPDATE})
     void administrativeViolationEntity();
 
+    @EntityPolicy(entityClass = Shift.class, actions = {EntityPolicyAction.READ, EntityPolicyAction.UPDATE})
+    void shiftUpdate();
+
+    @EntityAttributePolicy(entityClass = Shift.class, attributes = {"units"}, action = EntityAttributePolicyAction.MODIFY)
+    void shiftUnitsModify();
+
     @EntityAttributePolicy(
             entityClass = User.class,
             attributes = {"username", "password", "firstName", "lastName", "patronymic", "dateOfBirth"},
@@ -100,5 +106,4 @@ public interface SelfEditUserRole {
             action = EntityAttributePolicyAction.VIEW
     )
     void administrativeViolationSelfFields();
-
 }

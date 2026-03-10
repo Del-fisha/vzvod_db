@@ -131,9 +131,11 @@ public interface PolicemanRole {
 
     @ViewPolicy(viewIds = {
             "User.list",
+            "MainView",
             "User.detail",
             "UserListView",
             "UserCardView",
+            "ServiceInfo.list",
             "ServiceInfo.detail",
             "IdCard.detail",
             "Penalty.detail",
@@ -150,12 +152,13 @@ public interface PolicemanRole {
             "UserCardView",
             "ShiftBlankView",
             "AdministrativeViolation.detail",
-            "AdministrativeViolation.list"
+            "AdministrativeViolation.list",
+            "ProfileRedirect"
     })
     @MenuPolicy(menuIds = {
-            "User.list",
             "UserListView",
-            "AdministrativeViolation.list"
+            "ProfileRedirect",
+            "Shift.list"
     })
     void userViews();
 }
