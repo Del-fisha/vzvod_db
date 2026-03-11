@@ -40,7 +40,6 @@ public class ViewFieldChangeLoggingAspect {
                 Пользователь '{}' изменил поле '{}' сущности '{}'.
                 Предыдущее значение: {}
                 Новое значение:      {}
-                
                 """,
                 username,
                 property,

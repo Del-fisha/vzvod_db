@@ -2,14 +2,9 @@ package com.company.vzvod.view.contacts;
 
 import com.company.vzvod.entity.Address;
 import com.company.vzvod.entity.Contacts;
-import com.company.vzvod.entity.User;
 import com.company.vzvod.view.address.AddressDetailView;
-import com.company.vzvod.view.main.MainView;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ClickEvent;
-import com.vaadin.flow.router.Route;
-import io.jmix.core.DataManager;
-import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.component.checkbox.JmixCheckbox;
 import io.jmix.flowui.kit.component.button.JmixButton;
@@ -20,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Objects;
 
-@Route(value = "contactses/:id", layout = MainView.class)
 @ViewController(id = "Contacts.detail")
 @ViewDescriptor(path = "contacts-detail-view.xml")
 @EditedEntityContainer("contactsDc")
@@ -29,148 +23,150 @@ public class ContactsDetailView extends StandardDetailView<Contacts> {
     @ViewComponent
     private InstanceContainer<Contacts> contactsDc;
 
-    @Autowired
-    private CurrentAuthentication currentAuthentication;
-
-    @Autowired
-    private DialogWindows dialogWindows;
-
-    @Autowired
-    private DataManager dataManager;
-
     @ViewComponent
     private JmixCheckbox sameAddressCheckbox;
 
     @ViewComponent
     private JmixButton habitationAddressCreateButton;
 
-    @ViewComponent
-    private JmixButton registerAddressCreateButton;
+    @Autowired
+    private DialogWindows dialogWindows;
+
+    private boolean internalChange;
 
 
     @Subscribe
-    public void onInit(final InitEvent event) {
-        Contacts contact = contactsDc.getItemOrNull();
-        boolean same = contact != null
-                && contact.getRegistration() != null
-                && contact.getHabitation() != null
-                && addressesAreEqual(contact.getRegistration(), contact.getHabitation());
-
-        sameAddressCheckbox.setValue(same);
-        applySameAddressMode(same);
+    public void onReady(ReadyEvent event) {
+        System.out.println("ContactsDetailView READY instance=" + System.identityHashCode(this)
+                + ", editedEntityId=" + (getEditedEntity() != null ? getEditedEntity().getId() : null));
     }
 
-    private boolean addressesAreEqual(Address address1, Address address2) {
-        if (address1 == null || address2 == null) {
-            return false;
+    @Subscribe
+    public void onAfterClose(View.AfterCloseEvent event) {
+        System.out.println("ContactsDetailView AFTER_CLOSE instance=" + System.identityHashCode(this)
+                + ", closeAction=" + event.getCloseAction());
+    }
+
+    @Subscribe(id = "contactsDl", target = Target.DATA_LOADER)
+    public void onContactsDlPostLoad(InstanceLoader.PostLoadEvent event) {
+        Contacts c = contactsDc.getItemOrNull();
+        boolean same = c != null
+                && c.getRegistration() != null
+                && c.getHabitation() != null
+                && addressesAreEqual(c.getRegistration(), c.getHabitation());
+
+        internalChange = true;
+        try {
+            sameAddressCheckbox.setValue(same);
+            applySameMode(same);
+        } finally {
+            internalChange = false;
         }
-
-        return Objects.equals(address1.getIndex(), address2.getIndex())
-                && Objects.equals(address1.getCity(), address2.getCity())
-                && Objects.equals(address1.getStreet(), address2.getStreet())
-                && Objects.equals(address1.getHouseNumber(), address2.getHouseNumber())
-                && Objects.equals(address1.getBody(), address2.getBody())
-                && Objects.equals(address1.getFlat(), address2.getFlat())
-                && Objects.equals(address1.getTypeOfHousing(), address2.getTypeOfHousing())
-                && Objects.equals(address1.getStatusOfHousing(), address2.getStatusOfHousing());
     }
 
+    @Subscribe
+    public void onInitEntity(InitEntityEvent<Contacts> event) {
+        internalChange = true;
+        try {
+            sameAddressCheckbox.setValue(false);
+            applySameMode(false);
+            event.getEntity().setRegistration(null);
+            event.getEntity().setHabitation(null);
+        } finally {
+            internalChange = false;
+        }
+    }
 
     @Subscribe("sameAddressCheckbox")
-    public void onSameAddressCheckboxComponentValueChange(
+    public void onSameAddressCheckboxValueChange(
             AbstractField.ComponentValueChangeEvent<JmixCheckbox, Boolean> event) {
-        boolean same = Boolean.TRUE.equals(event.getValue());
-        Contacts contact = contactsDc.getItemOrNull();
-        if (contact == null) {
+
+        if (internalChange) {
             return;
         }
 
-        if (same) {
-            Address reg = contact.getRegistration();
-            if (reg != null) {
-                contact.setHabitation(copyAddress(reg));
+        boolean same = Boolean.TRUE.equals(event.getValue());
+        Contacts c = contactsDc.getItemOrNull();
+        if (c == null) {
+            applySameMode(same);
+            return;
+        }
+
+        internalChange = true;
+        try {
+            if (same) {
+                c.setHabitation(copyAddressOrNull(c.getRegistration()));
             } else {
-                contact.setHabitation(null);
+                c.setHabitation(null);
             }
-            habitationAddressCreateButton.setEnabled(false);
-        } else {
-            contact.setHabitation(null);
-            habitationAddressCreateButton.setEnabled(true);
+            applySameMode(same);
+        } finally {
+            internalChange = false;
         }
     }
-
 
     @Subscribe(id = "contactsDc", target = Target.DATA_CONTAINER)
     public void onContactsDcItemPropertyChange(InstanceContainer.ItemPropertyChangeEvent<Contacts> event) {
+        if (internalChange) {
+            return;
+        }
         if (!"registration".equals(event.getProperty())) {
             return;
         }
-
         if (!Boolean.TRUE.equals(sameAddressCheckbox.getValue())) {
             return;
         }
 
-        Contacts contact = event.getItem();
-        Address newReg = (Address) event.getValue();
+        Contacts c = event.getItem();
 
-        contact.setHabitation(newReg != null ? copyAddress(newReg) : null);
+        internalChange = true;
+        try {
+            c.setHabitation(copyAddressOrNull(c.getRegistration()));
+        } finally {
+            internalChange = false;
+        }
     }
 
-
-    private void applySameAddressMode(boolean same) {
-        Contacts contact = contactsDc.getItemOrNull();
-        if (contact == null) {
-            return;
-        }
-
-        if (same) {
-            if (contact.getRegistration() != null) {
-                Address registrationCopy = copyAddress(contact.getRegistration());
-                contact.setHabitation(registrationCopy);
-            }
-            habitationAddressCreateButton.setEnabled(false);
-        } else {
-            habitationAddressCreateButton.setEnabled(true);
-        }
+    private void applySameMode(boolean same) {
+        habitationAddressCreateButton.setEnabled(!same);
     }
 
     @Subscribe(id = "registerAddressCreateButton", subject = "clickListener")
     public void onRegisterAddressCreateButtonClick(final ClickEvent<JmixButton> event) {
-        Contacts contact = contactsDc.getItem();
-        Address addressRegistration = contact.getRegistration();
-        if (addressRegistration == null) {
-            addressRegistration = dataManager.create(Address.class);
-            contact.setRegistration(addressRegistration);
+        Contacts c = contactsDc.getItem();
+
+        if (c.getRegistration() == null) {
+            c.setRegistration(getViewData().getDataContext().create(Address.class));
         }
+
         dialogWindows.detail(this, Address.class)
                 .withViewClass(AddressDetailView.class)
                 .withParentDataContext(getViewData().getDataContext())
-                .editEntity(addressRegistration)
+                .editEntity(c.getRegistration())
                 .open();
     }
 
     @Subscribe(id = "habitationAddressCreateButton", subject = "clickListener")
     public void onHabitationAddressCreateButtonClick(final ClickEvent<JmixButton> event) {
-        Contacts contact = contactsDc.getItem();
-        Address addressHabitation = contact.getHabitation();
-        if (addressHabitation == null) {
-            addressHabitation = dataManager.create(Address.class);
-            contact.setHabitation(addressHabitation);
+        Contacts c = contactsDc.getItem();
+
+        if (c.getHabitation() == null) {
+            c.setHabitation(getViewData().getDataContext().create(Address.class));
         }
+
         dialogWindows.detail(this, Address.class)
                 .withViewClass(AddressDetailView.class)
                 .withParentDataContext(getViewData().getDataContext())
-                .editEntity(addressHabitation)
+                .editEntity(c.getHabitation())
                 .open();
     }
 
-
-    private Address copyAddress(Address source) {
+    private Address copyAddressOrNull(Address source) {
         if (source == null) {
             return null;
         }
 
-        Address copy = dataManager.create(Address.class);
+        Address copy = getViewData().getDataContext().create(Address.class);
 
         copy.setIndex(source.getIndex());
         copy.setCity(source.getCity());
@@ -184,41 +180,17 @@ public class ContactsDetailView extends StandardDetailView<Contacts> {
         return copy;
     }
 
-
-    private void initSameCheckboxFromEntity() {
-        Contacts contact = contactsDc.getItemOrNull();
-        if (contact == null) {
-            return;
+    private boolean addressesAreEqual(Address a1, Address a2) {
+        if (a1 == null || a2 == null) {
+            return false;
         }
-
-        boolean same = contact.getRegistration() != null
-                && contact.getHabitation() != null
-                && addressesAreEqual(contact.getRegistration(), contact.getHabitation());
-
-        sameAddressCheckbox.setValue(same);
-        habitationAddressCreateButton.setEnabled(!same);
-    }
-
-    @Subscribe(id = "contactsDl", target = Target.DATA_LOADER)
-    public void onContactsDlPostLoad(InstanceLoader.PostLoadEvent event) {
-        initSameCheckboxFromEntity();
-    }
-
-
-    @Subscribe
-    public void onReady(final ReadyEvent event) {
-        Contacts contacts = getEditedEntity();
-        User currentUser = (User) currentAuthentication.getUser();
-
-        boolean isOwnContacts = currentUser.getContactsInfo() != null
-                && currentUser.getContactsInfo().getId().equals(contacts.getId());
-
-        sameAddressCheckbox.setReadOnly(!isOwnContacts);
-    }
-
-    @Subscribe
-    public void onInitEntity(InitEntityEvent<Contacts> event) {
-        sameAddressCheckbox.setValue(false);
-        habitationAddressCreateButton.setEnabled(true);
+        return Objects.equals(a1.getIndex(), a2.getIndex())
+                && Objects.equals(a1.getCity(), a2.getCity())
+                && Objects.equals(a1.getStreet(), a2.getStreet())
+                && Objects.equals(a1.getHouseNumber(), a2.getHouseNumber())
+                && Objects.equals(a1.getBody(), a2.getBody())
+                && Objects.equals(a1.getFlat(), a2.getFlat())
+                && Objects.equals(a1.getTypeOfHousing(), a2.getTypeOfHousing())
+                && Objects.equals(a1.getStatusOfHousing(), a2.getStatusOfHousing());
     }
 }

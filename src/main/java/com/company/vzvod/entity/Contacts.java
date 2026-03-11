@@ -29,6 +29,10 @@ public class Contacts {
     @Id
     private UUID id;
 
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "USER_ID", nullable = false, unique = true)
+    private User user;
+
     @Column(name = "PHONE_NUMBER", length = 28)
     private String phoneNumber;
 

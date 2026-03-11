@@ -31,7 +31,6 @@ import java.util.UUID;
 @Entity
 @Table(name = "USER_", indexes = {
         @Index(name = "IDX_USER__ON_USERNAME", columnList = "USERNAME", unique = true),
-        @Index(name = "IDX_USER__CONTACTS_INFO", columnList = "CONTACTS_INFO_ID"),
         @Index(name = "IDX_USER__EDUCATION", columnList = "EDUCATION_ID")
 })
 public class User implements JmixUserDetails {
@@ -73,11 +72,7 @@ public class User implements JmixUserDetails {
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "user", optional = false, cascade = CascadeType.ALL)
     private ServiceInfo serviceInfo;
 
-    @Composition
-    @OnDelete(DeletePolicy.CASCADE)
-    @OnDeleteInverse(DeletePolicy.CASCADE)
-    @JoinColumn(name = "CONTACTS_INFO_ID")
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "user")
     private Contacts contactsInfo;
 
     @OnDeleteInverse(DeletePolicy.CASCADE)
