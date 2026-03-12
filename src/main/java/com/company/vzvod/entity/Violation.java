@@ -26,15 +26,4 @@ public class Violation {
     @JoinColumn(name = "SHIFT_ID")
     private Shift shift;
 
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public void setShift(Shift shift) {
-        this.shift = shift;
-    }
-
-    public void setImpact(Impact impact) {
-        this.impact = impact;
-    }
 }

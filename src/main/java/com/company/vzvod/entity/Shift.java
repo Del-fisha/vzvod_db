@@ -3,6 +3,7 @@ package com.company.vzvod.entity;
 import io.jmix.core.DeletePolicy;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.OnDeleteInverse;
+import io.jmix.core.metamodel.annotation.DependsOnProperties;
 import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import jakarta.persistence.*;
@@ -74,15 +75,8 @@ public class Shift {
 
 
     @InstanceName
+    @DependsOnProperties({"number", "date"})
     public String getInstanceName() {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (ServiceInfo serviceInfo : getUnits()) {
-            stringBuilder.append(serviceInfo.getUser().getLastName())
-                    .append(" ")
-                    .append(serviceInfo.getUser().getFirstName())
-                    .append(", ");
-        }
-        return String.format("%s (%s) %s",
-                this.date.format(DateTimeFormatter.ofPattern("yyyy dd MMMM")), this.number.getId(), stringBuilder);
+        return (getNumber() != null) ? getNumber().getId() : "";
     }
 }

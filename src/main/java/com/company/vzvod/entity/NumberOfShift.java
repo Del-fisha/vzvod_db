@@ -1,10 +1,8 @@
 package com.company.vzvod.entity;
 
 import io.jmix.core.metamodel.datatype.EnumClass;
-
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
-
 
 public enum NumberOfShift implements EnumClass<String> {
 
@@ -24,13 +22,22 @@ public enum NumberOfShift implements EnumClass<String> {
         this.id = id;
     }
 
+    @Override
     @NonNull
     public String getId() {
         return id;
     }
 
     @Nullable
-    public static NumberOfShift fromId(Integer id) {
+    public static NumberOfShift fromId(String id) {
+        if (id == null) {
+            return null;
+        }
+        for (NumberOfShift v : NumberOfShift.values()) {
+            if (v.getId().equals(id)) {
+                return v;
+            }
+        }
         return null;
     }
 }
