@@ -65,30 +65,27 @@ public class UserDetailView extends StandardDetailView<User> {
 
     @Subscribe(id = "contactsCreateButton", subject = "clickListener")
     public void onContactsCreateButtonClick(final ClickEvent<JmixButton> event) {
-        User user = userDc.getItem();
+        User user = userDc.getItemOrNull();
         if (user == null) {
             return;
         }
 
         Contacts contact = user.getContactsInfo();
         if (contact == null) {
-            contact = dataManager.create(Contacts.class);
+            contact = getViewData().getDataContext().create(Contacts.class);
+
+            contact.setUser(user);
+
+            user.setContactsInfo(contact);
+        } else {
+            if (contact.getUser() == null) {
+                contact.setUser(user);
+            }
         }
 
         dialogWindows.detail(this, Contacts.class)
                 .withViewClass(ContactsDetailView.class)
                 .editEntity(contact)
-                .withAfterCloseListener(e -> {
-                    if (e.closedWith(StandardOutcome.SAVE)) {
-                        Contacts saved = e.getView().getEditedEntity();
-
-                        if (user.getContactsInfo() == null) {
-                            user.setContactsInfo(saved);
-                            dataManager.save(user);
-                        }
-                        userDc.setItem(dataManager.load(User.class).id(user.getId()).one());
-                    }
-                })
                 .open();
     }
 

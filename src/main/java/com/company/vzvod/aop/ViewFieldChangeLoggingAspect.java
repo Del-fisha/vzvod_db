@@ -6,10 +6,11 @@ import io.jmix.flowui.model.InstanceContainer;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+@Profile("dev")
 @Aspect
 @Component
 public class ViewFieldChangeLoggingAspect {
