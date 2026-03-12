@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-@Profile("dev")
+@Profile("dev") // ToDo Разобраться с логированием
 @Aspect
 @Component
 public class ViewEnterLoggingAspect {
