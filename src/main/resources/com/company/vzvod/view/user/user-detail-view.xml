@@ -44,7 +44,8 @@
                 <responsiveStep minWidth="40em" columns="2"/>
             </responsiveSteps>
             <textField id="userNameField" property="username" helperText="msg://com.company.vzvod.view.user.user/userNameField.text"/>
-            <passwordField id="passwordField" property="password" helperText="msg://com.company.vzvod.view.user.user/passwordField.text"/>
+            <button id="changePasswordButton"
+                    text="Сменить пароль"/>
             <textField id="lastNameField" property="lastName"/>
             <textField id="firstNameField" property="firstName"/>
             <textField id="patronymicField" property="patronymic"/>

@@ -13,6 +13,7 @@ import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.view.*;
+import io.jmix.securityflowui.view.changepassword.ChangePasswordView;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -42,7 +43,28 @@ public class UserDetailView extends StandardDetailView<User> {
     }
 
 
-    @Subscribe(id = "serviceInfoCreateButton", subject = "clickListener")
+
+    @Subscribe("changePasswordButton")
+    public void onChangePasswordButtonClick(ClickEvent<JmixButton> event) {
+        User user = getEditedEntity();
+        if (user == null || user.getId() == null) {
+            return;
+        }
+
+        DialogWindow<ChangePasswordView> window =
+                dialogWindows.view(this, ChangePasswordView.class).build();
+
+        window.getView().setId(String.valueOf(user.getId()));
+
+        window.addAfterCloseListener(afterCloseEvent -> {
+            if (afterCloseEvent.closedWith(StandardOutcome.SAVE)) {
+            }
+        });
+
+        window.open();
+    }
+
+@Subscribe(id = "serviceInfoCreateButton", subject = "clickListener")
     public void onServiceInfoCreateButtonClick1(final ClickEvent<JmixButton> event) {
         User user = userDc.getItem();
         if (user == null) {
