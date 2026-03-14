@@ -42,6 +42,7 @@ public class ChangePasswordView extends StandardView {
 
     @Subscribe("saveButton")
     public void onSaveButtonClick(ClickEvent<JmixButton> event) {
+
         if (userId == null) {
             notifications.create("Не определён пользователь").show();
             return;
@@ -51,16 +52,22 @@ public class ChangePasswordView extends StandardView {
         String newPass = newPasswordField.getValue();
         String confirm = confirmPasswordField.getValue();
 
-        if (newPass == null || !newPass.equals(confirm)) {
+        if (newPass == null || newPass.isBlank()) {
+            notifications.create("Введите новый пароль").show();
+            return;
+        }
+        if (!newPass.equals(confirm)) {
             notifications.create("Новые пароли не совпадают").show();
             return;
         }
 
         User user = dataManager.load(User.class).id(userId).one();
 
-        if (user.getPassword() == null || !passwordEncoder.matches(oldPass, user.getPassword())) {
-            notifications.create("Старый пароль неверен").show();
-            return;
+        if (user.getPassword() != null) {
+            if (oldPass == null || !passwordEncoder.matches(oldPass, user.getPassword())) {
+                notifications.create("Старый пароль неверен").show();
+                return;
+            }
         }
 
         user.setPassword(passwordEncoder.encode(newPass));

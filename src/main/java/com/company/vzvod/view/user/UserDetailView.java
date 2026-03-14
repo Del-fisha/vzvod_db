@@ -15,6 +15,7 @@ import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +38,18 @@ public class UserDetailView extends StandardDetailView<User> {
     @ViewComponent
     private JmixButton vehicleCreateButton;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Subscribe
+    public void onBeforeSave(final BeforeSaveEvent event) {
+        User user = getEditedEntity();
+        String password = user.getPassword();
+
+        if (password != null && !password.isBlank() && !password.startsWith("{bcrypt}")) {
+            user.setPassword(passwordEncoder.encode(password));
+        }
+    }
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
