@@ -10,10 +10,10 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.router.Route;
 import io.jmix.core.DataManager;
 import io.jmix.flowui.DialogWindows;
+import io.jmix.flowui.Notifications;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.view.*;
-import io.jmix.securityflowui.view.changepassword.ChangePasswordView;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -37,11 +37,11 @@ public class UserDetailView extends StandardDetailView<User> {
     @ViewComponent
     private JmixButton vehicleCreateButton;
 
+
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         vehicleCreateButton.setEnabled(false);
     }
-
 
 
     @Subscribe("changePasswordButton")
@@ -54,17 +54,11 @@ public class UserDetailView extends StandardDetailView<User> {
         DialogWindow<ChangePasswordView> window =
                 dialogWindows.view(this, ChangePasswordView.class).build();
 
-        window.getView().setId(String.valueOf(user.getId()));
-
-        window.addAfterCloseListener(afterCloseEvent -> {
-            if (afterCloseEvent.closedWith(StandardOutcome.SAVE)) {
-            }
-        });
-
+        window.getView().setUserId(user.getId());
         window.open();
     }
 
-@Subscribe(id = "serviceInfoCreateButton", subject = "clickListener")
+    @Subscribe(id = "serviceInfoCreateButton", subject = "clickListener")
     public void onServiceInfoCreateButtonClick1(final ClickEvent<JmixButton> event) {
         User user = userDc.getItem();
         if (user == null) {
