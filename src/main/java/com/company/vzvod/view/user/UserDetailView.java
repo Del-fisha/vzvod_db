@@ -1,6 +1,7 @@
 package com.company.vzvod.view.user;
 
 import com.company.vzvod.entity.*;
+import com.company.vzvod.service.UserReadService;
 import com.company.vzvod.view.contacts.ContactsDetailView;
 import com.company.vzvod.view.education.EducationDetailView;
 import com.company.vzvod.view.main.MainView;
@@ -9,6 +10,7 @@ import com.company.vzvod.view.vehicle.VehicleDetailView;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.router.Route;
 import io.jmix.core.DataManager;
+import io.jmix.core.LoadContext;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.Notifications;
 import io.jmix.flowui.kit.component.button.JmixButton;
@@ -19,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Route(value = "users/:id", layout = MainView.class)
 @ViewController(id = "User.detail")
@@ -40,6 +43,18 @@ public class UserDetailView extends StandardDetailView<User> {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private UserReadService userReadService;
+
+    @Install(to = "userDl", target = Target.DATA_LOADER)
+    private User userDlLoadDelegate(LoadContext<User> loadContext) {
+        UUID id = (UUID) loadContext.getId();
+
+        userReadService.getUserCached(id);
+
+        return dataManager.load(User.class).id(id).one();
+    }
 
     @Subscribe
     public void onBeforeSave(final BeforeSaveEvent event) {
