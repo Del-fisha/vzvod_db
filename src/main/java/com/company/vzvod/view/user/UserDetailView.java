@@ -75,14 +75,14 @@ public class UserDetailView extends StandardDetailView<User> {
     @Subscribe("changePasswordButton")
     public void onChangePasswordButtonClick(ClickEvent<JmixButton> event) {
         User user = getEditedEntity();
-        if (user == null || user.getId() == null) {
+        if (user == null) {
             return;
         }
 
         DialogWindow<ChangePasswordView> window =
                 dialogWindows.view(this, ChangePasswordView.class).build();
 
-        window.getView().setUserId(user.getId());
+        window.getView().setUser(user);
         window.open();
     }
 

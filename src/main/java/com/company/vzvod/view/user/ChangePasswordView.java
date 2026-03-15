@@ -3,23 +3,17 @@ package com.company.vzvod.view.user;
 import com.company.vzvod.entity.User;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.textfield.PasswordField;
-import io.jmix.core.DataManager;
 import io.jmix.flowui.Notifications;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.UUID;
-
 @ViewController("ChangePasswordView")
 @ViewDescriptor("change-password-view.xml")
 public class ChangePasswordView extends StandardView {
 
-    private UUID userId;
-
-    @Autowired
-    private DataManager dataManager;
+    private User user;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -29,21 +23,34 @@ public class ChangePasswordView extends StandardView {
 
     @ViewComponent
     private PasswordField oldPasswordField;
-
     @ViewComponent
     private PasswordField newPasswordField;
-
     @ViewComponent
     private PasswordField confirmPasswordField;
 
-    public void setUserId(UUID userId) {
-        this.userId = userId;
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    @Subscribe
+    public void onBeforeShow(BeforeShowEvent event) {
+        if (user == null) {
+            notifications.create("Не определён пользователь").show();
+            close(StandardOutcome.CLOSE);
+            return;
+        }
+
+        boolean passwordAlreadySet = user.getPassword() != null && !user.getPassword().isBlank();
+        oldPasswordField.setVisible(passwordAlreadySet);
+        oldPasswordField.setRequired(passwordAlreadySet);
+        if (!passwordAlreadySet) {
+            oldPasswordField.clear();
+        }
     }
 
     @Subscribe("saveButton")
     public void onSaveButtonClick(ClickEvent<JmixButton> event) {
-
-        if (userId == null) {
+        if (user == null) {
             notifications.create("Не определён пользователь").show();
             return;
         }
@@ -61,17 +68,17 @@ public class ChangePasswordView extends StandardView {
             return;
         }
 
-        User user = dataManager.load(User.class).id(userId).one();
+        String existingHash = user.getPassword();
+        boolean passwordAlreadySet = existingHash != null && !existingHash.isBlank();
 
-        if (user.getPassword() != null) {
-            if (oldPass == null || !passwordEncoder.matches(oldPass, user.getPassword())) {
+        if (passwordAlreadySet) {
+            if (oldPass == null || oldPass.isBlank() || !passwordEncoder.matches(oldPass, existingHash)) {
                 notifications.create("Старый пароль неверен").show();
                 return;
             }
         }
 
         user.setPassword(passwordEncoder.encode(newPass));
-        dataManager.save(user);
 
         close(StandardOutcome.SAVE);
     }
