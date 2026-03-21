@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+    <changeSet id="1" author="Tarasov Aleksey">
+        <addColumn tableName="USER_">
+            <column name="ARMY_SERVICE" type="BOOLEAN"/>
+        </addColumn>
+
+        <addNotNullConstraint columnName="ARMY_SERVICE" defaultNullValue="false" tableName="USER_"/>
+    </changeSet>
+    <changeSet id="2" author="Tarasov Aleksey">
+        <addColumn tableName="SERVICE_INFO">
+            <column name="VACATION_DAYS_AVAILABLE" type="INT"/>
+        </addColumn>
+
+        <addNotNullConstraint columnName="VACATION_DAYS_AVAILABLE" defaultNullValue="40" tableName="SERVICE_INFO"/>
+    </changeSet>
+    <changeSet id="3" author="Tarasov Aleksey">
+        <addColumn tableName="SERVICE_INFO">
+            <column name="VACATION_DAYS_ENTITLED" type="INT"/>
+        </addColumn>
+
+        <addNotNullConstraint columnName="VACATION_DAYS_ENTITLED" defaultNullValue="40" tableName="SERVICE_INFO"/>
+    </changeSet>
+</databaseChangeLog>

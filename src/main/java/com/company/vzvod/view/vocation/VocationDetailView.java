@@ -26,6 +26,6 @@ public class VocationDetailView extends StandardDetailView<Vocation> {
         ServiceInfo serviceInfo = user.getServiceInfo();
 
         event.getEntity().setUserServiceInfo(serviceInfo);
-        event.getEntity().setType(VocationType.MAIN);
+        event.getEntity().setType(10);
     }
 }

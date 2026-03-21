@@ -23,6 +23,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 @EditedEntityContainer("serviceInfoDc")
 public class ServiceInfoDetailView extends StandardDetailView<ServiceInfo> {
 
+
+    @ViewComponent
+    private InstanceContainer<ServiceInfo> serviceInfoDc;
+
+    @Autowired
+    private DialogWindows dialogWindows;
+
     @Subscribe
     public void onInitEntity(final InitEntityEvent<ServiceInfo> event) {
         ServiceInfo serviceInfo = event.getEntity();
@@ -32,12 +39,6 @@ public class ServiceInfoDetailView extends StandardDetailView<ServiceInfo> {
         serviceInfo.setQualificationClass(Qualification.NONE);
 
     }
-
-    @ViewComponent
-    private InstanceContainer<ServiceInfo> serviceInfoDc;
-
-    @Autowired
-    private DialogWindows dialogWindows;
 
 
     @Subscribe(id = "vocationListButton", subject = "clickListener")

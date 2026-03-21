@@ -1,10 +1,13 @@
 package com.company.vzvod;
 
+import com.company.vzvod.job.ServiceInfoYearlyRecalcJob;
 import com.google.common.base.Strings;
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.theme.Theme;
+import org.quartz.JobDetail;
+import org.quartz.Trigger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -20,6 +23,10 @@ import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
 
 import javax.sql.DataSource;
+
+import static org.quartz.CronScheduleBuilder.cronSchedule;
+import static org.quartz.JobBuilder.newJob;
+import static org.quartz.TriggerBuilder.newTrigger;
 
 @Push
 @Theme(value = "Vzvod")
