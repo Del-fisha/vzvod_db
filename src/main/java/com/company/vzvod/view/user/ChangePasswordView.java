@@ -3,6 +3,7 @@ package com.company.vzvod.view.user;
 import com.company.vzvod.entity.User;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.textfield.PasswordField;
+import io.jmix.core.DataManager;
 import io.jmix.flowui.Notifications;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.*;
@@ -20,6 +21,10 @@ public class ChangePasswordView extends StandardView {
 
     @Autowired
     private Notifications notifications;
+
+    @Autowired
+    private DataManager dataManager;
+
 
     @ViewComponent
     private PasswordField oldPasswordField;
@@ -79,6 +84,9 @@ public class ChangePasswordView extends StandardView {
         }
 
         user.setPassword(passwordEncoder.encode(newPass));
+        dataManager.save(user);
+
+        close(StandardOutcome.SAVE);
 
         close(StandardOutcome.SAVE);
     }
