@@ -10,6 +10,7 @@ import com.company.vzvod.view.vehicle.VehicleDetailView;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.router.Route;
 import io.jmix.core.DataManager;
+import io.jmix.core.EntityStates;
 import io.jmix.core.LoadContext;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.Notifications;
@@ -45,7 +46,36 @@ public class UserDetailView extends StandardDetailView<User> {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
+    private Notifications notifications;
+
+    @Autowired
+    private EntityStates entityStates;
+
+    @Autowired
     private UserReadService userReadService;
+
+    @ViewComponent
+    private JmixButton changePasswordButton;
+
+    @Subscribe
+    public void onInitEntity(final InitEntityEvent<User> event) {
+        User user = event.getEntity();
+
+        if (user.getPassword() == null || user.getPassword().isBlank()) {
+            user.setPassword("0000");
+        }
+    }
+
+    @Subscribe
+    public void onReady(final ReadyEvent event) {
+        updateChangePasswordButtonState();
+    }
+
+    private void updateChangePasswordButtonState() {
+        User user = getEditedEntity();
+        boolean existingUser = user != null && !entityStates.isNew(user);
+        changePasswordButton.setEnabled(existingUser);
+    }
 
     @Install(to = "userDl", target = Target.DATA_LOADER)
     private User userDlLoadDelegate(LoadContext<User> loadContext) {
@@ -69,13 +99,19 @@ public class UserDetailView extends StandardDetailView<User> {
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         vehicleCreateButton.setEnabled(false);
+        updateChangePasswordButtonState();
     }
 
+
+    @Subscribe
+    public void onAfterSave(final AfterSaveEvent event) {
+        updateChangePasswordButtonState();
+    }
 
     @Subscribe("changePasswordButton")
     public void onChangePasswordButtonClick(ClickEvent<JmixButton> event) {
         User user = getEditedEntity();
-        if (user == null) {
+        if (user == null || entityStates.isNew(user)) {
             return;
         }
 
@@ -176,7 +212,6 @@ public class UserDetailView extends StandardDetailView<User> {
                 .withParentDataContext(getViewData().getDataContext())
                 .editEntity(vehicle)
                 .open();
-
     }
 
     public User getViewedUser() {
