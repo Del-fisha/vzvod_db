@@ -21,5 +21,6 @@
               title="msg://com.company.vzvod.view.criminalviolation/criminalViolationListView.title"/>
         <item id="all_employees_to_read" view="UserListView"
               title="msg://com.company.vzvod.view.userlist/userListView.title"/>
+        <item id="events" view="Event.list" title="msg://com.company.vzvod.view.event/eventListView.title"/>
     </menu>
 </menu-config>

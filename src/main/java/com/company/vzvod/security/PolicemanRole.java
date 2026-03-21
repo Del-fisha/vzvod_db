@@ -50,6 +50,9 @@ public interface PolicemanRole {
     @EntityPolicy(entityClass = CriminalViolation.class, actions = {EntityPolicyAction.READ})
     void criminalViolationEntity();
 
+    @EntityPolicy(entityClass = Event.class, actions = {EntityPolicyAction.READ})
+    void eventEntity();
+
 
     @EntityAttributePolicy(
             entityClass = User.class,
@@ -140,6 +143,13 @@ public interface PolicemanRole {
     )
     void criminalViolationSelfFields();
 
+    @EntityAttributePolicy(
+            entityClass = Event.class,
+            attributes = "*",
+            action = EntityAttributePolicyAction.VIEW
+    )
+    void eventSelfFields();
+
     @ViewPolicy(viewIds = {
             "User.list",
             "MainView",
@@ -167,12 +177,14 @@ public interface PolicemanRole {
             "ProfileRedirect",
             "CriminalViolation.detail",
             "CriminalViolation.list",
-            "MyShift.list"
+            "MyShift.list",
+            "Event.list"
     })
     @MenuPolicy(menuIds = {
             "all_employees_to_read",
             "my_profile",
-            "my_shifts"
+            "my_shifts",
+            "events"
     })
     void userViews();
 }
