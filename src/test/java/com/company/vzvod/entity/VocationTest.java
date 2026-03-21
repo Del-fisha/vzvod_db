@@ -31,7 +31,7 @@ class VocationTest extends EntityTestSupport {
     void testType() {
         assertNull(vocation.getType());
 
-        vocation.setType(VocationType.MAIN);
+        vocation.setType(10);
         assertSame(VocationType.MAIN, vocation.getType());
     }
 
@@ -65,15 +65,6 @@ class VocationTest extends EntityTestSupport {
         assertEquals(countOfDays, (int) vocation.getCountOfDays());
     }
 
-    @Test
-    void testAllRemaindDays() {
-        assertNull(vocation.getAllRemaindDays());
-
-        int allRemainedDays = 10;
-        vocation.setAllRemaindDays(10);
-
-        assertEquals(allRemainedDays, vocation.getAllRemaindDays());
-    }
 
     @Test
     void testHasDeparture() {

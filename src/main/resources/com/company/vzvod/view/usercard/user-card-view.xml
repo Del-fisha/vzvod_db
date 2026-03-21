@@ -24,6 +24,8 @@
                     <property name="breastplate"/>
                     <property name="startDate"/>
                     <property name="startOfPost"/>
+                    <property name="vacationDaysAvailable"/>
+                    <property name="vacationDaysEntitled"/>
                 </property>
 
                 <!-- контакты + вложенные адреса -->
@@ -244,6 +246,23 @@
                                     </formItem>
                                     <formItem>
                                         <textField property="statusOfHousing" readOnly="true"/>
+                                    </formItem>
+                                </formLayout>
+                            </accordionPanel>
+
+                            <accordionPanel summaryText="Отпуска">
+                                <formLayout dataContainer="serviceInfoDc" labelsPosition="ASIDE">
+                                    <formItem>
+                                        <integerField id="vacationDaysEntitledField"
+                                                      property="vacationDaysEntitled"
+                                                      label="Положено"
+                                                      readOnly="true"/>
+                                    </formItem>
+                                    <formItem>
+                                        <integerField id="vacationDaysAvailableField"
+                                                      property="vacationDaysAvailable"
+                                                      label="Осталось"
+                                                      readOnly="true"/>
                                     </formItem>
                                 </formLayout>
                             </accordionPanel>

@@ -77,11 +77,10 @@ public class PreTestEntities {
 
     public static void updateVocation(Vocation vocation) {
 
-        vocation.setType(VocationType.MAIN);
+        vocation.setType(10);
         vocation.setStartDate(LocalDate.now());
         vocation.setEndDate(LocalDate.now().plusDays(14));
         vocation.setCountOfDays(14);
-        vocation.setAllRemaindDays(28);
         vocation.setHasDeparture(false);
         vocation.setCityToDrive("Moscow");
         vocation.setDaysAddedByDeparture(0);
