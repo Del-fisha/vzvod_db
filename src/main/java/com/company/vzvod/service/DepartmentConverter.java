@@ -36,4 +36,25 @@ public class DepartmentConverter {
 
         return Dep.fromId(dep);
     }
+
+    public static int departmentFromDateToInt(LocalDate date) {
+
+        LocalDate startDate = LocalDate.of(2026, 2, 22);
+
+        long daysBetween = ChronoUnit.DAYS.between(startDate, date);
+        int dep = 0;
+
+        int normalizedDays = (int) ((daysBetween % 4 + 4) % 4);
+
+        switch (normalizedDays) {
+            case 0, 1:
+                dep = 1;
+                break;
+            case 2, 3:
+                dep = 2;
+                break;
+        }
+
+        return dep;
+    }
 }
