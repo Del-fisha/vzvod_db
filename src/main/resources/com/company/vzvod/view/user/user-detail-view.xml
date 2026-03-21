@@ -51,10 +51,16 @@
             <textField id="patronymicField" property="patronymic"/>
             <datePicker id="dateOfBirthField" property="dateOfBirth"/>
 
+
             <button id="serviceInfoCreateButton" text="msg://com.company.vzvod.view.user.user/serviceInfoButtonCreate.text"/>
             <button id="contactsCreateButton" text="msg://com.company.vzvod.view.user.user/contactsButtonCreate.text"/>
             <button id="educationCreateButton" text="msg://com.company.vzvod.view.user.user/educationButtonCreate.text"/>
             <button id="vehicleCreateButton" text="msg://com.company.vzvod.view.user.user/vehicleButtonCreate.text"/>
+            <div/>
+            <checkbox id="armyServiceField"
+                      property="armyService"
+                      label="Служба в армии"
+                      required="false"/>/>
 
         </formLayout>
         <hbox id="detailActions">
