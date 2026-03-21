@@ -88,6 +88,12 @@ public class ServiceInfo {
     @Column(name = "QUALIFICATION_CLASS")
     private Qualification qualificationClass;
 
+    @Column(name = "VACATION_DAYS_ENTITLED", nullable = false)
+    private Integer vacationDaysEntitled = 40;
+
+    @Column(name = "VACATION_DAYS_AVAILABLE", nullable = false)
+    private Integer vacationDaysAvailable = 40;
+
 
     public Rank getRank() {
         return rank == null ? null : Rank.fromId(rank);

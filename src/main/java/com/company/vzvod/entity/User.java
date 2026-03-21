@@ -80,6 +80,9 @@ public class User implements JmixUserDetails {
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Education education;
 
+    @Column(name = "ARMY_SERVICE", nullable = false)
+    private Boolean armyService = false;
+
     @OneToMany(mappedBy = "user")
     private List<Vehicle> vehicleInfo;
 
