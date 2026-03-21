@@ -5,7 +5,6 @@ import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.OnDeleteInverse;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.PastOrPresent;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -29,7 +28,7 @@ public class Vocation {
     private ServiceInfo userServiceInfo;
 
     @Column(name = "VOCATION_TYPE")
-    private VocationType type;
+    private Integer type;
 
     @Column(name = "START_DATE")
     private LocalDate startDate;
@@ -39,9 +38,6 @@ public class Vocation {
 
     @Column(name = "COUNT_OF_DAYS")
     private Integer countOfDays;
-
-    @Column(name = "ALL_REMAIND_DAYS")
-    private Integer allRemaindDays;
 
     @Column(name = "HAS_DEPARTURE")
     private Boolean hasDeparture;
@@ -57,11 +53,6 @@ public class Vocation {
     }
 
 
-    public void setType(VocationType type) {
-        this.type = type;
-    }
-
-
     public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
     }
@@ -72,10 +63,6 @@ public class Vocation {
 
     public void setCountOfDays(Integer countOfDays) {
         this.countOfDays = countOfDays;
-    }
-
-    public void setAllRemaindDays(Integer allRemaindDays) {
-        this.allRemaindDays = allRemaindDays;
     }
 
     public Boolean isHasDeparture() {
