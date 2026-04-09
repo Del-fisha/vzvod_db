@@ -37,11 +37,16 @@ dependencies {
     implementation 'org.springframework:spring-aspects'
     implementation 'org.postgresql:postgresql:42.7.3'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.kafka:spring-kafka'
     testImplementation 'org.testcontainers:junit-jupiter:1.19.7'
     testImplementation 'org.testcontainers:postgresql:1.19.7'
 
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    testImplementation 'org.springframework.kafka:spring-kafka-test'
+    testImplementation 'org.testcontainers:kafka'
 
     runtimeOnly 'org.hsqldb:hsqldb'
 
