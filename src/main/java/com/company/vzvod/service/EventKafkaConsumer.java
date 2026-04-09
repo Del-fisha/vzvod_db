@@ -2,6 +2,7 @@ package com.company.vzvod.service;
 
 import com.company.vzvod.entity.Event;
 import com.company.vzvod.entity.EventType;
+import com.company.vzvod.service.event_service.EventTypeLoader;
 import io.jmix.core.DataManager;
 import io.jmix.core.security.SystemAuthenticator;
 import org.slf4j.Logger;
@@ -29,20 +30,30 @@ public class EventKafkaConsumer {
         log.info("Получено событие: {}", dto);
 
         systemAuthenticator.runWithSystem(() -> {
-            Event event = dataManager.create(Event.class);
+            Event event = dataManager.load(Event.class)
+                    .query("select e from Event e where e.name = :name")
+                    .parameter("name", dto.getName())
+                    .optional()
+                    .orElseGet(() -> dataManager.create(Event.class));
+
+
+//            if (event.getEventType() == null) {
+//                event.setEventType(EventType.OTHER);
+//            }
+
+            if (event.getEventType() == EventType.OTHER) {
+                boolean isSport = EventTypeLoader.isSport(event.getName());
+                if (isSport) {
+                    event.setEventType(EventType.SPORT);
+                }
+            }
             event.setName(dto.getName());
-            event.setPlace(dto.getPlace());
             event.setDate(dto.getDate());
             event.setTime(dto.getTime());
+            event.setShiftOfDepartment(DepartmentConverter.departmentFromDateToInt(dto.getDate()));
+            event.setPlace(dto.getPlace());
 
 
-            if (dto.getName() != null && dto.getName().toLowerCase().contains("концерт")) {
-                event.setEventType(EventType.CONCERT);
-            } else if (dto.getPlace() != null && dto.getPlace().toLowerCase().contains("арена")) {
-                event.setEventType(EventType.SPORT);
-            } else {
-                event.setEventType(EventType.OTHER);
-            }
 
             dataManager.save(event);
         });

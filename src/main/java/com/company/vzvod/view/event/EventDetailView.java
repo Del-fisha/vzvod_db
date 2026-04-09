@@ -3,6 +3,7 @@ package com.company.vzvod.view.event;
 import com.company.vzvod.entity.Event;
 import com.company.vzvod.entity.EventType;
 import com.company.vzvod.service.DepartmentConverter;
+import com.company.vzvod.service.event_service.EventTypeLoader;
 import com.company.vzvod.view.main.MainView;
 import com.vaadin.flow.router.Route;
 import io.jmix.flowui.component.SupportsTypedValue;
@@ -43,13 +44,11 @@ public class EventDetailView extends StandardDetailView<Event> {
     public void onNameFieldTypedValueChange(
             SupportsTypedValue.TypedValueChangeEvent<TypedDatePicker<String>, String> event) {
 
-        String[] sportWords = {"Зенит", "Ска", "Драконы", "Dragons", "Россия"};
         String name = event.getValue();
 
         assert name != null;
 
-        boolean isSportTeam = Arrays.stream(sportWords)
-                .anyMatch(word -> name.toLowerCase().contains(word.toLowerCase()));
+        boolean isSportTeam = EventTypeLoader.isSport(name);
 
         if (isSportTeam) {
             getEditedEntity().setEventType(EventType.SPORT);
