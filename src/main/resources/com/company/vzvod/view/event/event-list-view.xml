@@ -9,7 +9,7 @@
             <fetchPlan extends="_base"/>
             <loader id="eventsDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from Event e ORDER BY e.date]]>
+                    <![CDATA[select e from Event e ORDER BY e.date DESC]]>
                 </query>
             </loader>
         </collection>
@@ -44,7 +44,8 @@
                   width="100%"
                   minHeight="20em"
                   dataContainer="eventsDc"
-                  columnReorderingAllowed="true">
+                  columnReorderingAllowed="true"
+                  selectionMode="MULTI">
             <actions>
                 <action id="createAction" type="list_create"/>
                 <action id="editAction" type="list_edit"/>
