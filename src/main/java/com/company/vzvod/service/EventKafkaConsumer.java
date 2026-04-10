@@ -36,18 +36,17 @@ public class EventKafkaConsumer {
                     .optional()
                     .orElseGet(() -> dataManager.create(Event.class));
 
-
-//            if (event.getEventType() == null) {
-//                event.setEventType(EventType.OTHER);
-//            }
-
+            event.setName(dto.getName());
+            if (event.getEventType() == null) {
+                event.setEventType(EventType.OTHER);
+            }
             if (event.getEventType() == EventType.OTHER) {
                 boolean isSport = EventTypeLoader.isSport(event.getName());
                 if (isSport) {
                     event.setEventType(EventType.SPORT);
                 }
             }
-            event.setName(dto.getName());
+
             event.setDate(dto.getDate());
             event.setTime(dto.getTime());
             event.setShiftOfDepartment(DepartmentConverter.departmentFromDateToInt(dto.getDate()));
