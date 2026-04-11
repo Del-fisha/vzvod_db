@@ -9,7 +9,7 @@
             <fetchPlan extends="_base"/>
             <loader id="eventsDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from Event e ORDER BY e.date DESC]]>
+                    <![CDATA[select e from Event e ORDER BY e.date ASC]]>
                 </query>
             </loader>
         </collection>
