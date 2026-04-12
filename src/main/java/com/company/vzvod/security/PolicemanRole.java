@@ -178,13 +178,15 @@ public interface PolicemanRole {
             "CriminalViolation.detail",
             "CriminalViolation.list",
             "MyShift.list",
-            "Event.list"
+            "Event.list",
+            "LastEvent.list"
     })
     @MenuPolicy(menuIds = {
             "all_employees_to_read",
             "my_profile",
             "my_shifts",
-            "events"
+            "events",
+            "last_events"
     })
     void userViews();
 }

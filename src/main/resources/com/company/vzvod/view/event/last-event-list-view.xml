@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <view xmlns="http://jmix.io/schema/flowui/view"
       xmlns:c="http://jmix.io/schema/flowui/jpql-condition"
-      title="msg://eventListView.title"
+      title="msg://lastEventListView.title"
       focusComponent="eventsDataGrid">
     <data>
         <collection id="eventsDc"
@@ -12,8 +12,8 @@
                     <![CDATA[
                         select e
                         from Event e
-                        where e.date >= CURRENT_DATE
-                        order by e.date desc
+                        where e.date < CURRENT_DATE
+                        order by e.date asc
                         ]]>
                 </query>
             </loader>
@@ -58,10 +58,10 @@
             </actions>
             <columns resizable="true">
                 <column property="eventType"/>
+                <column property="place"/>
                 <column property="name"/>
                 <column property="date"/>
                 <column property="time"/>
-                <column property="place"/>
                 <column property="shiftOfDepartment"/>
                 <column property="description"/>
             </columns>
