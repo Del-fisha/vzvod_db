@@ -180,6 +180,7 @@ public interface PolicemanRole {
             "MyShift.list",
             "Event.list",
             "LastEvent.list",
+            "Event.detail",
             "DeletedEvent.detail",
             "DeletedEvent.list"
     })

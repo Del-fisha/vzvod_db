@@ -1,7 +1,7 @@
 package com.company.vzvod.view.event;
 
-import com.company.vzvod.entity.DeletedEvent;
 import com.company.vzvod.entity.Event;
+import com.company.vzvod.service.event_service.EventArchiveService;
 import com.company.vzvod.view.main.MainView;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.router.Route;
@@ -30,10 +30,14 @@ public class EventListView extends StandardListView<Event> {
     @Autowired
     private DataManager dataManager;
 
+    @Autowired
+    private EventArchiveService eventArchiveService;
+
     @Subscribe
     public void onInit(InitEvent event) {
         eventsDataGrid.setSelectionMode(Grid.SelectionMode.MULTI);
     }
+
 
     @Subscribe("eventsDataGrid.removeAction")
     public void onEventsDataGridRemoveAction(ActionPerformedEvent event) {
@@ -41,21 +45,8 @@ public class EventListView extends StandardListView<Event> {
         if (selected.isEmpty()) {
             return;
         }
-        for (Event e : selected) {
-            DeletedEvent de = metadata.create(DeletedEvent.class);
 
-            de.setOriginalEventId(e.getId());
-            de.setEventType(e.getEventType());
-            de.setPlace(e.getPlace());
-            de.setName(e.getName());
-            de.setDate(e.getDate());
-            de.setTime(e.getTime());
-            de.setShiftOfDepartment(e.getShiftOfDepartment());
-            de.setDescription(e.getDescription());
-
-            dataManager.save(de);
-            dataManager.remove(e);
-        }
+        eventArchiveService.archiveEvents(selected);
         getViewData().getLoader("eventsDl").load();
     }
 }

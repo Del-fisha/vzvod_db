@@ -6,7 +6,6 @@
               title="Мой профиль"/>
         <item id="my_shifts" view="MyShift.list"
               title="Мои смены"/>
-        <item view="DeletedEvent.list" title="msg://com.company.vzvod.view.deletedevent/deletedEventListView.title"/>
     </menu>
 
     <menu id="application" title="msg://com.company.vzvod/menu.application.title" opened="false">
