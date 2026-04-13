@@ -185,7 +185,7 @@ public interface PolicemanRole {
             "all_employees_to_read",
             "my_profile",
             "my_shifts",
-            "events",
+            "future_events",
             "last_events"
     })
     void userViews();

@@ -13,7 +13,7 @@
                         select e
                         from Event e
                         where e.date >= CURRENT_DATE
-                        order by e.date desc
+                        order by e.date asc
                         ]]>
                 </query>
             </loader>
