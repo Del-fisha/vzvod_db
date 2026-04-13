@@ -6,6 +6,7 @@
               title="Мой профиль"/>
         <item id="my_shifts" view="MyShift.list"
               title="Мои смены"/>
+        <item view="DeletedEvent.list" title="msg://com.company.vzvod.view.deletedevent/deletedEventListView.title"/>
     </menu>
 
     <menu id="application" title="msg://com.company.vzvod/menu.application.title" opened="false">
@@ -26,5 +27,7 @@
     <menu id="events" title="Усиления" opened="true">
         <item id="future_events" view="Event.list" title="msg://com.company.vzvod.view.event/eventListView.title"/>
         <item id="last_events" view="LastEvent.list" title="msg://com.company.vzvod.view.event/lastEventListView.title"/>
+        <item id="deleted_events" view="DeletedEvent.list" title="msg://com.company.vzvod.view.deletedevent/deletedEventListView.title"/>
+
     </menu>
 </menu-config>

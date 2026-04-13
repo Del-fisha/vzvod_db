@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+    <changeSet id="2024-04-13-create-deleted-event" author="dev">
+        <createTable tableName="DELETED_EVENT">
+            <column name="ID" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="ORIGINAL_EVENT_ID" type="varchar(36)"/>
+            <column name="EVENT_TYPE" type="varchar(50)"/>
+            <column name="PLACE" type="varchar(30)"/>
+            <column name="NAME" type="varchar(255)"/>
+
+            <column name="DATE_" type="date"/>
+            <column name="TIME_" type="time"/>
+
+            <column name="SHIFT_OF_DEPARTMENT" type="integer"/>
+
+            <column name="DESCRIPTION" type="clob"/>
+
+
+        </createTable>
+
+        <createIndex tableName="DELETED_EVENT"
+                     indexName="IDX_DELETED_EVENT_ORIG_ID">
+            <column name="ORIGINAL_EVENT_ID"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

@@ -179,7 +179,9 @@ public interface PolicemanRole {
             "CriminalViolation.list",
             "MyShift.list",
             "Event.list",
-            "LastEvent.list"
+            "LastEvent.list",
+            "DeletedEvent.detail",
+            "DeletedEvent.list"
     })
     @MenuPolicy(menuIds = {
             "all_employees_to_read",
