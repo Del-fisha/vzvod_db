@@ -48,8 +48,8 @@ public interface SelfEditUserRole {
     @EntityAttributePolicy(entityClass = Shift.class, attributes = {"units"}, action = EntityAttributePolicyAction.MODIFY)
     void shiftUnitsModify();
 
-    @EntityPolicy(entityClass = Event.class, actions = {EntityPolicyAction.READ, EntityPolicyAction.UPDATE})
-    void eventEntity();
+//    @EntityPolicy(entityClass = Event.class, actions = {EntityPolicyAction.READ, EntityPolicyAction.UPDATE})
+//    void eventEntity();
 
     @EntityAttributePolicy(
             entityClass = User.class,
@@ -121,10 +121,10 @@ public interface SelfEditUserRole {
     )
     void criminalViolationSelfFields();
 
-    @EntityAttributePolicy(
-            entityClass = Event.class,
-            attributes = "*",
-            action = EntityAttributePolicyAction.VIEW
-    )
-    void eventSelfFields();
+//    @EntityAttributePolicy(
+//            entityClass = Event.class,
+//            attributes = "*",
+//            action = EntityAttributePolicyAction.VIEW
+//    )
+//    void eventSelfFields();
 }

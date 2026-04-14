@@ -43,7 +43,7 @@ public class EventKafkaConsumer {
                     .optional()
                     .orElseGet(() -> dataManager.create(DeletedEvent.class));
 
-            if (event.getName().equalsIgnoreCase(deletedEvent.getName())) {
+            if (deletedEvent.getId() != null) {
                 return;
             }
             event.setName(dto.getName());

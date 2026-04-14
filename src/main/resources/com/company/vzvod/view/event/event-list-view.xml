@@ -33,8 +33,9 @@
         <hbox id="buttonsPanel" classNames="buttons-panel">
             <startSlot>
                 <button id="createButton" action="eventsDataGrid.createAction"/>
-                <button id="editButton" action="eventsDataGrid.editAction"/>
+<!--                <button id="editButton" action="eventsDataGrid.editAction"/>-->
                 <button id="removeButton" action="eventsDataGrid.removeAction"/>
+<!--                <button id="viewButton" action="eventsDataGrid.viewAction"/>-->
             </startSlot>
             <endSlot>
                 <simplePagination id="pagination" dataLoader="eventsDl"/>
@@ -48,8 +49,9 @@
                   selectionMode="MULTI">
             <actions>
                 <action id="createAction" type="list_create"/>
-                <action id="editAction" type="list_edit"/>
+<!--                <action id="editAction" type="list_edit"/>-->
                 <action id="removeAction" type="list_remove"/>
+<!--                <action id="viewAction" type="list_view"/>-->
             </actions>
             <columns resizable="true">
                 <column property="date"/>
