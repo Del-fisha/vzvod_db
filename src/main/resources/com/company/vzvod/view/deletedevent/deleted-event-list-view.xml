@@ -1,20 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <view xmlns="http://jmix.io/schema/flowui/view"
       xmlns:c="http://jmix.io/schema/flowui/jpql-condition"
-      title="msg://lastEventListView.title"
-      focusComponent="eventsDataGrid">
+      title="msg://deletedEventListView.title"
+      focusComponent="deletedEventsDataGrid">
     <data>
-        <collection id="eventsDc"
-                    class="com.company.vzvod.entity.Event">
+        <collection id="deletedEventsDc"
+                    class="com.company.vzvod.entity.DeletedEvent">
             <fetchPlan extends="_base"/>
-            <loader id="eventsDl" readOnly="true">
+            <loader id="deletedEventsDl" readOnly="true">
                 <query>
-                    <![CDATA[
-                        select e
-                        from Event e
-                        where e.date < CURRENT_DATE
-                        order by e.date asc
-                        ]]>
+                    <![CDATA[select e from DeletedEvent e order by e.date asc]]>
                 </query>
             </loader>
         </collection>
@@ -32,18 +27,18 @@
     <layout>
         <hbox id="buttonsPanel" classNames="buttons-panel">
             <startSlot>
-                <button id="createButton" action="eventsDataGrid.createAction"/>
-                <button id="editButton" action="eventsDataGrid.editAction"/>
-                <button id="removeButton" action="eventsDataGrid.removeAction"/>
+                <button id="createButton" action="deletedEventsDataGrid.createAction"/>
+                <button id="editButton" action="deletedEventsDataGrid.editAction"/>
+                <button id="removeButton" action="deletedEventsDataGrid.removeAction"/>
             </startSlot>
             <endSlot>
-                <simplePagination id="pagination" dataLoader="eventsDl"/>
+                <simplePagination id="pagination" dataLoader="deletedEventsDl"/>
             </endSlot>
         </hbox>
-        <dataGrid id="eventsDataGrid"
+        <dataGrid id="deletedEventsDataGrid"
                   width="100%"
                   minHeight="20em"
-                  dataContainer="eventsDc"
+                  dataContainer="deletedEventsDc"
                   columnReorderingAllowed="true"
                   selectionMode="MULTI">
             <actions>

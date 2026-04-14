@@ -1,8 +1,9 @@
-package com.company.vzvod.service;
+package com.company.vzvod.service.event_service;
 
+import com.company.vzvod.entity.DeletedEvent;
 import com.company.vzvod.entity.Event;
 import com.company.vzvod.entity.EventType;
-import com.company.vzvod.service.event_service.EventTypeLoader;
+import com.company.vzvod.service.DepartmentConverter;
 import io.jmix.core.DataManager;
 import io.jmix.core.security.SystemAuthenticator;
 import org.slf4j.Logger;
@@ -36,6 +37,15 @@ public class EventKafkaConsumer {
                     .optional()
                     .orElseGet(() -> dataManager.create(Event.class));
 
+            DeletedEvent deletedEvent = dataManager.load(DeletedEvent.class)
+                    .query("select e from DeletedEvent e where e.name = :name")
+                    .parameter("name", dto.getName())
+                    .optional()
+                    .orElseGet(() -> dataManager.create(DeletedEvent.class));
+
+            if (deletedEvent.getId() != null) {
+                return;
+            }
             event.setName(dto.getName());
             if (event.getEventType() == null) {
                 event.setEventType(EventType.OTHER);

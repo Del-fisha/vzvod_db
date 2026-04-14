@@ -22,7 +22,6 @@
     <facets>
         <dataLoadCoordinator auto="true"/>
         <urlQueryParameters>
-            <genericFilter component="genericFilter"/>
             <pagination component="pagination"/>
         </urlQueryParameters>
     </facets>
@@ -31,15 +30,12 @@
         <action id="discardAction" type="lookup_discard"/>
     </actions>
     <layout>
-        <genericFilter id="genericFilter"
-                       dataLoader="eventsDl">
-            <properties include=".*"/>
-        </genericFilter>
         <hbox id="buttonsPanel" classNames="buttons-panel">
             <startSlot>
                 <button id="createButton" action="eventsDataGrid.createAction"/>
-                <button id="editButton" action="eventsDataGrid.editAction"/>
+<!--                <button id="editButton" action="eventsDataGrid.editAction"/>-->
                 <button id="removeButton" action="eventsDataGrid.removeAction"/>
+<!--                <button id="viewButton" action="eventsDataGrid.viewAction"/>-->
             </startSlot>
             <endSlot>
                 <simplePagination id="pagination" dataLoader="eventsDl"/>
@@ -53,13 +49,14 @@
                   selectionMode="MULTI">
             <actions>
                 <action id="createAction" type="list_create"/>
-                <action id="editAction" type="list_edit"/>
+<!--                <action id="editAction" type="list_edit"/>-->
                 <action id="removeAction" type="list_remove"/>
+<!--                <action id="viewAction" type="list_view"/>-->
             </actions>
             <columns resizable="true">
-                <column property="eventType"/>
-                <column property="name"/>
                 <column property="date"/>
+                <column property="name"/>
+                <column property="eventType"/>
                 <column property="time"/>
                 <column property="place"/>
                 <column property="shiftOfDepartment"/>
