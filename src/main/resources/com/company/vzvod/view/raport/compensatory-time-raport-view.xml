@@ -1,0 +1,37 @@
+<view xmlns="http://jmix.io/schema/flowui/view">
+    <layout spacing="true" padding="true">
+
+        <entityPicker id="employeeUserPicker"
+                      metaClass="User"
+                      label="Сотрудник (за кого рапорт)">
+            <actions>
+                <action id="lookup" type="entity_lookup"/>
+                <action id="clear" type="entity_clear"/>
+            </actions>
+        </entityPicker>
+
+        <entityPicker id="intercederUserPicker"
+                      metaClass="User"
+                      label="Командир (кто ходатайствует)">
+            <actions>
+                <action id="lookup" type="entity_lookup"/>
+                <action id="clear" type="entity_clear"/>
+            </actions>
+        </entityPicker>
+
+        <comboBox id="recipientComboBox"
+                  label="Начальник (кому рапорт)"/>
+
+        <datePicker id="reportDateField"
+                    label="Дата рапорта"
+                    datatype="localDate"/>
+
+        <datePicker id="dayOffDateField"
+                    label="Дата отгула"
+                    datatype="localDate"/>
+
+        <button id="sendBtn"
+                text="Отправить рапорт"
+                themeNames="primary"/>
+    </layout>
+</view>
