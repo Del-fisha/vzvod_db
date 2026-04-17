@@ -1,34 +1,68 @@
 <view xmlns="http://jmix.io/schema/flowui/view">
-    <layout spacing="true" padding="true">
 
-        <entityPicker id="employeeUserPicker"
-                      metaClass="User"
-                      label="Сотрудник (за кого рапорт)">
-            <actions>
-                <action id="lookup" type="entity_lookup"/>
-                <action id="clear" type="entity_clear"/>
-            </actions>
-        </entityPicker>
+    <data>
+        <collection id="employeesDc"
+                    class="com.company.vzvod.entity.User">
+            <fetchPlan extends="_base"/>
+            <loader id="employeesDl">
+                <query>
+                    <![CDATA[
+                select u from User u
+                where u.serviceInfo.post in ('D', 'E')
+                order by u.lastName, u.firstName
+            ]]>
+                </query>
+            </loader>
+        </collection>
 
-        <entityPicker id="intercederUserPicker"
-                      metaClass="User"
-                      label="Командир (кто ходатайствует)">
-            <actions>
-                <action id="lookup" type="entity_lookup"/>
-                <action id="clear" type="entity_clear"/>
-            </actions>
-        </entityPicker>
+        <collection id="commandersDc"
+                    class="com.company.vzvod.entity.User">
+            <fetchPlan extends="_base"/>
+            <loader id="commandersDl">
+                <query>
+                    <![CDATA[
+                select u from User u
+                where u.serviceInfo.post not in ('D', 'E')
+                order by u.lastName, u.firstName
+            ]]>
+                </query>
+            </loader>
+        </collection>
+
+    </data>
+
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+
+    <layout spacing="true" padding="true" width="500px" height="600px">
+
+        <entityComboBox id="employeeUserPicker"
+                        metaClass="User"
+                        label="Сотрудник (за кого рапорт)"
+                        itemsContainer="employeesDc"
+                        width="100%"/>
+
+        <entityComboBox id="intercederUserPicker"
+                        metaClass="User"
+                        label="Командир (кто ходатайствует)"
+                        itemsContainer="commandersDc"
+                        width="100%"/>
 
         <comboBox id="recipientComboBox"
-                  label="Начальник (кому рапорт)"/>
+                  label="Начальник (кому рапорт)"
+                  width="100%"/>
 
-        <datePicker id="reportDateField"
-                    label="Дата рапорта"
-                    datatype="localDate"/>
+        <hbox width="100%">
+            <datePicker id="reportDateField"
+                        label="Дата рапорта"
+                        datatype="localDate"/>
 
-        <datePicker id="dayOffDateField"
-                    label="Дата отгула"
-                    datatype="localDate"/>
+            <datePicker id="dayOffDateField"
+                        label="Дата отгула"
+                        datatype="localDate"/>
+        </hbox>
+
 
         <button id="sendBtn"
                 text="Отправить рапорт"

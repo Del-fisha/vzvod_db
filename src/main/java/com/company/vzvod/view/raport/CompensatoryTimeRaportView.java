@@ -6,30 +6,31 @@ import com.company.vzvod.service.dto.raport.CompensatoryTimeRaportDto;
 import com.company.vzvod.service.dto.raport.PersonDto;
 import com.company.vzvod.service.raport.CompensatoryTimeRaportSender;
 import com.vaadin.flow.component.ClickEvent;
-import com.vaadin.flow.router.Route;
 import io.jmix.core.DataManager;
 import io.jmix.core.Id;
+import io.jmix.core.Messages;
 import io.jmix.flowui.Notifications;
+import io.jmix.flowui.component.combobox.EntityComboBox;
 import io.jmix.flowui.component.combobox.JmixComboBox;
 import io.jmix.flowui.component.datepicker.TypedDatePicker;
-import io.jmix.flowui.component.valuepicker.EntityPicker;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
-import java.util.Arrays;
 
-@Route("compensatory-time-raport")
 @ViewController("CompensatoryTimeRaportView")
 @ViewDescriptor(value = "compensatory-time-raport-view.xml", path = "compensatory-time-raport-view.xml")
 public class CompensatoryTimeRaportView extends StandardView {
 
-    @ViewComponent
-    private EntityPicker<User> employeeUserPicker;
+    @Autowired
+    private Messages messages;
 
     @ViewComponent
-    private EntityPicker<User> intercederUserPicker;
+    private EntityComboBox<User> employeeUserPicker;
+
+    @ViewComponent
+    private EntityComboBox<User> intercederUserPicker;
 
     @ViewComponent
     private JmixComboBox<String> recipientComboBox;
@@ -116,10 +117,10 @@ public class CompensatoryTimeRaportView extends StandardView {
 
         if (serviceInfo != null) {
             if (serviceInfo.getRank() != null) {
-                rank = serviceInfo.getRank().toString();
+                rank = messages.getMessage(serviceInfo.getRank());
             }
             if (serviceInfo.getPost() != null) {
-                position = serviceInfo.getPost().toString();
+                position = messages.getMessage(serviceInfo.getPost());
             }
         }
 
