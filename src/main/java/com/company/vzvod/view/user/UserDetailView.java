@@ -15,6 +15,7 @@ import io.jmix.core.LoadContext;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.Notifications;
 import io.jmix.flowui.kit.component.button.JmixButton;
+import io.jmix.flowui.model.DataContext;
 import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,9 @@ public class UserDetailView extends StandardDetailView<User> {
 
     @ViewComponent
     private InstanceContainer<User> userDc;
+
+    @ViewComponent
+    private DataContext dataContext;
 
     @Autowired
     private DialogWindows dialogWindows;
@@ -63,6 +67,16 @@ public class UserDetailView extends StandardDetailView<User> {
 
         if (user.getPassword() == null || user.getPassword().isBlank()) {
             user.setPassword("0000");
+        }
+
+
+        if (user.getServiceInfo() == null) {
+            ServiceInfo serviceInfo = dataContext.create(ServiceInfo.class);
+            serviceInfo.setUser(user);
+            user.setServiceInfo(serviceInfo);
+
+            serviceInfo.setStatus(StatusInService.ACTIVE);
+            serviceInfo.setToken("TEMP");
         }
     }
 
