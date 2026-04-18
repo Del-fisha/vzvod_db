@@ -81,7 +81,7 @@ public class User implements JmixUserDetails {
     private Education education;
 
     @Column(name = "ARMY_SERVICE", nullable = false)
-    private Boolean armyService = false;
+    private String armyService;
 
     @OneToMany(mappedBy = "user")
     private List<Vehicle> vehicleInfo;
@@ -128,6 +128,14 @@ public class User implements JmixUserDetails {
 
     public void setGender(Gender gender) {
         this.gender = gender == null ? null : gender.getId();
+    }
+
+    public ArmyService getArmyService() {
+        return armyService == null ? null : ArmyService.fromId(armyService);
+    }
+
+    public void setArmyService(ArmyService armyService) {
+        this.armyService = armyService == null ? null : armyService.getId();
     }
 
 

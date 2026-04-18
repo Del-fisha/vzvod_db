@@ -73,6 +73,11 @@ public class UserDetailView extends StandardDetailView<User> {
             user.setGender(Gender.MALE);
         }
 
+        // по умолчанию: СЛУЖИЛ
+        if (user.getArmyService() == null) {
+            user.setArmyService(ArmyService.SERVED);
+        }
+
         if (user.getServiceInfo() == null) {
             ServiceInfo serviceInfo = dataContext.create(ServiceInfo.class);
             serviceInfo.setUser(user);

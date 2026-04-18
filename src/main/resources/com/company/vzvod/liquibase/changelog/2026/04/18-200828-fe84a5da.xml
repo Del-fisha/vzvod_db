@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+            http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
+
+    <changeSet id="user-army-service-boolean-to-enum-v2" author="your_name">
+
+        <!-- 1. Временная колонка под enum -->
+        <addColumn tableName="USER_">
+            <column name="ARMY_SERVICE_TMP" type="varchar(1)"/>
+        </addColumn>
+
+        <!-- 2. Перенос данных из BOOLEAN в TMP -->
+        <!-- true -> 'Y' -->
+        <update tableName="USER_">
+            <column name="ARMY_SERVICE_TMP" value="Y"/>
+            <where>ARMY_SERVICE = TRUE</where>
+        </update>
+
+        <!-- false или NULL -> 'N' -->
+        <update tableName="USER_">
+            <column name="ARMY_SERVICE_TMP" value="N"/>
+            <where>ARMY_SERVICE IS NULL OR ARMY_SERVICE = FALSE</where>
+        </update>
+
+        <!-- 3. Удаляем старую колонку BOOLEAN -->
+        <dropColumn tableName="USER_" columnName="ARMY_SERVICE"/>
+
+        <!-- 4. Переименовываем TMP в ARMY_SERVICE -->
+        <renameColumn tableName="USER_"
+                      oldColumnName="ARMY_SERVICE_TMP"
+                      newColumnName="ARMY_SERVICE"
+                      columnDataType="varchar(1)"/>
+
+        <!-- 5. Дефолт 'Y' (СЛУЖИЛ) -->
+        <addDefaultValue tableName="USER_"
+                         columnName="ARMY_SERVICE"
+                         defaultValue="Y"
+                         columnDataType="varchar(1)"/>
+
+        <!-- по желанию, после проверки данных:
+        <addNotNullConstraint tableName="USER_"
+                              columnName="ARMY_SERVICE"
+                              columnDataType="varchar(1)"/>
+        -->
+    </changeSet>
+
+</databaseChangeLog>

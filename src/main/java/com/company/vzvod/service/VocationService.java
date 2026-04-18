@@ -1,5 +1,6 @@
 package com.company.vzvod.service;
 
+import com.company.vzvod.entity.ArmyService;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.User;
 
@@ -17,10 +18,9 @@ public class VocationService {
         int result = DEFAULT_FAYS;
 
         User user = serviceInfo.getUser();
-        boolean army = user.getArmyService();
         int yearsOfService = Period.between(serviceInfo.getStartDate(), date)
                 .getYears();
-        if (army) {
+        if (user.getArmyService() == ArmyService.SERVED) {
             yearsOfService += 1;
         }
 

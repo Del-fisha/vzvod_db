@@ -1,5 +1,6 @@
 package com.company.vzvod.service;
 
+import com.company.vzvod.entity.ArmyService;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.User;
 import com.company.vzvod.test_support.PreTestEntities;
@@ -39,7 +40,7 @@ class VocationServiceTest {
     @DisplayName("Проверяет количество дней отпуска в зависимости от стажа: 10, 15, 20+ лет")
     void daysAvailable() {
         serviceInfo.setStartDate(LocalDate.of(2013, 4, 3));
-        serviceInfo.getUser().setArmyService(false);
+        serviceInfo.getUser().setArmyService(ArmyService.NOT_SERVED);
 
         LocalDate lessThan10Years = LocalDate.of(2023, 4, 2);
         LocalDate moreThan10Years = LocalDate.of(2023, 4, 4);
@@ -51,7 +52,7 @@ class VocationServiceTest {
         assertEquals(50, VocationService.daysAvailable(serviceInfo, moreThan15Years));
         assertEquals(55, VocationService.daysAvailable(serviceInfo, moreThan20Year));
 
-        serviceInfo.getUser().setArmyService(true);
+        serviceInfo.getUser().setArmyService(ArmyService.SERVED);
 
         lessThan10Years = LocalDate.of(2022, 4, 2);
         moreThan10Years = LocalDate.of(2022, 4, 4);

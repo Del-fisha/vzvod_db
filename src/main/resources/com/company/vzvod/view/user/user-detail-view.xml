@@ -51,10 +51,9 @@
             <textField id="patronymicField" property="patronymic"/>
             <datePicker id="dateOfBirthField" property="dateOfBirth"/>
 
-            <checkbox id="armyServiceField"
+            <comboBox id="armyServiceField"
                       property="armyService"
-                      label="Служба в армии"
-                      required="false"/>
+                      label="Служба в армии"/>
             <comboBox id="genderField"
                       property="gender"/>
 
