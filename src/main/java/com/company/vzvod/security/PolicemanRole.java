@@ -182,6 +182,7 @@ public interface PolicemanRole {
             "MyShift.list",
             "Event.list",
             "LastEvent.list"
+//            "CompensatoryTimeRaportView"
 //            "Event.detail",
 //            "DeletedEvent.detail",
 //            "DeletedEvent.list"
@@ -192,6 +193,7 @@ public interface PolicemanRole {
             "my_shifts",
             "future_events",
             "last_events"
+//            "CompensatoryTimeRaportView"
     })
     void userViews();
 }

@@ -1,0 +1,71 @@
+<view xmlns="http://jmix.io/schema/flowui/view">
+
+    <data>
+        <collection id="employeesDc"
+                    class="com.company.vzvod.entity.User">
+            <fetchPlan extends="_base"/>
+            <loader id="employeesDl">
+                <query>
+                    <![CDATA[
+                select u from User u
+                where u.serviceInfo.post in ('D', 'E')
+                order by u.lastName, u.firstName
+            ]]>
+                </query>
+            </loader>
+        </collection>
+
+        <collection id="commandersDc"
+                    class="com.company.vzvod.entity.User">
+            <fetchPlan extends="_base"/>
+            <loader id="commandersDl">
+                <query>
+                    <![CDATA[
+                select u from User u
+                where u.serviceInfo.post not in ('D', 'E')
+                order by u.lastName, u.firstName
+            ]]>
+                </query>
+            </loader>
+        </collection>
+
+    </data>
+
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+
+    <layout spacing="true" padding="true" width="500px" height="600px">
+
+        <entityComboBox id="employeeUserPicker"
+                        metaClass="User"
+                        label="Сотрудник (за кого рапорт)"
+                        itemsContainer="employeesDc"
+                        width="100%"/>
+
+        <entityComboBox id="intercederUserPicker"
+                        metaClass="User"
+                        label="Командир (кто ходатайствует)"
+                        itemsContainer="commandersDc"
+                        width="100%"/>
+
+        <comboBox id="recipientComboBox"
+                  label="Начальник (кому рапорт)"
+                  width="100%"/>
+
+        <hbox width="100%">
+            <datePicker id="reportDateField"
+                        label="Дата рапорта"
+                        datatype="localDate"/>
+
+            <datePicker id="dayOffDateField"
+                        label="Дата отгула"
+                        datatype="localDate"/>
+        </hbox>
+
+
+        <button id="sendBtn"
+                text="Отправить рапорт"
+                themeNames="primary"/>
+    </layout>
+</view>

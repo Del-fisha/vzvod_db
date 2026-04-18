@@ -27,6 +27,13 @@
         <item id="future_events" view="Event.list" title="msg://com.company.vzvod.view.event/eventListView.title"/>
         <item id="last_events" view="LastEvent.list" title="msg://com.company.vzvod.view.event/lastEventListView.title"/>
         <item id="deleted_events" view="DeletedEvent.list" title="msg://com.company.vzvod.view.deletedevent/deletedEventListView.title"/>
-
     </menu>
+
+    <menu id="raports" title="Рапорта">
+        <item id="CompensatoryTimeRaportView"
+              title="На отгул"
+              bean="raportMenuBean"
+              beanMethod="openCompensatoryRaport"/>
+    </menu>
+
 </menu-config>
