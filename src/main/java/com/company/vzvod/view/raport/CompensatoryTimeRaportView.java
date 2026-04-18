@@ -19,6 +19,7 @@ import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @ViewController("CompensatoryTimeRaportView")
 @ViewDescriptor(value = "compensatory-time-raport-view.xml", path = "compensatory-time-raport-view.xml")
@@ -47,6 +48,8 @@ public class CompensatoryTimeRaportView extends StandardView {
 
     @Autowired
     private CompensatoryTimeRaportSender raportSender;
+
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
     @Autowired
     private DataManager dataManager;
@@ -118,8 +121,8 @@ public class CompensatoryTimeRaportView extends StandardView {
         raport.setEmployee(employeeDto);
         raport.setInterceder(intercederDto);
         raport.setRecipient(recipientDto);
-        raport.setReportDate(reportDate.toString());
-        raport.setDayOffDate(dayOffDate.toString());
+        raport.setReportDate(reportDate.format(formatter));
+        raport.setDayOffDate(dayOffDate.format(formatter));
 
         try {
             raportSender.sendOtgulRaport(raport);

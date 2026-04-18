@@ -1,0 +1,7 @@
+:host(.user-list-small) {
+    font-size: 0.2rem; /* уменьшите как нужно */
+}
+
+:host(.user-list-small) vaadin-grid {
+    font-size: 0.2rem;
+}

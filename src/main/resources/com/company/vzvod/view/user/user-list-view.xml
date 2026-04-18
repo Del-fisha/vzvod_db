@@ -25,7 +25,7 @@
             </fetchPlan>
             <loader id="usersDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from User e]]>
+                    <![CDATA[select e from User e order by e.serviceInfo.post, e.serviceInfo.rank desc, e.lastName]]>
                 </query>
             </loader>
         </collection>
