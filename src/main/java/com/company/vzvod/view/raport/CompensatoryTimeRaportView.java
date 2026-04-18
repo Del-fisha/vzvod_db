@@ -5,6 +5,7 @@ import com.company.vzvod.entity.User;
 import com.company.vzvod.service.dto.raport.CompensatoryTimeRaportDto;
 import com.company.vzvod.service.dto.raport.PersonDto;
 import com.company.vzvod.service.raport.CompensatoryTimeRaportSender;
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ClickEvent;
 import io.jmix.core.DataManager;
 import io.jmix.core.Id;
@@ -27,7 +28,10 @@ public class CompensatoryTimeRaportView extends StandardView {
     private Messages messages;
 
     @ViewComponent
-    private EntityComboBox<User> employeeUserPicker;
+    private EntityComboBox<User> employeeDept1Picker;
+
+    @ViewComponent
+    private EntityComboBox<User> employeeDept2Picker;
 
     @ViewComponent
     private EntityComboBox<User> intercederUserPicker;
@@ -58,9 +62,37 @@ public class CompensatoryTimeRaportView extends StandardView {
         );
     }
 
+    @Subscribe("employeeDept1Picker")
+    public void onEmployeeDept1PickerValueChange(
+            AbstractField.ComponentValueChangeEvent<EntityComboBox<User>, User> event) {
+
+        if (event.getValue() != null) {
+            employeeDept2Picker.clear();
+            employeeDept2Picker.setEnabled(false);
+        } else {
+            employeeDept2Picker.setEnabled(true);
+        }
+    }
+
+    @Subscribe("employeeDept2Picker")
+    public void onEmployeeDept2PickerValueChange(
+            AbstractField.ComponentValueChangeEvent<EntityComboBox<User>, User> event) {
+
+        if (event.getValue() != null) {
+            employeeDept1Picker.clear();
+            employeeDept1Picker.setEnabled(false);
+        } else {
+            employeeDept1Picker.setEnabled(true);
+        }
+    }
+
     @Subscribe("sendBtn")
     public void onSendBtnClick(ClickEvent<JmixButton> event) {
-        User employee = employeeUserPicker.getValue();
+        User employee = employeeDept1Picker.getValue();
+        if (employee == null) {
+            employee = employeeDept2Picker.getValue();
+        }
+
         User interceder = intercederUserPicker.getValue();
         String recipientStr = recipientComboBox.getValue();
         LocalDate reportDate = reportDateField.getTypedValue();
@@ -97,8 +129,6 @@ public class CompensatoryTimeRaportView extends StandardView {
                     .show();
         } catch (org.springframework.web.client.HttpStatusCodeException e) {
             String status = e.getStatusCode().toString();
-            String body = e.getResponseBodyAsString();
-
             notifications.create("Ошибка при отправке рапорта: " + status)
                     .withType(Notifications.Type.ERROR)
                     .show();

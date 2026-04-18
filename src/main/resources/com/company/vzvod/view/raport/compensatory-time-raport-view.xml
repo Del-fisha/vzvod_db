@@ -1,16 +1,36 @@
 <view xmlns="http://jmix.io/schema/flowui/view">
 
     <data>
-        <collection id="employeesDc"
+        <collection id="employeesDept1Dc"
                     class="com.company.vzvod.entity.User">
             <fetchPlan extends="_base"/>
-            <loader id="employeesDl">
+            <loader id="employeesDept1Dl">
                 <query>
                     <![CDATA[
-                select u from User u
-                where u.serviceInfo.post in ('D', 'E')
-                order by u.lastName, u.firstName
-            ]]>
+                        select u
+                        from User u
+                        join u.serviceInfo si
+                        where si.post in ('D', 'E')
+                          and si.department.number = 1
+                        order by u.lastName, u.firstName
+                    ]]>
+                </query>
+            </loader>
+        </collection>
+
+        <collection id="employeesDept2Dc"
+                    class="com.company.vzvod.entity.User">
+            <fetchPlan extends="_base"/>
+            <loader id="employeesDept2Dl">
+                <query>
+                    <![CDATA[
+                        select u
+                        from User u
+                        join u.serviceInfo si
+                        where si.post in ('D', 'E')
+                          and si.department.number = 2
+                        order by u.lastName, u.firstName
+                    ]]>
                 </query>
             </loader>
         </collection>
@@ -37,11 +57,19 @@
 
     <layout spacing="true" padding="true" width="500px" height="600px">
 
-        <entityComboBox id="employeeUserPicker"
-                        metaClass="User"
-                        label="Сотрудник (за кого рапорт)"
-                        itemsContainer="employeesDc"
-                        width="100%"/>
+        <hbox width="100%">
+            <entityComboBox id="employeeDept1Picker"
+                            metaClass="User"
+                            label="Сотрудник (отдел 1)"
+                            itemsContainer="employeesDept1Dc"
+                            width="100%"/>
+
+            <entityComboBox id="employeeDept2Picker"
+                            metaClass="User"
+                            label="Сотрудник (отдел 2)"
+                            itemsContainer="employeesDept2Dc"
+                            width="100%"/>
+        </hbox>
 
         <entityComboBox id="intercederUserPicker"
                         metaClass="User"
