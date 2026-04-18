@@ -86,6 +86,9 @@ public class User implements JmixUserDetails {
     @OneToMany(mappedBy = "user")
     private List<Vehicle> vehicleInfo;
 
+    @Column(name = "GENDER")
+    private String gender;
+
     @Transient
     private Collection<? extends GrantedAuthority> authorities;
 
@@ -117,6 +120,14 @@ public class User implements JmixUserDetails {
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
+    }
+
+    public Gender getGender() {
+        return gender == null ? null : Gender.fromId(gender);
+    }
+
+    public void setGender(Gender gender) {
+        this.gender = gender == null ? null : gender.getId();
     }
 
 

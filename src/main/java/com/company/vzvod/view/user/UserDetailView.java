@@ -69,6 +69,9 @@ public class UserDetailView extends StandardDetailView<User> {
             user.setPassword("0000");
         }
 
+        if (user.getGender() == null) {
+            user.setGender(Gender.MALE);
+        }
 
         if (user.getServiceInfo() == null) {
             ServiceInfo serviceInfo = dataContext.create(ServiceInfo.class);
