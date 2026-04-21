@@ -154,6 +154,7 @@ public class UserDetailView extends StandardDetailView<User> {
         ServiceInfo serviceInfo = user.getServiceInfo();
         if (serviceInfo == null) {
             serviceInfo = dataManager.create(ServiceInfo.class);
+            serviceInfo.setStatus(StatusInService.ACTIVE);
             serviceInfo.setUser(user);
             user.setServiceInfo(serviceInfo);
         }
