@@ -76,6 +76,26 @@ configurations.implementation {
 
 test {
     useJUnitPlatform()
+    testLogging {
+        // Нагрузочные/профильные тесты печатают метрики в stdout.
+        // Включаем отображение потоков, когда явно запускаем нагрузку.
+        showStandardStreams = Boolean.getBoolean("runLoadTest") || Boolean.getBoolean("showTestStdout")
+    }
+
+    // Пробрасываем флаги в fork'нутый JVM тестов (Gradle не делает это автоматически для -D*).
+    def passthroughKeys = [
+            "runLoadTest",
+            "showTestStdout",
+            "loadTest.users",
+            "loadTest.durationMs",
+            "loadTest.warmupMs",
+            "loadTest.metricsPeriodMs"
+    ]
+    passthroughKeys.each { k ->
+        if (System.getProperty(k) != null) {
+            systemProperty(k, System.getProperty(k))
+        }
+    }
 }
 
 idea {
