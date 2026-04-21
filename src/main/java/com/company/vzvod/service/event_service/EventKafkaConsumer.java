@@ -31,40 +31,43 @@ public class EventKafkaConsumer {
         log.info("Получено событие: {}", dto);
 
         systemAuthenticator.runWithSystem(() -> {
-            Event event = dataManager.load(Event.class)
-                    .query("select e from Event e where e.name = :name")
-                    .parameter("name", dto.getName())
-                    .optional()
-                    .orElseGet(() -> dataManager.create(Event.class));
+            try {
+                Event event = dataManager.load(Event.class)
+                        .query("select e from Event e where e.name = :name")
+                        .parameter("name", dto.getName())
+                        .optional()
+                        .orElseGet(() -> dataManager.create(Event.class));
 
-            DeletedEvent deletedEvent = dataManager.load(DeletedEvent.class)
-                    .query("select e from DeletedEvent e where e.name = :name")
-                    .parameter("name", dto.getName())
-                    .optional()
-                    .orElseGet(() -> dataManager.create(DeletedEvent.class));
+                boolean isDeleted = dataManager.load(DeletedEvent.class)
+                        .query("select e from DeletedEvent e where e.name = :name")
+                        .parameter("name", dto.getName())
+                        .optional()
+                        .isPresent();
 
-            if (deletedEvent.getId() != null) {
-                return;
-            }
-            event.setName(dto.getName());
-            if (event.getEventType() == null) {
-                event.setEventType(EventType.OTHER);
-            }
-            if (event.getEventType() == EventType.OTHER) {
-                boolean isSport = EventTypeLoader.isSport(event.getName());
-                if (isSport) {
-                    event.setEventType(EventType.SPORT);
+                if (isDeleted) {
+                    return;
                 }
+                event.setName(dto.getName());
+                if (event.getEventType() == null) {
+                    event.setEventType(EventType.OTHER);
+                }
+                if (event.getEventType() == EventType.OTHER) {
+                    boolean isSport = EventTypeLoader.isSport(event.getName());
+                    if (isSport) {
+                        event.setEventType(EventType.SPORT);
+                    }
+                }
+
+                event.setDate(dto.getDate());
+                event.setTime(dto.getTime());
+                event.setShiftOfDepartment(DepartmentConverter.departmentFromDateToInt(dto.getDate()));
+                event.setPlace(dto.getPlace());
+
+                dataManager.save(event);
+            } catch (Exception e) {
+                log.error("Ошибка обработки Kafka-события: {}", dto, e);
+                throw e;
             }
-
-            event.setDate(dto.getDate());
-            event.setTime(dto.getTime());
-            event.setShiftOfDepartment(DepartmentConverter.departmentFromDateToInt(dto.getDate()));
-            event.setPlace(dto.getPlace());
-
-
-
-            dataManager.save(event);
         });
     }
 }

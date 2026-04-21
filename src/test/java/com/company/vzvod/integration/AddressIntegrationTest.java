@@ -4,6 +4,7 @@ import com.company.vzvod.entity.Address;
 import com.company.vzvod.entity.Contacts;
 import com.company.vzvod.entity.StatusOfHousing;
 import com.company.vzvod.entity.TypeOfHousing;
+import com.company.vzvod.entity.User;
 import com.company.vzvod.test_support.PreTestEntities;
 import io.jmix.core.DataManager;
 import io.jmix.core.security.SystemAuthenticator;
@@ -23,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test-postgres")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @DisplayName("Интеграционный тест Address")
 public class AddressIntegrationTest {
 
@@ -142,6 +143,12 @@ public class AddressIntegrationTest {
         Contacts contact = dataManager.create(Contacts.class);
         PreTestEntities.updateContact(contact);
         contact.setRegistration(address);
+
+        User user = dataManager.create(User.class);
+        PreTestEntities.updateUser(user);
+        user = dataManager.save(user);
+        contact.setUser(user);
+
         Contacts savedContact = dataManager.save(contact);
 
         Address savedAddress = savedContact.getRegistration();

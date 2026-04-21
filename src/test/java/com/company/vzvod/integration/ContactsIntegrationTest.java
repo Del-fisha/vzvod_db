@@ -3,6 +3,8 @@ package com.company.vzvod.integration;
 import com.company.vzvod.entity.Address;
 import com.company.vzvod.entity.Contacts;
 import com.company.vzvod.entity.MetroStation;
+import com.company.vzvod.entity.User;
+import com.company.vzvod.test_support.PreTestEntities;
 import io.jmix.core.DataManager;
 import io.jmix.core.security.SystemAuthenticator;
 import org.junit.jupiter.api.AfterEach;
@@ -21,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 @SpringBootTest
 @ActiveProfiles("test-postgres")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @DisplayName("Интеграционный тест Contacts")
 public class ContactsIntegrationTest {
 
@@ -36,9 +38,15 @@ public class ContactsIntegrationTest {
     @BeforeEach
     void setUp() {
         systemAuthenticator.begin();
+
+        User user = dataManager.create(User.class);
+        PreTestEntities.updateUser(user);
+        user = dataManager.save(user);
+
         contacts = dataManager.create(Contacts.class);
         Address address = dataManager.create(Address.class);
 
+        contacts.setUser(user);
         contacts.setPhoneNumber("89112291515");
         contacts.setHabitation(address);
         contacts.setRegistration(address);

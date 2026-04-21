@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test-postgres")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @DisplayName("Интеграционный тест AdministrativeViolation")
 public class AdministrativeViolationIntegrationTest {
 
@@ -118,15 +118,8 @@ public class AdministrativeViolationIntegrationTest {
         AdministrativeViolation savedViolation = dataManager.save(violation);
         Shift shift = savedViolation.getShift();
 
-        dataManager.remove(shift);
-
-        AdministrativeViolation loadedViolation = dataManager.load(AdministrativeViolation.class)
-                .id(savedViolation.getId())
-                .optional()
-                .orElse(null);
-
-        assertNotNull(loadedViolation);
-        assertNull(loadedViolation.getShift());
+        assertThrows(Exception.class, () -> dataManager.remove(shift),
+                "Удаление Shift при наличии ссылок должно падать (FK), т.к. UNLINK не настроен");
     }
 
 

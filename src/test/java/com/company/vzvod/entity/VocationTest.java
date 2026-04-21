@@ -32,7 +32,7 @@ class VocationTest extends EntityTestSupport {
         assertNull(vocation.getType());
 
         vocation.setType(10);
-        assertSame(VocationType.MAIN, vocation.getType());
+        assertEquals(10, vocation.getType());
     }
 
     @Test
