@@ -36,13 +36,13 @@ class UiMinimalRoleAssignmentServiceTest {
     }
 
     @Test
-    void ensureAssigned_createsAssignment() {
+    void ensureAssigned_createsDefaultAssignments() {
         String username = "admino";
 
         // precondition: may or may not exist, but after ensureAssigned it must exist.
         service.ensureAssigned(username);
 
-        boolean exists = dataManager.load(RoleAssignmentEntity.class)
+        boolean uiMinimalExists = dataManager.load(RoleAssignmentEntity.class)
                 .query("""
                         select ra from sec_RoleAssignmentEntity ra
                         where ra.username = :username
@@ -56,7 +56,22 @@ class UiMinimalRoleAssignmentServiceTest {
                 .optional()
                 .isPresent();
 
-        assertTrue(exists);
+        boolean policemanExists = dataManager.load(RoleAssignmentEntity.class)
+                .query("""
+                        select ra from sec_RoleAssignmentEntity ra
+                        where ra.username = :username
+                          and ra.roleType = :roleType
+                          and ra.roleCode = :roleCode
+                        """)
+                .parameter("username", username)
+                .parameter("roleType", "resource")
+                .parameter("roleCode", PolicemanRole.CODE)
+                .maxResults(1)
+                .optional()
+                .isPresent();
+
+        assertTrue(uiMinimalExists);
+        assertTrue(policemanExists);
     }
 }
 

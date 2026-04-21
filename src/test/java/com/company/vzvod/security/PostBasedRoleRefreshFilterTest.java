@@ -25,7 +25,7 @@ class PostBasedRoleRefreshFilterTest {
     }
 
     @Test
-    void nonAdmin_leadershipPost_getsFullAccess_andUiMinimal_only() throws Exception {
+    void nonAdmin_leadershipPost_getsFullAccess_plusDefaults() throws Exception {
         UserPostService userPostService = mock(UserPostService.class);
         when(userPostService.loadPost(any())).thenReturn(Post.COM_VZVOD);
 
@@ -55,10 +55,8 @@ class PostBasedRoleRefreshFilterTest {
         Set<String> authorities = newAuth.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(java.util.stream.Collectors.toSet());
 
         assertTrue(authorities.contains(UiMinimalRole.CODE));
+        assertTrue(authorities.contains(PolicemanRole.CODE));
         assertTrue(authorities.contains(FullAccessRole.CODE));
-        assertFalse(authorities.contains(PolicemanRole.CODE));
-        assertFalse(authorities.contains(SelfEditUserRole.CODE));
-        assertFalse(authorities.contains(PolicemanRowLevelRole.CODE));
         assertTrue(authorities.contains("unrelated-tech-authority"));
     }
 
@@ -90,14 +88,13 @@ class PostBasedRoleRefreshFilterTest {
 
         assertTrue(authorities.contains(UiMinimalRole.CODE));
         assertTrue(authorities.contains(PolicemanRole.CODE));
-        assertTrue(authorities.contains(SelfEditUserRole.CODE));
-        assertTrue(authorities.contains(PolicemanRowLevelRole.CODE));
         assertFalse(authorities.contains(FullAccessRole.CODE));
     }
 
     @Test
-    void admin_always_getsUiMinimal_added_but_other_roles_not_touched() throws Exception {
+    void existing_fullAccess_keepsUnrelatedAuthorities_andGetsDefaults() throws Exception {
         UserPostService userPostService = mock(UserPostService.class);
+        when(userPostService.loadPost(any())).thenReturn(Post.COM_VZVOD);
         PostBasedRoleRefreshFilter filter = new PostBasedRoleRefreshFilter(
                 new PostBasedRoleResolver(),
                 userPostService
@@ -110,7 +107,7 @@ class PostBasedRoleRefreshFilterTest {
                 user,
                 "n/a",
                 List.of(
-                        (GrantedAuthority) () -> ApplicationAdminRole.CODE,
+                        (GrantedAuthority) () -> FullAccessRole.CODE,
                         (GrantedAuthority) () -> "custom-admin-extra"
                 )
         );
@@ -122,11 +119,12 @@ class PostBasedRoleRefreshFilterTest {
         var newAuth = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
         Set<String> authorities = newAuth.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(java.util.stream.Collectors.toSet());
 
-        assertTrue(authorities.contains(ApplicationAdminRole.CODE));
+        assertTrue(authorities.contains(FullAccessRole.CODE));
         assertTrue(authorities.contains("custom-admin-extra"));
         assertTrue(authorities.contains(UiMinimalRole.CODE));
+        assertTrue(authorities.contains(PolicemanRole.CODE));
 
-        verifyNoInteractions(userPostService);
+        verify(userPostService).loadPost(any());
     }
 
     private static jakarta.servlet.http.HttpServletRequest mockRequest() {

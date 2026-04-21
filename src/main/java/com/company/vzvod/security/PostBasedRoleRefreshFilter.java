@@ -40,38 +40,10 @@ public class PostBasedRoleRefreshFilter extends OncePerRequestFilter {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof User user) {
-            if (isAdmin(authentication.getAuthorities())) {
-                ensureUiMinimal(authentication, user);
-            } else {
-                refreshAuthoritiesIfNeeded(authentication, user);
-            }
+            refreshAuthoritiesIfNeeded(authentication, user);
         }
 
         filterChain.doFilter(request, response);
-    }
-
-    private boolean isAdmin(Collection<? extends GrantedAuthority> authorities) {
-        return hasAuthority(authorities, ApplicationAdminRole.CODE);
-    }
-
-    private void ensureUiMinimal(Authentication authentication, User user) {
-        if (hasAuthority(authentication.getAuthorities(), UiMinimalRole.CODE)) {
-            return;
-        }
-
-        List<GrantedAuthority> newAuthorities = new ArrayList<>(authentication.getAuthorities().size() + 1);
-        newAuthorities.addAll(authentication.getAuthorities());
-        newAuthorities.add(() -> UiMinimalRole.CODE);
-
-        user.setAuthorities(newAuthorities);
-
-        Authentication newAuth = new UsernamePasswordAuthenticationToken(
-                authentication.getPrincipal(),
-                authentication.getCredentials(),
-                newAuthorities
-        );
-        ((UsernamePasswordAuthenticationToken) newAuth).setDetails(authentication.getDetails());
-        SecurityContextHolder.getContext().setAuthentication(newAuth);
     }
 
     private void refreshAuthoritiesIfNeeded(Authentication authentication, User user) {
@@ -85,12 +57,9 @@ public class PostBasedRoleRefreshFilter extends OncePerRequestFilter {
 
         Set<String> desired = new HashSet<>();
         desired.add(UiMinimalRole.CODE);
+        desired.add(PolicemanRole.CODE);
         if (shouldBeFull) {
             desired.add(FullAccessRole.CODE);
-        } else {
-            desired.add(PolicemanRole.CODE);
-            desired.add(SelfEditUserRole.CODE);
-            desired.add(PolicemanRowLevelRole.CODE);
         }
 
         List<GrantedAuthority> newAuthorities = rebuildAuthorities(authentication.getAuthorities(), desired);
@@ -123,8 +92,6 @@ public class PostBasedRoleRefreshFilter extends OncePerRequestFilter {
         Set<String> managed = Set.of(
                 FullAccessRole.CODE,
                 PolicemanRole.CODE,
-                SelfEditUserRole.CODE,
-                PolicemanRowLevelRole.CODE,
                 UiMinimalRole.CODE
         );
 

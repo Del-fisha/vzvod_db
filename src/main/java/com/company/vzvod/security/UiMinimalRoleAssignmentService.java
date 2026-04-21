@@ -1,6 +1,7 @@
 package com.company.vzvod.security;
 
 import io.jmix.core.UnconstrainedDataManager;
+import io.jmix.data.exception.UniqueConstraintViolationException;
 import io.jmix.securitydata.entity.RoleAssignmentEntity;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +22,11 @@ public class UiMinimalRoleAssignmentService {
         if (username == null || username.isBlank()) {
             return;
         }
+        ensureRoleAssigned(username, UiMinimalRole.CODE);
+        ensureRoleAssigned(username, PolicemanRole.CODE);
+    }
 
+    private void ensureRoleAssigned(String username, String roleCode) {
         boolean exists = dataManager.load(RoleAssignmentEntity.class)
                 .query("""
                         select ra from sec_RoleAssignmentEntity ra
@@ -31,7 +36,7 @@ public class UiMinimalRoleAssignmentService {
                         """)
                 .parameter("username", username)
                 .parameter("roleType", ROLE_TYPE_RESOURCE)
-                .parameter("roleCode", UiMinimalRole.CODE)
+                .parameter("roleCode", roleCode)
                 .maxResults(1)
                 .optional()
                 .isPresent();
@@ -43,9 +48,13 @@ public class UiMinimalRoleAssignmentService {
         RoleAssignmentEntity ra = dataManager.create(RoleAssignmentEntity.class);
         ra.setUsername(username);
         ra.setRoleType(ROLE_TYPE_RESOURCE);
-        ra.setRoleCode(UiMinimalRole.CODE);
+        ra.setRoleCode(roleCode);
 
-        dataManager.save(ra);
+        try {
+            dataManager.save(ra);
+        } catch (UniqueConstraintViolationException ignored) {
+            // assignment already created in parallel / in same commit cycle
+        }
     }
 
     public List<String> loadAllUsernames() {

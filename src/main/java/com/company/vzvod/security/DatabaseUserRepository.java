@@ -21,6 +21,7 @@ public class DatabaseUserRepository extends AbstractDatabaseUserRepository<User>
     protected void initSystemUser(final User systemUser) {
         final Collection<GrantedAuthority> authorities = getGrantedAuthoritiesBuilder()
                 .addResourceRole(FullAccessRole.CODE)
+                .addResourceRole(PolicemanRole.CODE)
                 .addResourceRole(UiMinimalRole.CODE)
                 .build();
         systemUser.setAuthorities(authorities);
