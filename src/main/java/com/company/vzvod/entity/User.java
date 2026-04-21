@@ -72,7 +72,8 @@ public class User implements JmixUserDetails {
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "user", optional = false, cascade = CascadeType.ALL)
     private ServiceInfo serviceInfo;
 
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "user")
+    @OnDeleteInverse(DeletePolicy.CASCADE)
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Contacts contactsInfo;
 
     @OnDeleteInverse(DeletePolicy.CASCADE)

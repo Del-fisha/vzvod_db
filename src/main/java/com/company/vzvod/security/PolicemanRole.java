@@ -1,8 +1,6 @@
 package com.company.vzvod.security;
 
 import com.company.vzvod.entity.*;
-import com.company.vzvod.view.event.EventListView;
-import com.company.vzvod.view.shift.MyShiftListView;
 import io.jmix.security.model.EntityAttributePolicyAction;
 import io.jmix.security.model.EntityPolicyAction;
 import io.jmix.security.model.SecurityScope;
@@ -153,9 +151,7 @@ public interface PolicemanRole {
     void eventSelfFields();
 
     @ViewPolicy(viewIds = {
-            "User.list",
             "MainView",
-            "User.detail",
             "UserListView",
             "UserCardView",
             "ServiceInfo.list",
@@ -166,7 +162,7 @@ public interface PolicemanRole {
             "Incentive.detail",
             "Incentive.list",
             "Shift.detail",
-//            "Shift.list",
+            "Shift.list",
             "Vocation.list",
             "Vocation.detail",
             "Contacts.detail",
@@ -181,7 +177,8 @@ public interface PolicemanRole {
             "CriminalViolation.list",
             "MyShift.list",
             "Event.list",
-            "LastEvent.list"
+            "LastEvent.list",
+            "LastEvent.detail"
 //            "CompensatoryTimeRaportView"
 //            "Event.detail",
 //            "DeletedEvent.detail",
@@ -192,7 +189,8 @@ public interface PolicemanRole {
             "my_profile",
             "my_shifts",
             "future_events",
-            "last_events"
+            "last_events",
+            "menuAllShifts"
 //            "CompensatoryTimeRaportView"
     })
     void userViews();

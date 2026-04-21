@@ -1,7 +1,6 @@
 package com.company.vzvod.security;
 
 import com.company.vzvod.entity.*;
-import com.company.vzvod.view.shift.MyShiftListView;
 import io.jmix.security.model.EntityAttributePolicyAction;
 import io.jmix.security.model.EntityPolicyAction;
 import io.jmix.security.role.annotation.EntityAttributePolicy;
@@ -21,12 +20,6 @@ public interface SelfEditUserRole {
     @EntityPolicy(entityClass = IdCard.class, actions = {EntityPolicyAction.UPDATE})
     void idCardUpdate();
 
-    @EntityPolicy(entityClass = Shift.class, actions = {EntityPolicyAction.CREATE, EntityPolicyAction.UPDATE})
-    void shiftEntity();
-
-    @EntityPolicy(entityClass = Vocation.class, actions = {EntityPolicyAction.CREATE, EntityPolicyAction.UPDATE})
-    void vocationEntity();
-
     @EntityPolicy(entityClass = Contacts.class, actions = {EntityPolicyAction.CREATE, EntityPolicyAction.UPDATE})
     void contactsEntity();
 
@@ -35,18 +28,6 @@ public interface SelfEditUserRole {
 
     @EntityPolicy(entityClass = Education.class, actions = {EntityPolicyAction.CREATE, EntityPolicyAction.UPDATE})
     void educationEntity();
-
-    @EntityPolicy(entityClass = AdministrativeViolation.class, actions = {EntityPolicyAction.CREATE, EntityPolicyAction.UPDATE})
-    void administrativeViolationEntity();
-
-    @EntityPolicy(entityClass = CriminalViolation.class, actions = {EntityPolicyAction.CREATE, EntityPolicyAction.UPDATE})
-    void criminalViolationEntity();
-
-    @EntityPolicy(entityClass = Shift.class, actions = {EntityPolicyAction.READ, EntityPolicyAction.UPDATE})
-    void shiftUpdate();
-
-    @EntityAttributePolicy(entityClass = Shift.class, attributes = {"units"}, action = EntityAttributePolicyAction.MODIFY)
-    void shiftUnitsModify();
 
 //    @EntityPolicy(entityClass = Event.class, actions = {EntityPolicyAction.READ, EntityPolicyAction.UPDATE})
 //    void eventEntity();
@@ -73,20 +54,6 @@ public interface SelfEditUserRole {
     void idCardSelfFields();
 
     @EntityAttributePolicy(
-            entityClass = Shift.class,
-            attributes = "*",
-            action = EntityAttributePolicyAction.MODIFY
-    )
-    void shiftSelfFields();
-
-    @EntityAttributePolicy(
-            entityClass = Vocation.class,
-            attributes = "*",
-            action = EntityAttributePolicyAction.MODIFY
-    )
-    void vocationSelfFields();
-
-    @EntityAttributePolicy(
             entityClass = Contacts.class,
             attributes = {"*"},
             action = EntityAttributePolicyAction.MODIFY
@@ -106,20 +73,6 @@ public interface SelfEditUserRole {
             action = EntityAttributePolicyAction.MODIFY
     )
     void educationSelfFields();
-
-    @EntityAttributePolicy(
-            entityClass = AdministrativeViolation.class,
-            attributes = "*",
-            action = EntityAttributePolicyAction.MODIFY
-    )
-    void administrativeViolationSelfFields();
-
-    @EntityAttributePolicy(
-            entityClass = CriminalViolation.class,
-            attributes = "*",
-            action = EntityAttributePolicyAction.MODIFY
-    )
-    void criminalViolationSelfFields();
 
 //    @EntityAttributePolicy(
 //            entityClass = Event.class,
