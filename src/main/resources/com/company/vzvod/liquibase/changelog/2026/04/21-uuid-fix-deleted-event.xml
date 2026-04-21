@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+    <changeSet id="2026-04-21-deleted-event-uuid-columns-postgres" author="assistant" dbms="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="DELETED_EVENT"/>
+        </preConditions>
+
+        <sql>
+            ALTER TABLE DELETED_EVENT
+                ALTER COLUMN ID TYPE UUID USING (ID::uuid);
+        </sql>
+
+        <sql>
+            ALTER TABLE DELETED_EVENT
+                ALTER COLUMN ORIGINAL_EVENT_ID TYPE UUID USING (NULLIF(ORIGINAL_EVENT_ID, '')::uuid);
+        </sql>
+    </changeSet>
+
+    <changeSet id="2026-04-21-deleted-event-uuid-columns-hsql" author="assistant" dbms="hsqldb">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="DELETED_EVENT"/>
+        </preConditions>
+
+        <modifyDataType tableName="DELETED_EVENT" columnName="ID" newDataType="UUID"/>
+        <modifyDataType tableName="DELETED_EVENT" columnName="ORIGINAL_EVENT_ID" newDataType="UUID"/>
+    </changeSet>
+
+</databaseChangeLog>
+
