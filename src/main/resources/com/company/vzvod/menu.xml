@@ -6,6 +6,14 @@
               title="Мой профиль"/>
         <item id="my_shifts" view="MyShift.list"
               title="Мои смены"/>
+        <item id="my_administrative_violations" view="MyAdministrativeViolation.list"
+              title="Моя административка"/>
+        <item id="my_criminal_violations" view="MyCriminalViolation.list"
+              title="Моя уголовка"/>
+        <item id="my_penalties" view="MyPenalty.list"
+              title="Мои взыскания"/>
+        <item id="my_incentives" view="MyIncentive.list"
+              title="Мои поощрения"/>
     </menu>
 
     <menu id="application" title="msg://com.company.vzvod/menu.application.title" opened="false">
