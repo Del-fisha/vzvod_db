@@ -1,6 +1,7 @@
 package com.company.vzvod.view.usercard;
 
 import com.company.vzvod.entity.*;
+import com.company.vzvod.service.VocationBalanceService;
 import com.company.vzvod.view.shiftblank.ShiftBlankView;
 import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.grid.ItemDoubleClickEvent;
@@ -64,6 +65,9 @@ public class UserCardView extends StandardView {
     @Autowired
     private ViewNavigators viewNavigators;
 
+    @Autowired
+    private VocationBalanceService vocationBalanceService;
+
     @Subscribe
     public void onQueryParametersChange(QueryParametersChangeEvent event) {
         List<String> params = event.getQueryParameters()
@@ -126,6 +130,12 @@ public class UserCardView extends StandardView {
         header.setText(user.getDisplayName());
 
         ServiceInfo serviceInfo = user.getServiceInfo();
+        if (serviceInfo != null && serviceInfo.getId() != null) {
+            var stats = vocationBalanceService.recalcAndSave(serviceInfo.getId());
+            // локально обновим отображаемый инстанс (в fetchPlan эти поля загружены, поэтому безопасно)
+            serviceInfo.setVacationDaysEntitled(stats.entitled());
+            serviceInfo.setVacationDaysAvailable(stats.available());
+        }
         serviceInfoDc.setItem(serviceInfo);
 
         Contacts contacts = user.getContactsInfo();

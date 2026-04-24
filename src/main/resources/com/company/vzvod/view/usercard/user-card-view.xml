@@ -259,6 +259,12 @@
                                                       readOnly="true"/>
                                     </formItem>
                                     <formItem>
+                                        <integerField id="vacationDaysUsedField"
+                                                      property="vacationDaysUsed"
+                                                      label="msg://com.company.vzvod.view.usercard/userCardView.vacationDaysUsedField.label"
+                                                      readOnly="true"/>
+                                    </formItem>
+                                    <formItem>
                                         <integerField id="vacationDaysAvailableField"
                                                       property="vacationDaysAvailable"
                                                       label="msg://com.company.vzvod.view.usercard/userCardView.vacationDaysAvailableField.label"

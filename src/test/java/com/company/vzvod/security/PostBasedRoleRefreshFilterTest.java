@@ -9,6 +9,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import io.jmix.security.role.RoleGrantedAuthorityUtils;
 
 import java.util.List;
 import java.util.Set;
@@ -29,9 +30,15 @@ class PostBasedRoleRefreshFilterTest {
         UserPostService userPostService = mock(UserPostService.class);
         when(userPostService.loadPost(any())).thenReturn(Post.COM_VZVOD);
 
+        RoleGrantedAuthorityUtils roleGrantedAuthorityUtils = mock(RoleGrantedAuthorityUtils.class);
+        when(roleGrantedAuthorityUtils.getDefaultRolePrefix()).thenReturn("");
+        when(roleGrantedAuthorityUtils.createResourceRoleGrantedAuthority(anyString()))
+                .thenAnswer(inv -> (GrantedAuthority) () -> inv.getArgument(0));
+
         PostBasedRoleRefreshFilter filter = new PostBasedRoleRefreshFilter(
                 new PostBasedRoleResolver(),
-                userPostService
+                userPostService,
+                roleGrantedAuthorityUtils
         );
 
         User user = new User();
@@ -65,9 +72,15 @@ class PostBasedRoleRefreshFilterTest {
         UserPostService userPostService = mock(UserPostService.class);
         when(userPostService.loadPost(any())).thenReturn(Post.POLICEMAN);
 
+        RoleGrantedAuthorityUtils roleGrantedAuthorityUtils = mock(RoleGrantedAuthorityUtils.class);
+        when(roleGrantedAuthorityUtils.getDefaultRolePrefix()).thenReturn("");
+        when(roleGrantedAuthorityUtils.createResourceRoleGrantedAuthority(anyString()))
+                .thenAnswer(inv -> (GrantedAuthority) () -> inv.getArgument(0));
+
         PostBasedRoleRefreshFilter filter = new PostBasedRoleRefreshFilter(
                 new PostBasedRoleResolver(),
-                userPostService
+                userPostService,
+                roleGrantedAuthorityUtils
         );
 
         User user = new User();
@@ -95,9 +108,16 @@ class PostBasedRoleRefreshFilterTest {
     void existing_fullAccess_keepsUnrelatedAuthorities_andGetsDefaults() throws Exception {
         UserPostService userPostService = mock(UserPostService.class);
         when(userPostService.loadPost(any())).thenReturn(Post.COM_VZVOD);
+
+        RoleGrantedAuthorityUtils roleGrantedAuthorityUtils = mock(RoleGrantedAuthorityUtils.class);
+        when(roleGrantedAuthorityUtils.getDefaultRolePrefix()).thenReturn("");
+        when(roleGrantedAuthorityUtils.createResourceRoleGrantedAuthority(anyString()))
+                .thenAnswer(inv -> (GrantedAuthority) () -> inv.getArgument(0));
+
         PostBasedRoleRefreshFilter filter = new PostBasedRoleRefreshFilter(
                 new PostBasedRoleResolver(),
-                userPostService
+                userPostService,
+                roleGrantedAuthorityUtils
         );
 
         User user = new User();

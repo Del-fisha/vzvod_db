@@ -5,6 +5,7 @@ import io.jmix.core.metamodel.annotation.Composition;
 import io.jmix.core.metamodel.annotation.DependsOnProperties;
 import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
+import io.jmix.core.metamodel.annotation.JmixProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -93,6 +94,18 @@ public class ServiceInfo {
 
     @Column(name = "VACATION_DAYS_AVAILABLE", nullable = false)
     private Integer vacationDaysAvailable = 40;
+
+    @Transient
+    @JmixProperty
+    @DependsOnProperties({"vacationDaysEntitled", "vacationDaysAvailable"})
+    public Integer getVacationDaysUsed() {
+        Integer entitled = vacationDaysEntitled;
+        Integer available = vacationDaysAvailable;
+        if (entitled == null || available == null) {
+            return null;
+        }
+        return Math.max(0, entitled - available);
+    }
 
 
     public Rank getRank() {
