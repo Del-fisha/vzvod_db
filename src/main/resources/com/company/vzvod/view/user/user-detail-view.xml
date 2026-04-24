@@ -45,7 +45,7 @@
             </responsiveSteps>
             <textField id="userNameField" property="username" helperText="msg://com.company.vzvod.view.user.user/userNameField.text"/>
             <button id="changePasswordButton"
-                    text="Сменить пароль"/>
+                    text="msg://com.company.vzvod.view.user/userDetailView.changePasswordButton.text"/>
             <textField id="lastNameField" property="lastName"/>
             <textField id="firstNameField" property="firstName"/>
             <textField id="patronymicField" property="patronymic"/>
@@ -53,7 +53,7 @@
 
             <comboBox id="armyServiceField"
                       property="armyService"
-                      label="Служба в армии"/>
+                      label="msg://com.company.vzvod.view.user/userDetailView.armyServiceField.label"/>
             <comboBox id="genderField"
                       property="gender"/>
 

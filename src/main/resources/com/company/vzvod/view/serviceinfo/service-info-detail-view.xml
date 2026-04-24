@@ -119,7 +119,7 @@
                     <checkbox id="medicalExamination"
                               dataContainer="serviceInfoDc"
                               property="medicalExamination"
-                              label="Профосмотр"
+                              label="msg://com.company.vzvod.view.serviceinfo/serviceInfoDetailView.medicalExamination.label"
                               classNames="align-checkbox"/>
 
                 </formLayout>

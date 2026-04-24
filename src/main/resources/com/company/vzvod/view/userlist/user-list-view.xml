@@ -80,7 +80,7 @@
         <!--        <h2 text="Список сотрудников"/>-->
 
         <vbox>
-            <details summaryText="Командиры" opened="true" width="50%" alignSelf="CENTER">
+            <details summaryText="msg://com.company.vzvod.view.userlist/userListView.commanders.summaryText" opened="true" width="50%" alignSelf="CENTER">
                 <dataGrid id="noDeptDataGrid"
                           dataContainer="usersNoDeptDc"
                           width="100%" height="150px">
@@ -96,7 +96,7 @@
             <!-- Две колонки: отдел 1 и отдел 2 -->
             <hbox width="100%" spacing="true">
                 <vbox width="50%">
-                    <h3 text="Отделение 1" alignSelf="CENTER"/>
+                    <h3 text="msg://com.company.vzvod.view.userlist/userListView.department1.title" alignSelf="CENTER"/>
                     <dataGrid id="dept1DataGrid"
                               dataContainer="dept1UsersDc"
                               width="100%"
@@ -111,7 +111,7 @@
                 </vbox>
 
                 <vbox width="50%">
-                    <h3 text="Отделение 2" alignSelf="CENTER"/>
+                    <h3 text="msg://com.company.vzvod.view.userlist/userListView.department2.title" alignSelf="CENTER"/>
                     <dataGrid id="dept2DataGrid"
                               dataContainer="dept2UsersDc"
                               width="100%"

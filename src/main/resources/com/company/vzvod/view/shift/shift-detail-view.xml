@@ -55,19 +55,19 @@
                 <!-- ЛЕВАЯ КОЛОНКА - ТАБЛИЦА С СОТРУДНИКАМИ -->
                 <vbox id="left" spacing="true" height="100%">
                     <!-- БЛОК 1. Сотрудники -->
-                    <h3 text="Сотрудники в наряде"/>
+                    <h3 text="msg://com.company.vzvod.view.shift/shiftDetailView.unitsSection.title"/>
                     <hbox spacing="true">
-                        <button id="addUnitBtn" action="unitsDataGrid.add" text="Добавить сотрудника" themeNames="primary"/>
-                        <button id="removeUnitBtn" action="unitsDataGrid.remove" text="Удалить"/>
+                        <button id="addUnitBtn" action="unitsDataGrid.add" text="msg://com.company.vzvod.view.shift/shiftDetailView.addUnitBtn.text" themeNames="primary"/>
+                        <button id="removeUnitBtn" action="unitsDataGrid.remove" text="msg://com.company.vzvod.view.shift/shiftDetailView.removeUnitBtn.text"/>
                     </hbox>
                     <dataGrid id="unitsDataGrid"
                               dataContainer="unitsDc"
                               width="100%"
                               minHeight="8em">
                         <columns>
-                            <column property="user.lastName" header="Фамилия"/>
-                            <column property="user.firstName" header="Имя"/>
-                            <column property="user.patronymic" header="Отчество"/>
+                            <column property="user.lastName" header="msg://com.company.vzvod.view.shift/shiftDetailView.unitsGrid.lastName"/>
+                            <column property="user.firstName" header="msg://com.company.vzvod.view.shift/shiftDetailView.unitsGrid.firstName"/>
+                            <column property="user.patronymic" header="msg://com.company.vzvod.view.shift/shiftDetailView.unitsGrid.patronymic"/>
                         </columns>
                         <actions>
                             <!-- создаёт связь с уже существующим ServiceInfo -->
@@ -77,10 +77,10 @@
                     </dataGrid>
 
                     <!-- БЛОК 2. Административные нарушения -->
-                    <h3 text="Административная практика"/>
+                    <h3 text="msg://com.company.vzvod.view.shift/shiftDetailView.adminPracticeSection.title"/>
                     <hbox spacing="true">
-                        <button id="addAdminBtn" action="adminViolationsDataGrid.create" text="Добавить/Редактировать АП" themeNames="primary"/>
-                        <button id="removeAdminBtn" action="adminViolationsDataGrid.remove" text="Удалить"/>
+                        <button id="addAdminBtn" action="adminViolationsDataGrid.create" text="msg://com.company.vzvod.view.shift/shiftDetailView.addAdminBtn.text" themeNames="primary"/>
+                        <button id="removeAdminBtn" action="adminViolationsDataGrid.remove" text="msg://com.company.vzvod.view.shift/shiftDetailView.removeAdminBtn.text"/>
                     </hbox>
                     <dataGrid id="adminViolationsDataGrid"
                               dataContainer="administrativeViolationsDc"
@@ -88,7 +88,7 @@
                               minHeight="8em">
                         <columns>
                             <!-- подберите подходящие свойства вашей сущности AdministrativeViolation -->
-                            <column property="article" header="Статья"/>
+                            <column property="article" header="msg://com.company.vzvod.view.shift/shiftDetailView.adminPracticeGrid.article"/>
                             <!-- можно добавить дополнительные колонки -->
                         </columns>
                         <actions>
@@ -100,10 +100,10 @@
                     </dataGrid>
 
                     <!-- БЛОК 3. Уголовные нарушения -->
-                    <h3 text="Уголовная практика"/>
+                    <h3 text="msg://com.company.vzvod.view.shift/shiftDetailView.criminalPracticeSection.title"/>
                     <hbox spacing="true">
-                        <button id="addCriminalBtn" action="criminalViolationsDataGrid.create" text="Добавить/Редактировать УП" themeNames="primary"/>
-                        <button id="removeCriminalBtn" action="criminalViolationsDataGrid.remove" text="Удалить"/>
+                        <button id="addCriminalBtn" action="criminalViolationsDataGrid.create" text="msg://com.company.vzvod.view.shift/shiftDetailView.addCriminalBtn.text" themeNames="primary"/>
+                        <button id="removeCriminalBtn" action="criminalViolationsDataGrid.remove" text="msg://com.company.vzvod.view.shift/shiftDetailView.removeCriminalBtn.text"/>
                     </hbox>
                     <dataGrid id="criminalViolationsDataGrid"
                               dataContainer="criminalViolationsDc"
@@ -111,7 +111,7 @@
                               minHeight="8em">
                         <columns>
                             <!-- свойство type – ваш enum TypeOfCriminal -->
-                            <column property="type" header="Тип преступления"/>
+                            <column property="type" header="msg://com.company.vzvod.view.shift/shiftDetailView.criminalPracticeGrid.type"/>
                         </columns>
                         <actions>
                             <action id="create" type="list_create"/>
@@ -125,7 +125,7 @@
                     <responsiveSteps>
                         <responsiveStep minWidth="0" columns="1"/>
                     </responsiveSteps>
-                    <h3>Данные наряда</h3>
+                    <h3 text="msg://com.company.vzvod.view.shift/shiftDetailView.shiftDataSection.title"/>
                     <select id="numberField" property="number"/>
                     <select id="typeOfShiftField" property="typeOfShift"/>
                     <datePicker id="dateField" property="date"/>

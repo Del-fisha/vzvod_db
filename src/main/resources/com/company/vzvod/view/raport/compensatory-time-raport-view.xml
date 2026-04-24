@@ -60,40 +60,40 @@
         <hbox width="100%">
             <entityComboBox id="employeeDept1Picker"
                             metaClass="User"
-                            label="Сотрудник (отдел 1)"
+                            label="msg://com.company.vzvod.view.raport/compensatoryTimeRaportView.employeeDept1Picker.label"
                             itemsContainer="employeesDept1Dc"
                             width="100%"/>
 
             <entityComboBox id="employeeDept2Picker"
                             metaClass="User"
-                            label="Сотрудник (отдел 2)"
+                            label="msg://com.company.vzvod.view.raport/compensatoryTimeRaportView.employeeDept2Picker.label"
                             itemsContainer="employeesDept2Dc"
                             width="100%"/>
         </hbox>
 
         <entityComboBox id="intercederUserPicker"
                         metaClass="User"
-                        label="Командир (кто ходатайствует)"
+                        label="msg://com.company.vzvod.view.raport/compensatoryTimeRaportView.intercederUserPicker.label"
                         itemsContainer="commandersDc"
                         width="100%"/>
 
         <comboBox id="recipientComboBox"
-                  label="Начальник (кому рапорт)"
+                  label="msg://com.company.vzvod.view.raport/compensatoryTimeRaportView.recipientComboBox.label"
                   width="100%"/>
 
         <hbox width="100%">
             <datePicker id="reportDateField"
-                        label="Дата рапорта"
+                        label="msg://com.company.vzvod.view.raport/compensatoryTimeRaportView.reportDateField.label"
                         datatype="localDate"/>
 
             <datePicker id="dayOffDateField"
-                        label="Дата отгула"
+                        label="msg://com.company.vzvod.view.raport/compensatoryTimeRaportView.dayOffDateField.label"
                         datatype="localDate"/>
         </hbox>
 
 
         <button id="sendBtn"
-                text="Отправить рапорт"
+                text="msg://com.company.vzvod.view.raport/compensatoryTimeRaportView.sendBtn.text"
                 themeNames="primary"/>
     </layout>
 </view>

@@ -105,7 +105,7 @@
         <hbox width="100%" spacing="true">
             <!-- Левая колонка: сотрудники отделения -->
             <vbox width="25%" spacing="true">
-                <h3 text="Сотрудники отделения"/>
+                <h3 text="msg://com.company.vzvod.view.usercard/userCardView.colleaguesSection.title"/>
                 <dataGrid id="colleaguesDataGrid"
                           dataContainer="colleaguesDc"
                           width="100%"
@@ -175,7 +175,7 @@
                     <vbox width="50%">
                         <accordion id="mainAccordion" width="100%">
                             <!-- Контакты -->
-                            <accordionPanel summaryText="Контакты">
+                            <accordionPanel summaryText="msg://com.company.vzvod.view.usercard/userCardView.contactsPanel.summaryText">
                                 <formLayout dataContainer="contactsDc"
                                             labelsPosition="ASIDE"
                                             autoResponsive="false">
@@ -189,7 +189,7 @@
                             </accordionPanel>
 
                             <!-- Адрес регистрации -->
-                            <accordionPanel summaryText="Адрес регистрации">
+                            <accordionPanel summaryText="msg://com.company.vzvod.view.usercard/userCardView.registrationAddressPanel.summaryText">
                                 <formLayout dataContainer="regAddressDc"
                                             labelsPosition="ASIDE">
                                     <formItem>
@@ -220,7 +220,7 @@
                             </accordionPanel>
 
                             <!-- Адрес проживания -->
-                            <accordionPanel summaryText="Адрес проживания">
+                            <accordionPanel summaryText="msg://com.company.vzvod.view.usercard/userCardView.habitationAddressPanel.summaryText">
                                 <formLayout dataContainer="habAddressDc"
                                             labelsPosition="ASIDE">
                                     <formItem>
@@ -250,18 +250,18 @@
                                 </formLayout>
                             </accordionPanel>
 
-                            <accordionPanel summaryText="Отпуска">
+                            <accordionPanel summaryText="msg://com.company.vzvod.view.usercard/userCardView.vacationsPanel.summaryText">
                                 <formLayout dataContainer="serviceInfoDc" labelsPosition="ASIDE">
                                     <formItem>
                                         <integerField id="vacationDaysEntitledField"
                                                       property="vacationDaysEntitled"
-                                                      label="Положено"
+                                                      label="msg://com.company.vzvod.view.usercard/userCardView.vacationDaysEntitledField.label"
                                                       readOnly="true"/>
                                     </formItem>
                                     <formItem>
                                         <integerField id="vacationDaysAvailableField"
                                                       property="vacationDaysAvailable"
-                                                      label="Осталось"
+                                                      label="msg://com.company.vzvod.view.usercard/userCardView.vacationDaysAvailableField.label"
                                                       readOnly="true"/>
                                     </formItem>
                                 </formLayout>
@@ -272,7 +272,7 @@
 
                 <!-- Низ: общий аккордеон "Смены" -->
                 <accordion id="shiftsAccordion" width="100%">
-                    <accordionPanel summaryText="Смены">
+                    <accordionPanel summaryText="msg://com.company.vzvod.view.usercard/userCardView.shiftsPanel.summaryText">
                         <dataGrid id="shiftsDataGrid"
                                   dataContainer="shiftsDc"
                                   width="100%"
