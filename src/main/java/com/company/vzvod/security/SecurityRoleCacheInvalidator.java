@@ -9,7 +9,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 /**
- * Jmix caches role definitions in Spring Cache (e.g. Redis). On redeploy, the cache may contain
+ * Jmix caches role definitions in Spring Cache. On redeploy, the cache may contain
  * stale role policies, so UI permissions won't reflect code changes until cache eviction.
  * Clearing caches on startup guarantees that design-time role changes are applied immediately.
  */
