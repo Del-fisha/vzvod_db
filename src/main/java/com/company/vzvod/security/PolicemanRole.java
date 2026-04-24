@@ -154,6 +154,7 @@ public interface PolicemanRole {
             "MainView",
             "UserListView",
             "UserCardView",
+            "User.detail",
             "ServiceInfo.list",
             "ServiceInfo.detail",
             "IdCard.detail",
