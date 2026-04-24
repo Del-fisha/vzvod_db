@@ -17,10 +17,10 @@ public interface PolicemanRole {
     @EntityPolicy(entityClass = User.class, actions = {EntityPolicyAction.READ})
     void userEntity();
 
-    @EntityPolicy(entityClass = ServiceInfo.class, actions = {EntityPolicyAction.READ})
+    @EntityPolicy(entityClass = ServiceInfo.class, actions = {EntityPolicyAction.READ, EntityPolicyAction.UPDATE})
     void serviceEntity();
 
-    @EntityPolicy(entityClass = IdCard.class, actions = {EntityPolicyAction.READ})
+    @EntityPolicy(entityClass = IdCard.class, actions = {EntityPolicyAction.READ, EntityPolicyAction.CREATE, EntityPolicyAction.UPDATE})
     void idCardEntity();
 
     @EntityPolicy(entityClass = Penalty.class, actions = {EntityPolicyAction.READ})
@@ -76,9 +76,16 @@ public interface PolicemanRole {
     void serviceInfoSelfFields();
 
     @EntityAttributePolicy(
+            entityClass = ServiceInfo.class,
+            attributes = {"medicalExamination"},
+            action = EntityAttributePolicyAction.MODIFY
+    )
+    void serviceInfoMedicalExamination();
+
+    @EntityAttributePolicy(
             entityClass = IdCard.class,
             attributes = {"*"},
-            action = EntityAttributePolicyAction.VIEW
+            action = EntityAttributePolicyAction.MODIFY
     )
     void idCardSelfFields();
 
