@@ -2,20 +2,21 @@ package com.company.vzvod.listener;
 
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.User;
-import com.company.vzvod.service.VocationService;
+import com.company.vzvod.service.VocationBalanceService;
 import io.jmix.core.DataManager;
 import io.jmix.core.event.EntityChangedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-
 @Component
 public class UserArmyServiceChangedListener {
 
     @Autowired
     private DataManager dataManager;
+
+    @Autowired
+    private VocationBalanceService vocationBalanceService;
 
     @EventListener
     public void onUserChangedBeforeCommit(EntityChangedEvent<User> event) {
@@ -31,11 +32,6 @@ public class UserArmyServiceChangedListener {
         if (serviceInfo == null || serviceInfo.getStartDate() == null) {
             return;
         }
-
-        int days = VocationService.daysAvailable(serviceInfo, LocalDate.now());
-        serviceInfo.setVacationDaysEntitled(days);
-        serviceInfo.setVacationDaysAvailable(days);
-
-        dataManager.save(serviceInfo);
+        vocationBalanceService.recalcAndSave(serviceInfo.getId());
     }
 }

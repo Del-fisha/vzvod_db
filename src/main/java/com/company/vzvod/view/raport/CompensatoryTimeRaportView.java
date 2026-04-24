@@ -57,11 +57,13 @@ public class CompensatoryTimeRaportView extends StandardView {
     @Autowired
     private Notifications notifications;
 
+    private static final String MSG_PREFIX = "com.company.vzvod.view.raport/compensatoryTimeRaportView.";
+
     @Subscribe
     public void onInit(InitEvent event) {
         recipientComboBox.setItems(
-                "Начальник Платов Михаил Викторович Полковник",
-                "Врио начальника Бахуров Михаил Иванович Полковник"
+                messages.getMessage(MSG_PREFIX + "recipient.chief.full"),
+                messages.getMessage(MSG_PREFIX + "recipient.deputy.full")
         );
     }
 
@@ -103,7 +105,7 @@ public class CompensatoryTimeRaportView extends StandardView {
 
         if (employee == null || interceder == null || recipientStr == null
                 || reportDate == null || dayOffDate == null) {
-            notifications.create("Заполните все поля")
+            notifications.create(messages.getMessage(MSG_PREFIX + "validation.fillAllFields"))
                     .withType(Notifications.Type.WARNING)
                     .show();
             return;
@@ -127,16 +129,16 @@ public class CompensatoryTimeRaportView extends StandardView {
         try {
             raportSender.sendOtgulRaport(raport);
 
-            notifications.create("Рапорт отправлен")
+            notifications.create(messages.getMessage(MSG_PREFIX + "notification.sent"))
                     .withType(Notifications.Type.SUCCESS)
                     .show();
         } catch (org.springframework.web.client.HttpStatusCodeException e) {
             String status = e.getStatusCode().toString();
-            notifications.create("Ошибка при отправке рапорта: " + status)
+            notifications.create(messages.getMessage(MSG_PREFIX + "notification.sendErrorWithStatus", status))
                     .withType(Notifications.Type.ERROR)
                     .show();
         } catch (org.springframework.web.client.RestClientException e) {
-            notifications.create("Не удалось связаться с сервисом рапортов")
+            notifications.create(messages.getMessage(MSG_PREFIX + "notification.serviceUnavailable"))
                     .withType(Notifications.Type.ERROR)
                     .show();
         }
@@ -174,16 +176,19 @@ public class CompensatoryTimeRaportView extends StandardView {
         String middleName;
         String rank;
 
-        if (s.startsWith("Начальник ")) {
+        String chiefPrefix = messages.getMessage(MSG_PREFIX + "recipient.chief.prefix");
+        String deputyPrefix = messages.getMessage(MSG_PREFIX + "recipient.deputy.prefix");
+
+        if (s.startsWith(chiefPrefix + " ")) {
             String[] parts = s.split("\\s+");
-            position = "Начальник";
+            position = messages.getMessage(MSG_PREFIX + "recipient.chief.position");
             lastName = parts[1];
             firstName = parts[2];
             middleName = parts[3];
             rank = parts[4];
-        } else if (s.startsWith("Врио начальника ")) {
+        } else if (s.startsWith(deputyPrefix + " ")) {
             String[] parts = s.split("\\s+");
-            position = "Врио начальника";
+            position = messages.getMessage(MSG_PREFIX + "recipient.deputy.position");
             lastName = parts[2];
             firstName = parts[3];
             middleName = parts[4];

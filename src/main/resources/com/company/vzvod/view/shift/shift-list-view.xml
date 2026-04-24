@@ -76,8 +76,8 @@
 <!--                    <column property="countOfStatements"/>-->
 <!--                    <column property="countOfClaims"/>-->
 
-                    <column key="adminViolationsCount" header="Адм. нарушения"/>
-                    <column key="criminalViolationsCount" header="Уголовные нарушения"/>
+                    <column key="adminViolationsCount" header="msg://com.company.vzvod.view.shift/shiftListView.adminViolationsCount.header"/>
+                    <column key="criminalViolationsCount" header="msg://com.company.vzvod.view.shift/shiftListView.criminalViolationsCount.header"/>
 
                     <column property="startTime"/>
                     <column property="endTime"/>

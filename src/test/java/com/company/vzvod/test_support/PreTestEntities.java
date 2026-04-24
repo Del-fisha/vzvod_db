@@ -77,7 +77,7 @@ public class PreTestEntities {
 
     public static void updateVocation(Vocation vocation) {
 
-        vocation.setType(10);
+        vocation.setTypeId(10);
         vocation.setStartDate(LocalDate.now());
         vocation.setEndDate(LocalDate.now().plusDays(14));
         vocation.setCountOfDays(14);

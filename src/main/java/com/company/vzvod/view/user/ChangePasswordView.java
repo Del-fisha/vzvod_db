@@ -4,6 +4,7 @@ import com.company.vzvod.entity.User;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.textfield.PasswordField;
 import io.jmix.core.DataManager;
+import io.jmix.core.Messages;
 import io.jmix.flowui.Notifications;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.*;
@@ -25,6 +26,9 @@ public class ChangePasswordView extends StandardView {
     @Autowired
     private DataManager dataManager;
 
+    @Autowired
+    private Messages messages;
+
 
     @ViewComponent
     private PasswordField oldPasswordField;
@@ -40,7 +44,8 @@ public class ChangePasswordView extends StandardView {
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         if (user == null) {
-            notifications.create("Не определён пользователь").show();
+            notifications.create(messages.getMessage("com.company.vzvod.view.user/changePasswordView.userNotDefined"))
+                    .show();
             close(StandardOutcome.CLOSE);
             return;
         }
@@ -56,7 +61,8 @@ public class ChangePasswordView extends StandardView {
     @Subscribe("saveButton")
     public void onSaveButtonClick(ClickEvent<JmixButton> event) {
         if (user == null) {
-            notifications.create("Не определён пользователь").show();
+            notifications.create(messages.getMessage("com.company.vzvod.view.user/changePasswordView.userNotDefined"))
+                    .show();
             return;
         }
 
@@ -65,11 +71,13 @@ public class ChangePasswordView extends StandardView {
         String confirm = confirmPasswordField.getValue();
 
         if (newPass == null || newPass.isBlank()) {
-            notifications.create("Введите новый пароль").show();
+            notifications.create(messages.getMessage("com.company.vzvod.view.user/changePasswordView.newPasswordRequired"))
+                    .show();
             return;
         }
         if (!newPass.equals(confirm)) {
-            notifications.create("Новые пароли не совпадают").show();
+            notifications.create(messages.getMessage("com.company.vzvod.view.user/changePasswordView.passwordsDoNotMatch"))
+                    .show();
             return;
         }
 
@@ -78,7 +86,8 @@ public class ChangePasswordView extends StandardView {
 
         if (passwordAlreadySet) {
             if (oldPass == null || oldPass.isBlank() || !passwordEncoder.matches(oldPass, existingHash)) {
-                notifications.create("Старый пароль неверен").show();
+                notifications.create(messages.getMessage("com.company.vzvod.view.user/changePasswordView.oldPasswordIncorrect"))
+                        .show();
                 return;
             }
         }

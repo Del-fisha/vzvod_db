@@ -1,0 +1,9 @@
+.gradle
+.idea
+.jmix
+build
+node_modules
+out
+*.iml
+*.log
+

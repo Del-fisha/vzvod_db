@@ -29,4 +29,13 @@ public class VocationListView extends StandardListView<Vocation> {
         vocationsDl.setParameter("serviceInfo", serviceInfo);
         vocationsDl.load();
     }
+
+    @Install(to = "vocationsDataGrid.createAction", subject = "initializer")
+    private void vocationsDataGridCreateInitializer(Vocation vocation) {
+        // берём параметр serviceInfo, которым фильтруется список
+        ServiceInfo serviceInfo = (ServiceInfo) vocationsDl.getParameter("serviceInfo");
+        if (serviceInfo != null) {
+            vocation.setUserServiceInfo(serviceInfo);
+        }
+    }
 }

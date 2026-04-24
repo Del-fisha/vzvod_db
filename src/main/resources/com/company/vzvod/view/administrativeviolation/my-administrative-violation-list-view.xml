@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      xmlns:c="http://jmix.io/schema/flowui/jpql-condition"
+      title="msg://com.company.vzvod.view.administrativeviolation/myAdministrativeViolationListView.title"
+      focusComponent="administrativeViolationsDataGrid">
+    <data>
+        <collection id="administrativeViolationsDc"
+                    class="com.company.vzvod.entity.AdministrativeViolation">
+            <fetchPlan extends="_base">
+                <property name="shift">
+                    <property name="number"/>
+                    <property name="date"/>
+                    <property name="units">
+                        <property name="user">
+                            <property name="firstName"/>
+                            <property name="lastName"/>
+                            <property name="patronymic"/>
+                        </property>
+                    </property>
+                    <property name="departmentToday"/>
+                </property>
+            </fetchPlan>
+            <loader id="administrativeViolationsDl" readOnly="true">
+                <query>
+                    <![CDATA[
+                        select distinct e
+                        from AdministrativeViolation e
+                        join e.shift sh
+                        left join sh.units u
+                        where :serviceInfo is null or u = :serviceInfo
+                    ]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+        <urlQueryParameters>
+            <pagination component="pagination"/>
+        </urlQueryParameters>
+    </facets>
+    <actions>
+        <action id="selectAction" type="lookup_select"/>
+        <action id="discardAction" type="lookup_discard"/>
+    </actions>
+    <layout alignItems="STRETCH"
+            padding="false" spacing="false"
+            expand="contentBox">
+        <vbox id="contentBox" classNames="overflow-auto">
+            <hbox id="buttonsPanel" classNames="buttons-panel">
+                <startSlot>
+                    <button id="createButton" action="administrativeViolationsDataGrid.createAction"/>
+                    <button id="editButton" action="administrativeViolationsDataGrid.editAction"/>
+                    <button id="removeButton" action="administrativeViolationsDataGrid.removeAction"/>
+                </startSlot>
+                <endSlot>
+                    <simplePagination id="pagination" dataLoader="administrativeViolationsDl"/>
+                </endSlot>
+            </hbox>
+            <dataGrid id="administrativeViolationsDataGrid"
+                      width="100%"
+                      minHeight="20em"
+                      dataContainer="administrativeViolationsDc"
+                      columnReorderingAllowed="true">
+                <actions>
+                    <action id="createAction" type="list_create"/>
+                    <action id="editAction" type="list_edit"/>
+                    <action id="removeAction" type="list_remove"/>
+                </actions>
+                <columns resizable="true">
+                    <column property="shift.date"/>
+                    <column property="shift.number"/>
+                    <column property="shift.departmentToday"/>
+                    <column property="shift.units"/>
+                    <column property="article"/>
+                    <column property="impact"/>
+                </columns>
+            </dataGrid>
+        </vbox>
+        <hbox id="lookupActions" visible="false"
+              classNames="px-m py-s bg-contrast-5">
+            <button id="selectButton" action="selectAction"/>
+            <button id="discardButton" action="discardAction"/>
+        </hbox>
+    </layout>
+</view>
+

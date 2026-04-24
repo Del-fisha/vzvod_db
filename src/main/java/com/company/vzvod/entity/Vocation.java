@@ -3,7 +3,9 @@ package com.company.vzvod.entity;
 import io.jmix.core.DeletePolicy;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.OnDeleteInverse;
+import io.jmix.core.metamodel.annotation.DependsOnProperties;
 import io.jmix.core.metamodel.annotation.JmixEntity;
+import io.jmix.core.metamodel.annotation.JmixProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,7 +30,7 @@ public class Vocation {
     private ServiceInfo userServiceInfo;
 
     @Column(name = "VOCATION_TYPE")
-    private Integer type;
+    private Integer typeId;
 
     @Column(name = "START_DATE")
     private LocalDate startDate;
@@ -47,6 +49,24 @@ public class Vocation {
 
     @Column(name = "DAYS_ADDED_BY_DEPARTURE")
     private Integer daysAddedByDeparture;
+
+    @JmixProperty
+    @DependsOnProperties("typeId")
+    public VocationType getType() {
+        return typeId == null ? null : VocationType.fromId(typeId);
+    }
+
+    public void setType(VocationType type) {
+        this.typeId = type == null ? null : type.getId();
+    }
+
+    public Integer getTypeId() {
+        return typeId;
+    }
+
+    public void setTypeId(Integer typeId) {
+        this.typeId = typeId;
+    }
 
     public void setUserServiceInfo(ServiceInfo userServiceInfo) {
         this.userServiceInfo = userServiceInfo;

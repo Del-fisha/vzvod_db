@@ -1,8 +1,6 @@
 package com.company.vzvod.security;
 
 import com.company.vzvod.entity.*;
-import com.company.vzvod.view.event.EventListView;
-import com.company.vzvod.view.shift.MyShiftListView;
 import io.jmix.security.model.EntityAttributePolicyAction;
 import io.jmix.security.model.EntityPolicyAction;
 import io.jmix.security.model.SecurityScope;
@@ -19,10 +17,10 @@ public interface PolicemanRole {
     @EntityPolicy(entityClass = User.class, actions = {EntityPolicyAction.READ})
     void userEntity();
 
-    @EntityPolicy(entityClass = ServiceInfo.class, actions = {EntityPolicyAction.READ})
+    @EntityPolicy(entityClass = ServiceInfo.class, actions = {EntityPolicyAction.READ, EntityPolicyAction.UPDATE})
     void serviceEntity();
 
-    @EntityPolicy(entityClass = IdCard.class, actions = {EntityPolicyAction.READ})
+    @EntityPolicy(entityClass = IdCard.class, actions = {EntityPolicyAction.READ, EntityPolicyAction.CREATE, EntityPolicyAction.UPDATE})
     void idCardEntity();
 
     @EntityPolicy(entityClass = Penalty.class, actions = {EntityPolicyAction.READ})
@@ -78,9 +76,16 @@ public interface PolicemanRole {
     void serviceInfoSelfFields();
 
     @EntityAttributePolicy(
+            entityClass = ServiceInfo.class,
+            attributes = {"medicalExamination"},
+            action = EntityAttributePolicyAction.MODIFY
+    )
+    void serviceInfoMedicalExamination();
+
+    @EntityAttributePolicy(
             entityClass = IdCard.class,
             attributes = {"*"},
-            action = EntityAttributePolicyAction.VIEW
+            action = EntityAttributePolicyAction.MODIFY
     )
     void idCardSelfFields();
 
@@ -153,20 +158,21 @@ public interface PolicemanRole {
     void eventSelfFields();
 
     @ViewPolicy(viewIds = {
-            "User.list",
             "MainView",
-            "User.detail",
             "UserListView",
             "UserCardView",
+            "User.detail",
             "ServiceInfo.list",
             "ServiceInfo.detail",
             "IdCard.detail",
             "Penalty.detail",
             "Penalty.list",
+            "MyPenalty.list",
             "Incentive.detail",
             "Incentive.list",
+            "MyIncentive.list",
             "Shift.detail",
-//            "Shift.list",
+            "Shift.list",
             "Vocation.list",
             "Vocation.detail",
             "Contacts.detail",
@@ -176,24 +182,40 @@ public interface PolicemanRole {
             "ShiftBlankView",
             "AdministrativeViolation.detail",
             "AdministrativeViolation.list",
+            "MyAdministrativeViolation.list",
             "ProfileRedirect",
             "CriminalViolation.detail",
             "CriminalViolation.list",
+            "MyCriminalViolation.list",
             "MyShift.list",
             "Event.list",
-            "LastEvent.list"
+            "LastEvent.list",
+            "LastEvent.detail"
 //            "CompensatoryTimeRaportView"
 //            "Event.detail",
 //            "DeletedEvent.detail",
 //            "DeletedEvent.list"
     })
+    void userViews();
+
     @MenuPolicy(menuIds = {
             "all_employees_to_read",
             "my_profile",
             "my_shifts",
+            "my_administrative_violations",
+            "my_criminal_violations",
+            "my_penalties",
+            "my_incentives",
+            "all_vocations",
+            "all_administrative_violations",
+            "all_criminal_violations",
+            "Vocation.list",
+            "AdministrativeViolation.list",
+            "CriminalViolation.list",
             "future_events",
-            "last_events"
+            "last_events",
+            "menuAllShifts"
 //            "CompensatoryTimeRaportView"
     })
-    void userViews();
+    void userMenu();
 }

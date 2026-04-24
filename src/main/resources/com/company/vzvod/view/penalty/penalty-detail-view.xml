@@ -29,7 +29,7 @@
             <entityPicker id="serviceInfoPicker"
                           dataContainer="penaltyDc"
                           property="userServiceInfo"
-                          label="Сотрудник">
+                          label="msg://com.company.vzvod.view.penalty/penaltyDetailView.serviceInfoPicker.label">
                 <actions>
                     <action id="lookup" type="entity_lookup"/>
                     <action id="clear" type="entity_clear"/>

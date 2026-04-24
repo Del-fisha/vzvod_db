@@ -22,7 +22,13 @@
             </fetchPlan>
             <loader id="administrativeViolationsDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from AdministrativeViolation e]]>
+                    <![CDATA[
+                        select distinct e
+                        from AdministrativeViolation e
+                        join e.shift sh
+                        left join sh.units u
+                        where :serviceInfo is null or u = :serviceInfo
+                    ]]>
                 </query>
             </loader>
         </collection>

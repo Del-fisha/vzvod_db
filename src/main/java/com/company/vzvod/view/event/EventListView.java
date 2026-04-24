@@ -1,7 +1,7 @@
 package com.company.vzvod.view.event;
 
 import com.company.vzvod.entity.Event;
-import com.company.vzvod.security.PolicemanRole;
+import com.company.vzvod.security.FullAccessRole;
 import com.company.vzvod.service.event_service.EventArchiveService;
 import com.company.vzvod.view.main.MainView;
 import com.vaadin.flow.component.button.Button;
@@ -9,6 +9,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.ItemDoubleClickEvent;
 import com.vaadin.flow.router.Route;
 import io.jmix.core.security.CurrentAuthentication;
+import io.jmix.security.role.RoleGrantedAuthorityUtils;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.view.*;
@@ -28,6 +29,9 @@ public class EventListView extends StandardListView<Event> {
 
     @Autowired
     private CurrentAuthentication currentAuthentication;
+
+    @Autowired
+    private RoleGrantedAuthorityUtils roleGrantedAuthorityUtils;
 
     @ViewComponent
     private Button createButton;
@@ -59,11 +63,10 @@ public class EventListView extends StandardListView<Event> {
 
     @Subscribe
     public void onReady(ReadyEvent event) {
-        if (hasRole(PolicemanRole.CODE)) {
+        if (!hasRole(FullAccessRole.CODE)) {
             createButton.setVisible(false);
             editButton.setVisible(false);
             removeButton.setVisible(false);
-//            viewButton.setVisible(false);
 
             var createAction = eventsDataGrid.getAction("createAction");
             if (createAction != null) {
@@ -77,16 +80,12 @@ public class EventListView extends StandardListView<Event> {
             if (removeAction != null) {
                 removeAction.setEnabled(false);
             }
-//            var viewAction = eventsDataGrid.getAction("viewAction");
-//            if (viewAction != null) {
-//                viewAction.setEnabled(false);
-//            }
         }
     }
 
     @Subscribe("eventsDataGrid")
     public void onEventsDataGridItemDoubleClick(ItemDoubleClickEvent<Event> event) {
-        if (hasRole(PolicemanRole.CODE)) {
+        if (!hasRole(FullAccessRole.CODE)) {
             return;
         }
         var editAction = eventsDataGrid.getAction("editAction");
@@ -96,7 +95,11 @@ public class EventListView extends StandardListView<Event> {
     }
 
     private boolean hasRole(String roleCode) {
+        String prefix = roleGrantedAuthorityUtils.getDefaultRolePrefix();
         return currentAuthentication.getUser().getAuthorities().stream()
-                .anyMatch(grantedAuthority -> roleCode.equals(grantedAuthority.getAuthority()));
+                .anyMatch(grantedAuthority -> {
+                    String a = grantedAuthority.getAuthority();
+                    return roleCode.equals(a) || (prefix + roleCode).equals(a);
+                });
     }
 }

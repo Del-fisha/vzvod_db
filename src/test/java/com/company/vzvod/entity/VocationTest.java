@@ -31,8 +31,8 @@ class VocationTest extends EntityTestSupport {
     void testType() {
         assertNull(vocation.getType());
 
-        vocation.setType(10);
-        assertEquals(10, vocation.getType());
+        vocation.setTypeId(10);
+        assertEquals(VocationType.MAIN, vocation.getType());
     }
 
     @Test
