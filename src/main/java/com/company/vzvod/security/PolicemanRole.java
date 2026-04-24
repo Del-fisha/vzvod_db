@@ -159,8 +159,10 @@ public interface PolicemanRole {
             "IdCard.detail",
             "Penalty.detail",
             "Penalty.list",
+            "MyPenalty.list",
             "Incentive.detail",
             "Incentive.list",
+            "MyIncentive.list",
             "Shift.detail",
             "Shift.list",
             "Vocation.list",
@@ -172,9 +174,11 @@ public interface PolicemanRole {
             "ShiftBlankView",
             "AdministrativeViolation.detail",
             "AdministrativeViolation.list",
+            "MyAdministrativeViolation.list",
             "ProfileRedirect",
             "CriminalViolation.detail",
             "CriminalViolation.list",
+            "MyCriminalViolation.list",
             "MyShift.list",
             "Event.list",
             "LastEvent.list",
@@ -184,14 +188,26 @@ public interface PolicemanRole {
 //            "DeletedEvent.detail",
 //            "DeletedEvent.list"
     })
+    void userViews();
+
     @MenuPolicy(menuIds = {
             "all_employees_to_read",
             "my_profile",
             "my_shifts",
+            "my_administrative_violations",
+            "my_criminal_violations",
+            "my_penalties",
+            "my_incentives",
+            "all_vocations",
+            "all_administrative_violations",
+            "all_criminal_violations",
+            "Vocation.list",
+            "AdministrativeViolation.list",
+            "CriminalViolation.list",
             "future_events",
             "last_events",
             "menuAllShifts"
 //            "CompensatoryTimeRaportView"
     })
-    void userViews();
+    void userMenu();
 }

@@ -5,6 +5,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import io.jmix.security.role.RoleGrantedAuthorityUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -25,10 +26,16 @@ public class PostBasedRoleRefreshFilter extends OncePerRequestFilter {
 
     private final PostBasedRoleResolver roleResolver;
     private final UserPostService userPostService;
+    private final RoleGrantedAuthorityUtils roleGrantedAuthorityUtils;
 
-    public PostBasedRoleRefreshFilter(PostBasedRoleResolver roleResolver, UserPostService userPostService) {
+    public PostBasedRoleRefreshFilter(
+            PostBasedRoleResolver roleResolver,
+            UserPostService userPostService,
+            RoleGrantedAuthorityUtils roleGrantedAuthorityUtils
+    ) {
         this.roleResolver = roleResolver;
         this.userPostService = userPostService;
+        this.roleGrantedAuthorityUtils = roleGrantedAuthorityUtils;
     }
 
     @Override
@@ -62,7 +69,7 @@ public class PostBasedRoleRefreshFilter extends OncePerRequestFilter {
             desired.add(FullAccessRole.CODE);
         }
 
-        List<GrantedAuthority> newAuthorities = rebuildAuthorities(authentication.getAuthorities(), desired);
+        List<GrantedAuthority> newAuthorities = rebuildAuthorities(authentication.getAuthorities(), desired, roleGrantedAuthorityUtils);
         if (!sameAuthorities(authentication.getAuthorities(), newAuthorities)) {
             user.setAuthorities(newAuthorities);
             Authentication newAuth = new UsernamePasswordAuthenticationToken(
@@ -86,13 +93,15 @@ public class PostBasedRoleRefreshFilter extends OncePerRequestFilter {
 
     private static List<GrantedAuthority> rebuildAuthorities(
             Collection<? extends GrantedAuthority> existing,
-            Set<String> desiredRoleCodes
+            Set<String> desiredRoleCodes,
+            RoleGrantedAuthorityUtils roleGrantedAuthorityUtils
     ) {
         // Keep unrelated authorities (e.g. technical ones), but normalize our managed role set.
+        String resourceRolePrefix = roleGrantedAuthorityUtils.getDefaultRolePrefix();
         Set<String> managed = Set.of(
-                FullAccessRole.CODE,
-                PolicemanRole.CODE,
-                UiMinimalRole.CODE
+                resourceRolePrefix + FullAccessRole.CODE,
+                resourceRolePrefix + PolicemanRole.CODE,
+                resourceRolePrefix + UiMinimalRole.CODE
         );
 
         List<GrantedAuthority> result = new ArrayList<>();
@@ -102,9 +111,9 @@ public class PostBasedRoleRefreshFilter extends OncePerRequestFilter {
             }
         }
 
-        // Add desired roles (as simple GrantedAuthority implementations).
+        // Add desired roles (as Spring Security authorities in Jmix format).
         for (String role : desiredRoleCodes) {
-            result.add(() -> role);
+            result.add(roleGrantedAuthorityUtils.createResourceRoleGrantedAuthority(role));
         }
 
         return result;

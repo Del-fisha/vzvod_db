@@ -16,16 +16,16 @@
               title="Мои поощрения"/>
     </menu>
 
-    <menu id="application" title="msg://com.company.vzvod/menu.application.title" opened="false">
+    <menu id="application" title="msg://com.company.vzvod/menu.application.title" opened="true">
         <item view="User.list" title="msg://com.company.vzvod.view.user/userListView.title"/>
         <item view="Penalty.list" title="msg://com.company.vzvod.view.penalty/penaltyListView.title"/>
         <item view="Incentive.list" title="msg://com.company.vzvod.view.penalty/incentiveListView.title"/>
-        <item view="Vocation.list" title="msg://com.company.vzvod.view.vocation/vocationListView.title"/>
-        <item view="AdministrativeViolation.list"
+        <item id="all_vocations" view="Vocation.list" title="msg://com.company.vzvod.view.vocation/vocationListView.title"/>
+        <item id="all_administrative_violations" view="AdministrativeViolation.list"
               title="msg://com.company.vzvod.view.administrativeviolation/administrativeViolationListView.title"/>
         <item id="menuAllShifts" view="Shift.list"
               title="Все смены"/>
-        <item view="CriminalViolation.list"
+        <item id="all_criminal_violations" view="CriminalViolation.list"
               title="msg://com.company.vzvod.view.criminalviolation/criminalViolationListView.title"/>
         <item id="all_employees_to_read" view="UserListView"
               title="msg://com.company.vzvod.view.userlist/userListView.title"/>
