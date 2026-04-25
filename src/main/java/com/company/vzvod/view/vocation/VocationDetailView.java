@@ -33,10 +33,13 @@ public class VocationDetailView extends StandardDetailView<Vocation> {
 
     @Subscribe
     public void onInitEntity(final InitEntityEvent<Vocation> event) {
-        User user = (User) currentAuthentication.getUser();
-        ServiceInfo serviceInfo = user.getServiceInfo();
-
-        event.getEntity().setUserServiceInfo(serviceInfo);
+        Vocation vocation = event.getEntity();
+        ServiceInfo serviceInfo = vocation.getUserServiceInfo();
+        if (serviceInfo == null) {
+            User user = (User) currentAuthentication.getUser();
+            serviceInfo = user.getServiceInfo();
+            vocation.setUserServiceInfo(serviceInfo);
+        }
         event.getEntity().setType(VocationType.MAIN);
 
         refreshBalance(serviceInfo);

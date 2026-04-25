@@ -104,7 +104,7 @@
                 <formItem>
                     <button id="idCardCreateButton"
                                 text="msg://com.company.vzvod.view.user.user/idCardButtonCreate.text"
-                                action="idCardField.entityOpen"/>
+                    />
                 </formItem>
             </formLayout>
         </hbox>
