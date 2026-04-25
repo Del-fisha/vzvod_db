@@ -98,8 +98,13 @@
 
     <layout padding="true" spacing="true" width="100%">
 
-        <!-- ФИО в заголовке -->
-        <h2 id="header" alignSelf="CENTER"/>
+        <!-- Верхняя панель: Назад + заголовок -->
+        <hbox id="topBar" width="100%" spacing="true">
+            <button id="backButton" text="Назад"/>
+            <div width="100%"/>
+            <h2 id="header"/>
+            <div width="100%"/>
+        </hbox>
 
         <!-- Общий layout: слева список отделения, справа карточка -->
         <hbox width="100%" spacing="true">
@@ -255,19 +260,16 @@
                                     <formItem>
                                         <integerField id="vacationDaysEntitledField"
                                                       property="vacationDaysEntitled"
-                                                      label="msg://com.company.vzvod.view.usercard/userCardView.vacationDaysEntitledField.label"
                                                       readOnly="true"/>
                                     </formItem>
                                     <formItem>
                                         <integerField id="vacationDaysUsedField"
                                                       property="vacationDaysUsed"
-                                                      label="msg://com.company.vzvod.view.usercard/userCardView.vacationDaysUsedField.label"
                                                       readOnly="true"/>
                                     </formItem>
                                     <formItem>
                                         <integerField id="vacationDaysAvailableField"
                                                       property="vacationDaysAvailable"
-                                                      label="msg://com.company.vzvod.view.usercard/userCardView.vacationDaysAvailableField.label"
                                                       readOnly="true"/>
                                     </formItem>
                                 </formLayout>

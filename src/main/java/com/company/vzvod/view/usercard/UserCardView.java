@@ -3,13 +3,16 @@ package com.company.vzvod.view.usercard;
 import com.company.vzvod.entity.*;
 import com.company.vzvod.service.VocationBalanceService;
 import com.company.vzvod.view.shiftblank.ShiftBlankView;
+import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.grid.ItemDoubleClickEvent;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.component.accordion.JmixAccordion;
+import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.model.CollectionContainer;
 import io.jmix.flowui.model.CollectionLoader;
@@ -119,6 +122,12 @@ public class UserCardView extends StandardView {
                 )
                 .withBackwardNavigation(true)
                 .navigate();
+    }
+
+    @Subscribe("backButton")
+    public void onBackButtonClick(ClickEvent<JmixButton> event) {
+        // Uses browser history; works with .withBackwardNavigation(true)
+        UI.getCurrent().getPage().getHistory().back();
     }
 
     private void refreshUserData() {
