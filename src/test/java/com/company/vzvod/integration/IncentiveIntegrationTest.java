@@ -15,6 +15,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,6 +34,7 @@ public class IncentiveIntegrationTest {
     DataManager dataManager;
 
     Incentive incentive;
+    private final List<UUID> createdUserIds = new ArrayList<>();
 
     @BeforeEach
     void setUp() {
@@ -117,6 +120,7 @@ public class IncentiveIntegrationTest {
         User user = dataManager.create(User.class);
         PreTestEntities.updateUser(user);
         user = dataManager.save(user);
+        createdUserIds.add(user.getId());
 
         ServiceInfo serviceInfo = dataManager.create(ServiceInfo.class);
         PreTestEntities.updateServiceInfo(serviceInfo);
@@ -147,6 +151,7 @@ public class IncentiveIntegrationTest {
         User user = dataManager.create(User.class);
         PreTestEntities.updateUser(user);
         user = dataManager.save(user);
+        createdUserIds.add(user.getId());
 
         ServiceInfo serviceInfo = dataManager.create(ServiceInfo.class);
         PreTestEntities.updateServiceInfo(serviceInfo);
@@ -200,6 +205,12 @@ public class IncentiveIntegrationTest {
 
     @AfterEach
     void tearDown() {
+        for (UUID id : createdUserIds) {
+            if (id != null) {
+                dataManager.load(User.class).id(id).optional().ifPresent(dataManager::remove);
+            }
+        }
+        createdUserIds.clear();
         systemAuthenticator.end();
     }
 }

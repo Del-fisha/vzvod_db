@@ -33,6 +33,10 @@ public class ServiceInfoIntegrationTest {
     private User user;
     private Department department;
     private IdCard idCard;
+    private UUID createdUserId;
+    private UUID createdDepartmentId;
+    private UUID createdServiceInfoId;
+    private UUID createdIdCardId;
 
     @BeforeEach
     void setUp() {
@@ -41,10 +45,12 @@ public class ServiceInfoIntegrationTest {
         user = dataManager.create(User.class);
         PreTestEntities.updateUser(user);
         user = dataManager.save(user);
+        createdUserId = user.getId();
 
         department = dataManager.create(Department.class);
         PreTestEntities.updateDepartment(department);
         department = dataManager.save(department);
+        createdDepartmentId = department.getId();
 
         idCard = dataManager.create(IdCard.class);
         PreTestEntities.updateIdCard(idCard);
@@ -58,6 +64,22 @@ public class ServiceInfoIntegrationTest {
 
     @AfterEach
     void tearDown() {
+        if (createdServiceInfoId != null) {
+            dataManager.load(ServiceInfo.class).id(createdServiceInfoId).optional().ifPresent(dataManager::remove);
+            createdServiceInfoId = null;
+        }
+        if (createdIdCardId != null) {
+            dataManager.load(IdCard.class).id(createdIdCardId).optional().ifPresent(dataManager::remove);
+            createdIdCardId = null;
+        }
+        if (createdDepartmentId != null) {
+            dataManager.load(Department.class).id(createdDepartmentId).optional().ifPresent(dataManager::remove);
+            createdDepartmentId = null;
+        }
+        if (createdUserId != null) {
+            dataManager.load(User.class).id(createdUserId).optional().ifPresent(dataManager::remove);
+            createdUserId = null;
+        }
         systemAuthenticator.end();
     }
 
@@ -65,6 +87,8 @@ public class ServiceInfoIntegrationTest {
     @DisplayName("Тест сохранения в БД")
     void testSave() {
         ServiceInfo saved = dataManager.save(serviceInfo);
+        createdServiceInfoId = saved.getId();
+        createdIdCardId = saved.getIdCard() != null ? saved.getIdCard().getId() : null;
         UUID id = saved.getId();
         assertNotNull(id);
 
@@ -86,6 +110,8 @@ public class ServiceInfoIntegrationTest {
     @DisplayName("Тест изменения в БД")
     void testUpdate() {
         ServiceInfo saved = dataManager.save(serviceInfo);
+        createdServiceInfoId = saved.getId();
+        createdIdCardId = saved.getIdCard() != null ? saved.getIdCard().getId() : null;
         UUID id = saved.getId();
 
         ServiceInfo loaded = dataManager.load(ServiceInfo.class).id(id).one();
@@ -109,9 +135,13 @@ public class ServiceInfoIntegrationTest {
     @DisplayName("Тест удаления из БД")
     void testDelete() {
         ServiceInfo saved = dataManager.save(serviceInfo);
+        createdServiceInfoId = saved.getId();
+        createdIdCardId = saved.getIdCard() != null ? saved.getIdCard().getId() : null;
         UUID id = saved.getId();
 
         dataManager.remove(saved);
+        createdServiceInfoId = null;
+        createdIdCardId = null;
         ServiceInfo deleted = dataManager.load(ServiceInfo.class).id(id).optional().orElse(null);
         assertNull(deleted);
     }
@@ -120,9 +150,13 @@ public class ServiceInfoIntegrationTest {
     @DisplayName("Тест каскадного удаления IdCard при удалении ServiceInfo")
     void testCascadeDeleteIdCard() {
         ServiceInfo saved = dataManager.save(serviceInfo);
+        createdServiceInfoId = saved.getId();
+        createdIdCardId = saved.getIdCard() != null ? saved.getIdCard().getId() : null;
         UUID idCardId = saved.getIdCard().getId();
 
         dataManager.remove(saved);
+        createdServiceInfoId = null;
+        createdIdCardId = null;
         IdCard deletedIdCard = dataManager.load(IdCard.class).id(idCardId).optional().orElse(null);
         assertNull(deletedIdCard, "IdCard должен быть удалён каскадно");
     }

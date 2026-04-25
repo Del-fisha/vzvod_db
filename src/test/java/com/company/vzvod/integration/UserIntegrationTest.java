@@ -41,6 +41,7 @@ public class UserIntegrationTest {
     private EntityManager entityManager;
 
     private User user;
+    private UUID createdUserId;
 
     @BeforeEach
     void setUp() {
@@ -52,6 +53,11 @@ public class UserIntegrationTest {
 
     @AfterEach
     void tearDown() {
+        // Clean up only what this test persisted
+        if (createdUserId != null) {
+            dataManager.load(User.class).id(createdUserId).optional().ifPresent(dataManager::remove);
+            createdUserId = null;
+        }
         systemAuthenticator.end();
     }
 
@@ -59,6 +65,7 @@ public class UserIntegrationTest {
     @DisplayName("Тест сохранения в БД")
     void testSave() {
         User saved = dataManager.save(user);
+        createdUserId = saved.getId();
         UUID id = saved.getId();
         assertNotNull(id);
 
@@ -74,6 +81,7 @@ public class UserIntegrationTest {
     @DisplayName("Тест изменения в БД")
     void testUpdate() {
         User saved = dataManager.save(user);
+        createdUserId = saved.getId();
         UUID id = saved.getId();
 
         User loaded = dataManager.load(User.class).id(id).one();
@@ -96,6 +104,7 @@ public class UserIntegrationTest {
         UUID id = saved.getId();
 
         dataManager.remove(saved);
+        createdUserId = null;
         User deleted = dataManager.load(User.class).id(id).optional().orElse(null);
         assertNull(deleted);
     }
@@ -110,6 +119,7 @@ public class UserIntegrationTest {
         user.setServiceInfo(serviceInfo);
 
         User savedUser = dataManager.save(user);
+        createdUserId = savedUser.getId();
         UUID userId = savedUser.getId();
         UUID serviceInfoId = savedUser.getServiceInfo().getId();
         assertNotNull(serviceInfoId);
@@ -121,6 +131,7 @@ public class UserIntegrationTest {
         entityManager.clear();
 
         dataManager.remove(savedUser);
+        createdUserId = null;
 
         ServiceInfo deletedServiceInfo = dataManager.load(ServiceInfo.class)
                 .id(serviceInfoId)

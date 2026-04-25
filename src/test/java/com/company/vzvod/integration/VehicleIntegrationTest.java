@@ -33,6 +33,7 @@ public class VehicleIntegrationTest {
 
     private Vehicle vehicle;
     private User user;
+    private UUID createdUserId;
 
     @BeforeEach
     void setUp() {
@@ -41,6 +42,7 @@ public class VehicleIntegrationTest {
         user = dataManager.create(User.class);
         PreTestEntities.updateUser(user);
         user = dataManager.save(user);
+        createdUserId = user.getId();
 
         vehicle = dataManager.create(Vehicle.class);
         PreTestEntities.updateVehicle(vehicle);
@@ -49,6 +51,11 @@ public class VehicleIntegrationTest {
 
     @AfterEach
     void tearDown() {
+        // Clean up only entities created by this test
+        if (createdUserId != null) {
+            dataManager.load(User.class).id(createdUserId).optional().ifPresent(dataManager::remove);
+            createdUserId = null;
+        }
         systemAuthenticator.end();
     }
 

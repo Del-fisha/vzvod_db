@@ -9,6 +9,7 @@
     <changeSet id="hsql-contacts-delete-orphans" author="Tarasov Aleksey">
         <preConditions onFail="MARK_RAN">
             <dbms type="hsqldb"/>
+            <columnExists tableName="CONTACTS" columnName="USER_ID"/>
         </preConditions>
 
         <sql>

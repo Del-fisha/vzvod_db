@@ -34,6 +34,7 @@ public class ContactsIntegrationTest {
     private SystemAuthenticator systemAuthenticator;
 
     private Contacts contacts;
+    private UUID createdUserId;
 
     @BeforeEach
     void setUp() {
@@ -42,6 +43,7 @@ public class ContactsIntegrationTest {
         User user = dataManager.create(User.class);
         PreTestEntities.updateUser(user);
         user = dataManager.save(user);
+        createdUserId = user.getId();
 
         contacts = dataManager.create(Contacts.class);
         Address address = dataManager.create(Address.class);
@@ -55,6 +57,11 @@ public class ContactsIntegrationTest {
 
     @AfterEach
     void tearDown() {
+        // Clean up only entities created by this test
+        if (createdUserId != null) {
+            dataManager.load(User.class).id(createdUserId).optional().ifPresent(dataManager::remove);
+            createdUserId = null;
+        }
         systemAuthenticator.end();
     }
 

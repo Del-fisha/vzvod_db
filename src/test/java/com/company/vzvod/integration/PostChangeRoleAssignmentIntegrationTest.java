@@ -18,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,6 +33,9 @@ class PostChangeRoleAssignmentIntegrationTest {
     @Autowired
     SystemAuthenticator systemAuthenticator;
 
+    private UUID createdUserId;
+    private UUID createdServiceInfoId;
+
     @BeforeEach
     void begin() {
         systemAuthenticator.begin();
@@ -39,6 +43,15 @@ class PostChangeRoleAssignmentIntegrationTest {
 
     @AfterEach
     void end() {
+        // Clean up only entities created by this test class
+        if (createdServiceInfoId != null) {
+            dataManager.load(ServiceInfo.class).id(createdServiceInfoId).optional().ifPresent(dataManager::remove);
+            createdServiceInfoId = null;
+        }
+        if (createdUserId != null) {
+            dataManager.load(User.class).id(createdUserId).optional().ifPresent(dataManager::remove);
+            createdUserId = null;
+        }
         systemAuthenticator.end();
     }
 
@@ -55,6 +68,8 @@ class PostChangeRoleAssignmentIntegrationTest {
         user.setServiceInfo(si);
 
         User saved = dataManager.save(user);
+        createdUserId = saved.getId();
+        createdServiceInfoId = saved.getServiceInfo() != null ? saved.getServiceInfo().getId() : null;
 
         Set<String> roles1 = loadRoles(saved.getUsername());
         assertTrue(roles1.contains(UiMinimalRole.CODE));
