@@ -59,6 +59,33 @@ public class Penalty {
         this.penaltyStatus = penaltyStatus == null ? null : penaltyStatus.getId();
     }
 
+    /**
+     * If penalty is ACTIVE and at least a year has passed since {@link #date},
+     * switch it to COMPLETED.
+     *
+     * @return true if status was changed
+     */
+    public boolean autoCompleteIfExpired(LocalDate now) {
+        if (now == null) {
+            now = LocalDate.now();
+        }
+
+        if (getPenaltyStatus() != PenaltyStatus.ACTIVE) {
+            return false;
+        }
+        if (date == null) {
+            return false;
+        }
+
+        // "a year has passed" => date <= now - 1 year
+        if (date.isAfter(now.minusYears(1))) {
+            return false;
+        }
+
+        setPenaltyStatus(PenaltyStatus.COMPLETED);
+        return true;
+    }
+
     public PenaltyType getPenaltyType() {
         return penaltyType == null ? null : PenaltyType.fromId(penaltyType);
     }
