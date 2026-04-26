@@ -36,7 +36,7 @@ public class Vocation {
     private LocalDate startDate;
 
     @Column(name = "END_DATE")
-    private LocalDate endDate
+    private LocalDate endDate;
 
     @Column(name = "COUNT_OF_DAYS")
     private Integer countOfDays;

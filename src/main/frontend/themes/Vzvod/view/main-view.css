@@ -64,3 +64,19 @@
 .jmix-main-view-footer .jmix-user-indicator {
   flex-grow: 1;
 }
+
+.bg-audio-controls {
+  position: fixed;
+  right: var(--lumo-space-m);
+  bottom: var(--lumo-space-m);
+  z-index: 1000;
+  padding: var(--lumo-space-xs) var(--lumo-space-s);
+  border-radius: var(--lumo-border-radius-m);
+  background: color-mix(in srgb, var(--lumo-base-color) 50%, transparent);
+  box-shadow: var(--lumo-box-shadow-s);
+  align-items: center;
+}
+
+.bg-volume-slider {
+  accent-color: var(--lumo-primary-color);
+}
