@@ -1,5 +1,6 @@
 package com.company.vzvod.config;
 
+import com.company.vzvod.job.ServiceInfoVocationStatusDailySyncJob;
 import com.company.vzvod.job.ServiceInfoYearlyRecalcJob;
 import org.quartz.*;
 import org.springframework.context.annotation.Bean;
@@ -29,6 +30,27 @@ public class QuartzConfig {
                 .withIdentity("serviceInfoYearlyRecalcTrigger")
                 .withSchedule(
                         cronSchedule("0 0 1 1 1 ?")
+                                .inTimeZone(TimeZone.getTimeZone("Europe/Moscow"))
+                )
+                .build();
+    }
+
+    @Bean
+    public JobDetail serviceInfoVocationStatusDailySyncJobDetail() {
+        return newJob(ServiceInfoVocationStatusDailySyncJob.class)
+                .withIdentity("serviceInfoVocationStatusDailySync")
+                .storeDurably()
+                .build();
+    }
+
+    @Bean
+    public Trigger serviceInfoVocationStatusDailySyncTrigger(JobDetail serviceInfoVocationStatusDailySyncJobDetail) {
+        return newTrigger()
+                .forJob(serviceInfoVocationStatusDailySyncJobDetail)
+                .withIdentity("serviceInfoVocationStatusDailySyncTrigger")
+                .withSchedule(
+                        // Каждый день в 00:05 (по Мск), чтобы статус гарантированно "переехал" на новую дату.
+                        cronSchedule("0 5 0 ? * *")
                                 .inTimeZone(TimeZone.getTimeZone("Europe/Moscow"))
                 )
                 .build();
