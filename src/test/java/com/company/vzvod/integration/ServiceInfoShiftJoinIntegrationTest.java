@@ -20,6 +20,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import java.util.UUID;
 
 @SpringBootTest
 @ActiveProfiles("test-postgres")
@@ -45,6 +46,10 @@ public class ServiceInfoShiftJoinIntegrationTest {
 
     User user;
 
+    private UUID createdUserId;
+    private UUID createdServiceInfoId;
+    private UUID createdShiftId;
+
     @BeforeEach
     void setUp() {
         systemAuthenticator.begin();
@@ -53,6 +58,7 @@ public class ServiceInfoShiftJoinIntegrationTest {
         PreTestEntities.updateUser(user);
 
         User savedUser = dataManager.save(user);
+        createdUserId = savedUser.getId();
 
         serviceInfo = dataManager.create(ServiceInfo.class);
         PreTestEntities.updateServiceInfo(serviceInfo);
@@ -67,10 +73,12 @@ public class ServiceInfoShiftJoinIntegrationTest {
     void testManyToManyJoin() {
 
         ServiceInfo savedServiceInfo = dataManager.save(serviceInfo);
+        createdServiceInfoId = savedServiceInfo.getId();
 
         shift.getUnits().add(savedServiceInfo);
 
         Shift savedShift = dataManager.save(shift);
+        createdShiftId = savedShift.getId();
 
         entityManager.clear();
 
@@ -101,6 +109,18 @@ public class ServiceInfoShiftJoinIntegrationTest {
 
     @AfterEach
     void tearDown() {
+        if (createdShiftId != null) {
+            dataManager.load(Shift.class).id(createdShiftId).optional().ifPresent(dataManager::remove);
+            createdShiftId = null;
+        }
+        if (createdServiceInfoId != null) {
+            dataManager.load(ServiceInfo.class).id(createdServiceInfoId).optional().ifPresent(dataManager::remove);
+            createdServiceInfoId = null;
+        }
+        if (createdUserId != null) {
+            dataManager.load(User.class).id(createdUserId).optional().ifPresent(dataManager::remove);
+            createdUserId = null;
+        }
         systemAuthenticator.end();
     }
 }

@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class AddressIntegrationTest {
 
     private Address address;
+    private UUID createdUserId;
 
     @Autowired
     private SystemAuthenticator systemAuthenticator;
@@ -52,6 +53,10 @@ public class AddressIntegrationTest {
 
     @AfterEach
     void tearDown() {
+        if (createdUserId != null) {
+            dataManager.load(User.class).id(createdUserId).optional().ifPresent(dataManager::remove);
+            createdUserId = null;
+        }
         systemAuthenticator.end();
     }
 
@@ -147,6 +152,7 @@ public class AddressIntegrationTest {
         User user = dataManager.create(User.class);
         PreTestEntities.updateUser(user);
         user = dataManager.save(user);
+        createdUserId = user.getId();
         contact.setUser(user);
 
         Contacts savedContact = dataManager.save(contact);

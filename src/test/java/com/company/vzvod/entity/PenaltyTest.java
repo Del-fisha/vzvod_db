@@ -97,4 +97,26 @@ public class PenaltyTest extends EntityTestSupport {
         penalty.setPenaltyStatus(PenaltyStatus.ACTIVE);
         assertSame(PenaltyStatus.ACTIVE, penalty.getPenaltyStatus());
     }
+
+    @Test
+    @DisplayName("ACTIVE -> COMPLETED если прошёл год")
+    void testAutoCompleteIfExpired() {
+        penalty.setPenaltyStatus(PenaltyStatus.ACTIVE);
+        penalty.setDate(LocalDate.of(2020, 1, 1));
+
+        boolean changed = penalty.autoCompleteIfExpired(LocalDate.of(2021, 1, 1));
+        assertTrue(changed);
+        assertSame(PenaltyStatus.COMPLETED, penalty.getPenaltyStatus());
+    }
+
+    @Test
+    @DisplayName("Не меняем статус, если год ещё не прошёл")
+    void testAutoCompleteIfExpiredNotYet() {
+        penalty.setPenaltyStatus(PenaltyStatus.ACTIVE);
+        penalty.setDate(LocalDate.of(2020, 1, 2));
+
+        boolean changed = penalty.autoCompleteIfExpired(LocalDate.of(2021, 1, 1));
+        assertFalse(changed);
+        assertSame(PenaltyStatus.ACTIVE, penalty.getPenaltyStatus());
+    }
 }

@@ -34,6 +34,7 @@ public class EducationIntegrationTest {
     private SystemAuthenticator systemAuthenticator;
 
     private Education education;
+    private UUID createdUserId;
 
     @BeforeEach
     void setUp() {
@@ -49,6 +50,10 @@ public class EducationIntegrationTest {
 
     @AfterEach
     void tearDown() {
+        if (createdUserId != null) {
+            dataManager.load(User.class).id(createdUserId).optional().ifPresent(dataManager::remove);
+            createdUserId = null;
+        }
         systemAuthenticator.end();
     }
 
@@ -126,12 +131,14 @@ public class EducationIntegrationTest {
         user.setEducation(education);
 
         User savedUser = dataManager.save(user);
+        createdUserId = savedUser.getId();
         Education savedEducation = savedUser.getEducation();
         UUID savedEducationId = savedEducation.getId();
 
         assertEquals(education.getId(), savedEducationId);
 
         dataManager.remove(savedUser);
+        createdUserId = null;
 
         Education loadedEducation = dataManager.load(Education.class)
                 .id(savedEducationId)
