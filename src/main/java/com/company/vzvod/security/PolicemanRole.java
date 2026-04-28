@@ -335,6 +335,7 @@ public interface PolicemanRole {
             "Penalty.list",
             "Incentive.list",
             "DeletedEvent.list",
+            "Vehicle.list",
             "CompensatoryTimeRaportView"
     })
     void userMenu();

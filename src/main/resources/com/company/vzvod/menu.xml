@@ -20,6 +20,7 @@
         <item view="User.list" title="msg://com.company.vzvod.view.user/userListView.title"/>
         <item view="Penalty.list" title="msg://com.company.vzvod.view.penalty/penaltyListView.title"/>
         <item view="Incentive.list" title="msg://com.company.vzvod.view.penalty/incentiveListView.title"/>
+        <item view="Vehicle.list" title="msg://vehicleListView.title"/>
         <item id="all_vocations" view="Vocation.list" title="msg://com.company.vzvod.view.vocation/vocationListView.title"/>
         <item id="all_administrative_violations" view="AdministrativeViolation.list"
               title="msg://com.company.vzvod.view.administrativeviolation/administrativeViolationListView.title"/>
