@@ -104,7 +104,7 @@ public class VehicleIntegrationTest {
         loaded.setInsurance(LocalDate.now().plusYears(1));
 
         Vehicle updated = dataManager.save(loaded);
-        assertEquals("В456ММ198", updated.getStateNumber());
+        assertEquals("В-456-ММ_198", updated.getStateNumber());
         assertEquals("Granta", updated.getModel());
     }
 

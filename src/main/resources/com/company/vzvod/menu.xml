@@ -4,6 +4,8 @@
     <menu id="my_data" title="msg://com.company.vzvod/menu.my_data.title" opened="true">
         <item id="my_profile" view="ProfileRedirect"
               title="msg://com.company.vzvod/menu.my_profile.title"/>
+        <item id="my_transport" view="MyVehicle.list"
+              title="msg://myVehicleListView.title"/>
         <item id="my_shifts" view="MyShift.list"
               title="msg://com.company.vzvod/menu.my_shifts.title"/>
         <item id="my_administrative_violations" view="MyAdministrativeViolation.list"

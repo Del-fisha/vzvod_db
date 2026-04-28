@@ -6,7 +6,13 @@
     <data>
         <collection id="vehiclesDc"
                     class="com.company.vzvod.entity.Vehicle">
-            <fetchPlan extends="_base"/>
+            <fetchPlan extends="_base">
+                <property name="user">
+                    <property name="firstName"/>
+                    <property name="lastName"/>
+                    <property name="patronymic"/>
+                </property>
+            </fetchPlan>
             <loader id="vehiclesDl" readOnly="true">
                 <query>
                     <![CDATA[select e from Vehicle e where :user is null or e.user = :user]]>
@@ -47,6 +53,7 @@
                 <action id="removeAction" type="list_remove"/>
             </actions>
             <columns resizable="true">
+                <column property="ownerShortFio"/>
                 <column property="stateNumber"/>
                 <column property="model"/>
                 <column property="brand"/>
