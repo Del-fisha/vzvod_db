@@ -152,4 +152,44 @@ public class User implements JmixUserDetails {
         return result.replaceAll("\\s+", " ");
     }
 
+    public String getShortFio() {
+        String ln = lastName == null ? "" : lastName.trim();
+        String fn = firstName == null ? "" : firstName.trim();
+        String pn = patronymic == null ? "" : patronymic.trim();
+
+        StringBuilder sb = new StringBuilder();
+        if (!ln.isBlank()) {
+            sb.append(ln);
+        }
+
+        String fi = initial(fn);
+        String pi = initial(pn);
+
+        if (!fi.isBlank() || !pi.isBlank()) {
+            if (sb.length() > 0) {
+                sb.append(' ');
+            }
+            if (!fi.isBlank()) {
+                sb.append(fi).append('.');
+            }
+            if (!pi.isBlank()) {
+                sb.append(' ').append(pi).append('.');
+            }
+        }
+
+        return sb.toString().trim();
+    }
+
+    private static String initial(String value) {
+        if (value == null) {
+            return "";
+        }
+        String v = value.trim();
+        if (v.isBlank()) {
+            return "";
+        }
+        int cp = v.codePointAt(0);
+        return new String(Character.toChars(cp)).toUpperCase();
+    }
+
 }

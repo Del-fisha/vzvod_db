@@ -8,8 +8,11 @@ import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.grid.ItemDoubleClickEvent;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.data.renderer.Renderer;
+import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
+import com.company.vzvod.view.main.MainView;
 import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.component.accordion.JmixAccordion;
 import io.jmix.flowui.kit.component.button.JmixButton;
@@ -24,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.UUID;
 
-@Route("user-card")
+@Route(value = "user-card", layout = MainView.class)
 @ViewController("UserCardView")
 @ViewDescriptor("user-card-view.xml")
 public class UserCardView extends StandardView {
@@ -177,5 +180,10 @@ public class UserCardView extends StandardView {
                     .findFirst()
                     .ifPresent(colleaguesDataGrid::select);
         }
+    }
+
+    @Supply(to = "colleaguesDataGrid.shortFio", subject = "renderer")
+    private Renderer<User> colleaguesShortFioRenderer() {
+        return new TextRenderer<>(u -> u == null ? "" : u.getShortFio());
     }
 }

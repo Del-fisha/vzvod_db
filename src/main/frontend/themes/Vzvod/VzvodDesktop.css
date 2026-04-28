@@ -1,0 +1,109 @@
+/* Desktop-like styling overrides.
+   Kept separate from Vzvod.css for easy switching. */
+
+html {
+  /* Make overall app background slightly gray */
+  --lumo-base-color: #eef1f4;
+}
+
+/* ===========================
+   Drawer menu: animated open
+   =========================== */
+
+.jmix-main-view-navigation vaadin-details::part(summary) {
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  transition: background 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.jmix-main-view-navigation vaadin-details::part(summary):hover {
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.09);
+  transform: translateY(-1px);
+}
+
+/* Rotate default toggle icon (if present) */
+.jmix-main-view-navigation vaadin-details::part(toggle) {
+  transition: transform 180ms ease;
+}
+.jmix-main-view-navigation vaadin-details[opened]::part(toggle) {
+  transform: rotate(90deg);
+}
+
+/* Animated content reveal */
+.jmix-main-view-navigation vaadin-details::part(content) {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: max-height 220ms ease, opacity 180ms ease, transform 220ms ease;
+  will-change: max-height, opacity, transform;
+}
+
+.jmix-main-view-navigation vaadin-details[opened]::part(content) {
+  max-height: 900px; /* enough for nested items */
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Slight stagger feel for the items inside opened group */
+.jmix-main-view-navigation vaadin-details::part(content) * {
+  transition: transform 220ms ease, opacity 220ms ease;
+}
+
+.jmix-main-view-navigation vaadin-details:not([opened])::part(content) * {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.jmix-main-view-navigation vaadin-details[opened]::part(content) * {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.bg-audio-controls {
+  gap: var(--lumo-space-s);
+  padding: 10px 12px;
+  border-radius: 12px;
+
+  /* semi-transparent dark panel */
+  background: rgba(18, 18, 20, 0.5);
+  color: rgba(255, 255, 255, 0.9);
+
+  /* subtle border + blur like desktop apps */
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+}
+
+.bg-audio-controls vaadin-button {
+  height: 32px;
+  min-width: 32px;
+  padding: 0 12px !important;
+  border-radius: 10px !important;
+
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.92);
+  box-shadow: none;
+}
+
+.bg-audio-controls vaadin-button:hover {
+  background: rgba(255, 255, 255, 0.14);
+  transform: none;
+}
+
+.bg-audio-controls vaadin-button:active {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.bg-volume-slider {
+  width: 160px;
+  height: 4px;
+  accent-color: rgba(255, 255, 255, 0.85);
+  opacity: 0.92;
+}
+
