@@ -116,9 +116,7 @@
                           width="100%"
                           minHeight="20em">
                     <columns>
-                        <column property="lastName"/>
-                        <column property="firstName"/>
-                        <column property="patronymic"/>
+                        <column key="shortFio" header="Фамилия И. О."/>
                     </columns>
                 </dataGrid>
             </vbox>

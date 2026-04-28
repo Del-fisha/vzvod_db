@@ -5,6 +5,7 @@ import com.company.vzvod.entity.CriminalViolation;
 import com.company.vzvod.entity.Shift;
 import com.company.vzvod.entity.User;
 import com.vaadin.flow.router.Route;
+import com.company.vzvod.view.main.MainView;
 import io.jmix.flowui.model.CollectionContainer;
 import io.jmix.flowui.model.CollectionPropertyContainer;
 import io.jmix.flowui.model.InstanceContainer;
@@ -14,7 +15,7 @@ import io.jmix.flowui.view.*;
 import java.util.List;
 import java.util.UUID;
 
-@Route("shift-blank")
+@Route(value = "shift-blank", layout = MainView.class)
 @ViewController("ShiftBlankView")
 @ViewDescriptor("shift-blank-view.xml")
 public class ShiftBlankView extends StandardView {
