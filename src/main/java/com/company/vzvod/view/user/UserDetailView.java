@@ -173,12 +173,16 @@ public class UserDetailView extends StandardDetailView<User> {
             return;
         }
 
+        boolean userPersisted = !entityStates.isNew(user) && user.getId() != null;
+
         Contacts contact = user.getContactsInfo();
         if (contact == null) {
-            contact = getViewData().getDataContext().create(Contacts.class);
-
+            // For persisted User we save Contacts in its own dialog (DB),
+            // so we must NOT create Contacts inside the parent's DataContext.
+            contact = userPersisted
+                    ? dataManager.create(Contacts.class)
+                    : getViewData().getDataContext().create(Contacts.class);
             contact.setUser(user);
-
             user.setContactsInfo(contact);
         } else {
             if (contact.getUser() == null) {
@@ -186,10 +190,40 @@ public class UserDetailView extends StandardDetailView<User> {
             }
         }
 
-        dialogWindows.detail(this, Contacts.class)
+        DialogWindow<ContactsDetailView> window = userPersisted
+                ? dialogWindows.detail(this, Contacts.class)
                 .withViewClass(ContactsDetailView.class)
                 .editEntity(contact)
-                .open();
+                .build()
+                : dialogWindows.detail(this, Contacts.class)
+                .withViewClass(ContactsDetailView.class)
+                .withParentDataContext(getViewData().getDataContext())
+                .editEntity(contact)
+                .build();
+
+        if (userPersisted) {
+            window.addAfterCloseListener(closeEvent -> {
+                if (!closeEvent.closedWith(StandardOutcome.SAVE)) {
+                    return;
+                }
+
+                Contacts savedContacts = window.getView().getEditedEntity();
+                // Important: take a fresh persisted graph from DB, not instances from the dialog DataContext.
+                // Otherwise nested compositions (e.g. Address) may be treated as "new" and re-inserted.
+                Contacts persistedContacts = dataManager.load(Contacts.class)
+                        .id(savedContacts.getId())
+                        .one();
+                user.setContactsInfo(persistedContacts);
+
+                User persistedUser = dataManager.load(User.class)
+                        .id(user.getId())
+                        .one();
+                persistedUser.setContactsInfo(persistedContacts);
+                dataManager.save(persistedUser);
+            });
+        }
+
+        window.open();
     }
 
 
