@@ -4,6 +4,8 @@ import com.company.vzvod.entity.User;
 import com.company.vzvod.entity.Vehicle;
 import com.company.vzvod.test_support.PreTestEntities;
 import io.jmix.core.DataManager;
+import io.jmix.core.FetchPlan;
+import io.jmix.core.FetchPlans;
 import io.jmix.core.security.SystemAuthenticator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +29,9 @@ public class VehicleIntegrationTest {
 
     @Autowired
     private DataManager dataManager;
+
+    @Autowired
+    private FetchPlans fetchPlans;
 
     @Autowired
     private SystemAuthenticator systemAuthenticator;
@@ -73,6 +78,16 @@ public class VehicleIntegrationTest {
         assertEquals(saved.getRegistrationCertificate(), loaded.getRegistrationCertificate());
         assertEquals(saved.getInsurance(), loaded.getInsurance());
         assertEquals(saved.getUser().getId(), loaded.getUser().getId());
+
+        FetchPlan userPlan = fetchPlans.builder(User.class)
+                .add("vehicleInfo")
+                .build();
+        User loadedUser = dataManager.load(User.class)
+                .id(saved.getUser().getId())
+                .fetchPlan(userPlan)
+                .one();
+        assertNotNull(loadedUser.getVehicleInfo());
+        assertTrue(loadedUser.getVehicleInfo().stream().anyMatch(v -> v.getId().equals(saved.getId())));
     }
 
     @Test
@@ -89,7 +104,7 @@ public class VehicleIntegrationTest {
         loaded.setInsurance(LocalDate.now().plusYears(1));
 
         Vehicle updated = dataManager.save(loaded);
-        assertEquals("В456ММ198", updated.getStateNumber());
+        assertEquals("В-456-ММ_198", updated.getStateNumber());
         assertEquals("Granta", updated.getModel());
     }
 

@@ -1,9 +1,12 @@
 package com.company.vzvod.entity;
 
+import com.company.vzvod.validation.ValidVehicleStateNumber;
 import io.jmix.core.DeletePolicy;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.OnDeleteInverse;
+import io.jmix.core.metamodel.annotation.DependsOnProperties;
 import io.jmix.core.metamodel.annotation.JmixEntity;
+import io.jmix.core.metamodel.annotation.JmixProperty;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -20,7 +23,8 @@ public class Vehicle {
     @Id
     private UUID id;
 
-    @Column(name = "STATE_NUMBER", length = 10)
+    @Column(name = "STATE_NUMBER", length = 20)
+    @ValidVehicleStateNumber
     private String stateNumber;
 
     @Column(name = "MODEL", length = 50)
@@ -39,6 +43,13 @@ public class Vehicle {
     @JoinColumn(name = "USER_ID")
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
+
+    @Transient
+    @JmixProperty
+    @DependsOnProperties("user")
+    public String getOwnerShortFio() {
+        return user == null ? null : user.getShortFio();
+    }
 
     public User getUser() {
         return user;

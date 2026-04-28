@@ -6,10 +6,16 @@
     <data>
         <collection id="vehiclesDc"
                     class="com.company.vzvod.entity.Vehicle">
-            <fetchPlan extends="_base"/>
+            <fetchPlan extends="_base">
+                <property name="user">
+                    <property name="firstName"/>
+                    <property name="lastName"/>
+                    <property name="patronymic"/>
+                </property>
+            </fetchPlan>
             <loader id="vehiclesDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from Vehicle e]]>
+                    <![CDATA[select e from Vehicle e where :user is null or e.user = :user]]>
                 </query>
             </loader>
         </collection>
@@ -31,7 +37,7 @@
 <!--            <properties include=".*"/>-->
 <!--        </genericFilter>-->
         <hbox id="buttonsPanel" classNames="buttons-panel">
-            <button id="addButton" action="vehiclesDataGrid.addAction"/>
+            <button id="addButton" action="vehiclesDataGrid.createAction"/>
             <button id="editButton" action="vehiclesDataGrid.editAction"/>
             <button id="removeButton" action="vehiclesDataGrid.removeAction"/>
             <simplePagination id="pagination" dataLoader="vehiclesDl"/>
@@ -42,11 +48,12 @@
                   dataContainer="vehiclesDc"
                   columnReorderingAllowed="true">
             <actions>
-                <action id="addAction" type="list_add"/>
+                <action id="createAction" type="list_create"/>
                 <action id="editAction" type="list_edit"/>
                 <action id="removeAction" type="list_remove"/>
             </actions>
             <columns resizable="true">
+                <column property="ownerShortFio"/>
                 <column property="stateNumber"/>
                 <column property="model"/>
                 <column property="brand"/>

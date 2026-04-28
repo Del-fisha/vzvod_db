@@ -7,6 +7,7 @@ import com.company.vzvod.view.education.EducationDetailView;
 import com.company.vzvod.view.main.MainView;
 import com.company.vzvod.view.serviceinfo.ServiceInfoDetailView;
 import com.company.vzvod.view.vehicle.VehicleDetailView;
+import com.company.vzvod.view.vehicle.VehicleListView;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.router.Route;
 import io.jmix.core.DataManager;
@@ -120,8 +121,13 @@ public class UserDetailView extends StandardDetailView<User> {
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        vehicleCreateButton.setEnabled(false);
+        vehicleCreateButton.setEnabled(isUserPersisted());
         updateChangePasswordButtonState();
+    }
+
+    private boolean isUserPersisted() {
+        User user = getEditedEntity();
+        return user != null && !entityStates.isNew(user) && user.getId() != null;
     }
 
 
@@ -250,25 +256,14 @@ public class UserDetailView extends StandardDetailView<User> {
 
     @Subscribe(id = "vehicleCreateButton", subject = "clickListener")
     public void onVehicleCreateButtonClick(final ClickEvent<JmixButton> event) {
-        User user = userDc.getItem();
-        if (user == null) {
+        User user = userDc.getItemOrNull();
+        if (user == null || !isUserPersisted()) {
             return;
         }
 
-        Vehicle vehicle = user.getVehicleInfo().get(0);
-        if (vehicle == null) {
-            vehicle = dataManager.create(Vehicle.class);
-            // ToDo Разработать выдачу листа машин
-            List<Vehicle> vehicles = new ArrayList<>();
-            vehicles.add(vehicle);
-            user.setVehicleInfo(vehicles);
-        }
-
-        dialogWindows.detail(this, Vehicle.class)
-                .withViewClass(VehicleDetailView.class)
-                .withParentDataContext(getViewData().getDataContext())
-                .editEntity(vehicle)
-                .open();
+        DialogWindow<VehicleListView> window = dialogWindows.view(this, VehicleListView.class).build();
+        window.getView().setUser(user);
+        window.open();
     }
 
     public User getViewedUser() {

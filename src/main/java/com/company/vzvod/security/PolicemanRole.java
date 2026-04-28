@@ -245,6 +245,7 @@ public interface PolicemanRole {
             attributes = {
                     "id",
                     "user",
+                    "ownerShortFio",
                     "brand",
                     "model",
                     "stateNumber",
@@ -303,6 +304,7 @@ public interface PolicemanRole {
             "DeletedEvent.list",
             "Vehicle.list",
             "Vehicle.detail",
+            "MyVehicle.list",
             "Department.list",
             "MainViewTopMenu",
             "CompensatoryTimeRaportView"
@@ -313,6 +315,7 @@ public interface PolicemanRole {
             "my_data",
             "all_employees_to_read",
             "my_profile",
+            "my_transport",
             "my_shifts",
             "my_administrative_violations",
             "my_criminal_violations",
@@ -335,6 +338,7 @@ public interface PolicemanRole {
             "Penalty.list",
             "Incentive.list",
             "DeletedEvent.list",
+            "Vehicle.list",
             "CompensatoryTimeRaportView"
     })
     void userMenu();
