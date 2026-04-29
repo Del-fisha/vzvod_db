@@ -1,7 +1,9 @@
 .gradle
 .idea
 .jmix
-build
+build/*
+!build/libs/
+!build/libs/*.jar
 node_modules
 out
 *.iml

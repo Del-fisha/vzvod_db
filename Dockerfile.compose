@@ -1,0 +1,16 @@
+FROM eclipse-temurin:21-jre
+
+WORKDIR /app
+
+# This compose-oriented Dockerfile expects a locally built jar.
+# Build it on host first:
+#   gradlew.bat --no-daemon clean vaadinBuildFrontend bootJar -Pvaadin.productionMode -x test
+COPY build/libs/*.jar ./app.jar
+
+EXPOSE 8080
+
+ENV JAVA_OPTS=""
+ENV VAADIN_PRODUCTION_MODE="true"
+
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app/app.jar"]
+

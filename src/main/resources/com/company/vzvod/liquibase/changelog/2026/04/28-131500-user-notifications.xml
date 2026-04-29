@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="2026-04-28-131500-1" author="cursor">
+        <createTable tableName="USER_NOTIFICATION">
+            <column name="ID" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="KIND" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="PAYLOAD" type="clob">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="CREATED_AT" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="CREATED_BY_USER_ID" type="uuid"/>
+
+            <column name="RESOLVED_AT" type="timestamp with time zone"/>
+            <column name="RESOLVED_BY_USER_ID" type="uuid"/>
+        </createTable>
+
+        <createIndex indexName="IDX_USER_NOTIFICATION_CREATED_AT" tableName="USER_NOTIFICATION">
+            <column name="CREATED_AT"/>
+        </createIndex>
+        <createIndex indexName="IDX_USER_NOTIFICATION_RESOLVED_AT" tableName="USER_NOTIFICATION">
+            <column name="RESOLVED_AT"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseTableName="USER_NOTIFICATION"
+                                 baseColumnNames="CREATED_BY_USER_ID"
+                                 constraintName="FK_USER_NOTIFICATION_CREATED_BY"
+                                 referencedTableName="USER_"
+                                 referencedColumnNames="ID"/>
+        <addForeignKeyConstraint baseTableName="USER_NOTIFICATION"
+                                 baseColumnNames="RESOLVED_BY_USER_ID"
+                                 constraintName="FK_USER_NOTIFICATION_RESOLVED_BY"
+                                 referencedTableName="USER_"
+                                 referencedColumnNames="ID"/>
+    </changeSet>
+
+    <changeSet id="2026-04-28-131500-2" author="cursor">
+        <createTable tableName="USER_NOTIFICATION_RECIPIENT">
+            <column name="ID" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="NOTIFICATION_ID" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="USER_ID" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="USER_NOTIFICATION_RECIPIENT"
+                                 baseColumnNames="NOTIFICATION_ID"
+                                 constraintName="FK_UNR_NOTIFICATION"
+                                 referencedTableName="USER_NOTIFICATION"
+                                 referencedColumnNames="ID"/>
+
+        <addForeignKeyConstraint baseTableName="USER_NOTIFICATION_RECIPIENT"
+                                 baseColumnNames="USER_ID"
+                                 constraintName="FK_UNR_USER"
+                                 referencedTableName="USER_"
+                                 referencedColumnNames="ID"/>
+
+        <createIndex indexName="IDX_UNR_USER" tableName="USER_NOTIFICATION_RECIPIENT">
+            <column name="USER_ID"/>
+        </createIndex>
+        <createIndex indexName="IDX_UNR_NOTIFICATION" tableName="USER_NOTIFICATION_RECIPIENT">
+            <column name="NOTIFICATION_ID"/>
+        </createIndex>
+
+        <addUniqueConstraint tableName="USER_NOTIFICATION_RECIPIENT"
+                             columnNames="USER_ID, NOTIFICATION_ID"
+                             constraintName="UK_UNR_USER_NOTIFICATION"/>
+    </changeSet>
+
+</databaseChangeLog>
+

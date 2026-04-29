@@ -6,7 +6,11 @@ import com.vaadin.flow.component.HtmlComponent;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import com.company.vzvod.entity.User;
 import io.jmix.flowui.app.main.StandardMainView;
@@ -14,7 +18,22 @@ import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.flowui.view.Subscribe;
 import io.jmix.flowui.view.ViewController;
 import io.jmix.flowui.view.ViewDescriptor;
+import io.jmix.flowui.view.ViewComponent;
+import io.jmix.flowui.kit.component.button.JmixButton;
+import io.jmix.flowui.view.MessageBundle;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.company.vzvod.notification.UserNotificationService;
+import com.company.vzvod.notification.UserNotificationService.StoredOverduePayload;
+import com.company.vzvod.notification.OverdueItemDto;
+import com.company.vzvod.notification.OverdueItemType;
+import com.company.vzvod.entity.UserNotification;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jmix.core.DataManager;
+
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
 
 @Route("")
 @ViewController(id = "MainView")
@@ -27,6 +46,18 @@ public class MainView extends StandardMainView {
 
     @Autowired
     private CurrentAuthentication currentAuthentication;
+
+    @Autowired
+    private UserNotificationService userNotificationService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private DataManager dataManager;
+
+    @ViewComponent
+    private MessageBundle messageBundle;
 
     @Subscribe
     public void onInit(final InitEvent event) {
@@ -53,6 +84,135 @@ public class MainView extends StandardMainView {
                 "const a=document.getElementById($0); if(a){a.play().catch(()=>{});} ",
                 AUDIO_ID
         );
+
+        showLoginNotifications();
+    }
+
+    private void showLoginNotifications() {
+        UUID userId = currentUserIdOrNull();
+        if (userId == null) {
+            return;
+        }
+        List<UserNotification> active = userNotificationService.loadActiveForUser(userId);
+        if (active.isEmpty()) {
+            return;
+        }
+
+        Dialog dialog = new Dialog();
+        dialog.setCloseOnEsc(false);
+        dialog.setCloseOnOutsideClick(false);
+        dialog.setWidth("640px");
+
+        H3 title = new H3(messageBundle.getMessage("com.company.vzvod.notification.dialog.title"));
+        VerticalLayout body = new VerticalLayout();
+        body.setPadding(false);
+        body.setSpacing(true);
+
+        for (UserNotification n : active) {
+            body.add(renderNotificationBlock(n, userId, dialog));
+        }
+
+        JmixButton remindLater = new JmixButton();
+        remindLater.setText(messageBundle.getMessage("com.company.vzvod.notification.dialog.remindLater"));
+        remindLater.addClickListener(e -> dialog.close());
+
+        HorizontalLayout actions = new HorizontalLayout(remindLater);
+        VerticalLayout root = new VerticalLayout(title, body, actions);
+        root.setPadding(true);
+        root.setSpacing(true);
+        dialog.add(root);
+
+        dialog.open();
+    }
+
+    private UUID currentUserIdOrNull() {
+        try {
+            Object u = currentAuthentication.getUser();
+            if (u instanceof User user) {
+                return user.getId();
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
+
+    private Component renderNotificationBlock(UserNotification n, UUID userId, Dialog dialog) {
+        VerticalLayout box = new VerticalLayout();
+        box.setPadding(false);
+        box.setSpacing(false);
+
+        String text = safeRenderOverdue(n);
+        Pre pre = new Pre(text);
+        pre.getStyle().set("white-space", "pre-wrap");
+        pre.getStyle().set("margin", "0");
+
+        JmixButton fixed = new JmixButton();
+        fixed.setText(messageBundle.getMessage("com.company.vzvod.notification.dialog.fixed"));
+        fixed.addClickListener(e -> {
+            userNotificationService.resolve(n.getId(), userId);
+            dialog.close();
+        });
+
+        box.add(pre, new HorizontalLayout(fixed));
+        return box;
+    }
+
+    private String safeRenderOverdue(UserNotification n) {
+        if (n == null || n.getPayload() == null) {
+            return "";
+        }
+        try {
+            StoredOverduePayload payload = objectMapper.readValue(n.getPayload(), StoredOverduePayload.class);
+            return renderOverduePayload(payload);
+        } catch (Exception e) {
+            return n.getPayload();
+        }
+    }
+
+    private String renderOverduePayload(StoredOverduePayload payload) {
+        UUID currentUserId = currentUserIdOrNull();
+        if (payload == null || payload.items() == null || payload.items().isEmpty()) {
+            return "";
+        }
+
+        boolean isSubject = currentUserId != null && currentUserId.equals(payload.subjectUserId());
+        StringBuilder sb = new StringBuilder();
+
+        if (isSubject) {
+            sb.append(messageBundle.getMessage("com.company.vzvod.notification.overdue.you.header")).append('\n');
+        } else {
+            String fio = "";
+            try {
+                User subject = dataManager.load(User.class).id(payload.subjectUserId()).one();
+                fio = subject.getShortFio();
+            } catch (Exception ignored) {
+                // keep empty
+            }
+            sb.append(messageBundle.formatMessage("com.company.vzvod.notification.overdue.commander.header", fio)).append('\n');
+        }
+
+        DateTimeFormatter df = DateTimeFormatter.ofPattern(
+                messageBundle.getMessage("com.company.vzvod.notification.dateFormat"),
+                Locale.getDefault()
+        );
+
+        for (OverdueItemDto item : payload.items()) {
+            sb.append('\t').append(itemLabel(item.type())).append(' ')
+                    .append('(').append(item.date() == null ? "" : df.format(item.date())).append(')')
+                    .append('\n');
+        }
+
+        return sb.toString().trim();
+    }
+
+    private String itemLabel(OverdueItemType type) {
+        if (type == null) {
+            return "";
+        }
+        return switch (type) {
+            case VEHICLE_INSURANCE -> messageBundle.getMessage("com.company.vzvod.notification.overdue.item.vehicleInsurance");
+            case ID_CARD_UNTIL -> messageBundle.getMessage("com.company.vzvod.notification.overdue.item.idCardUntil");
+        };
     }
 
     private BgAudio buildAudio() {

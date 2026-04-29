@@ -2,6 +2,7 @@ package com.company.vzvod.view.user;
 
 import com.company.vzvod.entity.*;
 import com.company.vzvod.service.UserReadService;
+import com.company.vzvod.service.UserDialogSaveService;
 import com.company.vzvod.view.contacts.ContactsDetailView;
 import com.company.vzvod.view.education.EducationDetailView;
 import com.company.vzvod.view.main.MainView;
@@ -59,6 +60,9 @@ public class UserDetailView extends StandardDetailView<User> {
     @Autowired
     private UserReadService userReadService;
 
+    @Autowired
+    private UserDialogSaveService userDialogSaveService;
+
     @ViewComponent
     private JmixButton changePasswordButton;
 
@@ -111,12 +115,24 @@ public class UserDetailView extends StandardDetailView<User> {
 
     @Subscribe
     public void onBeforeSave(final BeforeSaveEvent event) {
+        // This view uses detail_saveClose action.
+        // We persist via DataManager directly to guarantee UPDATE semantics in case
+        // the User was already saved by nested dialogs (ServiceInfo etc), but this view still holds
+        // a "new" instance with an existing id (otherwise: USER__pkey).
+        event.preventSave();
+
         User user = getEditedEntity();
         String password = user.getPassword();
 
         if (password != null && !password.isBlank() && !password.startsWith("{bcrypt}")) {
             user.setPassword(passwordEncoder.encode(password));
         }
+
+        User saved = userDialogSaveService.saveFromDialog(user);
+        getViewData().getDataContext().clear();
+        userDc.setItem(saved);
+        clearChanges();
+        event.resume(close(StandardOutcome.SAVE));
     }
 
     @Subscribe
@@ -157,19 +173,66 @@ public class UserDetailView extends StandardDetailView<User> {
             return;
         }
 
+        boolean userPersisted = !entityStates.isNew(user) && user.getId() != null;
+
         ServiceInfo serviceInfo = user.getServiceInfo();
         if (serviceInfo == null) {
-            serviceInfo = dataManager.create(ServiceInfo.class);
+            // For persisted User we want ServiceInfo to save in its own dialog (DB),
+            // so avoid creating it inside parent's DataContext.
+            serviceInfo = userPersisted
+                    ? dataManager.create(ServiceInfo.class)
+                    : getViewData().getDataContext().create(ServiceInfo.class);
             serviceInfo.setStatus(StatusInService.ACTIVE);
             serviceInfo.setUser(user);
             user.setServiceInfo(serviceInfo);
         }
 
-        dialogWindows.detail(this, ServiceInfo.class)
+        DialogWindow<ServiceInfoDetailView> window = userPersisted
+                ? dialogWindows.detail(this, ServiceInfo.class)
+                .withViewClass(ServiceInfoDetailView.class)
+                .editEntity(serviceInfo)
+                .build()
+                : dialogWindows.detail(this, ServiceInfo.class)
                 .withViewClass(ServiceInfoDetailView.class)
                 .withParentDataContext(getViewData().getDataContext())
                 .editEntity(serviceInfo)
-                .open();
+                .build();
+
+        window.addAfterCloseListener(closeEvent -> {
+            if (!closeEvent.closedWith(StandardOutcome.SAVE)) {
+                return;
+            }
+
+            ServiceInfo savedServiceInfo = window.getView().getEditedEntity();
+
+            // Always use fresh persisted instances from DB (never instances from dialog DataContext),
+            // otherwise the parent view may try to INSERT again (e.g. USER__pkey / PK_ID_CARD).
+            ServiceInfo persistedServiceInfo = dataManager.load(ServiceInfo.class)
+                    .id(savedServiceInfo.getId())
+                    .one();
+
+            // If ServiceInfo dialog saved a NEW user (required for FK), the parent UserDetailView still
+            // holds a "new" User instance in its DataContext. Replace it with the persisted one.
+            if (!userPersisted) {
+                User persistedUser = dataManager.load(User.class)
+                        .id(persistedServiceInfo.getUser().getId())
+                        .one();
+                getViewData().getDataContext().clear();
+                userDc.setItem(persistedUser);
+                clearChanges();
+                return;
+            }
+
+            user.setServiceInfo(persistedServiceInfo);
+
+            User persistedUser = dataManager.load(User.class)
+                    .id(user.getId())
+                    .one();
+            persistedUser.setServiceInfo(persistedServiceInfo);
+            dataManager.save(persistedUser);
+        });
+
+        window.open();
     }
 
     @Subscribe(id = "contactsCreateButton", subject = "clickListener")

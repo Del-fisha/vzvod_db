@@ -51,7 +51,12 @@ public class ServiceInfo {
 
     @Composition
 //    @OnDelete(DeletePolicy.CASCADE)
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    // Important: IdCard can be created/saved in its own dialog.
+    // If we cascade PERSIST here, then when ServiceInfo is persisted as a NEW entity
+    // EclipseLink/JPA may try to INSERT IdCard again, causing PK_ID_CARD duplication.
+    //
+    // We still keep CascadeType.REMOVE so deleting ServiceInfo also deletes its IdCard.
+    @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.REMOVE})
     @JoinColumn(name = "ID_CARD_ID")
     private IdCard idCard;
 

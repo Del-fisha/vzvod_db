@@ -54,6 +54,7 @@ public class ServiceInfoIntegrationTest {
 
         idCard = dataManager.create(IdCard.class);
         PreTestEntities.updateIdCard(idCard);
+        idCard = dataManager.save(idCard);
 
         serviceInfo = dataManager.create(ServiceInfo.class);
         PreTestEntities.updateServiceInfo(serviceInfo);

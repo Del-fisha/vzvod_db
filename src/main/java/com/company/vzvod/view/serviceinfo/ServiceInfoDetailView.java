@@ -11,6 +11,7 @@ import com.company.vzvod.view.main.MainView;
 import com.company.vzvod.view.penalty.PenaltyListView;
 import com.company.vzvod.view.shift.ShiftListView;
 import com.company.vzvod.view.vocation.VocationListView;
+import com.company.vzvod.service.ServiceInfoDialogSaveService;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.router.Route;
 import io.jmix.core.DataManager;
@@ -42,6 +43,9 @@ public class ServiceInfoDetailView extends StandardDetailView<ServiceInfo> {
     @Autowired
     private EntityStates entityStates;
 
+    @Autowired
+    private ServiceInfoDialogSaveService serviceInfoDialogSaveService;
+
     @Subscribe
     public void onInitEntity(final InitEntityEvent<ServiceInfo> event) {
         ServiceInfo serviceInfo = event.getEntity();
@@ -50,6 +54,27 @@ public class ServiceInfoDetailView extends StandardDetailView<ServiceInfo> {
         serviceInfo.setMedicalExamination(false);
         serviceInfo.setQualificationClass(Qualification.NONE);
 
+    }
+
+    /**
+     * When this view is opened as a dialog window from another screen,
+     * we want ServiceInfo to be persisted right here on SAVE and avoid
+     * parent-screen double-persist issues.
+     */
+    @Subscribe
+    public void onBeforeSave(final BeforeSaveEvent event) {
+        event.preventSave();
+
+        ServiceInfo saved = serviceInfoDialogSaveService.saveFromDialog(getEditedEntity());
+
+        // IMPORTANT:
+        // `setEntityToEdit(saved)` may mark DataContext as modified again (merge/value changes),
+        // which then triggers the "unsaved changes" dialog on close and may loop.
+        // We reset the DataContext state explicitly and only update the container item.
+        getViewData().getDataContext().clear();
+        serviceInfoDc.setItem(saved);
+        clearChanges();
+        event.resume(close(StandardOutcome.SAVE));
     }
 
     @Subscribe(id = "idCardCreateButton", subject = "clickListener")
@@ -61,11 +86,23 @@ public class ServiceInfoDetailView extends StandardDetailView<ServiceInfo> {
 
         IdCard idCard = serviceInfo.getIdCard();
         if (idCard == null) {
-            idCard = dataManager.create(IdCard.class);
+            // If ServiceInfo is being edited within a parent DataContext (e.g. new User),
+            // create IdCard inside the same DataContext to avoid detached instances.
+            idCard = (entityStates.isNew(serviceInfo) || serviceInfo.getId() == null)
+                    ? getViewData().getDataContext().create(IdCard.class)
+                    : dataManager.create(IdCard.class);
         }
 
-        DialogWindow<IdCardDetailView> window = dialogWindows.detail(this, IdCard.class)
+        boolean serviceInfoPersisted = !entityStates.isNew(serviceInfo) && serviceInfo.getId() != null;
+
+        DialogWindow<IdCardDetailView> window = serviceInfoPersisted
+                ? dialogWindows.detail(this, IdCard.class)
                 .withViewClass(IdCardDetailView.class)
+                .editEntity(idCard)
+                .build()
+                : dialogWindows.detail(this, IdCard.class)
+                .withViewClass(IdCardDetailView.class)
+                .withParentDataContext(getViewData().getDataContext())
                 .editEntity(idCard)
                 .build();
 
@@ -75,17 +112,26 @@ public class ServiceInfoDetailView extends StandardDetailView<ServiceInfo> {
             }
 
             IdCard savedIdCard = window.getView().getEditedEntity();
-            serviceInfo.setIdCard(savedIdCard);
-
             if (entityStates.isNew(serviceInfo) || serviceInfo.getId() == null) {
-                // ServiceInfo isn't in DB yet: relation will be persisted when ServiceInfo is saved
+                // ServiceInfo isn't in DB yet: keep everything inside the same DataContext
+                // so the whole graph is persisted once when ServiceInfo is saved.
+                IdCard mergedIdCard = getViewData().getDataContext().merge(savedIdCard);
+                serviceInfo.setIdCard(mergedIdCard);
                 return;
             }
+
+            // ServiceInfo is already persisted. Never keep instances coming from the IdCard dialog DataContext:
+            // load a fresh persisted IdCard and attach it to THIS view's DataContext, otherwise it can be re-inserted
+            // during ServiceInfo save (PK_ID_CARD violation).
+            IdCard persistedIdCard = dataManager.load(IdCard.class).id(savedIdCard.getId()).one();
+            serviceInfo.setIdCard(getViewData().getDataContext().merge(persistedIdCard));
 
             ServiceInfo persisted = dataManager.load(ServiceInfo.class)
                     .id(serviceInfo.getId())
                     .one();
-            persisted.setIdCard(savedIdCard);
+            // Persisted ServiceInfo is saved via DataManager (separate context),
+            // so use a managed IdCard instance for that save as well.
+            persisted.setIdCard(dataManager.load(IdCard.class).id(savedIdCard.getId()).one());
             dataManager.save(persisted);
         });
 
