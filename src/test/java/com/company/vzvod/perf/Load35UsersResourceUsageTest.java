@@ -6,6 +6,7 @@ import io.jmix.core.DataManager;
 import io.jmix.core.security.SystemAuthenticator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
@@ -30,12 +31,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
-
 @SpringBootTest
 @ActiveProfiles("test-postgres")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @DisplayName("Нагрузочный тест: 35 активных юзеров + печать RAM/CPU в консоль")
+@EnabledIfSystemProperty(named = "runLoadTest", matches = "true")
 public class Load35UsersResourceUsageTest {
 
     private static final int DEFAULT_ACTIVE_USERS = 35;
@@ -51,9 +51,6 @@ public class Load35UsersResourceUsageTest {
 
     @Test
     void load35Users_printRamAndCpuToConsole() throws InterruptedException, ExecutionException {
-        assumeTrue(Boolean.getBoolean("runLoadTest"),
-                "Тест выключен по умолчанию. Запуск: gradle test -DrunLoadTest=true");
-
         int users = Integer.getInteger("loadTest.users", DEFAULT_ACTIVE_USERS);
         Duration duration = Duration.ofMillis(Long.getLong("loadTest.durationMs", DEFAULT_DURATION.toMillis()));
         Duration warmup = Duration.ofMillis(Long.getLong("loadTest.warmupMs", DEFAULT_WARMUP.toMillis()));

@@ -12,7 +12,19 @@ COPY src ./src
 
 # Build Vaadin production bundle and runnable Spring Boot jar.
 # Production mode prevents dev-server from trying to generate frontend resources at runtime.
-RUN ./gradlew --no-daemon clean vaadinBuildFrontend bootJar -Pvaadin.productionMode -x test
+RUN set -e; \
+    for i in 1 2 3 4; do \
+      echo "[core docker] build attempt $i/4"; \
+      ./gradlew --no-daemon \
+        -Dorg.gradle.internal.http.connectionTimeout=600000 \
+        -Dorg.gradle.internal.http.socketTimeout=600000 \
+        -Dorg.gradle.internal.repository.max.retries=10 \
+        -Dorg.gradle.internal.repository.initial.backoff=2000 \
+        clean vaadinBuildFrontend bootJar -Pvaadin.productionMode -x test \
+        && break; \
+      echo "[core docker] attempt $i failed, retrying..."; \
+      sleep 10; \
+    done
 
 ## Runtime stage
 FROM eclipse-temurin:21-jre

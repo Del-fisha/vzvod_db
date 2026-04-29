@@ -75,6 +75,11 @@ configurations.implementation {
 
 test {
     useJUnitPlatform()
+    // Prevent OOM on CI/dev machine when multiple Spring contexts are created.
+    // We run tests with a single fork to limit concurrent heap usage.
+    maxParallelForks = 1
+    forkEvery = 1
+    jvmArgs '-Xms512m', '-Xmx2g'
     testLogging {
         // Нагрузочные/профильные тесты печатают метрики в stdout.
         // Включаем отображение потоков, когда явно запускаем нагрузку.

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      xmlns:c="http://jmix.io/schema/flowui/jpql-condition"
+      title="msg://myVehicleListView.title"
+      focusComponent="vehiclesDataGrid">
+    <data>
+        <collection id="vehiclesDc"
+                    class="com.company.vzvod.entity.Vehicle">
+            <fetchPlan extends="_base">
+                <property name="user">
+                    <property name="firstName"/>
+                    <property name="lastName"/>
+                    <property name="patronymic"/>
+                </property>
+            </fetchPlan>
+            <loader id="vehiclesDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from Vehicle e where :user is null or e.user = :user]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+        <urlQueryParameters>
+            <pagination component="pagination"/>
+        </urlQueryParameters>
+    </facets>
+    <actions>
+        <action id="selectAction" type="lookup_select"/>
+        <action id="discardAction" type="lookup_discard"/>
+    </actions>
+    <layout>
+        <hbox id="buttonsPanel" classNames="buttons-panel">
+            <button id="addButton" action="vehiclesDataGrid.createAction"/>
+            <button id="editButton" action="vehiclesDataGrid.editAction"/>
+            <button id="removeButton" action="vehiclesDataGrid.removeAction"/>
+            <simplePagination id="pagination" dataLoader="vehiclesDl"/>
+        </hbox>
+        <dataGrid id="vehiclesDataGrid"
+                  width="100%"
+                  minHeight="20em"
+                  dataContainer="vehiclesDc"
+                  columnReorderingAllowed="true">
+            <actions>
+                <action id="createAction" type="list_create"/>
+                <action id="editAction" type="list_edit"/>
+                <action id="removeAction" type="list_remove"/>
+            </actions>
+            <columns resizable="true">
+                <column property="stateNumber"/>
+                <column property="model"/>
+                <column property="brand"/>
+                <column property="registrationCertificate"/>
+                <column property="insurance"/>
+            </columns>
+        </dataGrid>
+        <hbox id="lookupActions" visible="false">
+            <button id="selectButton" action="selectAction"/>
+            <button id="discardButton" action="discardAction"/>
+        </hbox>
+    </layout>
+</view>
+
