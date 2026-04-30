@@ -36,7 +36,7 @@ public class UserNotificationService {
             throw new IllegalArgumentException("Empty request");
         }
 
-        log.info("Creating OVERDUE notification: subjectUserId={}, items={}", request.userId(), request.items());
+        log.info("Creating/Updating OVERDUE notification: subjectUserId={}, items={}", request.userId(), request.items());
 
         User subjectUser = dataManager.load(User.class).id(request.userId()).one();
 
@@ -74,22 +74,45 @@ public class UserNotificationService {
             throw new IllegalStateException("Failed to serialize payload", e);
         }
 
-        UserNotification n = metadata.create(UserNotification.class);
-        n.setKind(UserNotificationKind.OVERDUE);
-        n.setPayload(payloadJson);
-        n.setCreatedAt(OffsetDateTime.now());
-        n.setCreatedByUser(createdBy);
+        OffsetDateTime now = OffsetDateTime.now();
 
-        dataManager.save(n);
-        log.info("Notification saved: id={}, kind={}, createdAt={}", n.getId(), n.getKind(), n.getCreatedAt());
+        // Make OVERDUE notifications unique per subjectUserId: update existing active one instead of creating duplicates.
+        List<UserNotification> existingForSubject = loadActiveForUser(subjectUser.getId()).stream()
+                .filter(n -> UserNotificationKind.OVERDUE.equals(n.getKind()))
+                .filter(n -> subjectUser.getId().equals(tryExtractSubjectUserId(n)))
+                .toList();
 
-        for (UUID uid : recipientUserIds) {
-            User u = dataManager.load(User.class).id(uid).one();
-            UserNotificationRecipient r = metadata.create(UserNotificationRecipient.class);
-            r.setNotification(n);
-            r.setUser(u);
-            dataManager.save(r);
+        UserNotification n;
+        if (!existingForSubject.isEmpty()) {
+            // list is already ordered by createdAt desc in loadActiveForUser()
+            n = existingForSubject.getFirst();
+            n.setPayload(payloadJson);
+            n.setCreatedAt(now);
+            n.setCreatedByUser(createdBy);
+            dataManager.save(n);
+            log.info("Notification updated: id={}, kind={}, createdAt={}", n.getId(), n.getKind(), n.getCreatedAt());
+
+            // Close duplicates if any (to keep UI clean and semantics "unique problem").
+            if (existingForSubject.size() > 1) {
+                for (int i = 1; i < existingForSubject.size(); i++) {
+                    UserNotification dup = existingForSubject.get(i);
+                    dup.setResolvedAt(now);
+                    dup.setResolvedByUser(createdBy);
+                    dataManager.save(dup);
+                    log.info("Duplicate OVERDUE notification auto-resolved: id={}", dup.getId());
+                }
+            }
+        } else {
+            n = metadata.create(UserNotification.class);
+            n.setKind(UserNotificationKind.OVERDUE);
+            n.setPayload(payloadJson);
+            n.setCreatedAt(now);
+            n.setCreatedByUser(createdBy);
+            dataManager.save(n);
+            log.info("Notification saved: id={}, kind={}, createdAt={}", n.getId(), n.getKind(), n.getCreatedAt());
         }
+
+        syncRecipients(n, recipientUserIds);
 
         return n.getId();
     }
@@ -120,6 +143,56 @@ public class UserNotificationService {
         n.setResolvedByUser(resolver);
         dataManager.save(n);
         log.info("Resolved notification: id={}, resolverUserId={}", notificationId, resolverUserId);
+    }
+
+    private UUID tryExtractSubjectUserId(UserNotification n) {
+        if (n == null || n.getPayload() == null) {
+            return null;
+        }
+        try {
+            StoredOverduePayload payload = objectMapper.readValue(n.getPayload(), StoredOverduePayload.class);
+            return payload == null ? null : payload.subjectUserId();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private void syncRecipients(UserNotification notification, Set<UUID> desiredRecipientUserIds) {
+        if (notification == null || desiredRecipientUserIds == null || desiredRecipientUserIds.isEmpty()) {
+            return;
+        }
+
+        List<UserNotificationRecipient> existing = dataManager.load(UserNotificationRecipient.class)
+                .query("select r from UserNotificationRecipient r where r.notification.id = :nid")
+                .parameter("nid", notification.getId())
+                .list();
+
+        Set<UUID> existingUserIds = new HashSet<>();
+        for (UserNotificationRecipient r : existing) {
+            if (r.getUser() != null && r.getUser().getId() != null) {
+                existingUserIds.add(r.getUser().getId());
+            }
+        }
+
+        // Remove recipients no longer applicable (department change, etc.)
+        for (UserNotificationRecipient r : existing) {
+            UUID uid = r.getUser() == null ? null : r.getUser().getId();
+            if (uid == null || !desiredRecipientUserIds.contains(uid)) {
+                dataManager.remove(r);
+            }
+        }
+
+        // Add missing recipients
+        for (UUID uid : desiredRecipientUserIds) {
+            if (existingUserIds.contains(uid)) {
+                continue;
+            }
+            User u = dataManager.load(User.class).id(uid).one();
+            UserNotificationRecipient r = metadata.create(UserNotificationRecipient.class);
+            r.setNotification(notification);
+            r.setUser(u);
+            dataManager.save(r);
+        }
     }
 
     public record StoredOverduePayload(UUID subjectUserId, List<OverdueItemDto> items) {

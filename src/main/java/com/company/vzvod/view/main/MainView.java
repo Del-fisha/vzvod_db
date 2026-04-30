@@ -9,8 +9,10 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Pre;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.router.Route;
 import com.company.vzvod.entity.User;
 import io.jmix.flowui.app.main.StandardMainView;
@@ -24,6 +26,7 @@ import io.jmix.flowui.view.MessageBundle;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.company.vzvod.notification.UserNotificationService;
 import com.company.vzvod.notification.UserNotificationService.StoredOverduePayload;
+import com.company.vzvod.notification.UserNotificationKind;
 import com.company.vzvod.notification.OverdueItemDto;
 import com.company.vzvod.notification.OverdueItemType;
 import com.company.vzvod.entity.UserNotification;
@@ -31,8 +34,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jmix.core.DataManager;
 
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 
 @Route("")
@@ -97,32 +103,77 @@ public class MainView extends StandardMainView {
         if (active.isEmpty()) {
             return;
         }
+        active = deduplicateForDisplay(active);
+        if (active.isEmpty()) {
+            return;
+        }
 
         Dialog dialog = new Dialog();
         dialog.setCloseOnEsc(false);
         dialog.setCloseOnOutsideClick(false);
-        dialog.setWidth("640px");
+        dialog.setResizable(true);
+        dialog.setWidth("min(900px, 95vw)");
+        dialog.setHeight("min(85vh, 900px)");
 
         H3 title = new H3(messageBundle.getMessage("notification.dialog.title"));
+
         VerticalLayout body = new VerticalLayout();
         body.setPadding(false);
         body.setSpacing(true);
+        body.setWidthFull();
 
         for (UserNotification n : active) {
             body.add(renderNotificationBlock(n, userId, dialog));
         }
+
+        Scroller scroller = new Scroller(body);
+        scroller.setSizeFull();
 
         JmixButton remindLater = new JmixButton();
         remindLater.setText(messageBundle.getMessage("notification.dialog.remindLater"));
         remindLater.addClickListener(e -> dialog.close());
 
         HorizontalLayout actions = new HorizontalLayout(remindLater);
-        VerticalLayout root = new VerticalLayout(title, body, actions);
+        actions.setWidthFull();
+        actions.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+
+        VerticalLayout root = new VerticalLayout(title, scroller, actions);
         root.setPadding(true);
         root.setSpacing(true);
+        root.setSizeFull();
+        root.expand(scroller);
         dialog.add(root);
 
         dialog.open();
+    }
+
+    private List<UserNotification> deduplicateForDisplay(List<UserNotification> active) {
+        if (active == null || active.isEmpty()) {
+            return List.of();
+        }
+        // active is ordered by createdAt desc, so "first wins"
+        Map<String, UserNotification> byKey = new LinkedHashMap<>();
+        for (UserNotification n : active) {
+            String key = buildDedupKey(n);
+            byKey.putIfAbsent(key, n);
+        }
+        return new ArrayList<>(byKey.values());
+    }
+
+    private String buildDedupKey(UserNotification n) {
+        if (n == null) {
+            return "null";
+        }
+        if (!UserNotificationKind.OVERDUE.equals(n.getKind()) || n.getPayload() == null) {
+            return n.getKind() + ":" + n.getId();
+        }
+        try {
+            StoredOverduePayload payload = objectMapper.readValue(n.getPayload(), StoredOverduePayload.class);
+            UUID subjectId = payload == null ? null : payload.subjectUserId();
+            return n.getKind() + ":" + subjectId;
+        } catch (Exception e) {
+            return n.getKind() + ":" + n.getId();
+        }
     }
 
     private UUID currentUserIdOrNull() {
@@ -138,13 +189,21 @@ public class MainView extends StandardMainView {
 
     private Component renderNotificationBlock(UserNotification n, UUID userId, Dialog dialog) {
         VerticalLayout box = new VerticalLayout();
-        box.setPadding(false);
+        box.setPadding(true);
         box.setSpacing(false);
+        box.setWidthFull();
+        box.getStyle()
+                .set("border", "1px solid var(--lumo-contrast-10pct)")
+                .set("border-radius", "12px")
+                .set("background", "var(--lumo-base-color)")
+                .set("box-shadow", "var(--lumo-box-shadow-xs)");
 
         String text = safeRenderOverdue(n);
         Pre pre = new Pre(text);
         pre.getStyle().set("white-space", "pre-wrap");
-        pre.getStyle().set("margin", "0");
+        pre.getStyle()
+                .set("margin", "0")
+                .set("line-height", "1.25");
 
         JmixButton fixed = new JmixButton();
         fixed.setText(messageBundle.getMessage("notification.dialog.fixed"));
@@ -153,7 +212,10 @@ public class MainView extends StandardMainView {
             dialog.close();
         });
 
-        box.add(pre, new HorizontalLayout(fixed));
+        HorizontalLayout footer = new HorizontalLayout(fixed);
+        footer.setWidthFull();
+        footer.setJustifyContentMode(FlexComponent.JustifyContentMode.START);
+        box.add(pre, footer);
         return box;
     }
 
@@ -179,7 +241,7 @@ public class MainView extends StandardMainView {
         StringBuilder sb = new StringBuilder();
 
         if (isSubject) {
-            sb.append(messageBundle.getMessage("notification.overdue.you.header")).append('\n');
+            sb.append(messageBundle.getMessage("notification.overdue.subject.who")).append('\n');
         } else {
             String fio = "";
             try {
@@ -188,8 +250,11 @@ public class MainView extends StandardMainView {
             } catch (Exception ignored) {
                 // keep empty
             }
-            sb.append(messageBundle.formatMessage("notification.overdue.commander.header", fio)).append('\n');
+            String whoTemplate = messageBundle.getMessage("notification.overdue.commander.who");
+            sb.append(String.format(Locale.getDefault(), whoTemplate, fio)).append('\n');
         }
+
+        sb.append('\t').append(messageBundle.getMessage("notification.overdue.header")).append('\n');
 
         DateTimeFormatter df = DateTimeFormatter.ofPattern(
                 messageBundle.getMessage("notification.dateFormat"),
@@ -197,7 +262,7 @@ public class MainView extends StandardMainView {
         );
 
         for (OverdueItemDto item : payload.items()) {
-            sb.append('\t').append(itemLabel(item.type())).append(' ')
+            sb.append("\t\t").append(itemLabel(item.type())).append(' ')
                     .append('(').append(item.date() == null ? "" : df.format(item.date())).append(')')
                     .append('\n');
         }
