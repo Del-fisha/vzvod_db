@@ -1,6 +1,9 @@
 package com.company.vzvod.security;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
@@ -32,4 +35,16 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class VzvodSecurityConfiguration {
 
+    /**
+     * Allow internal service-to-service endpoints.
+     * Access control is implemented in the controllers themselves via X-Internal-Token.
+     */
+    @Bean
+    @Order(0)
+    SecurityFilterChain internalApiFilterChain(HttpSecurity http) throws Exception {
+        http.securityMatcher("/internal/**")
+                .authorizeHttpRequests(registry -> registry.anyRequest().permitAll())
+                .csrf(csrf -> csrf.disable());
+        return http.build();
+    }
 }

@@ -7,8 +7,8 @@ import com.company.vzvod.entity.UserNotification;
 import com.company.vzvod.entity.UserNotificationRecipient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jmix.core.DataManager;
 import io.jmix.core.Metadata;
+import io.jmix.core.UnconstrainedDataManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -21,11 +21,11 @@ public class UserNotificationService {
 
     private static final Logger log = LoggerFactory.getLogger(UserNotificationService.class);
 
-    private final DataManager dataManager;
+    private final UnconstrainedDataManager dataManager;
     private final Metadata metadata;
     private final ObjectMapper objectMapper;
 
-    public UserNotificationService(DataManager dataManager, Metadata metadata, ObjectMapper objectMapper) {
+    public UserNotificationService(UnconstrainedDataManager dataManager, Metadata metadata, ObjectMapper objectMapper) {
         this.dataManager = dataManager;
         this.metadata = metadata;
         this.objectMapper = objectMapper;

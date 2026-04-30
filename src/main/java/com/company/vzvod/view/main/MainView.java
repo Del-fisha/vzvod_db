@@ -103,7 +103,7 @@ public class MainView extends StandardMainView {
         dialog.setCloseOnOutsideClick(false);
         dialog.setWidth("640px");
 
-        H3 title = new H3(messageBundle.getMessage("com.company.vzvod.notification.dialog.title"));
+        H3 title = new H3(messageBundle.getMessage("notification.dialog.title"));
         VerticalLayout body = new VerticalLayout();
         body.setPadding(false);
         body.setSpacing(true);
@@ -113,7 +113,7 @@ public class MainView extends StandardMainView {
         }
 
         JmixButton remindLater = new JmixButton();
-        remindLater.setText(messageBundle.getMessage("com.company.vzvod.notification.dialog.remindLater"));
+        remindLater.setText(messageBundle.getMessage("notification.dialog.remindLater"));
         remindLater.addClickListener(e -> dialog.close());
 
         HorizontalLayout actions = new HorizontalLayout(remindLater);
@@ -147,7 +147,7 @@ public class MainView extends StandardMainView {
         pre.getStyle().set("margin", "0");
 
         JmixButton fixed = new JmixButton();
-        fixed.setText(messageBundle.getMessage("com.company.vzvod.notification.dialog.fixed"));
+        fixed.setText(messageBundle.getMessage("notification.dialog.fixed"));
         fixed.addClickListener(e -> {
             userNotificationService.resolve(n.getId(), userId);
             dialog.close();
@@ -179,7 +179,7 @@ public class MainView extends StandardMainView {
         StringBuilder sb = new StringBuilder();
 
         if (isSubject) {
-            sb.append(messageBundle.getMessage("com.company.vzvod.notification.overdue.you.header")).append('\n');
+            sb.append(messageBundle.getMessage("notification.overdue.you.header")).append('\n');
         } else {
             String fio = "";
             try {
@@ -188,11 +188,11 @@ public class MainView extends StandardMainView {
             } catch (Exception ignored) {
                 // keep empty
             }
-            sb.append(messageBundle.formatMessage("com.company.vzvod.notification.overdue.commander.header", fio)).append('\n');
+            sb.append(messageBundle.formatMessage("notification.overdue.commander.header", fio)).append('\n');
         }
 
         DateTimeFormatter df = DateTimeFormatter.ofPattern(
-                messageBundle.getMessage("com.company.vzvod.notification.dateFormat"),
+                messageBundle.getMessage("notification.dateFormat"),
                 Locale.getDefault()
         );
 
@@ -210,8 +210,8 @@ public class MainView extends StandardMainView {
             return "";
         }
         return switch (type) {
-            case VEHICLE_INSURANCE -> messageBundle.getMessage("com.company.vzvod.notification.overdue.item.vehicleInsurance");
-            case ID_CARD_UNTIL -> messageBundle.getMessage("com.company.vzvod.notification.overdue.item.idCardUntil");
+            case VEHICLE_INSURANCE -> messageBundle.getMessage("notification.overdue.item.vehicleInsurance");
+            case ID_CARD_UNTIL -> messageBundle.getMessage("notification.overdue.item.idCardUntil");
         };
     }
 
