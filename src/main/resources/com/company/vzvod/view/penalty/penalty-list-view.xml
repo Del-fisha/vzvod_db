@@ -51,9 +51,9 @@
                 <column property="userServiceInfo"/>
                 <column property="initiator"/>
                 <column property="penaltyType"/>
-                <column property="penaltyStatus"/>
                 <column property="date"/>
                 <column property="orderNumber"/>
+                <column property="penaltyStatus"/>
                 <column property="description"/>
             </columns>
         </dataGrid>

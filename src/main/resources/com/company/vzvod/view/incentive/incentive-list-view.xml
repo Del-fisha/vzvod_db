@@ -47,9 +47,9 @@
             <columns resizable="true">
                 <column property="userServiceInfo"/>
                 <column property="initiator"/>
-                <column property="incentiveType"/>
                 <column property="date"/>
                 <column property="orderNumber"/>
+                <column property="incentiveType"/>
                 <column property="description"/>
             </columns>
         </dataGrid>
