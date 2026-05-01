@@ -75,6 +75,18 @@ public class UserNotificationService {
         }
 
         OffsetDateTime now = OffsetDateTime.now();
+        String incomingFingerprint = fingerprint(subjectUser.getId(), request.items());
+
+        // If user marked the issue as resolved ("Исправлено"), do not re-notify
+        // until the actual overdue data changes (fingerprint changes).
+        UserNotification latestForSubject = findLatestOverdueForSubject(subjectUser.getId());
+        if (latestForSubject != null
+                && latestForSubject.getResolvedAt() != null
+                && incomingFingerprint.equals(fingerprintFromStoredPayload(latestForSubject))) {
+            log.info("OVERDUE suppressed (already resolved, unchanged): subjectUserId={}, latestNotificationId={}",
+                    subjectUser.getId(), latestForSubject.getId());
+            return latestForSubject.getId();
+        }
 
         // Make OVERDUE notifications unique per subjectUserId: update existing active one instead of creating duplicates.
         List<UserNotification> existingForSubject = loadActiveForUser(subjectUser.getId()).stream()
@@ -155,6 +167,60 @@ public class UserNotificationService {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    private UserNotification findLatestOverdueForSubject(UUID subjectUserId) {
+        if (subjectUserId == null) {
+            return null;
+        }
+        List<UserNotification> recent = dataManager.load(UserNotification.class)
+                .query("select n from UserNotification n where n.kind = :kind order by n.createdAt desc")
+                .parameter("kind", UserNotificationKind.OVERDUE)
+                .maxResults(200)
+                .list();
+
+        for (UserNotification n : recent) {
+            if (subjectUserId.equals(tryExtractSubjectUserId(n))) {
+                return n;
+            }
+        }
+        return null;
+    }
+
+    private String fingerprintFromStoredPayload(UserNotification n) {
+        if (n == null || n.getPayload() == null) {
+            return "";
+        }
+        try {
+            StoredOverduePayload payload = objectMapper.readValue(n.getPayload(), StoredOverduePayload.class);
+            if (payload == null) {
+                return "";
+            }
+            return fingerprint(payload.subjectUserId(), payload.items());
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    private static String fingerprint(UUID subjectUserId, List<OverdueItemDto> items) {
+        if (subjectUserId == null || items == null || items.isEmpty()) {
+            return "";
+        }
+        // Canonicalize: sort by type, then date
+        List<OverdueItemDto> copy = new ArrayList<>(items);
+        copy.sort(Comparator
+                .comparing((OverdueItemDto i) -> i.type() == null ? "" : i.type().name())
+                .thenComparing(i -> i.date() == null ? "" : i.date().toString()));
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(subjectUserId);
+        for (OverdueItemDto i : copy) {
+            sb.append('|')
+                    .append(i.type() == null ? "null" : i.type().name())
+                    .append('@')
+                    .append(i.date() == null ? "null" : i.date());
+        }
+        return sb.toString();
     }
 
     private void syncRecipients(UserNotification notification, Set<UUID> desiredRecipientUserIds) {
