@@ -123,7 +123,7 @@ public class MainView extends StandardMainView {
         body.setWidthFull();
 
         for (UserNotification n : active) {
-            body.add(renderNotificationBlock(n, userId, dialog));
+            body.add(renderNotificationBlock(body, n, userId, dialog));
         }
 
         Scroller scroller = new Scroller(body);
@@ -187,7 +187,7 @@ public class MainView extends StandardMainView {
         return null;
     }
 
-    private Component renderNotificationBlock(UserNotification n, UUID userId, Dialog dialog) {
+    private Component renderNotificationBlock(VerticalLayout container, UserNotification n, UUID userId, Dialog dialog) {
         VerticalLayout box = new VerticalLayout();
         box.setPadding(true);
         box.setSpacing(false);
@@ -209,7 +209,14 @@ public class MainView extends StandardMainView {
         fixed.setText(messageBundle.getMessage("notification.dialog.fixed"));
         fixed.addClickListener(e -> {
             userNotificationService.resolve(n.getId(), userId);
-            dialog.close();
+            if (container != null) {
+                container.remove(box);
+                if (container.getComponentCount() == 0) {
+                    dialog.close();
+                }
+            } else {
+                dialog.close();
+            }
         });
 
         HorizontalLayout footer = new HorizontalLayout(fixed);
