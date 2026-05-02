@@ -139,6 +139,14 @@ public class UserCardView extends StandardView {
         applyAccordionContentSizing();
     }
 
+    /**
+     * После полной инициализации гридов заголовки гарантированно есть — убираем для «линейных» списков.
+     */
+    @Subscribe
+    public void onReady(ReadyEvent event) {
+        applyAccordionContentSizing();
+    }
+
     @Subscribe("colleaguesDataGrid")
     public void onColleaguesDataGridItemClick(ItemClickEvent<User> event) {
         User selected = event.getItem();
@@ -226,11 +234,31 @@ public class UserCardView extends StandardView {
      * Высота гридов в аккордеонах по фактическому числу строк (пустой список — минимум, без «колодца»).
      */
     private void applyAccordionContentSizing() {
-        compactHeightToRows(incentivesDataGrid);
-        compactHeightToRows(penaltiesDataGrid);
-        compactHeightToRows(vehiclesDataGrid);
+        compactInlineListGrid(incentivesDataGrid);
+        compactInlineListGrid(penaltiesDataGrid);
+        compactInlineListGrid(vehiclesDataGrid);
         compactHeightToRows(workResultsDataGrid);
         compactHeightToRows(shiftsDataGrid);
+    }
+
+    /**
+     * Таблицы в аккордеоне только с данными, без строки названий столбцов.
+     * Атрибут {@code hide-header-row} на разметке Flow не попадает на {@code vaadin-grid} —
+     * используется серверный API {@link com.vaadin.flow.component.grid.Grid#removeAllHeaderRows()}.
+     */
+    private void compactInlineListGrid(DataGrid<?> grid) {
+        compactHeightToRows(grid);
+        stripGridHeaderRow(grid);
+    }
+
+    private void stripGridHeaderRow(DataGrid<?> grid) {
+        if (grid == null) {
+            return;
+        }
+        if (grid.getHeaderRows().isEmpty()) {
+            return;
+        }
+        grid.removeAllHeaderRows();
     }
 
     private void compactHeightToRows(DataGrid<?> grid) {
