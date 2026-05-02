@@ -13,6 +13,9 @@ import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 import com.company.vzvod.view.main.MainView;
+import io.jmix.core.DataManager;
+import io.jmix.core.Metadata;
+import io.jmix.core.entity.KeyValueEntity;
 import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.component.accordion.JmixAccordion;
 import io.jmix.flowui.kit.component.button.JmixButton;
@@ -21,9 +24,11 @@ import io.jmix.flowui.model.CollectionContainer;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.model.InstanceLoader;
+import io.jmix.flowui.model.KeyValueCollectionContainer;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -51,7 +56,19 @@ public class UserCardView extends StandardView {
     private InstanceContainer<Address> habAddressDc;
 
     @ViewComponent
+    private InstanceContainer<IdCard> idCardDc;
+
+    @ViewComponent
     private CollectionLoader<Shift> shiftsDl;
+
+    @ViewComponent
+    private CollectionLoader<Incentive> incentivesDl;
+
+    @ViewComponent
+    private CollectionLoader<Penalty> penaltiesDl;
+
+    @ViewComponent
+    private CollectionLoader<Vehicle> vehiclesDl;
 
     @ViewComponent
     private CollectionLoader<User> colleaguesDl;
@@ -60,7 +77,25 @@ public class UserCardView extends StandardView {
     private DataGrid<User> colleaguesDataGrid;
 
     @ViewComponent
+    private DataGrid<Incentive> incentivesDataGrid;
+
+    @ViewComponent
+    private DataGrid<Penalty> penaltiesDataGrid;
+
+    @ViewComponent
+    private DataGrid<Vehicle> vehiclesDataGrid;
+
+    @ViewComponent
+    private DataGrid<KeyValueEntity> workResultsDataGrid;
+
+    @ViewComponent
+    private DataGrid<Shift> shiftsDataGrid;
+
+    @ViewComponent
     private CollectionContainer<User> colleaguesDc;
+
+    @ViewComponent
+    private KeyValueCollectionContainer workResultsDc;
 
     @ViewComponent
     private H2 header;
@@ -73,6 +108,12 @@ public class UserCardView extends StandardView {
 
     @Autowired
     private VocationBalanceService vocationBalanceService;
+
+    @Autowired
+    private DataManager dataManager;
+
+    @Autowired
+    private Metadata metadata;
 
     @Subscribe
     public void onQueryParametersChange(QueryParametersChangeEvent event) {
@@ -95,6 +136,15 @@ public class UserCardView extends StandardView {
     public void onBeforeShow(BeforeShowEvent event) {
         refreshUserData();
         mainAccordion.close();
+        applyAccordionContentSizing();
+    }
+
+    /**
+     * После полной инициализации гридов заголовки гарантированно есть — убираем для «линейных» списков.
+     */
+    @Subscribe
+    public void onReady(ReadyEvent event) {
+        applyAccordionContentSizing();
     }
 
     @Subscribe("colleaguesDataGrid")
@@ -149,6 +199,7 @@ public class UserCardView extends StandardView {
             serviceInfo.setVacationDaysAvailable(stats.available());
         }
         serviceInfoDc.setItem(serviceInfo);
+        idCardDc.setItem(serviceInfo != null ? serviceInfo.getIdCard() : null);
 
         Contacts contacts = user.getContactsInfo();
         contactsDc.setItem(contacts);
@@ -164,7 +215,152 @@ public class UserCardView extends StandardView {
         shiftsDl.setParameter("user", user);
         shiftsDl.load();
 
+        incentivesDl.setParameter("serviceInfo", serviceInfo);
+        incentivesDl.load();
+
+        penaltiesDl.setParameter("serviceInfo", serviceInfo);
+        penaltiesDl.load();
+
+        vehiclesDl.setParameter("user", user);
+        vehiclesDl.load();
+
+        workResultsDc.setItems(buildWorkResults(serviceInfo));
+
         loadColleagues(user);
+        applyAccordionContentSizing();
+    }
+
+    /**
+     * Высота гридов в аккордеонах по фактическому числу строк (пустой список — минимум, без «колодца»).
+     */
+    private void applyAccordionContentSizing() {
+        compactInlineListGrid(incentivesDataGrid);
+        compactInlineListGrid(penaltiesDataGrid);
+        compactInlineListGrid(vehiclesDataGrid);
+        compactHeightToRows(workResultsDataGrid);
+        compactHeightToRows(shiftsDataGrid);
+    }
+
+    /**
+     * Таблицы в аккордеоне только с данными, без строки названий столбцов.
+     * Атрибут {@code hide-header-row} на разметке Flow не попадает на {@code vaadin-grid} —
+     * используется серверный API {@link com.vaadin.flow.component.grid.Grid#removeAllHeaderRows()}.
+     */
+    private void compactInlineListGrid(DataGrid<?> grid) {
+        compactHeightToRows(grid);
+        stripGridHeaderRow(grid);
+    }
+
+    private void stripGridHeaderRow(DataGrid<?> grid) {
+        if (grid == null) {
+            return;
+        }
+        if (grid.getHeaderRows().isEmpty()) {
+            return;
+        }
+        grid.removeAllHeaderRows();
+    }
+
+    private void compactHeightToRows(DataGrid<?> grid) {
+        if (grid == null) {
+            return;
+        }
+        grid.setAllRowsVisible(true);
+    }
+
+    private List<KeyValueEntity> buildWorkResults(ServiceInfo serviceInfo) {
+        LocalDate now = LocalDate.now();
+        LocalDate monthStart = now.withDayOfMonth(1);
+        LocalDate yearStart = now.withDayOfYear(1);
+
+        int adminMonth = serviceInfo == null ? 0 : countAdministrative(serviceInfo, monthStart);
+        int adminYear = serviceInfo == null ? 0 : countAdministrative(serviceInfo, yearStart);
+        int adminTotal = serviceInfo == null ? 0 : countAdministrative(serviceInfo, null);
+
+        int criminalMonth = serviceInfo == null ? 0 : countCriminal(serviceInfo, monthStart);
+        int criminalYear = serviceInfo == null ? 0 : countCriminal(serviceInfo, yearStart);
+        int criminalTotal = serviceInfo == null ? 0 : countCriminal(serviceInfo, null);
+
+        int ibdrMonth = serviceInfo == null ? 0 : sumIbdr(serviceInfo, monthStart);
+        int ibdrYear = serviceInfo == null ? 0 : sumIbdr(serviceInfo, yearStart);
+        int ibdrTotal = serviceInfo == null ? 0 : sumIbdr(serviceInfo, null);
+
+        return List.of(
+                kvRow("АП", adminMonth, adminYear, adminTotal),
+                kvRow("УП", criminalMonth, criminalYear, criminalTotal),
+                kvRow("ИБДР", ibdrMonth, ibdrYear, ibdrTotal)
+        );
+    }
+
+    private KeyValueEntity kvRow(String category, int month, int year, int total) {
+        KeyValueEntity e = metadata.create(KeyValueEntity.class);
+        e.setValue("category", category);
+        e.setValue("month", month);
+        e.setValue("year", year);
+        e.setValue("total", total);
+        return e;
+    }
+
+    private int countAdministrative(ServiceInfo serviceInfo, LocalDate from) {
+        String q = """
+                select count(v)
+                from AdministrativeViolation v
+                join v.shift s
+                join s.units si
+                where si = :serviceInfo
+                """;
+        if (from != null) {
+            q += " and s.date >= :from";
+        }
+
+        var loader = dataManager.loadValue(q, Long.class)
+                .parameter("serviceInfo", serviceInfo);
+        if (from != null) {
+            loader.parameter("from", from);
+        }
+        Long value = loader.one();
+        return value == null ? 0 : value.intValue();
+    }
+
+    private int countCriminal(ServiceInfo serviceInfo, LocalDate from) {
+        String q = """
+                select count(v)
+                from CriminalViolation v
+                join v.shift s
+                join s.units si
+                where si = :serviceInfo
+                """;
+        if (from != null) {
+            q += " and s.date >= :from";
+        }
+
+        var loader = dataManager.loadValue(q, Long.class)
+                .parameter("serviceInfo", serviceInfo);
+        if (from != null) {
+            loader.parameter("from", from);
+        }
+        Long value = loader.one();
+        return value == null ? 0 : value.intValue();
+    }
+
+    private int sumIbdr(ServiceInfo serviceInfo, LocalDate from) {
+        String q = """
+                select coalesce(sum(coalesce(s.ibdWithMigrant, 0) + coalesce(s.ibdWithoutMigrant, 0)), 0)
+                from Shift s
+                join s.units si
+                where si = :serviceInfo
+                """;
+        if (from != null) {
+            q += " and s.date >= :from";
+        }
+
+        var loader = dataManager.loadValue(q, Long.class)
+                .parameter("serviceInfo", serviceInfo);
+        if (from != null) {
+            loader.parameter("from", from);
+        }
+        Long value = loader.one();
+        return value == null ? 0 : value.intValue();
     }
 
     private void loadColleagues(User user) {

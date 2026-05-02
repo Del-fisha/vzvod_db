@@ -26,6 +26,11 @@
                     <property name="startOfPost"/>
                     <property name="vacationDaysAvailable"/>
                     <property name="vacationDaysEntitled"/>
+                    <property name="idCard">
+                        <property name="spl"/>
+                        <property name="issued"/>
+                        <property name="until"/>
+                    </property>
                 </property>
 
                 <!-- контакты + вложенные адреса -->
@@ -48,6 +53,10 @@
                   class="com.company.vzvod.entity.Address"/>
         <instance id="habAddressDc"
                   class="com.company.vzvod.entity.Address"/>
+
+        <!-- Служебное удостоверение -->
+        <instance id="idCardDc"
+                  class="com.company.vzvod.entity.IdCard"/>
 
         <!-- Смены сотрудника -->
         <collection id="shiftsDc"
@@ -90,13 +99,71 @@
                 </query>
             </loader>
         </collection>
+
+        <!-- Поощрения выбранного сотрудника -->
+        <collection id="incentivesDc"
+                    class="com.company.vzvod.entity.Incentive">
+            <fetchPlan extends="_base"/>
+            <loader id="incentivesDl" readOnly="true">
+                <query>
+                    <![CDATA[
+                        select i
+                        from Incentive i
+                        where i.userServiceInfo = :serviceInfo
+                        order by i.date desc, i.id desc
+                    ]]>
+                </query>
+            </loader>
+        </collection>
+
+        <!-- Взыскания выбранного сотрудника -->
+        <collection id="penaltiesDc"
+                    class="com.company.vzvod.entity.Penalty">
+            <fetchPlan extends="_base"/>
+            <loader id="penaltiesDl" readOnly="true">
+                <query>
+                    <![CDATA[
+                        select p
+                        from Penalty p
+                        where p.userServiceInfo = :serviceInfo
+                        order by p.date desc, p.id desc
+                    ]]>
+                </query>
+            </loader>
+        </collection>
+
+        <!-- Транспорт выбранного сотрудника -->
+        <collection id="vehiclesDc"
+                    class="com.company.vzvod.entity.Vehicle">
+            <fetchPlan extends="_base"/>
+            <loader id="vehiclesDl" readOnly="true">
+                <query>
+                    <![CDATA[
+                        select v
+                        from Vehicle v
+                        where v.user = :user
+                        order by v.stateNumber
+                    ]]>
+                </query>
+            </loader>
+        </collection>
+
+        <!-- Таблица результатов работы выбранного сотрудника (рассчитывается в контроллере) -->
+        <keyValueCollection id="workResultsDc">
+            <properties>
+                <property name="category" datatype="string"/>
+                <property name="month" datatype="int"/>
+                <property name="year" datatype="int"/>
+                <property name="total" datatype="int"/>
+            </properties>
+        </keyValueCollection>
     </data>
 
     <facets>
         <dataLoadCoordinator auto="true"/>
     </facets>
 
-    <layout padding="true" spacing="true" width="100%">
+    <layout padding="true" spacing="true" width="100%" classNames="user-card-view">
 
         <!-- Верхняя панель: Назад + заголовок -->
         <hbox id="topBar" width="100%" spacing="true">
@@ -107,9 +174,9 @@
         </hbox>
 
         <!-- Общий layout: слева список отделения, справа карточка -->
-        <hbox width="100%" spacing="true">
+        <hbox width="100%" spacing="true" alignItems="START">
             <!-- Левая колонка: сотрудники отделения -->
-            <vbox width="25%" spacing="true">
+            <vbox width="25%" spacing="true" flexShrink="0">
                 <h3 text="msg://com.company.vzvod.view.usercard/userCardView.colleaguesSection.title"/>
                 <dataGrid id="colleaguesDataGrid"
                           dataContainer="colleaguesDc"
@@ -122,12 +189,12 @@
             </vbox>
 
             <!-- Правая часть: сама карточка пользователя -->
-            <vbox width="75%" spacing="true">
+            <vbox width="75%" spacing="true" flexGrow="1" flexShrink="1">
 
                 <!-- Верх: слева User + ServiceInfo, справа аккордеон с контактами и адресами -->
-                <hbox width="100%" spacing="true">
+                <hbox id="userCardHeaderRow" width="100%" spacing="true" alignItems="START">
                     <!-- Левая колонка (данные пользователя и ServiceInfo) -->
-                    <vbox width="50%" spacing="true">
+                    <vbox width="50%" spacing="true" flexGrow="0">
                         <!-- Основные поля пользователя -->
                         <formLayout id="userForm"
                                     dataContainer="userDc"
@@ -175,7 +242,7 @@
                     </vbox>
 
                     <!-- Правая колонка (контакты и адреса) -->
-                    <vbox width="50%">
+                    <vbox width="50%" flexGrow="0" spacing="false" padding="false">
                         <accordion id="mainAccordion" width="100%">
                             <!-- Контакты -->
                             <accordionPanel summaryText="msg://com.company.vzvod.view.usercard/userCardView.contactsPanel.summaryText">
@@ -272,6 +339,80 @@
                                     </formItem>
                                 </formLayout>
                             </accordionPanel>
+
+                            <accordionPanel summaryText="Поощрения сотрудника">
+                                <dataGrid id="incentivesDataGrid"
+                                          dataContainer="incentivesDc"
+                                          width="100%"
+                                          columnReorderingAllowed="false">
+                                    <columns>
+                                        <column property="date"/>
+                                        <column property="incentiveType"/>
+                                        <column property="initiator"/>
+                                        <column property="orderNumber"/>
+                                        <column property="description"/>
+                                    </columns>
+                                </dataGrid>
+                            </accordionPanel>
+
+                            <accordionPanel summaryText="Взыскания сотрудника">
+                                <dataGrid id="penaltiesDataGrid"
+                                          dataContainer="penaltiesDc"
+                                          width="100%"
+                                          columnReorderingAllowed="false">
+                                    <columns>
+                                        <column property="date"/>
+                                        <column property="penaltyType"/>
+                                        <column property="penaltyStatus"/>
+                                        <column property="initiator"/>
+                                        <column property="orderNumber"/>
+                                        <column property="description"/>
+                                    </columns>
+                                </dataGrid>
+                            </accordionPanel>
+
+                            <accordionPanel summaryText="Транспорт сотрудника">
+                                <dataGrid id="vehiclesDataGrid"
+                                          dataContainer="vehiclesDc"
+                                          width="100%"
+                                          columnReorderingAllowed="false">
+                                    <columns>
+                                        <column property="stateNumber"/>
+                                        <column property="brand"/>
+                                        <column property="model"/>
+                                        <column property="registrationCertificate"/>
+                                        <column property="insurance"/>
+                                    </columns>
+                                </dataGrid>
+                            </accordionPanel>
+
+                            <accordionPanel summaryText="Служебное удостоверение">
+                                <formLayout dataContainer="idCardDc" labelsPosition="ASIDE">
+                                    <formItem>
+                                        <textField property="spl" readOnly="true"/>
+                                    </formItem>
+                                    <formItem>
+                                        <datePicker property="issued" readOnly="true"/>
+                                    </formItem>
+                                    <formItem>
+                                        <datePicker property="until" readOnly="true"/>
+                                    </formItem>
+                                </formLayout>
+                            </accordionPanel>
+
+                            <accordionPanel summaryText="Результаты работы сотрудника">
+                                <dataGrid id="workResultsDataGrid"
+                                          dataContainer="workResultsDc"
+                                          width="100%"
+                                          columnReorderingAllowed="false">
+                                    <columns>
+                                        <column property="category" header="Показатель"/>
+                                        <column property="month" header="За месяц"/>
+                                        <column property="year" header="За год"/>
+                                        <column property="total" header="Всего"/>
+                                    </columns>
+                                </dataGrid>
+                            </accordionPanel>
                         </accordion>
                     </vbox>
                 </hbox>
@@ -282,7 +423,7 @@
                         <dataGrid id="shiftsDataGrid"
                                   dataContainer="shiftsDc"
                                   width="100%"
-                                  minHeight="8em">
+                                  columnReorderingAllowed="false">
                             <columns>
                                 <column property="date"/>
                                 <column property="number"/>
