@@ -174,9 +174,9 @@
         </hbox>
 
         <!-- Общий layout: слева список отделения, справа карточка -->
-        <hbox width="100%" spacing="true">
+        <hbox width="100%" spacing="true" alignItems="START">
             <!-- Левая колонка: сотрудники отделения -->
-            <vbox width="25%" spacing="true">
+            <vbox width="25%" spacing="true" flexShrink="0">
                 <h3 text="msg://com.company.vzvod.view.usercard/userCardView.colleaguesSection.title"/>
                 <dataGrid id="colleaguesDataGrid"
                           dataContainer="colleaguesDc"
@@ -189,12 +189,12 @@
             </vbox>
 
             <!-- Правая часть: сама карточка пользователя -->
-            <vbox width="75%" spacing="true">
+            <vbox width="75%" spacing="true" flexGrow="1" flexShrink="1">
 
                 <!-- Верх: слева User + ServiceInfo, справа аккордеон с контактами и адресами -->
-                <hbox width="100%" spacing="true">
+                <hbox id="userCardHeaderRow" width="100%" spacing="true" alignItems="START">
                     <!-- Левая колонка (данные пользователя и ServiceInfo) -->
-                    <vbox width="50%" spacing="true">
+                    <vbox width="50%" spacing="true" flexGrow="0">
                         <!-- Основные поля пользователя -->
                         <formLayout id="userForm"
                                     dataContainer="userDc"
@@ -242,7 +242,7 @@
                     </vbox>
 
                     <!-- Правая колонка (контакты и адреса) -->
-                    <vbox width="50%">
+                    <vbox width="50%" flexGrow="0" spacing="false" padding="false">
                         <accordion id="mainAccordion" width="100%">
                             <!-- Контакты -->
                             <accordionPanel summaryText="msg://com.company.vzvod.view.usercard/userCardView.contactsPanel.summaryText">
@@ -344,7 +344,7 @@
                                 <dataGrid id="incentivesDataGrid"
                                           dataContainer="incentivesDc"
                                           width="100%"
-                                          minHeight="10em">
+                                          columnReorderingAllowed="false">
                                     <columns>
                                         <column property="date"/>
                                         <column property="incentiveType"/>
@@ -359,7 +359,7 @@
                                 <dataGrid id="penaltiesDataGrid"
                                           dataContainer="penaltiesDc"
                                           width="100%"
-                                          minHeight="10em">
+                                          columnReorderingAllowed="false">
                                     <columns>
                                         <column property="date"/>
                                         <column property="penaltyType"/>
@@ -375,7 +375,7 @@
                                 <dataGrid id="vehiclesDataGrid"
                                           dataContainer="vehiclesDc"
                                           width="100%"
-                                          minHeight="8em">
+                                          columnReorderingAllowed="false">
                                     <columns>
                                         <column property="stateNumber"/>
                                         <column property="brand"/>
@@ -404,7 +404,7 @@
                                 <dataGrid id="workResultsDataGrid"
                                           dataContainer="workResultsDc"
                                           width="100%"
-                                          minHeight="8em">
+                                          columnReorderingAllowed="false">
                                     <columns>
                                         <column property="category"/>
                                         <column property="month"/>
@@ -423,7 +423,7 @@
                         <dataGrid id="shiftsDataGrid"
                                   dataContainer="shiftsDc"
                                   width="100%"
-                                  minHeight="8em">
+                                  columnReorderingAllowed="false">
                             <columns>
                                 <column property="date"/>
                                 <column property="number"/>

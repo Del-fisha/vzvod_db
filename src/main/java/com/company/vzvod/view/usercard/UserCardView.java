@@ -77,6 +77,21 @@ public class UserCardView extends StandardView {
     private DataGrid<User> colleaguesDataGrid;
 
     @ViewComponent
+    private DataGrid<Incentive> incentivesDataGrid;
+
+    @ViewComponent
+    private DataGrid<Penalty> penaltiesDataGrid;
+
+    @ViewComponent
+    private DataGrid<Vehicle> vehiclesDataGrid;
+
+    @ViewComponent
+    private DataGrid<KeyValueEntity> workResultsDataGrid;
+
+    @ViewComponent
+    private DataGrid<Shift> shiftsDataGrid;
+
+    @ViewComponent
     private CollectionContainer<User> colleaguesDc;
 
     @ViewComponent
@@ -121,6 +136,7 @@ public class UserCardView extends StandardView {
     public void onBeforeShow(BeforeShowEvent event) {
         refreshUserData();
         mainAccordion.close();
+        applyAccordionContentSizing();
     }
 
     @Subscribe("colleaguesDataGrid")
@@ -203,6 +219,25 @@ public class UserCardView extends StandardView {
         workResultsDc.setItems(buildWorkResults(serviceInfo));
 
         loadColleagues(user);
+        applyAccordionContentSizing();
+    }
+
+    /**
+     * Высота гридов в аккордеонах по фактическому числу строк (пустой список — минимум, без «колодца»).
+     */
+    private void applyAccordionContentSizing() {
+        compactHeightToRows(incentivesDataGrid);
+        compactHeightToRows(penaltiesDataGrid);
+        compactHeightToRows(vehiclesDataGrid);
+        compactHeightToRows(workResultsDataGrid);
+        compactHeightToRows(shiftsDataGrid);
+    }
+
+    private void compactHeightToRows(DataGrid<?> grid) {
+        if (grid == null) {
+            return;
+        }
+        grid.setAllRowsVisible(true);
     }
 
     private List<KeyValueEntity> buildWorkResults(ServiceInfo serviceInfo) {
