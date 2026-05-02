@@ -286,9 +286,9 @@ public class UserCardView extends StandardView {
         int ibdrTotal = serviceInfo == null ? 0 : sumIbdr(serviceInfo, null);
 
         return List.of(
-                kvRow("Административки", adminMonth, adminYear, adminTotal),
-                kvRow("Уголовка", criminalMonth, criminalYear, criminalTotal),
-                kvRow("ИБДР всего", ibdrMonth, ibdrYear, ibdrTotal)
+                kvRow("АП", adminMonth, adminYear, adminTotal),
+                kvRow("УП", criminalMonth, criminalYear, criminalTotal),
+                kvRow("ИБДР", ibdrMonth, ibdrYear, ibdrTotal)
         );
     }
 

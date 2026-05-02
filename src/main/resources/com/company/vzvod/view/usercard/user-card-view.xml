@@ -163,7 +163,7 @@
         <dataLoadCoordinator auto="true"/>
     </facets>
 
-    <layout padding="true" spacing="true" width="100%">
+    <layout padding="true" spacing="true" width="100%" classNames="user-card-view">
 
         <!-- Верхняя панель: Назад + заголовок -->
         <hbox id="topBar" width="100%" spacing="true">
@@ -406,10 +406,10 @@
                                           width="100%"
                                           columnReorderingAllowed="false">
                                     <columns>
-                                        <column property="category"/>
-                                        <column property="month"/>
-                                        <column property="year"/>
-                                        <column property="total"/>
+                                        <column property="category" header="Показатель"/>
+                                        <column property="month" header="За месяц"/>
+                                        <column property="year" header="За год"/>
+                                        <column property="total" header="Всего"/>
                                     </columns>
                                 </dataGrid>
                             </accordionPanel>

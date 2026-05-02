@@ -6,3 +6,5 @@
 
 /* Desktop-like overrides (easy to disable/switch) */
 @import url('VzvodDesktop.css');
+
+@import url('view/user-card-view.css');

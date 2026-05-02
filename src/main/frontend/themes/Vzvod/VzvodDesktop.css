@@ -107,3 +107,6 @@ html {
   opacity: 0.92;
 }
 
+.user-card-view vaadin-accordion-panel::part(content) {
+  padding-bottom: 5mm;
+}

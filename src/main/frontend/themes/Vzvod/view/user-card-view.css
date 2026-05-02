@@ -1,0 +1,4 @@
+/* Карточка сотрудника: отступ снизу у раскрытого содержимого панелей аккордеона */
+.user-card-view vaadin-accordion-panel::part(content) {
+    padding-bottom: 5mm;
+}
