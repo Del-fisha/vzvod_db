@@ -11,10 +11,11 @@ import com.company.vzvod.view.main.MainView;
 import com.vaadin.flow.router.Route;
 import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.flowui.DialogWindows;
+import io.jmix.flowui.action.list.CreateAction;
 import io.jmix.flowui.component.SupportsTypedValue;
 import io.jmix.flowui.component.datepicker.TypedDatePicker;
 import io.jmix.flowui.component.grid.DataGrid;
-import io.jmix.flowui.kit.action.ActionPerformedEvent;
+import io.jmix.flowui.kit.action.Action;
 import io.jmix.flowui.model.CollectionPropertyContainer;
 import io.jmix.flowui.model.DataContext;
 import io.jmix.flowui.view.*;
@@ -31,6 +32,9 @@ public class ShiftDetailView extends StandardDetailView<Shift> {
     @Autowired
     private CurrentAuthentication currentAuthentication;
 
+    @Autowired
+    private DialogWindows dialogWindows;
+
     @ViewComponent
     private DataGrid<AdministrativeViolation> adminViolationsDataGrid;
 
@@ -42,12 +46,6 @@ public class ShiftDetailView extends StandardDetailView<Shift> {
 
     @ViewComponent
     private CollectionPropertyContainer<CriminalViolation> criminalViolationsDc;
-
-    @ViewComponent
-    private DataContext dataContext;
-
-    @Autowired
-    private DialogWindows dialogWindows;
 
     @Subscribe
     public void onInitEntity(final InitEntityEvent<Shift> event) {
@@ -76,29 +74,42 @@ public class ShiftDetailView extends StandardDetailView<Shift> {
         }
     }
 
-    @Subscribe("adminViolationsDataGrid.create")
-    public void onAdminViolationsCreate(ActionPerformedEvent event) {
-        DataContext dataContext = getViewData().getDataContext();
-        AdministrativeViolation violation = dataContext.create(AdministrativeViolation.class);
-        violation.setShift(getEditedEntity());
+    @Subscribe
+    public void onBeforeShow(BeforeShowEvent event) {
+        replaceViolationCreate(adminViolationsDataGrid, this::openNewAdministrativeViolation);
+        replaceViolationCreate(criminalViolationsDataGrid, this::openNewCriminalViolation);
+    }
 
-        dialogWindows.detail(adminViolationsDataGrid)
+    private void replaceViolationCreate(DataGrid<?> grid, Runnable openNew) {
+        Action action = grid.getAction("create");
+        if (!(action instanceof CreateAction<?> createAction)) {
+            return;
+        }
+        createAction.withHandler(null);
+        createAction.withHandler(e -> openNew.run());
+    }
+
+    private void openNewAdministrativeViolation() {
+        DataContext parentDc = getViewData().getDataContext();
+        AdministrativeViolation v = parentDc.create(AdministrativeViolation.class);
+        v.setShift(getEditedEntity());
+        dialogWindows.detail(this, AdministrativeViolation.class)
+                .withListDataComponent(adminViolationsDataGrid)
+                .withParentDataContext(parentDc)
                 .withViewClass(AdministrativeViolationDetailView.class)
-                .newEntity(violation)
-                .withParentDataContext(dataContext)
+                .newEntity(v)
                 .open();
     }
 
-    @Subscribe("criminalViolationsDataGrid.create")
-    public void onCriminalViolationsCreate(ActionPerformedEvent event) {
-        DataContext dataContext = getViewData().getDataContext();
-        CriminalViolation violation = dataContext.create(CriminalViolation.class);
-        violation.setShift(getEditedEntity());  // Только set shift!
-
-        dialogWindows.detail(criminalViolationsDataGrid)
+    private void openNewCriminalViolation() {
+        DataContext parentDc = getViewData().getDataContext();
+        CriminalViolation v = parentDc.create(CriminalViolation.class);
+        v.setShift(getEditedEntity());
+        dialogWindows.detail(this, CriminalViolation.class)
+                .withListDataComponent(criminalViolationsDataGrid)
+                .withParentDataContext(parentDc)
                 .withViewClass(CriminalViolationDetailView.class)
-                .newEntity(violation)
-                .withParentDataContext(dataContext)
+                .newEntity(v)
                 .open();
     }
 

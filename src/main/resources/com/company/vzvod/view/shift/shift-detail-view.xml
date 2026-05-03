@@ -92,8 +92,11 @@
                             <!-- можно добавить дополнительные колонки -->
                         </columns>
                         <actions>
-                            <!-- открывает детальный экран нарушения -->
-                            <action id="create" type="list_create"/>
+                            <action id="create" type="list_create">
+                                <properties>
+                                    <property name="openMode" value="DIALOG"/>
+                                </properties>
+                            </action>
                             <action id="edit" type="list_edit"/>
                             <action id="remove" type="list_remove"/>
                         </actions>
@@ -114,7 +117,11 @@
                             <column property="type" header="msg://com.company.vzvod.view.shift/shiftDetailView.criminalPracticeGrid.type"/>
                         </columns>
                         <actions>
-                            <action id="create" type="list_create"/>
+                            <action id="create" type="list_create">
+                                <properties>
+                                    <property name="openMode" value="DIALOG"/>
+                                </properties>
+                            </action>
                             <action id="edit" type="list_edit"/>
                             <action id="remove" type="list_remove"/>
                         </actions>

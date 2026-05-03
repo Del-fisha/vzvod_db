@@ -9,7 +9,13 @@
             <fetchPlan extends="_base"/>
             <loader id="serviceInfoesDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from ServiceInfo e]]>
+                    <![CDATA[select e from ServiceInfo e
+                               left join e.department dep
+                               left join e.user u
+                           order by coalesce(dep.number, 2147483647),
+                               coalesce(e.post, 'ZZ'),
+                               CASE WHEN u.lastName IS NULL THEN 1 ELSE 0 END asc,
+                               u.lastName asc]]>
                 </query>
             </loader>
         </collection>

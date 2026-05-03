@@ -77,6 +77,19 @@ public class Shift {
     @InstanceName
     @DependsOnProperties({"number", "date"})
     public String getInstanceName() {
-        return (getNumber() != null) ? getNumber().getId() : "";
+        if (date == null && number == null) {
+            return "";
+        }
+        var parts = new StringBuilder();
+        if (date != null) {
+            parts.append(date.format(DateTimeFormatter.ISO_LOCAL_DATE));
+        }
+        if (number != null) {
+            if (parts.length() > 0) {
+                parts.append(" · ");
+            }
+            parts.append(number.getId());
+        }
+        return parts.toString();
     }
 }
