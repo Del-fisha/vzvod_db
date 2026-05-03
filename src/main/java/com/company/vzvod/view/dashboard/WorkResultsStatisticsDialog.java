@@ -401,31 +401,72 @@ public class WorkResultsStatisticsDialog extends StandardView {
         chartArea.add(buildLineChartSvg(result, colors));
     }
 
+    /** Целевая интервал между подписями по Y (линии сетки = подписи включая ноль сверху). */
+    private static final int CHART_Y_DIVISION_TARGET = 5;
+
     private Div buildLineChartSvg(StatsResult result, String[] colors) {
         int buckets = result.bucketLabels().size();
         int w = 920;
         int h = 360;
-        int padL = 44;
-        int padR = 14;
-        int padT = 18;
-        int padB = 38;
 
-        double max = result.series().stream()
+        double dataMax = result.series().stream()
                 .flatMapToDouble(s -> Arrays.stream(s.bucketValues()))
                 .max()
                 .orElse(1.0);
-        if (max < 1e-6) max = 1.0;
+        if (!(dataMax > 0)) {
+            dataMax = 1.0;
+        }
+
+        double approxStep = dataMax / Math.max(CHART_Y_DIVISION_TARGET - 1, 1);
+        long tickStep = Math.max(1L, (long) Math.ceil(niceChartIncrement(Math.max(approxStep, 1e-15))));
+        double axisTop = tickStep * Math.ceil(dataMax / tickStep);
+        if (!(axisTop > 0)) {
+            axisTop = tickStep;
+        }
+
+        int padR = 14;
+        int padT = 18;
+        int padB = 38;
+        int padL = 16 + chartYLabelReserve(axisTop, tickStep);
 
         double innerW = Math.max(1, w - padL - padR);
         double innerH = Math.max(1, h - padT - padB);
         double stepX = buckets <= 1 ? 0 : innerW / (buckets - 1);
 
+        double yBase = padT + innerH;
+        double yTop = padT;
+
         StringBuilder sb = new StringBuilder();
         sb.append("<svg viewBox='0 0 ").append(w).append(" ").append(h).append("' ")
                 .append("width='100%' height='").append(h).append("'>");
-        // axes
-        sb.append("<line x1='").append(padL).append("' y1='").append(padT + innerH)
-                .append("' x2='").append(padL + innerW).append("' y2='").append(padT + innerH)
+
+        // horizontal grid + Y axis labels (low values at bottom → high at top)
+        for (double yValue = 0; yValue <= axisTop + tickStep * 1e-9; yValue += tickStep) {
+            double frac = axisTop <= 1e-12 ? 0 : Math.min(Math.max(yValue / axisTop, 0), 1);
+            double gridY = yBase - frac * innerH;
+            boolean onBottomAxis = Math.abs(gridY - yBase) < 0.5;
+            if (!onBottomAxis) {
+                sb.append("<line x1='").append(padL).append("' y1='").append(String.format(Locale.US, "%.2f", gridY))
+                        .append("' x2='").append(padL + innerW).append("' y2='")
+                        .append(String.format(Locale.US, "%.2f", gridY))
+                        .append("' stroke='var(--lumo-contrast-10pct)' stroke-width='1' stroke-dasharray='4 4'/>");
+            }
+
+            sb.append("<text x='").append(padL - 6)
+                    .append("' y='").append(String.format(Locale.US, "%.2f", gridY + 4))
+                    .append("' font-size='12' text-anchor='end' fill='var(--lumo-secondary-text-color)'>")
+                    .append(escapeXml(formatYAxisLabel(yValue)))
+                    .append("</text>");
+        }
+
+        // Y axis spine
+        sb.append("<line x1='").append(padL).append("' y1='").append(String.format(Locale.US, "%.2f", yBase))
+                .append("' x2='").append(padL).append("' y2='").append(String.format(Locale.US, "%.2f", yTop))
+                .append("' stroke='var(--lumo-contrast-25pct)' stroke-width='1'/>");
+
+        // X axis baseline
+        sb.append("<line x1='").append(padL).append("' y1='").append(String.format(Locale.US, "%.2f", yBase))
+                .append("' x2='").append(padL + innerW).append("' y2='").append(String.format(Locale.US, "%.2f", yBase))
                 .append("' stroke='var(--lumo-contrast-30pct)' stroke-width='1'/>");
 
         // x labels (sparse)
@@ -445,19 +486,22 @@ public class WorkResultsStatisticsDialog extends StandardView {
             for (int i = 0; i < buckets; i++) {
                 double v = series.bucketValues()[i];
                 double x = padL + stepX * i;
-                double y = padT + innerH - (v / max) * innerH;
-                if (i > 0) pts.append(' ');
+                double fracY = axisTop <= 1e-12 ? 0 : Math.min(Math.max(v / axisTop, 0), 1);
+                double y = padT + innerH - fracY * innerH;
+                if (i > 0) {
+                    pts.append(' ');
+                }
                 pts.append(String.format(Locale.US, "%.2f,%.2f", x, y));
             }
             sb.append("<polyline fill='none' stroke='").append(color)
                     .append("' stroke-width='3' stroke-linejoin='round' stroke-linecap='round' ")
                     .append("points='").append(pts).append("'/>");
 
-            // dots
             for (int i = 0; i < buckets; i++) {
                 double v = series.bucketValues()[i];
                 double x = padL + stepX * i;
-                double y = padT + innerH - (v / max) * innerH;
+                double fracY = axisTop <= 1e-12 ? 0 : Math.min(Math.max(v / axisTop, 0), 1);
+                double y = padT + innerH - fracY * innerH;
                 sb.append("<circle cx='").append(String.format(Locale.US, "%.2f", x))
                         .append("' cy='").append(String.format(Locale.US, "%.2f", y))
                         .append("' r='3.5' fill='").append(color).append("'/>");
@@ -472,6 +516,30 @@ public class WorkResultsStatisticsDialog extends StandardView {
                 .set("padding", "8px")
                 .set("background", "color-mix(in srgb, var(--lumo-base-color) 70%, transparent)");
         return box;
+    }
+
+    private static double niceChartIncrement(double approxStep) {
+        if (!(approxStep > 0)) {
+            return 1;
+        }
+        double exp = Math.floor(Math.log10(approxStep));
+        double mantissa = approxStep / Math.pow(10, exp);
+        double nf = mantissa <= 1 ? 1 : mantissa <= 2 ? 2 : mantissa <= 5 ? 5 : 10;
+        return nf * Math.pow(10, exp);
+    }
+
+    private static int chartYLabelReserve(double axisTop, long tickStep) {
+        int maxChars = formatYAxisLabel(0).length();
+        int guard = 0;
+        for (double yVal = 0; yVal <= axisTop + tickStep * 1e-9 && guard < 512; yVal += tickStep, guard++) {
+            maxChars = Math.max(maxChars, formatYAxisLabel(yVal).length());
+        }
+        return Math.min(130, Math.max(32, maxChars * 8 + 6));
+    }
+
+    private static String formatYAxisLabel(double v) {
+        // По оси Y — только целые значения (счётчики событий).
+        return String.valueOf((long) Math.round(v));
     }
 
     private String metricLabel(WorkMetric m) {

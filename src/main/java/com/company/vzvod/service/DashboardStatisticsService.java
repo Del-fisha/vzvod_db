@@ -104,13 +104,17 @@ public class DashboardStatisticsService {
     }
 
     private double sumMetricsForDepartment(UUID departmentId, LocalDate from, LocalDate to, StatsQuery query) {
-        List<ServiceInfo> sis = dataManager.load(ServiceInfo.class)
-                .query("select e from ServiceInfo e where e.department.id = :dep")
-                .parameter("dep", departmentId)
-                .list();
+        // В режиме "общие показатели отделения" считаем по нарядам (Shift), а не по каждому сотруднику.
+        // Иначе один и тот же наряд (где несколько сотрудников одного отделения) будет ошибочно давать +N к отделению.
         double sum = 0.0;
-        for (ServiceInfo si : sis) {
-            sum += sumMetricsForServiceInfo(si, from, to, query);
+        if (query.metrics().contains(WorkMetric.ADMINISTRATIVE_VIOLATIONS)) {
+            sum += countAdministrativeDistinctViolationsForDepartment(departmentId, from, to, query);
+        }
+        if (query.metrics().contains(WorkMetric.CRIMINAL_VIOLATIONS)) {
+            sum += countCriminalDistinctViolationsForDepartment(departmentId, from, to, query);
+        }
+        if (query.metrics().contains(WorkMetric.IBD_WITH_MIGRANT)) {
+            sum += sumIbdWithMigrantDistinctShiftsForDepartment(departmentId, from, to);
         }
         return sum;
     }
@@ -163,6 +167,30 @@ public class DashboardStatisticsService {
                 .count();
     }
 
+    private long countAdministrativeDistinctViolationsForDepartment(UUID departmentId, LocalDate from, LocalDate to, StatsQuery query) {
+        List<ArticleOfAdministrative> articlesFilter = mapArticles(query.administrativeArticleIds());
+        if (!query.administrativeArticleIds().isEmpty() && articlesFilter.isEmpty()) {
+            return 0;
+        }
+        String jpql = """
+                select distinct v.id as vid
+                from AdministrativeViolation v
+                join v.shift s
+                join s.units u
+                where u.department.id = :dep
+                  and s.date >= :from and s.date <= :to
+                """ + (articlesFilter.isEmpty() ? "" : " and v.article in :arts ");
+        var loader = dataManager.loadValues(jpql)
+                .properties("vid")
+                .parameter("dep", departmentId)
+                .parameter("from", from)
+                .parameter("to", to);
+        if (!articlesFilter.isEmpty()) {
+            loader.parameter("arts", articlesFilter);
+        }
+        return loader.list().size();
+    }
+
     private long countCriminal(ServiceInfo si, LocalDate from, LocalDate to, StatsQuery query) {
         String jpql = """
                 select count(v)
@@ -179,6 +207,26 @@ public class DashboardStatisticsService {
         }
         Long v = loader.one();
         return v == null ? 0L : v;
+    }
+
+    private long countCriminalDistinctViolationsForDepartment(UUID departmentId, LocalDate from, LocalDate to, StatsQuery query) {
+        String jpql = """
+                select distinct v.id as vid
+                from CriminalViolation v
+                join v.shift s
+                join s.units u
+                where u.department.id = :dep
+                  and s.date >= :from and s.date <= :to
+                """ + (query.criminalTypeIds().isEmpty() ? "" : " and v.type in :types ");
+        var loader = dataManager.loadValues(jpql)
+                .properties("vid")
+                .parameter("dep", departmentId)
+                .parameter("from", from)
+                .parameter("to", to);
+        if (!query.criminalTypeIds().isEmpty()) {
+            loader.parameter("types", query.criminalTypeIds().stream().toList());
+        }
+        return loader.list().size();
     }
 
     /**
@@ -211,6 +259,29 @@ public class DashboardStatisticsService {
                 .parameter("to", to)
                 .one();
         return v == null ? 0L : v;
+    }
+
+    private long sumIbdWithMigrantDistinctShiftsForDepartment(UUID departmentId, LocalDate from, LocalDate to) {
+        // В Shift.ibdWithMigrant хранится итог по наряду — суммируем один раз на Shift.
+        String jpql = """
+                select distinct s.id as sid, coalesce(s.ibdWithMigrant, 0) as v
+                from Shift s
+                join s.units u
+                where u.department.id = :dep
+                  and s.date >= :from and s.date <= :to
+                """;
+        return dataManager.loadValues(jpql)
+                .properties("sid", "v")
+                .parameter("dep", departmentId)
+                .parameter("from", from)
+                .parameter("to", to)
+                .list()
+                .stream()
+                .mapToLong(r -> {
+                    Number v = (Number) r.getValue("v");
+                    return v == null ? 0L : v.longValue();
+                })
+                .sum();
     }
 
     private List<Bucket> buildBuckets(StatsQuery query, OverallRange overall, LocalDate ref) {
