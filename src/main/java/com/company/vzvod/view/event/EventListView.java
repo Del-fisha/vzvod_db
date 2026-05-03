@@ -9,10 +9,10 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.ItemDoubleClickEvent;
 import com.vaadin.flow.router.Route;
 import io.jmix.core.security.CurrentAuthentication;
-import io.jmix.security.role.RoleGrantedAuthorityUtils;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.view.*;
+import io.jmix.security.role.RoleGrantedAuthorityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Set;
@@ -38,9 +38,9 @@ public class EventListView extends StandardListView<Event> {
     @ViewComponent
     private Button editButton;
     @ViewComponent
-    private Button removeButton;
+    private Button archiveWithoutSquadButton;
     @ViewComponent
-    private Button viewButton;
+    private Button permanentDeleteButton;
 
     @Autowired
     private EventArchiveService eventArchiveService;
@@ -48,10 +48,11 @@ public class EventListView extends StandardListView<Event> {
     @Subscribe
     public void onInit(InitEvent event) {
         eventsDataGrid.setSelectionMode(Grid.SelectionMode.MULTI);
+        eventsDataGrid.addSelectionListener(selection -> syncEventActionStates());
     }
 
-    @Subscribe("eventsDataGrid.removeAction")
-    public void onEventsDataGridRemoveAction(ActionPerformedEvent event) {
+    @Subscribe("eventsDataGrid.archiveWithoutSquadAction")
+    public void onEventsDataGridArchiveWithoutSquadAction(ActionPerformedEvent apEvent) {
         Set<Event> selected = eventsDataGrid.getSelectedItems();
         if (selected.isEmpty()) {
             return;
@@ -61,12 +62,23 @@ public class EventListView extends StandardListView<Event> {
         getViewData().getLoader("eventsDl").load();
     }
 
+    @Subscribe("eventsDataGrid.permanentDeleteAction")
+    public void onEventsDataGridPermanentDeleteAction(ActionPerformedEvent apEvent) {
+        Set<Event> selected = eventsDataGrid.getSelectedItems();
+        if (selected.isEmpty()) {
+            return;
+        }
+
+        eventArchiveService.permanentlySuppressEvents(selected);
+        getViewData().getLoader("eventsDl").load();
+    }
+
     @Subscribe
     public void onReady(ReadyEvent event) {
-        if (!hasRole(FullAccessRole.CODE)) {
+        if (!hasFullAccess()) {
             createButton.setVisible(false);
             editButton.setVisible(false);
-            removeButton.setVisible(false);
+            permanentDeleteButton.setVisible(false);
 
             var createAction = eventsDataGrid.getAction("createAction");
             if (createAction != null) {
@@ -76,22 +88,40 @@ public class EventListView extends StandardListView<Event> {
             if (editAction != null) {
                 editAction.setEnabled(false);
             }
-            var removeAction = eventsDataGrid.getAction("removeAction");
-            if (removeAction != null) {
-                removeAction.setEnabled(false);
-            }
+        } else {
+            permanentDeleteButton.setVisible(true);
         }
+
+        // Кто уже прошёл ViewPolicy этого экрана, видит «БЕЗ ВЗВОДА» (тип действия включается при выборе строк).
+        archiveWithoutSquadButton.setVisible(true);
+        syncEventActionStates();
     }
 
     @Subscribe("eventsDataGrid")
-    public void onEventsDataGridItemDoubleClick(ItemDoubleClickEvent<Event> event) {
-        if (!hasRole(FullAccessRole.CODE)) {
+    public void onEventsDataGridItemDoubleClick(ItemDoubleClickEvent<Event> apEvent) {
+        if (!hasFullAccess()) {
             return;
         }
         var editAction = eventsDataGrid.getAction("editAction");
         if (editAction != null && editAction.isEnabled()) {
             editAction.actionPerform(eventsDataGrid);
         }
+    }
+
+    /**
+     * list_itemTracking включает действие при выборе строки; здесь ограничиваем только финальное «Удалить»
+     * ролью system-full-access (полицейский без этого — не видит кнопку).
+     */
+    private void syncEventActionStates() {
+        boolean hasSelection = !eventsDataGrid.getSelectedItems().isEmpty();
+        var delAct = eventsDataGrid.getAction("permanentDeleteAction");
+        if (delAct != null) {
+            delAct.setEnabled(hasFullAccess() && hasSelection);
+        }
+    }
+
+    private boolean hasFullAccess() {
+        return hasRole(FullAccessRole.CODE);
     }
 
     private boolean hasRole(String roleCode) {

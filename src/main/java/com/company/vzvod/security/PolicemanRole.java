@@ -233,7 +233,8 @@ public interface PolicemanRole {
                     "time",
                     "place",
                     "shiftOfDepartment",
-                    "originalEventId"
+                    "originalEventId",
+                    "restorable"
             },
             action = EntityAttributePolicyAction.MODIFY
     )

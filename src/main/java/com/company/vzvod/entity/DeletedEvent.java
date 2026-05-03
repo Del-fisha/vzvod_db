@@ -52,6 +52,10 @@ public class DeletedEvent {
     @Lob
     private String description;
 
+    /** false — запись только для блокировки импорта (Kafka), не показывается в «Без взвода». */
+    @Column(name = "RESTORABLE", nullable = false)
+    private Boolean restorable = true;
+
     @Transient
     @Nullable
     public EventType getEventType() {

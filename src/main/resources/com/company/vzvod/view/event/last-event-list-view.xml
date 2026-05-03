@@ -34,7 +34,8 @@
             <startSlot>
                 <button id="createButton" action="eventsDataGrid.createAction"/>
                 <button id="editButton" action="eventsDataGrid.editAction"/>
-                <button id="removeButton" action="eventsDataGrid.removeAction"/>
+                <button id="archiveWithoutSquadButton" action="eventsDataGrid.archiveWithoutSquadAction" themeNames="primary"/>
+                <button id="permanentDeleteButton" action="eventsDataGrid.permanentDeleteAction" themeNames="error"/>
             </startSlot>
             <endSlot>
                 <simplePagination id="pagination" dataLoader="eventsDl"/>
@@ -49,7 +50,14 @@
             <actions>
                 <action id="createAction" type="list_create"/>
                 <action id="editAction" type="list_edit"/>
-                <action id="removeAction" type="list_remove"/>
+                <action id="archiveWithoutSquadAction"
+                        type="list_itemTracking"
+                        text="msg://lastEventListView.returnArchived"
+                        themeNames="primary"/>
+                <action id="permanentDeleteAction"
+                        type="list_itemTracking"
+                        text="msg://lastEventListView.permanentDelete"
+                        themeNames="error"/>
             </actions>
             <columns resizable="true">
                 <column property="date"/>

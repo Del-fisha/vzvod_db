@@ -114,6 +114,7 @@ public class EventKafkaConsumerIntegrationTest {
         try {
             DeletedEvent deleted = dataManager.create(DeletedEvent.class);
             deleted.setName(name);
+            deleted.setRestorable(true);
             deleted.setDate(LocalDate.now().plusDays(2));
             deleted.setTime(LocalTime.of(12, 0));
             deleted = dataManager.save(deleted);
@@ -126,6 +127,28 @@ public class EventKafkaConsumerIntegrationTest {
         kafkaTemplate.send("events", dto).get();
 
         assertNull(waitForEventByName(name, 3_000), "Event не должен быть создан, если есть DeletedEvent");
+    }
+
+    @Test
+    @DisplayName("DeletedEvent с restorable=false по-прежнему блокирует импорт из Kafka")
+    void nonRestorableDeletedEventStillBlocksKafka() throws Exception {
+        String name = "Подавленное навсегда";
+
+        systemAuthenticator.begin();
+        try {
+            DeletedEvent suppressed = dataManager.create(DeletedEvent.class);
+            suppressed.setName(name);
+            suppressed.setRestorable(false);
+            suppressed.setDate(LocalDate.now().plusDays(5));
+            dataManager.save(suppressed);
+        } finally {
+            systemAuthenticator.end();
+        }
+
+        EventDto dto = new EventDto("Площадка", name, LocalDate.now().plusDays(5), LocalTime.of(20, 0));
+        kafkaTemplate.send("events", dto).get();
+
+        assertNull(waitForEventByName(name, 3_000), "Event не должен появиться при tombstone без restorable");
     }
 
     private Event waitForEventByName(String name, long timeoutMs) throws InterruptedException {

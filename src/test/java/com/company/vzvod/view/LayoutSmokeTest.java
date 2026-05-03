@@ -24,6 +24,15 @@ class LayoutSmokeTest {
         assertFalse(xml.contains("id=\"countOfDaysField\""));
     }
 
+    @Test
+    void eventListView_hasArchiveAndPermanentActions_notLegacyRemove() throws IOException {
+        String xml = readResource("/com/company/vzvod/view/event/event-list-view.xml");
+        assertTrue(xml.contains("archiveWithoutSquadAction"));
+        assertTrue(xml.contains("permanentDeleteAction"));
+        assertFalse(xml.contains("type=\"list_remove\""));
+        assertTrue(xml.contains("type=\"list_itemTracking\""));
+    }
+
     private static String readResource(String path) throws IOException {
         try (var is = LayoutSmokeTest.class.getResourceAsStream(path)) {
             if (is == null) {

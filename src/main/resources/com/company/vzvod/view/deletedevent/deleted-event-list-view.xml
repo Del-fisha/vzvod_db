@@ -9,7 +9,7 @@
             <fetchPlan extends="_base"/>
             <loader id="deletedEventsDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from DeletedEvent e order by e.date asc]]>
+                    <![CDATA[select e from DeletedEvent e where e.restorable = true order by e.date asc]]>
                 </query>
             </loader>
         </collection>
@@ -29,7 +29,10 @@
             <startSlot>
                 <button id="createButton" action="deletedEventsDataGrid.createAction"/>
                 <button id="editButton" action="deletedEventsDataGrid.editAction"/>
-                <button id="removeButton" action="deletedEventsDataGrid.removeAction"/>
+                <button id="restoreButton" action="deletedEventsDataGrid.restoreAction" themeNames="primary"/>
+                <button id="permanentDeleteArchivedButton"
+                        action="deletedEventsDataGrid.permanentDeleteArchivedAction"
+                        themeNames="error"/>
             </startSlot>
             <endSlot>
                 <simplePagination id="pagination" dataLoader="deletedEventsDl"/>
@@ -44,7 +47,14 @@
             <actions>
                 <action id="createAction" type="list_create"/>
                 <action id="editAction" type="list_edit"/>
-                <action id="removeAction" type="list_remove"/>
+                <action id="restoreAction"
+                        type="list_itemTracking"
+                        text="msg://deletedEventListView.restore"
+                        themeNames="primary"/>
+                <action id="permanentDeleteArchivedAction"
+                        type="list_itemTracking"
+                        text="msg://deletedEventListView.permanentDeleteArchived"
+                        themeNames="error"/>
             </actions>
             <columns resizable="true">
                 <column property="date"/>
