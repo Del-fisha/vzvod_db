@@ -37,6 +37,12 @@
             </section>
         </drawerLayout>
         <initialLayout>
+            <vbox id="homeStatsEntry" classNames="home-stats-entry" width="100%" height="100%"
+                  padding="true" spacing="true" alignItems="CENTER" justifyContent="CENTER">
+                <h3 text="msg://homeStatsEntry.caption"/>
+                <button id="openWorkResultsStatsBtn" text="msg://openWorkResultsStatsBtn.text"
+                        themeNames="primary"/>
+            </vbox>
         </initialLayout>
     </appLayout>
 </mainView>
