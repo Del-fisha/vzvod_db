@@ -11,6 +11,8 @@ import com.company.vzvod.view.main.MainView;
 import com.vaadin.flow.router.Route;
 import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.flowui.DialogWindows;
+import io.jmix.flowui.component.SupportsTypedValue;
+import io.jmix.flowui.component.datepicker.TypedDatePicker;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.model.CollectionPropertyContainer;
@@ -26,7 +28,7 @@ import java.time.LocalDate;
 @EditedEntityContainer("shiftDc")
 public class ShiftDetailView extends StandardDetailView<Shift> {
 
-    @Autowired  // ← Добавь это
+    @Autowired
     private CurrentAuthentication currentAuthentication;
 
     @ViewComponent
@@ -60,8 +62,18 @@ public class ShiftDetailView extends StandardDetailView<Shift> {
         shift.setIbdWithMigrant(0);
         shift.setIbdWithoutMigrant(0);
         shift.setCountOfStatements(0);
-        shift.setDepartmentToday(DepartmentConverter.departmentFromDate(LocalDate.now()));
+        shift.setDepartmentToday(DepartmentConverter.departmentFromDate(shift.getDate()));
 
+    }
+
+    @Subscribe("dateField")
+    public void onDateFieldTypedValueChange(
+            SupportsTypedValue.TypedValueChangeEvent<TypedDatePicker<LocalDate>, LocalDate> event) {
+
+        LocalDate date = event.getValue();
+        if (date != null) {
+            getEditedEntity().setDepartmentToday(DepartmentConverter.departmentFromDate(date));
+        }
     }
 
     @Subscribe("adminViolationsDataGrid.create")
