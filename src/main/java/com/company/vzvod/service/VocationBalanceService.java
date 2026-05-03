@@ -1,14 +1,11 @@
 package com.company.vzvod.service;
 
 import com.company.vzvod.entity.ServiceInfo;
-import com.company.vzvod.entity.User;
-import com.company.vzvod.entity.Vocation;
 import com.company.vzvod.entity.VocationType;
 import io.jmix.core.DataManager;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,8 +19,10 @@ public class VocationBalanceService {
     }
 
     /**
-     * Пересчитывает лимит/остаток отпускных дней за текущий календарный год.
-     * Лимит фиксируется на 01.01 текущего года (т.е. увеличение стажа в середине года не повышает лимит до следующего 01.01).
+     * Пересчитывает положено/остаток отпуска за календарный год вокруг «сегодня».
+     * Номинал на год = норматив по стажу на 01.01 + доп. +5/+5 после достижения 10 или 15 лет в течение года
+     * (если на 01.01 порог ещё не пройден) + сумма «добавлено дней» по выезду.
+     * Списание — только с пула: {@code countOfDays - daysAddedByDeparture} по основному и части основного.
      */
     public void recalcAndSave(ServiceInfo serviceInfo) {
         if (serviceInfo == null || serviceInfo.getId() == null) {
@@ -38,6 +37,9 @@ public class VocationBalanceService {
         }
 
         ServiceInfo serviceInfo = loadForVacationCalc(serviceInfoId);
+        if (serviceInfo == null) {
+            return new VocationYearStats(0, 0, 0);
+        }
         VocationYearStats stats = calcCurrentYearStats(serviceInfo, LocalDate.now());
         serviceInfo.setVacationDaysEntitled(stats.entitled());
         serviceInfo.setVacationDaysAvailable(stats.available());
@@ -53,20 +55,29 @@ public class VocationBalanceService {
         LocalDate yearStart = LocalDate.of(now.getYear(), 1, 1);
         LocalDate yearEnd = LocalDate.of(now.getYear(), 12, 31);
 
-        int entitledBase = VocationService.daysAvailable(serviceInfo, yearStart);
-        int used = loadUsedDays(serviceInfo.getId(), yearStart, yearEnd);
+        int nominalAtJan1 = VocationService.nominalDaysAvailable(serviceInfo, yearStart);
+        int midYearBonuses = VocationService.midYearSeniorityBonuses(serviceInfo, yearStart, now);
         int added = loadAddedDays(serviceInfo.getId(), yearStart, yearEnd);
-        int entitled = entitledBase + Math.max(0, added);
+        int entitled = nominalAtJan1 + midYearBonuses + Math.max(0, added);
+
+        int used = loadPoolDaysUsed(serviceInfo.getId(), yearStart, yearEnd);
         int available = Math.max(0, entitled - used);
 
         return new VocationYearStats(entitled, used, available);
     }
 
-    private int loadUsedDays(UUID serviceInfoId, LocalDate start, LocalDate end) {
+    private int loadPoolDaysUsed(UUID serviceInfoId, LocalDate start, LocalDate end) {
         if (serviceInfoId == null) {
             return 0;
         }
 
+        int sumCounted = vocationSumCountedDays(serviceInfoId, start, end);
+        int sumAddedParts = loadAddedDays(serviceInfoId, start, end);
+        return Math.max(0, sumCounted - sumAddedParts);
+    }
+
+    /** Сумма {@code countOfDays} только по тем же типам, что учитываются в балансе. */
+    private int vocationSumCountedDays(UUID serviceInfoId, LocalDate start, LocalDate end) {
         Integer sum = dataManager.loadValue(
                         "select sum(coalesce(e.countOfDays, 0)) " +
                                 "from Vocation e " +
@@ -116,10 +127,10 @@ public class VocationBalanceService {
                         .add("vacationDaysAvailable")
                         .add("user", fp2 -> fp2.add("armyService"))
                 )
-                .one();
+                .optional()
+                .orElse(null);
     }
 
     public record VocationYearStats(int entitled, int used, int available) {
     }
 }
-

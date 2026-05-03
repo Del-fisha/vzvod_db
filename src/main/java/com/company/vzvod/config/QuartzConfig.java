@@ -29,7 +29,7 @@ public class QuartzConfig {
                 .forJob(serviceInfoYearlyRecalcJobDetail)
                 .withIdentity("serviceInfoYearlyRecalcTrigger")
                 .withSchedule(
-                        cronSchedule("0 0 1 1 1 ?")
+                        cronSchedule("0 0 0 1 1 ?")
                                 .inTimeZone(TimeZone.getTimeZone("Europe/Moscow"))
                 )
                 .build();

@@ -2,14 +2,16 @@ package com.company.vzvod.listener;
 
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.Vocation;
-import com.company.vzvod.service.VocationBalanceService;
 import com.company.vzvod.service.ServiceInfoVocationStatusService;
+import com.company.vzvod.service.VocationBalanceService;
 import io.jmix.core.DataManager;
+import io.jmix.core.Id;
 import io.jmix.core.event.EntityChangedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Component
 public class VocationChangedListener {
@@ -30,26 +32,33 @@ public class VocationChangedListener {
 
     @EventListener
     public void onVocationChangedBeforeCommit(EntityChangedEvent<Vocation> event) {
-        // Любая операция над отпуском должна пересчитать остаток дней за текущий год.
-        // Event приходит before commit — даже при DELETE запись ещё можно загрузить в рамках транзакции.
         if (event.getEntityId() == null) {
             return;
         }
 
-        Vocation vocation;
-        try {
-            vocation = dataManager.load(event.getEntityId()).one();
-        } catch (Exception e) {
+        UUID serviceInfoId = resolveServiceInfoId(event);
+        if (serviceInfoId == null) {
             return;
         }
+        vocationBalanceService.recalcAndSave(serviceInfoId);
+        serviceInfoVocationStatusService.syncForServiceInfo(serviceInfoId, LocalDate.now());
+    }
 
+    /**
+     * При удалении запись уже может быть недоступна через загрузку — берём прежний FK из события.
+     */
+    private UUID resolveServiceInfoId(EntityChangedEvent<Vocation> event) {
+        if (event.getType() == EntityChangedEvent.Type.DELETED) {
+            Id<ServiceInfo> ref = event.getChanges().getOldReferenceId("userServiceInfo");
+            if (ref == null) {
+                return null;
+            }
+            Object raw = ref.getValue();
+            return raw instanceof UUID u ? u : null;
+        }
+
+        Vocation vocation = dataManager.load(event.getEntityId()).one();
         ServiceInfo serviceInfo = vocation.getUserServiceInfo();
-        if (serviceInfo == null) {
-            return;
-        }
-
-        vocationBalanceService.recalcAndSave(serviceInfo.getId());
-        serviceInfoVocationStatusService.syncForServiceInfo(serviceInfo.getId(), LocalDate.now());
+        return serviceInfo == null ? null : serviceInfo.getId();
     }
 }
-
