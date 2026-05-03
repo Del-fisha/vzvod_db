@@ -111,10 +111,10 @@ public class VocationBalanceIntegrationTest {
 
         var stats = vocationBalanceService.recalcAndSave(serviceInfo.getId());
 
-        int baseEntitled = VocationService.daysAvailable(serviceInfo, LocalDate.of(year, 1, 1));
-        assertEquals(baseEntitled + 2, stats.entitled());
-        assertEquals(15, stats.used());
-        assertEquals((baseEntitled + 2) - 15, stats.available());
+        int baseJan1Nominal = VocationService.nominalDaysAvailable(serviceInfo, LocalDate.of(year, 1, 1));
+        assertEquals(baseJan1Nominal + 2, stats.entitled());
+        assertEquals(13, stats.used()); // только пул: (10-2) + 5
+        assertEquals((baseJan1Nominal + 2) - 13, stats.available());
     }
 }
 

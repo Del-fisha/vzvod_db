@@ -20,14 +20,16 @@ public class ServiceInfoEventListener {
         }
     }
 
-    private void recalcVacation(ServiceInfo serviceInfo, LocalDate date) {
+    private void recalcVacation(ServiceInfo serviceInfo, LocalDate now) {
         if (serviceInfo.getUser() == null || serviceInfo.getStartDate() == null) {
             return;
         }
 
-        int days = VocationService.daysAvailable(serviceInfo, date);
-        serviceInfo.setVacationDaysEntitled(days);
-
-        serviceInfo.setVacationDaysAvailable(days);
+        LocalDate yearStart = LocalDate.of(now.getYear(), 1, 1);
+        int nominal = VocationService.nominalDaysAvailable(serviceInfo, yearStart);
+        int midYear = VocationService.midYearSeniorityBonuses(serviceInfo, yearStart, now);
+        int entitled = nominal + midYear;
+        serviceInfo.setVacationDaysEntitled(entitled);
+        serviceInfo.setVacationDaysAvailable(entitled);
     }
 }

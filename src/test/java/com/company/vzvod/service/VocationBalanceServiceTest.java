@@ -25,7 +25,7 @@ class VocationBalanceServiceTest {
                 .parameter(anyString(), any())
                 .parameter(anyString(), any())
                 .parameter(anyString(), any())
-                .one()).thenReturn(12, 3);
+                .one()).thenReturn(3, 12, 3);
 
         VocationBalanceService service = new VocationBalanceService(dataManager);
 
@@ -39,10 +39,10 @@ class VocationBalanceServiceTest {
 
         var stats = service.calcCurrentYearStats(serviceInfo, LocalDate.of(2026, 4, 24));
 
-        // 2010-01-01 -> 2026-01-01 = 16 лет + 1 год за армию => 17 => >=15 => +10 дней.
+        // 2010-01-01 -> 2026-01-01 = 16 календарных лет + 1 год за армию => номинальные 50 дней.
         assertEquals(53, stats.entitled());
-        assertEquals(12, stats.used());
-        assertEquals(41, stats.available());
+        assertEquals(9, stats.used()); // сумма календарных дней минус сумма добавленных = 12 - 3
+        assertEquals(44, stats.available());
     }
 }
 
