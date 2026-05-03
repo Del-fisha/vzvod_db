@@ -2,9 +2,10 @@ FROM eclipse-temurin:21-jre
 
 WORKDIR /app
 
-# This compose-oriented Dockerfile expects a locally built jar.
-# Build it on host first:
-#   gradlew.bat --no-daemon clean vaadinBuildFrontend bootJar -Pvaadin.productionMode -x test
+# Expects a jar in build/libs/ (run from core/). Plain bootJar bundles Vaadin *dev* mode and
+# the app crashes in Docker (it looks for the host path to src, e.g. D:\...\core).
+# Always build production frontend before copying into this image:
+#   .\gradlew.bat clean vaadinBuildFrontend bootJar "-Pvaadin.productionMode=true" -x test
 COPY build/libs/*.jar ./app.jar
 
 EXPOSE 8080
