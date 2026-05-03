@@ -7,10 +7,11 @@ import org.springframework.lang.Nullable;
 
 public enum Qualification implements EnumClass<Integer> {
 
+    /** Порядок по возрастанию классности (выпадающие списки и т.п.). */
     NONE(0),
-    FIRST(1),
-    SECOND(2),
     THIRD(3),
+    SECOND(2),
+    FIRST(1),
     MASTER(4);
 
     private final Integer id;
