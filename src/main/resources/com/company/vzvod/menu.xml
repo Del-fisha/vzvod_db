@@ -30,8 +30,6 @@
               title="msg://com.company.vzvod.view.administrativeviolation/administrativeViolationListView.title"/>
         <item id="all_criminal_violations" view="CriminalViolation.list"
               title="msg://com.company.vzvod.view.criminalviolation/criminalViolationListView.title"/>
-        <item id="all_employees_to_read" view="UserListView"
-              title="msg://com.company.vzvod.view.userlist/userListView.title"/>
     </menu>
 
     <menu id="events" title="msg://com.company.vzvod/menu.events.title" opened="true">
