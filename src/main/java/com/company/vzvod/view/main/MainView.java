@@ -18,6 +18,7 @@ import com.vaadin.flow.router.Route;
 import com.company.vzvod.entity.User;
 import com.company.vzvod.view.userlist.UserListView;
 import com.company.vzvod.view.event.EventListView;
+import com.company.vzvod.view.print.PrintHubView;
 import io.jmix.flowui.app.main.StandardMainView;
 import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.flowui.view.Subscribe;
@@ -142,6 +143,15 @@ public class MainView extends StandardMainView {
         );
         events.addCardClickListener(() -> UI.getCurrent().navigate(EventListView.class));
         homeStatsWidgetSlot.add(events);
+
+        HomeStatsCard print = new HomeStatsCard(
+                "Распечатать",
+                "Рапорта и другие документы — отдельной страницей.",
+                "Открыть",
+                "var(--lumo-primary-text-color)"
+        );
+        print.addCardClickListener(() -> UI.getCurrent().navigate(PrintHubView.class));
+        homeStatsWidgetSlot.add(print);
     }
 
     @Tag("article")

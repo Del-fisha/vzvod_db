@@ -1,7 +1,10 @@
 package com.company.vzvod.view.raport;
 
+import com.company.vzvod.entity.Post;
 import com.company.vzvod.entity.ServiceInfo;
+import com.company.vzvod.entity.StatusInService;
 import com.company.vzvod.entity.User;
+import com.company.vzvod.service.ServiceInfoVocationStatusService;
 import com.company.vzvod.service.dto.raport.CompensatoryTimeRaportDto;
 import com.company.vzvod.service.dto.raport.PersonDto;
 import com.company.vzvod.service.raport.CompensatoryTimeRaportSender;
@@ -57,14 +60,34 @@ public class CompensatoryTimeRaportView extends StandardView {
     @Autowired
     private Notifications notifications;
 
+    @Autowired
+    private ServiceInfoVocationStatusService serviceInfoVocationStatusService;
+
     private static final String MSG_PREFIX = "com.company.vzvod.view.raport/compensatoryTimeRaportView.";
+    private static final String OOOP_DEPUTY_FULL_DEFAULT =
+            "Зам. начальника ОООП Самусенко Виктор Александрович подполковник";
+    private static final String OOOP_DEPUTY_PREFIX_DEFAULT = "Зам. начальника ОООП";
+    private static final String OOOP_DEPUTY_POSITION_DEFAULT = "Зам. начальника ОООП";
 
     @Subscribe
     public void onInit(InitEvent event) {
+        LocalDate today = LocalDate.now();
+        reportDateField.setTypedValue(today);
+        dayOffDateField.setTypedValue(today);
+
+        String ooopDeputyFull = msgOrDefault(MSG_PREFIX + "recipient.ooopDeputy.full", OOOP_DEPUTY_FULL_DEFAULT);
         recipientComboBox.setItems(
                 messages.getMessage(MSG_PREFIX + "recipient.chief.full"),
-                messages.getMessage(MSG_PREFIX + "recipient.deputy.full")
+                messages.getMessage(MSG_PREFIX + "recipient.deputy.full"),
+                ooopDeputyFull
         );
+
+        updateIntercederForReportDate(today, true);
+    }
+
+    @Subscribe("reportDateField")
+    public void onReportDateFieldValueChange(AbstractField.ComponentValueChangeEvent<TypedDatePicker<LocalDate>, LocalDate> event) {
+        updateIntercederForReportDate(event.getValue(), false);
     }
 
     @Subscribe("employeeDept1Picker")
@@ -178,6 +201,7 @@ public class CompensatoryTimeRaportView extends StandardView {
 
         String chiefPrefix = messages.getMessage(MSG_PREFIX + "recipient.chief.prefix");
         String deputyPrefix = messages.getMessage(MSG_PREFIX + "recipient.deputy.prefix");
+        String ooopDeputyPrefix = msgOrDefault(MSG_PREFIX + "recipient.ooopDeputy.prefix", OOOP_DEPUTY_PREFIX_DEFAULT);
 
         if (s.startsWith(chiefPrefix + " ")) {
             String[] parts = s.split("\\s+");
@@ -193,6 +217,13 @@ public class CompensatoryTimeRaportView extends StandardView {
             firstName = parts[3];
             middleName = parts[4];
             rank = parts[5];
+        } else if (s.startsWith(ooopDeputyPrefix + " ")) {
+            String[] parts = s.split("\\s+");
+            position = msgOrDefault(MSG_PREFIX + "recipient.ooopDeputy.position", OOOP_DEPUTY_POSITION_DEFAULT);
+            lastName = parts[3];
+            firstName = parts[4];
+            middleName = parts[5];
+            rank = parts[6];
         } else {
             position = s;
             lastName = s;
@@ -209,5 +240,70 @@ public class CompensatoryTimeRaportView extends StandardView {
                 .position(position)
                 .gender(null)
                 .build();
+    }
+
+    private String msgOrDefault(String key, String defaultValue) {
+        String v = messages.getMessage(key);
+        return key.equals(v) ? defaultValue : v;
+    }
+
+    private void updateIntercederForReportDate(LocalDate reportDate, boolean force) {
+        if (reportDate == null) {
+            return;
+        }
+
+        User current = intercederUserPicker.getValue();
+        if (!force && current != null) {
+            ServiceInfo si = current.getServiceInfo();
+            Post p = si == null ? null : si.getPost();
+            if (p != Post.COM_VZVOD && p != Post.ZAM_COM_VZVOD) {
+                return;
+            }
+        }
+
+        User commander = loadUserByPost(Post.COM_VZVOD);
+        User deputy = loadUserByPost(Post.ZAM_COM_VZVOD);
+        if (commander == null && deputy == null) {
+            return;
+        }
+
+        boolean commanderActive = isUserActiveOnDate(commander, reportDate);
+        intercederUserPicker.setValue(commanderActive ? commander : deputy);
+    }
+
+    private boolean isUserActiveOnDate(User user, LocalDate date) {
+        if (user == null || date == null) {
+            return false;
+        }
+        ServiceInfo serviceInfo = user.getServiceInfo();
+        if (serviceInfo == null || serviceInfo.getId() == null) {
+            return false;
+        }
+
+        ServiceInfo fresh = dataManager.load(ServiceInfo.class)
+                .id(serviceInfo.getId())
+                .fetchPlan(fp -> fp.add("status"))
+                .optional()
+                .orElse(null);
+        if (fresh == null) {
+            return false;
+        }
+
+        if (fresh.getStatus() != StatusInService.ACTIVE) {
+            return false;
+        }
+
+        return !serviceInfoVocationStatusService.hasVocationToday(fresh.getId(), date);
+    }
+
+    private User loadUserByPost(Post post) {
+        if (post == null) {
+            return null;
+        }
+        return dataManager.load(User.class)
+                .query("select u from User u join u.serviceInfo si where si.post = :post")
+                .parameter("post", post.getId())
+                .optional()
+                .orElse(null);
     }
 }

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="Распечатать">
+    <layout>
+        <vbox classNames="home-stats-entry" width="100%" height="100%" padding="true" spacing="true"
+              alignItems="START" justifyContent="START">
+            <vbox id="printWidgetsSlot" classNames="home-stats-widget-slot" width="100%"/>
+        </vbox>
+    </layout>
+</view>

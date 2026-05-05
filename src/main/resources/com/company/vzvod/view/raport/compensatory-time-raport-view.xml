@@ -10,7 +10,7 @@
                         select u
                         from User u
                         join u.serviceInfo si
-                        where si.post in ('D', 'E')
+                        where si.post not in ('A', 'B')
                           and si.department.number = 1
                         order by u.lastName, u.firstName
                     ]]>
@@ -27,7 +27,7 @@
                         select u
                         from User u
                         join u.serviceInfo si
-                        where si.post in ('D', 'E')
+                        where si.post not in ('A', 'B')
                           and si.department.number = 2
                         order by u.lastName, u.firstName
                     ]]>
