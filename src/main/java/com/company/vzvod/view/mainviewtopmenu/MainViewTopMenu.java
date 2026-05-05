@@ -16,6 +16,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.UI;
 import com.company.vzvod.view.userlist.UserListView;
+import com.company.vzvod.view.event.EventListView;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @ViewController(id = "MainViewTopMenu")
@@ -59,6 +60,15 @@ public class MainViewTopMenu extends StandardMainView {
         );
         employees.addCardClickListener(() -> UI.getCurrent().navigate(UserListView.class));
         homeStatsWidgetSlot.add(employees);
+
+        HomeStatsCard events = new HomeStatsCard(
+                "Мероприятия",
+                "Планируемые, прошедшие и «без взвода» — всё в одном месте.",
+                "Открыть",
+                "var(--lumo-error-color)"
+        );
+        events.addCardClickListener(() -> UI.getCurrent().navigate(EventListView.class));
+        homeStatsWidgetSlot.add(events);
     }
 
     @Override

@@ -25,50 +25,60 @@
         <action id="discardAction" type="lookup_discard"/>
     </actions>
     <layout>
-        <hbox id="buttonsPanel" classNames="buttons-panel">
-            <startSlot>
-                <button id="createButton" action="deletedEventsDataGrid.createAction"/>
-                <button id="editButton" action="deletedEventsDataGrid.editAction"/>
-                <button id="restoreButton" action="deletedEventsDataGrid.restoreAction" themeNames="primary"/>
-                <button id="permanentDeleteArchivedButton"
-                        action="deletedEventsDataGrid.permanentDeleteArchivedAction"
-                        themeNames="error"/>
-            </startSlot>
-            <endSlot>
-                <simplePagination id="pagination" dataLoader="deletedEventsDl"/>
-            </endSlot>
-        </hbox>
-        <dataGrid id="deletedEventsDataGrid"
-                  width="100%"
-                  minHeight="20em"
-                  dataContainer="deletedEventsDc"
-                  columnReorderingAllowed="true"
-                  selectionMode="MULTI">
-            <actions>
-                <action id="createAction" type="list_create"/>
-                <action id="editAction" type="list_edit"/>
-                <action id="restoreAction"
-                        type="list_itemTracking"
-                        text="msg://deletedEventListView.restore"
-                        themeNames="primary"/>
-                <action id="permanentDeleteArchivedAction"
-                        type="list_itemTracking"
-                        text="msg://deletedEventListView.permanentDeleteArchived"
-                        themeNames="error"/>
-            </actions>
-            <columns resizable="true">
-                <column property="date"/>
-                <column property="name"/>
-                <column property="eventType"/>
-                <column property="place"/>
-                <column property="time"/>
-                <column property="shiftOfDepartment"/>
-                <column property="description"/>
-            </columns>
-        </dataGrid>
-        <hbox id="lookupActions" visible="false">
-            <button id="selectButton" action="selectAction"/>
-            <button id="discardButton" action="discardAction"/>
+        <hbox width="100%" spacing="true" alignItems="START">
+            <vbox classNames="events-switcher" width="240px" flexShrink="0" spacing="true">
+                <button id="eventsPlannedBtn" text="Планируемые"/>
+                <button id="eventsPastBtn" text="Прошедшие"/>
+                <button id="eventsWithoutSquadBtn" text="Без взвода" themeNames="primary"/>
+            </vbox>
+
+            <vbox classNames="events-content" width="100%" flexGrow="1" spacing="true">
+                <hbox id="buttonsPanel" classNames="buttons-panel">
+                    <startSlot>
+                        <button id="createButton" action="deletedEventsDataGrid.createAction"/>
+                        <button id="editButton" action="deletedEventsDataGrid.editAction"/>
+                        <button id="restoreButton" action="deletedEventsDataGrid.restoreAction" themeNames="primary"/>
+                        <button id="permanentDeleteArchivedButton"
+                                action="deletedEventsDataGrid.permanentDeleteArchivedAction"
+                                themeNames="error"/>
+                    </startSlot>
+                    <endSlot>
+                        <simplePagination id="pagination" dataLoader="deletedEventsDl"/>
+                    </endSlot>
+                </hbox>
+                <dataGrid id="deletedEventsDataGrid"
+                          width="100%"
+                          minHeight="20em"
+                          dataContainer="deletedEventsDc"
+                          columnReorderingAllowed="true"
+                          selectionMode="MULTI">
+                    <actions>
+                        <action id="createAction" type="list_create"/>
+                        <action id="editAction" type="list_edit"/>
+                        <action id="restoreAction"
+                                type="list_itemTracking"
+                                text="msg://deletedEventListView.restore"
+                                themeNames="primary"/>
+                        <action id="permanentDeleteArchivedAction"
+                                type="list_itemTracking"
+                                text="msg://deletedEventListView.permanentDeleteArchived"
+                                themeNames="error"/>
+                    </actions>
+                    <columns resizable="true">
+                        <column property="date"/>
+                        <column property="name"/>
+                        <column property="eventType"/>
+                        <column property="place"/>
+                        <column property="time"/>
+                        <column property="shiftOfDepartment"/>
+                        <column property="description"/>
+                    </columns>
+                </dataGrid>
+                <hbox id="lookupActions" visible="false">
+                    <button id="selectButton" action="selectAction"/>
+                    <button id="discardButton" action="discardAction"/>
+                </hbox>
+            </vbox>
         </hbox>
     </layout>
 </view>

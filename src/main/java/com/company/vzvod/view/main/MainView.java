@@ -17,6 +17,7 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.router.Route;
 import com.company.vzvod.entity.User;
 import com.company.vzvod.view.userlist.UserListView;
+import com.company.vzvod.view.event.EventListView;
 import io.jmix.flowui.app.main.StandardMainView;
 import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.flowui.view.Subscribe;
@@ -132,6 +133,15 @@ public class MainView extends StandardMainView {
         );
         employees.addCardClickListener(() -> UI.getCurrent().navigate(UserListView.class));
         homeStatsWidgetSlot.add(employees);
+
+        HomeStatsCard events = new HomeStatsCard(
+                "Мероприятия",
+                "Планируемые, прошедшие и «без взвода» — всё в одном месте.",
+                "Открыть",
+                "var(--lumo-error-color)"
+        );
+        events.addCardClickListener(() -> UI.getCurrent().navigate(EventListView.class));
+        homeStatsWidgetSlot.add(events);
     }
 
     @Tag("article")

@@ -30,48 +30,58 @@
         <action id="discardAction" type="lookup_discard"/>
     </actions>
     <layout>
-        <hbox id="buttonsPanel" classNames="buttons-panel">
-            <startSlot>
-                <button id="createButton" action="eventsDataGrid.createAction"/>
-                <button id="editButton" action="eventsDataGrid.editAction"/>
-                <button id="archiveWithoutSquadButton" action="eventsDataGrid.archiveWithoutSquadAction" themeNames="primary"/>
-                <button id="permanentDeleteButton" action="eventsDataGrid.permanentDeleteAction" themeNames="error"/>
-            </startSlot>
-            <endSlot>
-                <simplePagination id="pagination" dataLoader="eventsDl"/>
-            </endSlot>
-        </hbox>
-        <dataGrid id="eventsDataGrid"
-                  width="100%"
-                  minHeight="20em"
-                  dataContainer="eventsDc"
-                  columnReorderingAllowed="true"
-                  selectionMode="MULTI">
-            <actions>
-                <action id="createAction" type="list_create"/>
-                <action id="editAction" type="list_edit"/>
-                <action id="archiveWithoutSquadAction"
-                        type="list_itemTracking"
-                        text="msg://lastEventListView.returnArchived"
-                        themeNames="primary"/>
-                <action id="permanentDeleteAction"
-                        type="list_itemTracking"
-                        text="msg://lastEventListView.permanentDelete"
-                        themeNames="error"/>
-            </actions>
-            <columns resizable="true">
-                <column property="date"/>
-                <column property="name"/>
-                <column property="eventType"/>
-                <column property="place"/>
-                <column property="time"/>
-                <column property="shiftOfDepartment"/>
-                <column property="description"/>
-            </columns>
-        </dataGrid>
-        <hbox id="lookupActions" visible="false">
-            <button id="selectButton" action="selectAction"/>
-            <button id="discardButton" action="discardAction"/>
+        <hbox width="100%" spacing="true" alignItems="START">
+            <vbox classNames="events-switcher" width="240px" flexShrink="0" spacing="true">
+                <button id="eventsPlannedBtn" text="Планируемые"/>
+                <button id="eventsPastBtn" text="Прошедшие" themeNames="primary"/>
+                <button id="eventsWithoutSquadBtn" text="Без взвода"/>
+            </vbox>
+
+            <vbox classNames="events-content" width="100%" flexGrow="1" spacing="true">
+                <hbox id="buttonsPanel" classNames="buttons-panel">
+                    <startSlot>
+                        <button id="createButton" action="eventsDataGrid.createAction"/>
+                        <button id="editButton" action="eventsDataGrid.editAction"/>
+                        <button id="archiveWithoutSquadButton" action="eventsDataGrid.archiveWithoutSquadAction" themeNames="primary"/>
+                        <button id="permanentDeleteButton" action="eventsDataGrid.permanentDeleteAction" themeNames="error"/>
+                    </startSlot>
+                    <endSlot>
+                        <simplePagination id="pagination" dataLoader="eventsDl"/>
+                    </endSlot>
+                </hbox>
+                <dataGrid id="eventsDataGrid"
+                          width="100%"
+                          minHeight="20em"
+                          dataContainer="eventsDc"
+                          columnReorderingAllowed="true"
+                          selectionMode="MULTI">
+                    <actions>
+                        <action id="createAction" type="list_create"/>
+                        <action id="editAction" type="list_edit"/>
+                        <action id="archiveWithoutSquadAction"
+                                type="list_itemTracking"
+                                text="msg://lastEventListView.returnArchived"
+                                themeNames="primary"/>
+                        <action id="permanentDeleteAction"
+                                type="list_itemTracking"
+                                text="msg://lastEventListView.permanentDelete"
+                                themeNames="error"/>
+                    </actions>
+                    <columns resizable="true">
+                        <column property="date"/>
+                        <column property="name"/>
+                        <column property="eventType"/>
+                        <column property="place"/>
+                        <column property="time"/>
+                        <column property="shiftOfDepartment"/>
+                        <column property="description"/>
+                    </columns>
+                </dataGrid>
+                <hbox id="lookupActions" visible="false">
+                    <button id="selectButton" action="selectAction"/>
+                    <button id="discardButton" action="discardAction"/>
+                </hbox>
+            </vbox>
         </hbox>
     </layout>
 </view>

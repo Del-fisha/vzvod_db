@@ -21,6 +21,24 @@ html {
     --lumo-font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
 }
 
+/* ============================================================
+   Events lists: left switcher
+   ============================================================ */
+.events-switcher {
+    padding: var(--lumo-space-s);
+    border: 1px solid var(--lumo-contrast-10pct);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--lumo-base-color) 70%, transparent);
+    box-shadow: var(--lumo-box-shadow-xs);
+}
+
+.events-switcher vaadin-button,
+.events-switcher .jmix-button,
+.events-switcher [theme~="button"] {
+    width: 100%;
+    justify-content: flex-start;
+}
+
 /* микро-обводка для всего текста – улучшает контраст */
 body,
 vaadin-button,

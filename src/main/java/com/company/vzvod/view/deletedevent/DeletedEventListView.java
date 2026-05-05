@@ -3,10 +3,13 @@ package com.company.vzvod.view.deletedevent;
 import com.company.vzvod.entity.DeletedEvent;
 import com.company.vzvod.security.FullAccessRole;
 import com.company.vzvod.service.event_service.EventArchiveService;
+import com.company.vzvod.view.event.EventListView;
+import com.company.vzvod.view.event.LastEventListView;
 import com.company.vzvod.view.main.MainView;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.component.UI;
 import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
@@ -38,10 +41,24 @@ public class DeletedEventListView extends StandardListView<DeletedEvent> {
     @ViewComponent
     private Button permanentDeleteArchivedButton;
 
+    @ViewComponent
+    private Button eventsPlannedBtn;
+    @ViewComponent
+    private Button eventsPastBtn;
+    @ViewComponent
+    private Button eventsWithoutSquadBtn;
+
     @Subscribe
     public void onInit(InitEvent event) {
         deletedEventsDataGrid.setSelectionMode(Grid.SelectionMode.MULTI);
         deletedEventsDataGrid.addSelectionListener(selection -> syncDeletedGridActions());
+
+        if (eventsPlannedBtn != null) {
+            eventsPlannedBtn.addClickListener(e -> UI.getCurrent().navigate(EventListView.class));
+        }
+        if (eventsPastBtn != null) {
+            eventsPastBtn.addClickListener(e -> UI.getCurrent().navigate(LastEventListView.class));
+        }
     }
 
     @Subscribe("deletedEventsDataGrid.restoreAction")
