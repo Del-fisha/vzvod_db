@@ -52,3 +52,114 @@ vaadin-app-layout.jmix-main-view-top-menu-app-layout::part(navbar) {
   margin: var(--lumo-space-s) var(--lumo-space-m);
 }
 
+/* Home dashboard widget (shared with side-menu MainView) */
+.home-stats-entry {
+  padding: clamp(12px, 2vw, 20px);
+}
+
+.home-stats-widget-slot {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(280px, 1fr));
+  gap: clamp(12px, 2vw, 20px);
+  align-items: start;
+  justify-items: start;
+}
+
+.home-card {
+  --bg: var(--lumo-base-color);
+  --clr: var(--lumo-primary-color);
+
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  min-height: 260px;
+  padding: 22px 22px 18px;
+  border-radius: 18px;
+  background: var(--bg);
+  color: var(--lumo-body-text-color);
+  border: 1px solid var(--lumo-contrast-10pct);
+  box-shadow: var(--lumo-box-shadow-s);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+@media (max-width: 1100px) {
+  .home-stats-widget-slot {
+    grid-template-columns: repeat(2, minmax(260px, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .home-stats-widget-slot {
+    grid-template-columns: 1fr;
+  }
+}
+
+.home-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--lumo-box-shadow-m);
+}
+
+.home-card__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  background: var(--bg);
+  box-shadow:
+    0 0 0 4px var(--bg),
+    0 0 0 6px var(--clr);
+  transition: box-shadow 0.55s ease;
+}
+
+.home-card:hover .home-card__icon {
+  box-shadow:
+    0 0 0 4px var(--bg),
+    0 0 0 60vmax var(--clr);
+}
+
+.home-card__title {
+  position: relative;
+  margin: 14px 0 8px;
+  font-size: var(--lumo-font-size-xl);
+  line-height: 1.15;
+  color: var(--lumo-header-text-color);
+}
+
+.home-card__subtitle {
+  position: relative;
+  color: var(--lumo-secondary-text-color);
+  line-height: 1.35;
+  max-width: 44ch;
+}
+
+.home-card:hover .home-card__title,
+.home-card:hover .home-card__subtitle {
+  /* On fill, keep text in "normal background" color */
+  color: var(--lumo-base-color);
+}
+
+.home-card__cta {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 18px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: var(--clr);
+  border: 2px solid var(--clr);
+  color: var(--lumo-base-color);
+  font-weight: 600;
+  width: fit-content;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.home-card:hover .home-card__cta {
+  background: var(--bg);
+  border-color: var(--bg);
+  color: var(--clr);
+}
+
