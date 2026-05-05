@@ -39,6 +39,15 @@ html {
     justify-content: flex-start;
 }
 
+.events-content {
+    min-height: 0;
+}
+
+.events-content vaadin-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
 /* микро-обводка для всего текста – улучшает контраст */
 body,
 vaadin-button,

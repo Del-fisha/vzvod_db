@@ -23,7 +23,6 @@ import java.util.Set;
 @ViewController(id = "Event.list")
 @ViewDescriptor(path = "event-list-view.xml")
 @LookupComponent("eventsDataGrid")
-@DialogMode(width = "64em")
 public class EventListView extends StandardListView<Event> {
 
     @ViewComponent

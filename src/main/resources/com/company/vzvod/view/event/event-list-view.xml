@@ -30,14 +30,14 @@
         <action id="discardAction" type="lookup_discard"/>
     </actions>
     <layout>
-        <hbox width="100%" spacing="true" alignItems="START">
+        <hbox width="100%" height="100%" spacing="true" alignItems="START">
             <vbox classNames="events-switcher" width="240px" flexShrink="0" spacing="true">
                 <button id="eventsPlannedBtn" text="Планируемые" themeNames="primary"/>
                 <button id="eventsPastBtn" text="Прошедшие"/>
                 <button id="eventsWithoutSquadBtn" text="Без взвода"/>
             </vbox>
 
-            <vbox classNames="events-content" width="100%" flexGrow="1" spacing="true">
+            <vbox classNames="events-content" width="100%" height="100%" flexGrow="1" spacing="true">
                 <hbox id="buttonsPanel" classNames="buttons-panel">
                     <startSlot>
                         <button id="createButton" action="eventsDataGrid.createAction"/>
@@ -51,7 +51,7 @@
                 </hbox>
                 <dataGrid id="eventsDataGrid"
                           width="100%"
-                          minHeight="20em"
+                          height="100%"
                           dataContainer="eventsDc"
                           columnReorderingAllowed="true"
                           selectionMode="MULTI">

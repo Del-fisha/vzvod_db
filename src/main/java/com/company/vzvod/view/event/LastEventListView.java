@@ -22,7 +22,6 @@ import java.util.Set;
 @ViewController(id = "LastEvent.list")
 @ViewDescriptor(path = "last-event-list-view.xml")
 @LookupComponent("eventsDataGrid")
-@DialogMode(width = "64em")
 public class LastEventListView extends StandardListView<Event> {
 
     @ViewComponent

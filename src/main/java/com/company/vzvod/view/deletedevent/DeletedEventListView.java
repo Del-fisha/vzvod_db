@@ -23,7 +23,6 @@ import java.util.Set;
 @ViewController(id = "DeletedEvent.list")
 @ViewDescriptor(path = "deleted-event-list-view.xml")
 @LookupComponent("deletedEventsDataGrid")
-@DialogMode(width = "64em")
 public class DeletedEventListView extends StandardListView<DeletedEvent> {
 
     @ViewComponent
