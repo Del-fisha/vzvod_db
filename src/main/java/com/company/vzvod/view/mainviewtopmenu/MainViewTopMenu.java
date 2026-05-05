@@ -14,6 +14,8 @@ import io.jmix.flowui.view.ViewDescriptor;
 import com.vaadin.flow.component.HtmlComponent;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.UI;
+import com.company.vzvod.view.userlist.UserListView;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @ViewController(id = "MainViewTopMenu")
@@ -37,17 +39,26 @@ public class MainViewTopMenu extends StandardMainView {
         }
         homeStatsWidgetSlot.removeAll();
 
-        HomeStatsCard card = new HomeStatsCard(
+        HomeStatsCard stats = new HomeStatsCard(
                 "Статистика результатов работы",
                 "Откройте сводную статистику по работе за выбранный период.",
                 "Открыть",
                 "var(--lumo-primary-color)"
         );
-        card.addCardClickListener(() -> {
+        stats.addCardClickListener(() -> {
             DialogWindow<WorkResultsStatisticsDialog> w = dialogWindows.view(this, WorkResultsStatisticsDialog.class).build();
             w.open();
         });
-        homeStatsWidgetSlot.add(card);
+        homeStatsWidgetSlot.add(stats);
+
+        HomeStatsCard employees = new HomeStatsCard(
+                "Все сотрудники",
+                "Откройте общий список сотрудников и перейдите в карточку нужного человека.",
+                "Открыть",
+                "var(--lumo-success-color)"
+        );
+        employees.addCardClickListener(() -> UI.getCurrent().navigate(UserListView.class));
+        homeStatsWidgetSlot.add(employees);
     }
 
     @Override

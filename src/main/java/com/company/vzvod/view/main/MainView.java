@@ -16,6 +16,7 @@ import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.router.Route;
 import com.company.vzvod.entity.User;
+import com.company.vzvod.view.userlist.UserListView;
 import io.jmix.flowui.app.main.StandardMainView;
 import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.flowui.view.Subscribe;
@@ -111,16 +112,26 @@ public class MainView extends StandardMainView {
         }
         homeStatsWidgetSlot.removeAll();
 
-        String title = messageBundle.getMessage("openWorkResultsStatsBtn.text");
-        String subtitle = "Откройте сводную статистику по работе за выбранный период.";
-        String cta = "Открыть";
-
-        HomeStatsCard card = new HomeStatsCard(title, subtitle, cta, "var(--lumo-primary-color)");
-        card.addCardClickListener(() -> {
+        HomeStatsCard stats = new HomeStatsCard(
+                messageBundle.getMessage("openWorkResultsStatsBtn.text"),
+                "Откройте сводную статистику по работе за выбранный период.",
+                "Открыть",
+                "var(--lumo-primary-color)"
+        );
+        stats.addCardClickListener(() -> {
             DialogWindow<WorkResultsStatisticsDialog> w = dialogWindows.view(this, WorkResultsStatisticsDialog.class).build();
             w.open();
         });
-        homeStatsWidgetSlot.add(card);
+        homeStatsWidgetSlot.add(stats);
+
+        HomeStatsCard employees = new HomeStatsCard(
+                "Все сотрудники",
+                "Откройте общий список сотрудников и перейдите в карточку нужного человека.",
+                "Открыть",
+                "var(--lumo-success-color)"
+        );
+        employees.addCardClickListener(() -> UI.getCurrent().navigate(UserListView.class));
+        homeStatsWidgetSlot.add(employees);
     }
 
     @Tag("article")
