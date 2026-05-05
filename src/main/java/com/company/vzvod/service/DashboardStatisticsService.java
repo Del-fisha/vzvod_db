@@ -37,7 +37,7 @@ public class DashboardStatisticsService {
     public StatsResult loadStats(StatsQuery query) {
         query.validate();
         LocalDate ref = query.resolveReferenceDate();
-        OverallRange overall = resolveOverallRange(query.period(), ref);
+        OverallRange overall = resolveOverallRange(query, ref);
         List<Bucket> buckets = buildBuckets(query, overall, ref);
         List<StatsSeries> series = switch (query.compareMode()) {
             case DEPARTMENTS -> buildDepartmentSeries(query, buckets);
@@ -381,7 +381,8 @@ public class DashboardStatisticsService {
         }
     }
 
-    private OverallRange resolveOverallRange(StatsPeriod period, LocalDate ref) {
+    private OverallRange resolveOverallRange(StatsQuery query, LocalDate ref) {
+        StatsPeriod period = query.period();
         return switch (period) {
             case TODAY -> new OverallRange(ref, ref);
             case MONTH -> {
@@ -395,7 +396,10 @@ public class DashboardStatisticsService {
                 yield new OverallRange(start, end);
             }
             case ALL_TIME -> {
-                LocalDate end = ref;
+                // Для "всё время" верхняя граница должна включать все смены в выбранном скоупе,
+                // а не обрезаться текущей датой (иначе "за месяц" может быть больше "за всё время"). 
+                LocalDate max = findMaxShiftDate(query);
+                LocalDate end = max != null ? max : ref;
                 yield new OverallRange(LocalDate.of(1970, 1, 1), end);
             }
         };
