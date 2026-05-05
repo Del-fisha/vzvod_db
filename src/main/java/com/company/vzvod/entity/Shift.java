@@ -29,11 +29,35 @@ public class Shift {
     @Id
     private UUID id;
 
+    /**
+     * Как {@link User#getGender()}: в БД строка id перечисления ({@link NumberOfShift#getId()}), в коде {@link NumberOfShift}.
+     * Иначе EclipseLink ошибочно вешает числовой конвертер на enum-поле и падает на «МП 30».
+     */
     @Column(name = "NUMBER")
-    private NumberOfShift number;
+    private String number;
 
+    public NumberOfShift getNumber() {
+        return number == null ? null : NumberOfShift.fromId(number);
+    }
+
+    public void setNumber(final NumberOfShift routeNumber) {
+        this.number = routeNumber == null ? null : routeNumber.getId();
+    }
+
+    /**
+     * Как {@link #getNumber()} / {@link User#getGender()}: в БД строка {@link TypeOfShift#getId()},
+     * в коде {@link TypeOfShift}.
+     */
     @Column(name = "TYPE_OF_SHIFT")
-    private TypeOfShift typeOfShift;
+    private String typeOfShift;
+
+    public TypeOfShift getTypeOfShift() {
+        return typeOfShift == null ? null : TypeOfShift.fromId(typeOfShift);
+    }
+
+    public void setTypeOfShift(final TypeOfShift type) {
+        this.typeOfShift = type == null ? null : type.getId();
+    }
 
     @ManyToMany
     @JoinTable(name = "SHIFT_SERVICE_INFO",
@@ -41,8 +65,20 @@ public class Shift {
             inverseJoinColumns = @JoinColumn(name = "SERVICE_INFO_ID"))
     private Set<ServiceInfo> units = new HashSet<>();
 
+    /**
+     * В БД — integer id {@link Dep#getId()} (1 или 2); в коде — {@link Dep}.
+     * Иначе EclipseLink ObjectTypeConverter для {@link Dep} даёт «No conversion value … for [2]».
+     */
     @Column(name = "DEPARTMENT")
-    private Dep departmentToday;
+    private Integer departmentToday;
+
+    public Dep getDepartmentToday() {
+        return departmentToday == null ? null : Dep.fromId(departmentToday);
+    }
+
+    public void setDepartmentToday(final Dep dep) {
+        this.departmentToday = dep == null ? null : dep.getId();
+    }
 
     @Column(name = "DATE")
     private LocalDate date;
@@ -77,18 +113,19 @@ public class Shift {
     @InstanceName
     @DependsOnProperties({"number", "date"})
     public String getInstanceName() {
-        if (date == null && number == null) {
+        NumberOfShift route = getNumber();
+        if (date == null && route == null) {
             return "";
         }
         var parts = new StringBuilder();
         if (date != null) {
             parts.append(date.format(DateTimeFormatter.ISO_LOCAL_DATE));
         }
-        if (number != null) {
+        if (route != null) {
             if (parts.length() > 0) {
                 parts.append(" · ");
             }
-            parts.append(number.getId());
+            parts.append(route.getId());
         }
         return parts.toString();
     }

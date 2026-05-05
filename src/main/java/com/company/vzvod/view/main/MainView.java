@@ -13,6 +13,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.router.Route;
 import com.company.vzvod.entity.User;
 import io.jmix.flowui.app.main.StandardMainView;
@@ -30,8 +31,11 @@ import com.company.vzvod.notification.UserNotificationKind;
 import com.company.vzvod.notification.OverdueItemDto;
 import com.company.vzvod.notification.OverdueItemType;
 import com.company.vzvod.entity.UserNotification;
+import com.company.vzvod.view.dashboard.WorkResultsStatisticsDialog;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jmix.core.DataManager;
+import io.jmix.flowui.DialogWindows;
+import io.jmix.flowui.view.DialogWindow;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -62,8 +66,20 @@ public class MainView extends StandardMainView {
     @Autowired
     private DataManager dataManager;
 
+    @Autowired
+    private DialogWindows dialogWindows;
+
     @ViewComponent
     private MessageBundle messageBundle;
+
+    @ViewComponent
+    private JmixButton openWorkResultsStatsBtn;
+
+    @Subscribe(id = "openWorkResultsStatsBtn", subject = "clickListener")
+    public void onOpenWorkResultsStatsBtnClick(final ClickEvent<JmixButton> event) {
+        DialogWindow<WorkResultsStatisticsDialog> w = dialogWindows.view(this, WorkResultsStatisticsDialog.class).build();
+        w.open();
+    }
 
     @Subscribe
     public void onInit(final InitEvent event) {

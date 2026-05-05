@@ -8,14 +8,16 @@
                     class="com.company.vzvod.entity.CriminalViolation">
             <fetchPlan extends="_base">
                 <property name="shift">
-                    <property name="date"/>
                     <property name="number"/>
+                    <property name="date"/>
                     <property name="units">
                         <property name="user">
                             <property name="firstName"/>
                             <property name="lastName"/>
+                            <property name="patronymic"/>
                         </property>
                     </property>
+                    <property name="departmentToday"/>
                 </property>
             </fetchPlan>
             <loader id="criminalViolationsDl" readOnly="true">
@@ -66,9 +68,12 @@
                     <action id="removeAction" type="list_remove"/>
                 </actions>
                 <columns resizable="true">
-                    <column property="impact"/>
-                    <column property="shift"/>
+                    <column property="shift.date"/>
+                    <column property="shift.number"/>
+                    <column property="shift.departmentToday"/>
+                    <column property="shift.units"/>
                     <column property="type"/>
+                    <column property="impact"/>
                 </columns>
             </dataGrid>
         </vbox>

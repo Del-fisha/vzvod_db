@@ -80,3 +80,27 @@
 .bg-volume-slider {
   accent-color: var(--lumo-primary-color);
 }
+
+.home-stats-entry {
+  animation: homeStatsFadeIn 0.75s ease-out both;
+}
+
+.home-stats-entry vaadin-button {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.home-stats-entry vaadin-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--lumo-box-shadow-m);
+}
+
+@keyframes homeStatsFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

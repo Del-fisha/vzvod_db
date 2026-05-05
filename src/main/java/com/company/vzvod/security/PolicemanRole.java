@@ -308,7 +308,8 @@ public interface PolicemanRole {
             "MyVehicle.list",
             "Department.list",
             "MainViewTopMenu",
-            "CompensatoryTimeRaportView"
+            "CompensatoryTimeRaportView",
+            "WorkResultsStatisticsDialog"
     })
     void userViews();
 

@@ -24,10 +24,10 @@
         <item view="Incentive.list" title="msg://com.company.vzvod.view.penalty/incentiveListView.title"/>
         <item view="Vehicle.list" title="msg://vehicleListView.title"/>
         <item id="all_vocations" view="Vocation.list" title="msg://com.company.vzvod.view.vocation/vocationListView.title"/>
-        <item id="all_administrative_violations" view="AdministrativeViolation.list"
-              title="msg://com.company.vzvod.view.administrativeviolation/administrativeViolationListView.title"/>
         <item id="menuAllShifts" view="Shift.list"
               title="msg://com.company.vzvod/menu.all_shifts.title"/>
+        <item id="all_administrative_violations" view="AdministrativeViolation.list"
+              title="msg://com.company.vzvod.view.administrativeviolation/administrativeViolationListView.title"/>
         <item id="all_criminal_violations" view="CriminalViolation.list"
               title="msg://com.company.vzvod.view.criminalviolation/criminalViolationListView.title"/>
         <item id="all_employees_to_read" view="UserListView"
