@@ -1,6 +1,7 @@
 package com.company.vzvod.dialog_beans;
 
 import com.company.vzvod.view.raport.CompensatoryTimeRaportView;
+import com.company.vzvod.view.raport.DailyShiftRaportView;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.component.UiComponentUtils;
 import io.jmix.flowui.view.View;
@@ -18,6 +19,14 @@ public class RaportMenuBean {
 
         dialogWindows
                 .view(currentView, CompensatoryTimeRaportView.class)
+                .open();
+    }
+
+    public void openDailyShiftRaport() {
+        View<?> currentView = UiComponentUtils.getCurrentView();
+
+        dialogWindows
+                .view(currentView, DailyShiftRaportView.class)
                 .open();
     }
 }

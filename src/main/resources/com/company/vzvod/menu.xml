@@ -37,6 +37,10 @@
               title="msg://com.company.vzvod/menu.raports.compensatory_time.title"
               bean="raportMenuBean"
               beanMethod="openCompensatoryRaport"/>
+        <item id="DailyShiftRaportView"
+              title="msg://com.company.vzvod/menu.raports.daily_shift.title"
+              bean="raportMenuBean"
+              beanMethod="openDailyShiftRaport"/>
     </menu>
 
 </menu-config>

@@ -39,6 +39,15 @@ public class PrintHubView extends StandardView {
         );
         otgul.addCardClickListener(() -> raportMenuBean.openCompensatoryRaport());
         printWidgetsSlot.add(otgul);
+
+        HomeCard dailyShift = new HomeCard(
+                "Перенос на сутки",
+                "Открывает рапорт «На сутки» в диалоговом окне.",
+                "Открыть",
+                "var(--lumo-success-color)"
+        );
+        dailyShift.addCardClickListener(() -> raportMenuBean.openDailyShiftRaport());
+        printWidgetsSlot.add(dailyShift);
     }
 
     @Tag("article")
