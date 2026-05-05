@@ -27,6 +27,7 @@ import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -227,9 +228,10 @@ public class WorkResultsStatisticsDialog extends StandardView {
         departmentTreeBox.add(new H3(messageBundle.getMessage("workResultsStatisticsDialog.departmentsTitle")));
 
         for (DepartmentEmployeesRow row : dashboardStatisticsService.loadDepartmentEmployeeTree()) {
-            Checkbox deptCb = new Checkbox(messageBundle.formatMessage(
-                    "workResultsStatisticsDialog.departmentNumber",
-                    Objects.toString(row.departmentNumber(), "—")));
+            Integer deptNum = row.departmentNumber();
+            String deptNumLabel = (deptNum == null || deptNum <= 0) ? "—" : deptNum.toString();
+            String deptPattern = messageBundle.getMessage("workResultsStatisticsDialog.departmentNumber");
+            Checkbox deptCb = new Checkbox(MessageFormat.format(deptPattern, deptNumLabel));
             UUID deptId = row.departmentId();
             departmentCheckboxes.put(deptId, deptCb);
             deptCb.addValueChangeListener(e -> {
@@ -373,8 +375,8 @@ public class WorkResultsStatisticsDialog extends StandardView {
             case CRIMINAL_VIOLATIONS -> t.criminalViolations();
             case IBD_WITH_MIGRANT -> t.ibdWithMigrant();
         };
-        totalsLine.setText(messageBundle.formatMessage("workResultsStatisticsDialog.totalsLineSingle",
-                metricLabel(selectedMetric), v));
+        String totalsPattern = messageBundle.getMessage("workResultsStatisticsDialog.totalsLineSingle");
+        totalsLine.setText(MessageFormat.format(totalsPattern, metricLabel(selectedMetric), v));
     }
 
     private void renderChart(StatsResult result) {
