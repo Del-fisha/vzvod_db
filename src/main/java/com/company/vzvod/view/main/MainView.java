@@ -73,13 +73,7 @@ public class MainView extends StandardMainView {
     private MessageBundle messageBundle;
 
     @ViewComponent
-    private JmixButton openWorkResultsStatsBtn;
-
-    @Subscribe(id = "openWorkResultsStatsBtn", subject = "clickListener")
-    public void onOpenWorkResultsStatsBtnClick(final ClickEvent<JmixButton> event) {
-        DialogWindow<WorkResultsStatisticsDialog> w = dialogWindows.view(this, WorkResultsStatisticsDialog.class).build();
-        w.open();
-    }
+    private VerticalLayout homeStatsWidgetSlot;
 
     @Subscribe
     public void onInit(final InitEvent event) {
@@ -100,6 +94,7 @@ public class MainView extends StandardMainView {
 
         applySavedSettings(storageKeyPrefix, audio, volumeSlider, muteButton);
         installUiSoundEffects();
+        installHomeStatsWidget();
 
         // Autoplay may still be blocked by browser policies; best-effort start.
         UI.getCurrent().getPage().executeJs(
@@ -108,6 +103,72 @@ public class MainView extends StandardMainView {
         );
 
         showLoginNotifications();
+    }
+
+    private void installHomeStatsWidget() {
+        if (homeStatsWidgetSlot == null) {
+            return;
+        }
+        homeStatsWidgetSlot.removeAll();
+
+        String title = messageBundle.getMessage("openWorkResultsStatsBtn.text");
+        String subtitle = "Откройте сводную статистику по работе за выбранный период.";
+        String cta = "Открыть";
+
+        HomeStatsCard card = new HomeStatsCard(title, subtitle, cta, "var(--lumo-primary-color)");
+        card.addCardClickListener(() -> {
+            DialogWindow<WorkResultsStatisticsDialog> w = dialogWindows.view(this, WorkResultsStatisticsDialog.class).build();
+            w.open();
+        });
+        homeStatsWidgetSlot.add(card);
+    }
+
+    @Tag("article")
+    private static final class HomeStatsCard extends HtmlComponent {
+        private Runnable onClick;
+
+        HomeStatsCard(String title, String subtitle, String cta, String color) {
+            addClassName("home-card");
+            getElement().getStyle().set("--clr", (color == null || color.isBlank()) ? "var(--lumo-primary-color)" : color);
+
+            getElement().setProperty("innerHTML", buildInnerHtml(
+                    escapeHtml(title),
+                    escapeHtml(subtitle),
+                    escapeHtml(cta)
+            ));
+
+            getElement().addEventListener("click", e -> {
+                if (onClick != null) {
+                    onClick.run();
+                }
+            });
+            getElement().getStyle().set("cursor", "pointer");
+        }
+
+        void addCardClickListener(Runnable r) {
+            this.onClick = r;
+        }
+
+        private static String buildInnerHtml(String title, String subtitle, String cta) {
+            return """
+                    <div class="home-card__icon" aria-hidden="true">📊</div>
+                    <h3 class="home-card__title">%s</h3>
+                    <div class="home-card__subtitle">%s</div>
+                    <div class="home-card__cta" role="button" tabindex="0">%s</div>
+                    """.formatted(title, subtitle, cta);
+        }
+
+        private static String escapeHtml(String s) {
+            if (s == null) {
+                return "";
+            }
+            return s
+                    .replace("&", "&amp;")
+                    .replace("<", "&lt;")
+                    .replace(">", "&gt;")
+                    .replace("\"", "&quot;")
+                    .replace("'", "&#39;");
+        }
     }
 
     private void showLoginNotifications() {
