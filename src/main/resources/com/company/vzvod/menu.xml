@@ -32,15 +32,4 @@
               title="msg://com.company.vzvod.view.criminalviolation/criminalViolationListView.title"/>
     </menu>
 
-    <menu id="raports" title="msg://com.company.vzvod/menu.raports.title">
-        <item id="CompensatoryTimeRaportView"
-              title="msg://com.company.vzvod/menu.raports.compensatory_time.title"
-              bean="raportMenuBean"
-              beanMethod="openCompensatoryRaport"/>
-        <item id="DailyShiftRaportView"
-              title="msg://com.company.vzvod/menu.raports.daily_shift.title"
-              bean="raportMenuBean"
-              beanMethod="openDailyShiftRaport"/>
-    </menu>
-
 </menu-config>

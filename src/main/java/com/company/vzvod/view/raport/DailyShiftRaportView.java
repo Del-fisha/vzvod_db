@@ -4,6 +4,8 @@ import com.company.vzvod.entity.Post;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.StatusInService;
 import com.company.vzvod.entity.User;
+import com.company.vzvod.entity.Shift;
+import com.company.vzvod.service.DepartmentConverter;
 import com.company.vzvod.service.ServiceInfoVocationStatusService;
 import com.company.vzvod.service.dto.raport.DailyShiftRaportDto;
 import com.company.vzvod.service.dto.raport.PersonDto;
@@ -144,8 +146,39 @@ public class DailyShiftRaportView extends StandardView {
             return;
         }
 
-        employee = dataManager.load(User.class).id(employee.getId()).one();
-        petitioner = dataManager.load(Id.of(petitioner)).one();
+        employee = dataManager.load(User.class)
+                .id(employee.getId())
+                .fetchPlan(fp -> fp
+                        .add("firstName")
+                        .add("lastName")
+                        .add("patronymic")
+                        .add("serviceInfo", si -> si.add("rank").add("post"))
+                )
+                .one();
+        petitioner = dataManager.load(User.class)
+                .id(petitioner.getId())
+                .fetchPlan(fp -> fp
+                        .add("firstName")
+                        .add("lastName")
+                        .add("patronymic")
+                        .add("serviceInfo", si -> si.add("rank").add("post"))
+                )
+                .one();
+
+        if (!hasShiftOnDate(employee, firstTimeDate)) {
+            notifications.create(messages.getMessage(MSG_PREFIX + "validation.noShiftForDate",
+                            firstTimeDate.format(formatter)))
+                    .withType(Notifications.Type.WARNING)
+                    .show();
+            return;
+        }
+        if (!hasShiftOnDate(employee, secondTimeDate)) {
+            notifications.create(messages.getMessage(MSG_PREFIX + "validation.noShiftForDate",
+                            secondTimeDate.format(formatter)))
+                    .withType(Notifications.Type.WARNING)
+                    .show();
+            return;
+        }
 
         DailyShiftRaportDto raport = new DailyShiftRaportDto();
         raport.setEmployee(toPersonDto(employee));
@@ -161,6 +194,7 @@ public class DailyShiftRaportView extends StandardView {
             notifications.create(messages.getMessage(MSG_PREFIX + "notification.sent"))
                     .withType(Notifications.Type.SUCCESS)
                     .show();
+            close(StandardOutcome.CLOSE);
         } catch (org.springframework.web.client.HttpStatusCodeException e) {
             String status = e.getStatusCode().toString();
             notifications.create(messages.getMessage(MSG_PREFIX + "notification.sendErrorWithStatus", status))
@@ -173,8 +207,34 @@ public class DailyShiftRaportView extends StandardView {
         }
     }
 
+    private boolean hasShiftOnDate(User employee, LocalDate date) {
+        if (employee == null || date == null) {
+            return false;
+        }
+        ServiceInfo si = employee.getServiceInfo();
+        if (si == null || si.getId() == null) {
+            return false;
+        }
+        int dep = DepartmentConverter.departmentFromDateToInt(date);
+        Long cnt = dataManager.loadValue(
+                        "select count(s) from Shift s join s.units u " +
+                                "where u.id = :serviceInfoId and s.date = :date and s.departmentToday = :dep",
+                        Long.class
+                )
+                .parameter("serviceInfoId", si.getId())
+                .parameter("date", date)
+                .parameter("dep", dep)
+                .one();
+        return cnt != null && cnt > 0;
+    }
+
     private PersonDto toPersonDto(User user) {
-        ServiceInfo serviceInfo = user.getServiceInfo();
+        User fresh = loadUserForDto(user);
+        if (fresh == null) {
+            return PersonDto.builder().build();
+        }
+
+        ServiceInfo serviceInfo = fresh.getServiceInfo();
 
         String rank = null;
         String position = null;
@@ -189,13 +249,28 @@ public class DailyShiftRaportView extends StandardView {
         }
 
         return PersonDto.builder()
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .middleName(user.getPatronymic())
+                .firstName(fresh.getFirstName())
+                .lastName(fresh.getLastName())
+                .middleName(fresh.getPatronymic())
                 .rank(rank)
                 .position(position)
                 .gender("MALE")
                 .build();
+    }
+
+    private User loadUserForDto(User user) {
+        if (user == null || user.getId() == null) {
+            return null;
+        }
+        return dataManager.load(User.class)
+                .id(user.getId())
+                .fetchPlan(fp -> fp
+                        .add("firstName")
+                        .add("lastName")
+                        .add("patronymic")
+                        .add("serviceInfo", si -> si.add("rank").add("post"))
+                )
+                .one();
     }
 
     private PersonDto fromCommanderString(String s) {

@@ -80,12 +80,6 @@
                   label="msg://com.company.vzvod.view.raport/dailyShiftRaportView.commanderComboBox.label"
                   width="100%"/>
 
-        <hbox width="100%">
-            <datePicker id="reportDateField"
-                        label="msg://com.company.vzvod.view.raport/dailyShiftRaportView.reportDateField.label"
-                        datatype="localDate"/>
-        </hbox>
-
         <label text="msg://com.company.vzvod.view.raport/dailyShiftRaportView.datesBlock.title"/>
 
         <hbox width="100%">
@@ -100,6 +94,11 @@
 
         <datePicker id="newTimeDateField"
                     label="msg://com.company.vzvod.view.raport/dailyShiftRaportView.newTimeDateField.label"
+                    datatype="localDate"
+                    width="100%"/>
+
+        <datePicker id="reportDateField"
+                    label="msg://com.company.vzvod.view.raport/dailyShiftRaportView.reportDateField.label"
                     datatype="localDate"
                     width="100%"/>
 

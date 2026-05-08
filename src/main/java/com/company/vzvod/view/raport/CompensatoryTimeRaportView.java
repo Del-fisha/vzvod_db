@@ -135,8 +135,22 @@ public class CompensatoryTimeRaportView extends StandardView {
         }
         employee = dataManager.load(User.class)
                 .id(employee.getId())
+                .fetchPlan(fp -> fp
+                        .add("firstName")
+                        .add("lastName")
+                        .add("patronymic")
+                        .add("serviceInfo", si -> si.add("rank").add("post"))
+                )
                 .one();
-        interceder = dataManager.load(Id.of(interceder)).one();
+        interceder = dataManager.load(User.class)
+                .id(interceder.getId())
+                .fetchPlan(fp -> fp
+                        .add("firstName")
+                        .add("lastName")
+                        .add("patronymic")
+                        .add("serviceInfo", si -> si.add("rank").add("post"))
+                )
+                .one();
 
         PersonDto employeeDto = toPersonDto(employee);
         PersonDto intercederDto = toPersonDto(interceder);
@@ -155,6 +169,7 @@ public class CompensatoryTimeRaportView extends StandardView {
             notifications.create(messages.getMessage(MSG_PREFIX + "notification.sent"))
                     .withType(Notifications.Type.SUCCESS)
                     .show();
+            close(StandardOutcome.CLOSE);
         } catch (org.springframework.web.client.HttpStatusCodeException e) {
             String status = e.getStatusCode().toString();
             notifications.create(messages.getMessage(MSG_PREFIX + "notification.sendErrorWithStatus", status))
@@ -168,7 +183,12 @@ public class CompensatoryTimeRaportView extends StandardView {
     }
 
     private PersonDto toPersonDto(User user) {
-        ServiceInfo serviceInfo = user.getServiceInfo();
+        User fresh = loadUserForDto(user);
+        if (fresh == null) {
+            return PersonDto.builder().build();
+        }
+
+        ServiceInfo serviceInfo = fresh.getServiceInfo();
 
         String rank = null;
         String position = null;
@@ -183,13 +203,28 @@ public class CompensatoryTimeRaportView extends StandardView {
         }
 
         return PersonDto.builder()
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .middleName(user.getPatronymic())
+                .firstName(fresh.getFirstName())
+                .lastName(fresh.getLastName())
+                .middleName(fresh.getPatronymic())
                 .rank(rank)
                 .position(position)
                 .gender("MALE")
                 .build();
+    }
+
+    private User loadUserForDto(User user) {
+        if (user == null || user.getId() == null) {
+            return null;
+        }
+        return dataManager.load(User.class)
+                .id(user.getId())
+                .fetchPlan(fp -> fp
+                        .add("firstName")
+                        .add("lastName")
+                        .add("patronymic")
+                        .add("serviceInfo", si -> si.add("rank").add("post"))
+                )
+                .one();
     }
 
     private PersonDto fromRecipientString(String s) {
