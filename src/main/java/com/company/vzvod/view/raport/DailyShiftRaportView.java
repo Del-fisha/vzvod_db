@@ -4,10 +4,12 @@ import com.company.vzvod.entity.Post;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.StatusInService;
 import com.company.vzvod.entity.User;
+import com.company.vzvod.entity.Shift;
+import com.company.vzvod.service.DepartmentConverter;
 import com.company.vzvod.service.ServiceInfoVocationStatusService;
-import com.company.vzvod.service.dto.raport.CompensatoryTimeRaportDto;
+import com.company.vzvod.service.dto.raport.DailyShiftRaportDto;
 import com.company.vzvod.service.dto.raport.PersonDto;
-import com.company.vzvod.service.raport.CompensatoryTimeRaportSender;
+import com.company.vzvod.service.raport.DailyShiftRaportSender;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ClickEvent;
 import io.jmix.core.DataManager;
@@ -24,35 +26,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-@ViewController("CompensatoryTimeRaportView")
-@ViewDescriptor(value = "compensatory-time-raport-view.xml", path = "compensatory-time-raport-view.xml")
-public class CompensatoryTimeRaportView extends StandardView {
+@ViewController("DailyShiftRaportView")
+@ViewDescriptor(value = "daily-shift-raport-view.xml", path = "daily-shift-raport-view.xml")
+public class DailyShiftRaportView extends StandardView {
+
+    private static final String MSG_PREFIX = "com.company.vzvod.view.raport/dailyShiftRaportView.";
 
     @Autowired
     private Messages messages;
-
-    @ViewComponent
-    private EntityComboBox<User> employeeDept1Picker;
-
-    @ViewComponent
-    private EntityComboBox<User> employeeDept2Picker;
-
-    @ViewComponent
-    private EntityComboBox<User> intercederUserPicker;
-
-    @ViewComponent
-    private JmixComboBox<String> recipientComboBox;
-
-    @ViewComponent
-    private TypedDatePicker<LocalDate> reportDateField;
-
-    @ViewComponent
-    private TypedDatePicker<LocalDate> dayOffDateField;
-
-    @Autowired
-    private CompensatoryTimeRaportSender raportSender;
-
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
     @Autowired
     private DataManager dataManager;
@@ -63,7 +44,35 @@ public class CompensatoryTimeRaportView extends StandardView {
     @Autowired
     private ServiceInfoVocationStatusService serviceInfoVocationStatusService;
 
-    private static final String MSG_PREFIX = "com.company.vzvod.view.raport/compensatoryTimeRaportView.";
+    @Autowired
+    private DailyShiftRaportSender raportSender;
+
+    @ViewComponent
+    private EntityComboBox<User> employeeDept1Picker;
+
+    @ViewComponent
+    private EntityComboBox<User> employeeDept2Picker;
+
+    @ViewComponent
+    private EntityComboBox<User> petitionerUserPicker;
+
+    @ViewComponent
+    private JmixComboBox<String> commanderComboBox;
+
+    @ViewComponent
+    private TypedDatePicker<LocalDate> reportDateField;
+
+    @ViewComponent
+    private TypedDatePicker<LocalDate> firstTimeDateField;
+
+    @ViewComponent
+    private TypedDatePicker<LocalDate> secondTimeDateField;
+
+    @ViewComponent
+    private TypedDatePicker<LocalDate> newTimeDateField;
+
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+
     private static final String OOOP_DEPUTY_FULL_DEFAULT =
             "Зам. начальника ОООП Самусенко Виктор Александрович подполковник";
     private static final String OOOP_DEPUTY_PREFIX_DEFAULT = "Зам. начальника ОООП";
@@ -73,27 +82,29 @@ public class CompensatoryTimeRaportView extends StandardView {
     public void onInit(InitEvent event) {
         LocalDate today = LocalDate.now();
         reportDateField.setTypedValue(today);
-        dayOffDateField.setTypedValue(today);
+        firstTimeDateField.setTypedValue(today);
+        secondTimeDateField.setTypedValue(today);
+        newTimeDateField.setTypedValue(today);
 
-        String ooopDeputyFull = msgOrDefault(MSG_PREFIX + "recipient.ooopDeputy.full", OOOP_DEPUTY_FULL_DEFAULT);
-        recipientComboBox.setItems(
-                messages.getMessage(MSG_PREFIX + "recipient.chief.full"),
-                messages.getMessage(MSG_PREFIX + "recipient.deputy.full"),
+        String ooopDeputyFull = msgOrDefault(MSG_PREFIX + "commander.ooopDeputy.full", OOOP_DEPUTY_FULL_DEFAULT);
+        commanderComboBox.setItems(
+                messages.getMessage(MSG_PREFIX + "commander.chief.full"),
+                messages.getMessage(MSG_PREFIX + "commander.deputy.full"),
                 ooopDeputyFull
         );
 
-        updateIntercederForReportDate(today, true);
+        updatePetitionerForReportDate(today, true);
     }
 
     @Subscribe("reportDateField")
-    public void onReportDateFieldValueChange(AbstractField.ComponentValueChangeEvent<TypedDatePicker<LocalDate>, LocalDate> event) {
-        updateIntercederForReportDate(event.getValue(), false);
+    public void onReportDateFieldValueChange(
+            AbstractField.ComponentValueChangeEvent<TypedDatePicker<LocalDate>, LocalDate> event) {
+        updatePetitionerForReportDate(event.getValue(), false);
     }
 
     @Subscribe("employeeDept1Picker")
     public void onEmployeeDept1PickerValueChange(
             AbstractField.ComponentValueChangeEvent<EntityComboBox<User>, User> event) {
-
         if (event.getValue() != null) {
             employeeDept2Picker.clear();
             employeeDept2Picker.setEnabled(false);
@@ -105,7 +116,6 @@ public class CompensatoryTimeRaportView extends StandardView {
     @Subscribe("employeeDept2Picker")
     public void onEmployeeDept2PickerValueChange(
             AbstractField.ComponentValueChangeEvent<EntityComboBox<User>, User> event) {
-
         if (event.getValue() != null) {
             employeeDept1Picker.clear();
             employeeDept1Picker.setEnabled(false);
@@ -121,18 +131,21 @@ public class CompensatoryTimeRaportView extends StandardView {
             employee = employeeDept2Picker.getValue();
         }
 
-        User interceder = intercederUserPicker.getValue();
-        String recipientStr = recipientComboBox.getValue();
+        User petitioner = petitionerUserPicker.getValue();
+        String commanderStr = commanderComboBox.getValue();
         LocalDate reportDate = reportDateField.getTypedValue();
-        LocalDate dayOffDate = dayOffDateField.getTypedValue();
+        LocalDate firstTimeDate = firstTimeDateField.getTypedValue();
+        LocalDate secondTimeDate = secondTimeDateField.getTypedValue();
+        LocalDate newTimeDate = newTimeDateField.getTypedValue();
 
-        if (employee == null || interceder == null || recipientStr == null
-                || reportDate == null || dayOffDate == null) {
+        if (employee == null || petitioner == null || commanderStr == null
+                || reportDate == null || firstTimeDate == null || secondTimeDate == null || newTimeDate == null) {
             notifications.create(messages.getMessage(MSG_PREFIX + "validation.fillAllFields"))
                     .withType(Notifications.Type.WARNING)
                     .show();
             return;
         }
+
         employee = dataManager.load(User.class)
                 .id(employee.getId())
                 .fetchPlan(fp -> fp
@@ -142,8 +155,8 @@ public class CompensatoryTimeRaportView extends StandardView {
                         .add("serviceInfo", si -> si.add("rank").add("post"))
                 )
                 .one();
-        interceder = dataManager.load(User.class)
-                .id(interceder.getId())
+        petitioner = dataManager.load(User.class)
+                .id(petitioner.getId())
                 .fetchPlan(fp -> fp
                         .add("firstName")
                         .add("lastName")
@@ -152,20 +165,32 @@ public class CompensatoryTimeRaportView extends StandardView {
                 )
                 .one();
 
-        PersonDto employeeDto = toPersonDto(employee);
-        PersonDto intercederDto = toPersonDto(interceder);
-        PersonDto recipientDto = fromRecipientString(recipientStr);
+        if (!hasShiftOnDate(employee, firstTimeDate)) {
+            notifications.create(messages.getMessage(MSG_PREFIX + "validation.noShiftForDate",
+                            firstTimeDate.format(formatter)))
+                    .withType(Notifications.Type.WARNING)
+                    .show();
+            return;
+        }
+        if (!hasShiftOnDate(employee, secondTimeDate)) {
+            notifications.create(messages.getMessage(MSG_PREFIX + "validation.noShiftForDate",
+                            secondTimeDate.format(formatter)))
+                    .withType(Notifications.Type.WARNING)
+                    .show();
+            return;
+        }
 
-        CompensatoryTimeRaportDto raport = new CompensatoryTimeRaportDto();
-        raport.setEmployee(employeeDto);
-        raport.setInterceder(intercederDto);
-        raport.setRecipient(recipientDto);
+        DailyShiftRaportDto raport = new DailyShiftRaportDto();
+        raport.setEmployee(toPersonDto(employee));
+        raport.setPetitioner(toPersonDto(petitioner));
+        raport.setRecipient(fromCommanderString(commanderStr));
         raport.setReportDate(reportDate.format(formatter));
-        raport.setDayOffDate(dayOffDate.format(formatter));
+        raport.setFirstTimeDate(firstTimeDate.format(formatter));
+        raport.setSecondTimeDate(secondTimeDate.format(formatter));
+        raport.setNewTimeDate(newTimeDate.format(formatter));
 
         try {
-            raportSender.sendOtgulRaport(raport);
-
+            raportSender.sendDailyShiftRaport(raport);
             notifications.create(messages.getMessage(MSG_PREFIX + "notification.sent"))
                     .withType(Notifications.Type.SUCCESS)
                     .show();
@@ -180,6 +205,27 @@ public class CompensatoryTimeRaportView extends StandardView {
                     .withType(Notifications.Type.ERROR)
                     .show();
         }
+    }
+
+    private boolean hasShiftOnDate(User employee, LocalDate date) {
+        if (employee == null || date == null) {
+            return false;
+        }
+        ServiceInfo si = employee.getServiceInfo();
+        if (si == null || si.getId() == null) {
+            return false;
+        }
+        int dep = DepartmentConverter.departmentFromDateToInt(date);
+        Long cnt = dataManager.loadValue(
+                        "select count(s) from Shift s join s.units u " +
+                                "where u.id = :serviceInfoId and s.date = :date and s.departmentToday = :dep",
+                        Long.class
+                )
+                .parameter("serviceInfoId", si.getId())
+                .parameter("date", date)
+                .parameter("dep", dep)
+                .one();
+        return cnt != null && cnt > 0;
     }
 
     private PersonDto toPersonDto(User user) {
@@ -227,34 +273,34 @@ public class CompensatoryTimeRaportView extends StandardView {
                 .one();
     }
 
-    private PersonDto fromRecipientString(String s) {
+    private PersonDto fromCommanderString(String s) {
         String position;
         String lastName;
         String firstName;
         String middleName;
         String rank;
 
-        String chiefPrefix = messages.getMessage(MSG_PREFIX + "recipient.chief.prefix");
-        String deputyPrefix = messages.getMessage(MSG_PREFIX + "recipient.deputy.prefix");
-        String ooopDeputyPrefix = msgOrDefault(MSG_PREFIX + "recipient.ooopDeputy.prefix", OOOP_DEPUTY_PREFIX_DEFAULT);
+        String chiefPrefix = messages.getMessage(MSG_PREFIX + "commander.chief.prefix");
+        String deputyPrefix = messages.getMessage(MSG_PREFIX + "commander.deputy.prefix");
+        String ooopDeputyPrefix = msgOrDefault(MSG_PREFIX + "commander.ooopDeputy.prefix", OOOP_DEPUTY_PREFIX_DEFAULT);
 
         if (s.startsWith(chiefPrefix + " ")) {
             String[] parts = s.split("\\s+");
-            position = messages.getMessage(MSG_PREFIX + "recipient.chief.position");
+            position = messages.getMessage(MSG_PREFIX + "commander.chief.position");
             lastName = parts[1];
             firstName = parts[2];
             middleName = parts[3];
             rank = parts[4];
         } else if (s.startsWith(deputyPrefix + " ")) {
             String[] parts = s.split("\\s+");
-            position = messages.getMessage(MSG_PREFIX + "recipient.deputy.position");
+            position = messages.getMessage(MSG_PREFIX + "commander.deputy.position");
             lastName = parts[2];
             firstName = parts[3];
             middleName = parts[4];
             rank = parts[5];
         } else if (s.startsWith(ooopDeputyPrefix + " ")) {
             String[] parts = s.split("\\s+");
-            position = msgOrDefault(MSG_PREFIX + "recipient.ooopDeputy.position", OOOP_DEPUTY_POSITION_DEFAULT);
+            position = msgOrDefault(MSG_PREFIX + "commander.ooopDeputy.position", OOOP_DEPUTY_POSITION_DEFAULT);
             lastName = parts[3];
             firstName = parts[4];
             middleName = parts[5];
@@ -282,12 +328,12 @@ public class CompensatoryTimeRaportView extends StandardView {
         return key.equals(v) ? defaultValue : v;
     }
 
-    private void updateIntercederForReportDate(LocalDate reportDate, boolean force) {
+    private void updatePetitionerForReportDate(LocalDate reportDate, boolean force) {
         if (reportDate == null) {
             return;
         }
 
-        User current = intercederUserPicker.getValue();
+        User current = petitionerUserPicker.getValue();
         if (!force && current != null) {
             ServiceInfo si = current.getServiceInfo();
             Post p = si == null ? null : si.getPost();
@@ -303,7 +349,7 @@ public class CompensatoryTimeRaportView extends StandardView {
         }
 
         boolean commanderActive = isUserActiveOnDate(commander, reportDate);
-        intercederUserPicker.setValue(commanderActive ? commander : deputy);
+        petitionerUserPicker.setValue(commanderActive ? commander : deputy);
     }
 
     private boolean isUserActiveOnDate(User user, LocalDate date) {
@@ -342,3 +388,4 @@ public class CompensatoryTimeRaportView extends StandardView {
                 .orElse(null);
     }
 }
+

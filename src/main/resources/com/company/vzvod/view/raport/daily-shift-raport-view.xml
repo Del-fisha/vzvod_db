@@ -41,59 +41,70 @@
             <loader id="commandersDl">
                 <query>
                     <![CDATA[
-                select u from User u
-                where u.serviceInfo.post not in ('D', 'E')
-                order by u.lastName, u.firstName
-            ]]>
+                        select u from User u
+                        where u.serviceInfo.post not in ('D', 'E')
+                        order by u.lastName, u.firstName
+                    ]]>
                 </query>
             </loader>
         </collection>
-
     </data>
 
     <facets>
         <dataLoadCoordinator auto="true"/>
     </facets>
 
-    <layout spacing="true" padding="true" width="500px" height="600px">
+    <layout spacing="true" padding="true" width="650px" height="650px">
 
         <hbox width="100%">
             <entityComboBox id="employeeDept1Picker"
                             metaClass="User"
-                            label="msg://com.company.vzvod.view.raport/compensatoryTimeRaportView.employeeDept1Picker.label"
+                            label="msg://com.company.vzvod.view.raport/dailyShiftRaportView.employeeDept1Picker.label"
                             itemsContainer="employeesDept1Dc"
                             width="100%"/>
 
             <entityComboBox id="employeeDept2Picker"
                             metaClass="User"
-                            label="msg://com.company.vzvod.view.raport/compensatoryTimeRaportView.employeeDept2Picker.label"
+                            label="msg://com.company.vzvod.view.raport/dailyShiftRaportView.employeeDept2Picker.label"
                             itemsContainer="employeesDept2Dc"
                             width="100%"/>
         </hbox>
 
-        <entityComboBox id="intercederUserPicker"
+        <entityComboBox id="petitionerUserPicker"
                         metaClass="User"
-                        label="msg://com.company.vzvod.view.raport/compensatoryTimeRaportView.intercederUserPicker.label"
+                        label="msg://com.company.vzvod.view.raport/dailyShiftRaportView.petitionerUserPicker.label"
                         itemsContainer="commandersDc"
                         width="100%"/>
 
-        <comboBox id="recipientComboBox"
-                  label="msg://com.company.vzvod.view.raport/compensatoryTimeRaportView.recipientComboBox.label"
+        <comboBox id="commanderComboBox"
+                  label="msg://com.company.vzvod.view.raport/dailyShiftRaportView.commanderComboBox.label"
                   width="100%"/>
 
+        <label text="msg://com.company.vzvod.view.raport/dailyShiftRaportView.datesBlock.title"/>
+
         <hbox width="100%">
-            <datePicker id="reportDateField"
-                        label="msg://com.company.vzvod.view.raport/compensatoryTimeRaportView.reportDateField.label"
+            <datePicker id="firstTimeDateField"
+                        label="msg://com.company.vzvod.view.raport/dailyShiftRaportView.firstTimeDateField.label"
                         datatype="localDate"/>
 
-            <datePicker id="dayOffDateField"
-                        label="msg://com.company.vzvod.view.raport/compensatoryTimeRaportView.dayOffDateField.label"
+            <datePicker id="secondTimeDateField"
+                        label="msg://com.company.vzvod.view.raport/dailyShiftRaportView.secondTimeDateField.label"
                         datatype="localDate"/>
         </hbox>
 
+        <datePicker id="newTimeDateField"
+                    label="msg://com.company.vzvod.view.raport/dailyShiftRaportView.newTimeDateField.label"
+                    datatype="localDate"
+                    width="100%"/>
+
+        <datePicker id="reportDateField"
+                    label="msg://com.company.vzvod.view.raport/dailyShiftRaportView.reportDateField.label"
+                    datatype="localDate"
+                    width="100%"/>
 
         <button id="sendBtn"
-                text="msg://com.company.vzvod.view.raport/compensatoryTimeRaportView.sendBtn.text"
+                text="msg://com.company.vzvod.view.raport/dailyShiftRaportView.sendBtn.text"
                 themeNames="primary"/>
     </layout>
 </view>
+

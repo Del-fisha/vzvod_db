@@ -32,17 +32,4 @@
               title="msg://com.company.vzvod.view.criminalviolation/criminalViolationListView.title"/>
     </menu>
 
-    <menu id="events" title="msg://com.company.vzvod/menu.events.title" opened="true">
-        <item id="future_events" view="Event.list" title="msg://com.company.vzvod.view.event/eventListView.title"/>
-        <item id="last_events" view="LastEvent.list" title="msg://com.company.vzvod.view.event/lastEventListView.title"/>
-        <item id="deleted_events" view="DeletedEvent.list" title="msg://com.company.vzvod.view.deletedevent/deletedEventListView.title"/>
-    </menu>
-
-    <menu id="raports" title="msg://com.company.vzvod/menu.raports.title">
-        <item id="CompensatoryTimeRaportView"
-              title="msg://com.company.vzvod/menu.raports.compensatory_time.title"
-              bean="raportMenuBean"
-              beanMethod="openCompensatoryRaport"/>
-    </menu>
-
 </menu-config>
