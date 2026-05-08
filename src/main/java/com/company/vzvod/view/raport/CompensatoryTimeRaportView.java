@@ -238,21 +238,26 @@ public class CompensatoryTimeRaportView extends StandardView {
         String deputyPrefix = messages.getMessage(MSG_PREFIX + "recipient.deputy.prefix");
         String ooopDeputyPrefix = msgOrDefault(MSG_PREFIX + "recipient.ooopDeputy.prefix", OOOP_DEPUTY_PREFIX_DEFAULT);
 
-        if (s.startsWith(chiefPrefix + " ")) {
+        String sNorm = normalizePrefixLike(s);
+        String chiefNorm = normalizePrefixLike(chiefPrefix);
+        String deputyNorm = normalizePrefixLike(deputyPrefix);
+        String ooopDeputyNorm = normalizePrefixLike(ooopDeputyPrefix);
+
+        if (sNorm.startsWith(chiefNorm)) {
             String[] parts = s.split("\\s+");
             position = messages.getMessage(MSG_PREFIX + "recipient.chief.position");
             lastName = parts[1];
             firstName = parts[2];
             middleName = parts[3];
             rank = parts[4];
-        } else if (s.startsWith(deputyPrefix + " ")) {
+        } else if (sNorm.startsWith(deputyNorm)) {
             String[] parts = s.split("\\s+");
             position = messages.getMessage(MSG_PREFIX + "recipient.deputy.position");
             lastName = parts[2];
             firstName = parts[3];
             middleName = parts[4];
             rank = parts[5];
-        } else if (s.startsWith(ooopDeputyPrefix + " ")) {
+        } else if (sNorm.startsWith(ooopDeputyNorm)) {
             String[] parts = s.split("\\s+");
             position = msgOrDefault(MSG_PREFIX + "recipient.ooopDeputy.position", OOOP_DEPUTY_POSITION_DEFAULT);
             lastName = parts[3];
@@ -275,6 +280,17 @@ public class CompensatoryTimeRaportView extends StandardView {
                 .position(position)
                 .gender(null)
                 .build();
+    }
+
+    private static String normalizePrefixLike(String v) {
+        if (v == null) {
+            return "";
+        }
+        // Allow "Зам.начальника" vs "Зам. начальника" and similar spacing/punctuation differences.
+        return v.toLowerCase()
+                .replace(".", "")
+                .replace(" ", "")
+                .trim();
     }
 
     private String msgOrDefault(String key, String defaultValue) {
