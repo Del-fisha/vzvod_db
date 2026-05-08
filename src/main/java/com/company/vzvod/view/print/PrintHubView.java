@@ -33,7 +33,7 @@ public class PrintHubView extends StandardView {
 
         HomeCard otgul = new HomeCard(
                 "Рапорт на отгул",
-                "Открывает форму рапорта в диалоговом окне.",
+                "(Распечатать рапорт на отгул)",
                 "Открыть",
                 "var(--lumo-primary-color)"
         );
@@ -42,7 +42,7 @@ public class PrintHubView extends StandardView {
 
         HomeCard dailyShift = new HomeCard(
                 "Перенос на сутки",
-                "Открывает рапорт «На сутки» в диалоговом окне.",
+                "(Распечатать рапорт на перенос смен на сутки)",
                 "Открыть",
                 "var(--lumo-success-color)"
         );

@@ -43,7 +43,7 @@ public class MainViewTopMenu extends StandardMainView {
 
         HomeStatsCard stats = new HomeStatsCard(
                 "Статистика результатов работы",
-                "Откройте сводную статистику по работе за выбранный период.",
+                "Выберите период, сотрудников и элементы для получения статистики",
                 "Открыть",
                 "var(--lumo-primary-color)"
         );
@@ -55,7 +55,7 @@ public class MainViewTopMenu extends StandardMainView {
 
         HomeStatsCard employees = new HomeStatsCard(
                 "Все сотрудники",
-                "Откройте общий список сотрудников и перейдите в карточку нужного человека.",
+                "Общая база данных всех сотрудников",
                 "Открыть",
                 "var(--lumo-success-color)"
         );
@@ -73,7 +73,7 @@ public class MainViewTopMenu extends StandardMainView {
 
         HomeStatsCard print = new HomeStatsCard(
                 "Распечатать",
-                "Рапорта и другие документы — отдельной страницей.",
+                "Рапорта и другие документы для быстрой распечатки с актуальными данными",
                 "Открыть",
                 "var(--lumo-primary-text-color)"
         );

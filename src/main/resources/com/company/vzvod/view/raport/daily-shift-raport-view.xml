@@ -102,9 +102,15 @@
                     datatype="localDate"
                     width="100%"/>
 
-        <button id="sendBtn"
-                text="msg://com.company.vzvod.view.raport/dailyShiftRaportView.sendBtn.text"
-                themeNames="primary"/>
+        <hbox width="100%" spacing="true">
+            <button id="sendBtn"
+                    text="msg://com.company.vzvod.view.raport/dailyShiftRaportView.sendBtn.text"
+                    themeNames="primary"/>
+
+            <button id="sendAndPrintBtn"
+                    text="msg://com.company.vzvod.view.raport/dailyShiftRaportView.sendAndPrintBtn.text"
+                    themeNames="primary contrast"/>
+        </hbox>
     </layout>
 </view>
 

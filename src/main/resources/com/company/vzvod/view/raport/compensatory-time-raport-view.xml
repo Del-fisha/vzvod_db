@@ -91,9 +91,14 @@
                         datatype="localDate"/>
         </hbox>
 
+        <hbox width="100%" spacing="true">
+            <button id="sendBtn"
+                    text="msg://com.company.vzvod.view.raport/compensatoryTimeRaportView.sendBtn.text"
+                    themeNames="primary"/>
 
-        <button id="sendBtn"
-                text="msg://com.company.vzvod.view.raport/compensatoryTimeRaportView.sendBtn.text"
-                themeNames="primary"/>
+            <button id="sendAndPrintBtn"
+                    text="msg://com.company.vzvod.view.raport/compensatoryTimeRaportView.sendAndPrintBtn.text"
+                    themeNames="primary contrast"/>
+        </hbox>
     </layout>
 </view>

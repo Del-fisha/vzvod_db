@@ -10,8 +10,12 @@ import com.company.vzvod.service.ServiceInfoVocationStatusService;
 import com.company.vzvod.service.dto.raport.DailyShiftRaportDto;
 import com.company.vzvod.service.dto.raport.PersonDto;
 import com.company.vzvod.service.raport.DailyShiftRaportSender;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.server.StreamRegistration;
+import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.VaadinSession;
 import io.jmix.core.DataManager;
 import io.jmix.core.Id;
 import io.jmix.core.Messages;
@@ -23,8 +27,10 @@ import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
 @ViewController("DailyShiftRaportView")
 @ViewDescriptor(value = "daily-shift-raport-view.xml", path = "daily-shift-raport-view.xml")
@@ -126,6 +132,15 @@ public class DailyShiftRaportView extends StandardView {
 
     @Subscribe("sendBtn")
     public void onSendBtnClick(ClickEvent<JmixButton> event) {
+        send(false);
+    }
+
+    @Subscribe("sendAndPrintBtn")
+    public void onSendAndPrintBtnClick(ClickEvent<JmixButton> event) {
+        send(true);
+    }
+
+    private void send(boolean openPdf) {
         User employee = employeeDept1Picker.getValue();
         if (employee == null) {
             employee = employeeDept2Picker.getValue();
@@ -190,7 +205,12 @@ public class DailyShiftRaportView extends StandardView {
         raport.setNewTimeDate(newTimeDate.format(formatter));
 
         try {
-            raportSender.sendDailyShiftRaport(raport);
+            if (openPdf) {
+                byte[] pdfBytes = raportSender.sendDailyShiftRaportPdf(raport);
+                openPdfInNewTab(pdfBytes, "sutki-" + UUID.randomUUID() + ".pdf");
+            } else {
+                raportSender.sendDailyShiftRaport(raport);
+            }
             notifications.create(messages.getMessage(MSG_PREFIX + "notification.sent"))
                     .withType(Notifications.Type.SUCCESS)
                     .show();
@@ -205,6 +225,24 @@ public class DailyShiftRaportView extends StandardView {
                     .withType(Notifications.Type.ERROR)
                     .show();
         }
+    }
+
+    private void openPdfInNewTab(byte[] bytes, String fileName) {
+        if (bytes == null || bytes.length == 0) {
+            notifications.create(messages.getMessage(MSG_PREFIX + "notification.serviceUnavailable"))
+                    .withType(Notifications.Type.ERROR)
+                    .show();
+            return;
+        }
+
+        StreamResource resource = new StreamResource(fileName, () -> new ByteArrayInputStream(bytes));
+        resource.setContentType("application/pdf");
+
+        StreamRegistration registration = VaadinSession.getCurrent()
+                .getResourceRegistry()
+                .registerResource(resource);
+
+        UI.getCurrent().getPage().open(registration.getResourceUri().toString(), "_blank");
     }
 
     private boolean hasShiftOnDate(User employee, LocalDate date) {
@@ -284,21 +322,26 @@ public class DailyShiftRaportView extends StandardView {
         String deputyPrefix = messages.getMessage(MSG_PREFIX + "commander.deputy.prefix");
         String ooopDeputyPrefix = msgOrDefault(MSG_PREFIX + "commander.ooopDeputy.prefix", OOOP_DEPUTY_PREFIX_DEFAULT);
 
-        if (s.startsWith(chiefPrefix + " ")) {
+        String sNorm = normalizePrefixLike(s);
+        String chiefNorm = normalizePrefixLike(chiefPrefix);
+        String deputyNorm = normalizePrefixLike(deputyPrefix);
+        String ooopDeputyNorm = normalizePrefixLike(ooopDeputyPrefix);
+
+        if (sNorm.startsWith(chiefNorm)) {
             String[] parts = s.split("\\s+");
             position = messages.getMessage(MSG_PREFIX + "commander.chief.position");
             lastName = parts[1];
             firstName = parts[2];
             middleName = parts[3];
             rank = parts[4];
-        } else if (s.startsWith(deputyPrefix + " ")) {
+        } else if (sNorm.startsWith(deputyNorm)) {
             String[] parts = s.split("\\s+");
             position = messages.getMessage(MSG_PREFIX + "commander.deputy.position");
             lastName = parts[2];
             firstName = parts[3];
             middleName = parts[4];
             rank = parts[5];
-        } else if (s.startsWith(ooopDeputyPrefix + " ")) {
+        } else if (sNorm.startsWith(ooopDeputyNorm)) {
             String[] parts = s.split("\\s+");
             position = msgOrDefault(MSG_PREFIX + "commander.ooopDeputy.position", OOOP_DEPUTY_POSITION_DEFAULT);
             lastName = parts[3];
@@ -321,6 +364,16 @@ public class DailyShiftRaportView extends StandardView {
                 .position(position)
                 .gender(null)
                 .build();
+    }
+
+    private static String normalizePrefixLike(String v) {
+        if (v == null) {
+            return "";
+        }
+        return v.toLowerCase()
+                .replace(".", "")
+                .replace(" ", "")
+                .trim();
     }
 
     private String msgOrDefault(String key, String defaultValue) {

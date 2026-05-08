@@ -8,8 +8,12 @@ import com.company.vzvod.service.ServiceInfoVocationStatusService;
 import com.company.vzvod.service.dto.raport.CompensatoryTimeRaportDto;
 import com.company.vzvod.service.dto.raport.PersonDto;
 import com.company.vzvod.service.raport.CompensatoryTimeRaportSender;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.server.StreamRegistration;
+import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.VaadinSession;
 import io.jmix.core.DataManager;
 import io.jmix.core.Id;
 import io.jmix.core.Messages;
@@ -21,8 +25,10 @@ import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
 @ViewController("CompensatoryTimeRaportView")
 @ViewDescriptor(value = "compensatory-time-raport-view.xml", path = "compensatory-time-raport-view.xml")
@@ -116,6 +122,15 @@ public class CompensatoryTimeRaportView extends StandardView {
 
     @Subscribe("sendBtn")
     public void onSendBtnClick(ClickEvent<JmixButton> event) {
+        send(false);
+    }
+
+    @Subscribe("sendAndPrintBtn")
+    public void onSendAndPrintBtnClick(ClickEvent<JmixButton> event) {
+        send(true);
+    }
+
+    private void send(boolean openPdf) {
         User employee = employeeDept1Picker.getValue();
         if (employee == null) {
             employee = employeeDept2Picker.getValue();
@@ -164,7 +179,12 @@ public class CompensatoryTimeRaportView extends StandardView {
         raport.setDayOffDate(dayOffDate.format(formatter));
 
         try {
-            raportSender.sendOtgulRaport(raport);
+            if (openPdf) {
+                byte[] pdfBytes = raportSender.sendOtgulRaportPdf(raport);
+                openPdfInNewTab(pdfBytes, "otgul-" + UUID.randomUUID() + ".pdf");
+            } else {
+                raportSender.sendOtgulRaport(raport);
+            }
 
             notifications.create(messages.getMessage(MSG_PREFIX + "notification.sent"))
                     .withType(Notifications.Type.SUCCESS)
@@ -180,6 +200,24 @@ public class CompensatoryTimeRaportView extends StandardView {
                     .withType(Notifications.Type.ERROR)
                     .show();
         }
+    }
+
+    private void openPdfInNewTab(byte[] bytes, String fileName) {
+        if (bytes == null || bytes.length == 0) {
+            notifications.create(messages.getMessage(MSG_PREFIX + "notification.serviceUnavailable"))
+                    .withType(Notifications.Type.ERROR)
+                    .show();
+            return;
+        }
+
+        StreamResource resource = new StreamResource(fileName, () -> new ByteArrayInputStream(bytes));
+        resource.setContentType("application/pdf");
+
+        StreamRegistration registration = VaadinSession.getCurrent()
+                .getResourceRegistry()
+                .registerResource(resource);
+
+        UI.getCurrent().getPage().open(registration.getResourceUri().toString(), "_blank");
     }
 
     private PersonDto toPersonDto(User user) {
