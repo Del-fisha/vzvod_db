@@ -2,7 +2,9 @@ package com.company.vzvod.view.raport;
 
 import com.company.vzvod.entity.Post;
 import com.company.vzvod.entity.ServiceInfo;
+import com.company.vzvod.entity.StatusInService;
 import com.company.vzvod.entity.User;
+import com.company.vzvod.service.ServiceInfoVocationStatusService;
 import com.company.vzvod.service.dto.raport.PersonDto;
 import com.company.vzvod.service.dto.raport.ServiceBookSupplementDto;
 import com.company.vzvod.service.raport.ServiceBookSupplementSender;
@@ -45,6 +47,9 @@ public class ServiceBookSupplementView extends StandardView {
     @Autowired
     private ServiceBookSupplementSender sender;
 
+    @Autowired
+    private ServiceInfoVocationStatusService serviceInfoVocationStatusService;
+
     @Value("${raport.microservice.url}")
     private String raportMicroserviceUrl;
 
@@ -65,11 +70,14 @@ public class ServiceBookSupplementView extends StandardView {
         LocalDate today = LocalDate.now();
         reportDateField.setTypedValue(today);
 
-        // По умолчанию — "A" (COM_VZVOD), если есть.
-        User commander = loadUserByPost(Post.COM_VZVOD);
-        if (commander != null) {
-            signerPicker.setValue(commander);
-        }
+        updateSignerForReportDate(today, true);
+    }
+
+    @Subscribe("reportDateField")
+    public void onReportDateFieldValueChange(
+            AbstractField.ComponentValueChangeEvent<TypedDatePicker<LocalDate>, LocalDate> event
+    ) {
+        updateSignerForReportDate(event.getValue(), false);
     }
 
     @Subscribe("employeeDept1Picker")
@@ -223,6 +231,56 @@ public class ServiceBookSupplementView extends StandardView {
                 .parameter("post", post.getId())
                 .optional()
                 .orElse(null);
+    }
+
+    private void updateSignerForReportDate(LocalDate reportDate, boolean force) {
+        if (reportDate == null) {
+            return;
+        }
+
+        // Если пользователь вручную выбрал подписанта, который не A/B — не перетираем.
+        User current = signerPicker.getValue();
+        if (!force && current != null) {
+            ServiceInfo si = current.getServiceInfo();
+            Post p = si == null ? null : si.getPost();
+            if (p != Post.COM_VZVOD && p != Post.ZAM_COM_VZVOD) {
+                return;
+            }
+        }
+
+        User commander = loadUserByPost(Post.COM_VZVOD);
+        User deputy = loadUserByPost(Post.ZAM_COM_VZVOD);
+        if (commander == null && deputy == null) {
+            return;
+        }
+
+        boolean commanderActive = isUserActiveOnDate(commander, reportDate);
+        signerPicker.setValue(commanderActive ? commander : deputy);
+    }
+
+    private boolean isUserActiveOnDate(User user, LocalDate date) {
+        if (user == null || date == null) {
+            return false;
+        }
+        ServiceInfo serviceInfo = user.getServiceInfo();
+        if (serviceInfo == null || serviceInfo.getId() == null) {
+            return false;
+        }
+
+        ServiceInfo fresh = dataManager.load(ServiceInfo.class)
+                .id(serviceInfo.getId())
+                .fetchPlan(fp -> fp.add("status"))
+                .optional()
+                .orElse(null);
+        if (fresh == null) {
+            return false;
+        }
+
+        if (fresh.getStatus() != StatusInService.ACTIVE) {
+            return false;
+        }
+
+        return !serviceInfoVocationStatusService.hasVocationToday(fresh.getId(), date);
     }
 }
 
