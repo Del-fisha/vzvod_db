@@ -1,0 +1,98 @@
+<view xmlns="http://jmix.io/schema/flowui/view">
+
+    <data>
+        <collection id="employeesDept1Dc"
+                    class="com.company.vzvod.entity.User">
+            <fetchPlan extends="_base"/>
+            <loader id="employeesDept1Dl">
+                <query>
+                    <![CDATA[
+                        select u
+                        from User u
+                        join u.serviceInfo si
+                        where si.post not in ('A', 'B')
+                          and si.department.number = 1
+                        order by u.lastName, u.firstName
+                    ]]>
+                </query>
+            </loader>
+        </collection>
+
+        <collection id="employeesDept2Dc"
+                    class="com.company.vzvod.entity.User">
+            <fetchPlan extends="_base"/>
+            <loader id="employeesDept2Dl">
+                <query>
+                    <![CDATA[
+                        select u
+                        from User u
+                        join u.serviceInfo si
+                        where si.post not in ('A', 'B')
+                          and si.department.number = 2
+                        order by u.lastName, u.firstName
+                    ]]>
+                </query>
+            </loader>
+        </collection>
+
+        <collection id="signersDc"
+                    class="com.company.vzvod.entity.User">
+            <fetchPlan extends="_base"/>
+            <loader id="signersDl">
+                <query>
+                    <![CDATA[
+                        select u
+                        from User u
+                        join u.serviceInfo si
+                        where si.post in ('A', 'B')
+                        order by si.post asc, u.lastName, u.firstName
+                    ]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+
+    <layout spacing="true" padding="true" width="650px" height="450px">
+        <label text="Дополнение к служебной книжке"/>
+
+        <hbox width="100%">
+            <entityComboBox id="employeeDept1Picker"
+                            metaClass="User"
+                            label="Кому (отделение 1)"
+                            itemsContainer="employeesDept1Dc"
+                            width="100%"/>
+
+            <entityComboBox id="employeeDept2Picker"
+                            metaClass="User"
+                            label="Кому (отделение 2)"
+                            itemsContainer="employeesDept2Dc"
+                            width="100%"/>
+        </hbox>
+
+        <entityComboBox id="signerPicker"
+                        metaClass="User"
+                        label="Кто подписывает"
+                        itemsContainer="signersDc"
+                        width="100%"/>
+
+        <datePicker id="reportDateField"
+                    label="Дата подписания"
+                    datatype="localDate"
+                    width="100%"/>
+
+        <hbox width="100%" spacing="true">
+            <button id="sendBtn"
+                    text="Сформировать"
+                    themeNames="primary"/>
+
+            <button id="sendAndPrintBtn"
+                    text="Сформировать и открыть PDF"
+                    themeNames="primary contrast"/>
+        </hbox>
+    </layout>
+</view>
+
