@@ -6,11 +6,7 @@ import com.vaadin.flow.component.HtmlComponent;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
-import io.jmix.flowui.view.StandardView;
-import io.jmix.flowui.view.Subscribe;
-import io.jmix.flowui.view.ViewComponent;
-import io.jmix.flowui.view.ViewController;
-import io.jmix.flowui.view.ViewDescriptor;
+import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Route(value = "print", layout = MainView.class)
@@ -24,9 +20,13 @@ public class PrintHubView extends StandardView {
     @Autowired
     private RaportMenuBean raportMenuBean;
 
+    /**
+     * Показываем карточки при каждом открытии экрана: для навигационных {@code StandardView}
+     * надёжнее, чем {@code InitEvent} (слот и инъекции гарантированно готовы).
+     */
     @Subscribe
-    public void onInit(InitEvent event) {
-        if (printWidgetsSlot == null) {
+    public void onBeforeShow(BeforeShowEvent event) {
+        if (printWidgetsSlot == null || raportMenuBean == null) {
             return;
         }
         printWidgetsSlot.removeAll();
@@ -48,6 +48,15 @@ public class PrintHubView extends StandardView {
         );
         dailyShift.addCardClickListener(() -> raportMenuBean.openDailyShiftRaport());
         printWidgetsSlot.add(dailyShift);
+
+        HomeCard serviceBook = new HomeCard(
+                "Дополнение к служебной книжке",
+                "(Корешки, опись, таблица телефонов, таблица позывных)",
+                "Открыть",
+                "var(--lumo-accent-color)"
+        );
+        serviceBook.addCardClickListener(() -> raportMenuBean.openServiceBookSupplement());
+        printWidgetsSlot.add(serviceBook);
     }
 
     @Tag("article")
