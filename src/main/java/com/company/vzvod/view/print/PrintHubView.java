@@ -53,7 +53,7 @@ public class PrintHubView extends StandardView {
                 "Дополнение к служебной книжке",
                 "(Корешки, опись, таблица телефонов, таблица позывных)",
                 "Открыть",
-                "var(--lumo-accent-color)"
+                "var(--lumo-error-color)"
         );
         serviceBook.addCardClickListener(() -> raportMenuBean.openServiceBookSupplement());
         printWidgetsSlot.add(serviceBook);
