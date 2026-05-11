@@ -1,3 +1,13 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        // Jmix Gradle enhancing task uses groovy.util.XmlParser at build time.
+        classpath 'org.apache.groovy:groovy-xml:4.0.30'
+    }
+}
+
 plugins {
     id 'io.jmix' version '2.7.6'
     id 'java'

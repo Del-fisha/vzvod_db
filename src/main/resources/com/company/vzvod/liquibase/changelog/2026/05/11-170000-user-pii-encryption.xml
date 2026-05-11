@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+    <!-- Expand name columns to fit ciphertext (enc:v1:<base64(iv+ciphertext)>) -->
+    <changeSet id="user-pii-encryption-1-expand-name-columns" author="Vzvod">
+        <modifyDataType tableName="USER_" columnName="FIRST_NAME" newDataType="VARCHAR(512)"/>
+        <modifyDataType tableName="USER_" columnName="LAST_NAME" newDataType="VARCHAR(512)"/>
+        <modifyDataType tableName="USER_" columnName="PATRONYMIC" newDataType="VARCHAR(512)"/>
+    </changeSet>
+
+    <!-- Add encrypted date-of-birth column (legacy DATE_OF_BIRTH kept for migration/read) -->
+    <changeSet id="user-pii-encryption-2-add-dob-enc" author="Vzvod">
+        <addColumn tableName="USER_">
+            <column name="DATE_OF_BIRTH_ENC" type="VARCHAR(512)"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- Allow wiping legacy plaintext column after migration -->
+    <changeSet id="user-pii-encryption-3-drop-dob-notnull" author="Vzvod">
+        <dropNotNullConstraint tableName="USER_" columnName="DATE_OF_BIRTH" columnDataType="DATE"/>
+    </changeSet>
+
+</databaseChangeLog>
+
