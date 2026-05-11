@@ -2,11 +2,11 @@ package com.company.vzvod.view.shiftblank;
 
 import com.company.vzvod.entity.AdministrativeViolation;
 import com.company.vzvod.entity.CriminalViolation;
+import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.Shift;
-import com.company.vzvod.entity.User;
-import com.vaadin.flow.router.Route;
 import com.company.vzvod.view.main.MainView;
-import io.jmix.flowui.model.CollectionContainer;
+import com.vaadin.flow.router.Route;
+import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.model.CollectionPropertyContainer;
 import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.model.InstanceLoader;
@@ -27,13 +27,29 @@ public class ShiftBlankView extends StandardView {
     private InstanceLoader<Shift> shiftDl;
 
     @ViewComponent
-    private CollectionContainer<User> unitsDc;
+    private CollectionPropertyContainer<ServiceInfo> unitsDc;
 
     @ViewComponent
     private CollectionPropertyContainer<AdministrativeViolation> administrativeViolationsDc;
 
     @ViewComponent
     private CollectionPropertyContainer<CriminalViolation> criminalViolationsDc;
+
+    @ViewComponent
+    private DataGrid<ServiceInfo> unitsDataGrid;
+
+    @ViewComponent
+    private DataGrid<AdministrativeViolation> adminViolationsDataGrid;
+
+    @ViewComponent
+    private DataGrid<CriminalViolation> criminalViolationsDataGrid;
+
+    @Subscribe
+    public void onBeforeShow(BeforeShowEvent event) {
+        unitsDataGrid.setAllRowsVisible(true);
+        adminViolationsDataGrid.setAllRowsVisible(true);
+        criminalViolationsDataGrid.setAllRowsVisible(true);
+    }
 
     /**
      * Читаем shiftId из query-параметров и грузим смену.

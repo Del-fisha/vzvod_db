@@ -2,6 +2,7 @@ package com.company.vzvod.view.shift;
 
 import com.company.vzvod.entity.AdministrativeViolation;
 import com.company.vzvod.entity.CriminalViolation;
+import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.Shift;
 import com.company.vzvod.entity.User;
 import com.company.vzvod.service.DepartmentConverter;
@@ -34,6 +35,9 @@ public class ShiftDetailView extends StandardDetailView<Shift> {
 
     @Autowired
     private DialogWindows dialogWindows;
+
+    @ViewComponent
+    private DataGrid<ServiceInfo> unitsDataGrid;
 
     @ViewComponent
     private DataGrid<AdministrativeViolation> adminViolationsDataGrid;
@@ -76,6 +80,9 @@ public class ShiftDetailView extends StandardDetailView<Shift> {
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
+        unitsDataGrid.setAllRowsVisible(true);
+        adminViolationsDataGrid.setAllRowsVisible(true);
+        criminalViolationsDataGrid.setAllRowsVisible(true);
         replaceViolationCreate(adminViolationsDataGrid, this::openNewAdministrativeViolation);
         replaceViolationCreate(criminalViolationsDataGrid, this::openNewCriminalViolation);
     }
