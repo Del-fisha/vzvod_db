@@ -40,8 +40,7 @@
                 <h3 text="msg://com.company.vzvod.view.shiftblank/shiftBlankView.unitsSection.title"/>
                 <dataGrid id="unitsDataGrid"
                           dataContainer="unitsDc"
-                          width="100%"
-                          minHeight="8em">
+                          width="100%">
                     <columns>
                         <column property="user.lastName" header="msg://com.company.vzvod.view.shiftblank/shiftBlankView.unitsGrid.lastName"/>
                         <column property="user.firstName" header="msg://com.company.vzvod.view.shiftblank/shiftBlankView.unitsGrid.firstName"/>
@@ -52,8 +51,7 @@
                 <h3 text="msg://com.company.vzvod.view.shiftblank/shiftBlankView.adminPracticeSection.title"/>
                 <dataGrid id="adminViolationsDataGrid"
                           dataContainer="administrativeViolationsDc"
-                          width="100%"
-                          minHeight="8em">
+                          width="100%">
                     <columns>
                         <column property="article" header="msg://com.company.vzvod.view.shiftblank/shiftBlankView.adminPracticeGrid.article"/>
                     </columns>
@@ -62,8 +60,7 @@
                 <h3 text="msg://com.company.vzvod.view.shiftblank/shiftBlankView.criminalPracticeSection.title"/>
                 <dataGrid id="criminalViolationsDataGrid"
                           dataContainer="criminalViolationsDc"
-                          width="100%"
-                          minHeight="8em">
+                          width="100%">
                     <columns>
                         <column property="type" header="msg://com.company.vzvod.view.shiftblank/shiftBlankView.criminalPracticeGrid.type"/>
                     </columns>

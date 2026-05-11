@@ -25,8 +25,9 @@
             <loader id="shiftsDl" readOnly="true">
                 <query>
                     <![CDATA[
-                select distinct  e from Shift e
+                select distinct e from Shift e
                 where :serviceInfo is null or :serviceInfo member of e.units
+                order by e.date desc, e.number asc
             ]]>
                 </query>
             </loader>
