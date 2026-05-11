@@ -8,23 +8,26 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 
+/**
+ * Только для новой записи службы: начальные «положено»/«остаток» по номиналу стажа без учёта записей отпусков
+ * (их ещё нет). Актуальный учёт по отпускам обновляется при сохранении {@link com.company.vzvod.entity.Vocation}
+ * (см. {@link VocationChangedListener} и диалог отпуска).
+ */
 @Component
 public class ServiceInfoEventListener {
 
     @EventListener
     public void onServiceInfoSaving(EntitySavingEvent<ServiceInfo> event) {
         ServiceInfo serviceInfo = event.getEntity();
-
-        if (event.isNewEntity()) {
-            recalcVacation(serviceInfo, LocalDate.now());
+        if (!event.isNewEntity()) {
+            return;
         }
-    }
 
-    private void recalcVacation(ServiceInfo serviceInfo, LocalDate now) {
         if (serviceInfo.getUser() == null || serviceInfo.getStartDate() == null) {
             return;
         }
 
+        LocalDate now = LocalDate.now();
         LocalDate yearStart = LocalDate.of(now.getYear(), 1, 1);
         int nominal = VocationService.nominalDaysAvailable(serviceInfo, yearStart);
         int midYear = VocationService.midYearSeniorityBonuses(serviceInfo, yearStart, now);
