@@ -15,9 +15,13 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
+
+import com.company.vzvod.security.crypto.EncryptedLocalDateConverter;
+import com.company.vzvod.security.crypto.EncryptedStringConverter;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -52,22 +56,41 @@ public class User implements JmixUserDetails {
 
     @NotEmpty(message = "{msg://com.company.vzvod.entity/User.firstName.validation.NotEmpty}")
     @NotBlank(message = "{msg://com.company.vzvod.entity/User.firstName.validation.NotBlank}")
-    @Column(name = "FIRST_NAME", nullable = false, length = 20)
+    @Size(max = 20)
+    @Convert(converter = EncryptedStringConverter.class)
+    @Column(name = "FIRST_NAME", nullable = false, length = 512)
     private String firstName;
+
+    @Column(name = "FIRST_NAME", insertable = false, updatable = false)
+    private String firstNameRaw;
 
     @NotEmpty(message = "{msg://com.company.vzvod.entity/User.lastName.validation.NotEmpty}")
     @NotBlank(message = "{msg://com.company.vzvod.entity/User.lastName.validation.NotBlank}")
-    @Column(name = "LAST_NAME", nullable = false, length = 20)
+    @Size(max = 20)
+    @Convert(converter = EncryptedStringConverter.class)
+    @Column(name = "LAST_NAME", nullable = false, length = 512)
     private String lastName;
+
+    @Column(name = "LAST_NAME", insertable = false, updatable = false)
+    private String lastNameRaw;
 
     @NotEmpty(message = "{msg://com.company.vzvod.entity/User.patronymic.validation.NotEmpty}")
     @NotBlank(message = "{msg://com.company.vzvod.entity/User.patronymic.validation.NotBlank}")
-    @Column(name = "PATRONYMIC", nullable = false, length = 20)
+    @Size(max = 20)
+    @Convert(converter = EncryptedStringConverter.class)
+    @Column(name = "PATRONYMIC", nullable = false, length = 512)
     private String patronymic;
 
+    @Column(name = "PATRONYMIC", insertable = false, updatable = false)
+    private String patronymicRaw;
+
     @Past(message = "{msg://com.company.vzvod.entity/User.dateOfBirth.validation.Past}")
-    @Column(name = "DATE_OF_BIRTH", nullable = false)
+    @Convert(converter = EncryptedLocalDateConverter.class)
+    @Column(name = "DATE_OF_BIRTH_ENC")
     private LocalDate dateOfBirth;
+
+    @Column(name = "DATE_OF_BIRTH_ENC", insertable = false, updatable = false)
+    private String dateOfBirthEncRaw;
 
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "user", optional = false, cascade = CascadeType.ALL)
     private ServiceInfo serviceInfo;
@@ -137,6 +160,22 @@ public class User implements JmixUserDetails {
 
     public void setArmyService(ArmyService armyService) {
         this.armyService = armyService == null ? null : armyService.getId();
+    }
+
+    public String getFirstNameRaw() {
+        return firstNameRaw;
+    }
+
+    public String getLastNameRaw() {
+        return lastNameRaw;
+    }
+
+    public String getPatronymicRaw() {
+        return patronymicRaw;
+    }
+
+    public String getDateOfBirthEncRaw() {
+        return dateOfBirthEncRaw;
     }
 
 

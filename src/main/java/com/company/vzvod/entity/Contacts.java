@@ -10,10 +10,13 @@ import io.jmix.core.metamodel.annotation.DependsOnProperties;
 import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.UUID;
+
+import com.company.vzvod.security.crypto.EncryptedStringConverter;
 
 @JmixEntity
 @Table(name = "CONTACTS", indexes = {
@@ -33,8 +36,13 @@ public class Contacts {
     @JoinColumn(name = "USER_ID", nullable = false, unique = true)
     private User user;
 
+    @Size(max = 28)
+    @Convert(converter = EncryptedStringConverter.class)
     @Column(name = "PHONE_NUMBER", length = 28)
     private String phoneNumber;
+
+    @Column(name = "PHONE_NUMBER", insertable = false, updatable = false)
+    private String phoneNumberRaw;
 
     @Composition
 //    @OnDelete(DeletePolicy.CASCADE)
@@ -61,6 +69,10 @@ public class Contacts {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = new PhoneNormalizer().normalize(phoneNumber);
+    }
+
+    public String getPhoneNumberRaw() {
+        return phoneNumberRaw;
     }
 
     @InstanceName
