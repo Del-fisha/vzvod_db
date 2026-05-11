@@ -32,6 +32,33 @@ public class ServiceInfoDialogSaveService {
             return null;
         }
 
+        // ServiceInfoDetailView dialog does not edit vacation counters, but if the instance was loaded
+        // without these attributes, Java defaults (40/40) may overwrite DB values on save.
+        // Preserve the persisted counters here; the counters are recalculated when Vocation is saved.
+        if (edited.getId() != null) {
+            Integer entitled = dataManager.loadValue(
+                            "select si.vacationDaysEntitled from ServiceInfo si where si.id = :id",
+                            Integer.class
+                    )
+                    .parameter("id", edited.getId())
+                    .optional()
+                    .orElse(null);
+            Integer available = dataManager.loadValue(
+                            "select si.vacationDaysAvailable from ServiceInfo si where si.id = :id",
+                            Integer.class
+                    )
+                    .parameter("id", edited.getId())
+                    .optional()
+                    .orElse(null);
+
+            if (entitled != null) {
+                edited.setVacationDaysEntitled(entitled);
+            }
+            if (available != null) {
+                edited.setVacationDaysAvailable(available);
+            }
+        }
+
         IdCard idCard = edited.getIdCard();
         UUID idCardId = idCard != null ? idCard.getId() : null;
         if (idCard != null) {

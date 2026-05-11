@@ -48,8 +48,36 @@ public class VocationBalanceService {
     }
 
     public VocationYearStats calcCurrentYearStats(ServiceInfo serviceInfo, LocalDate now) {
-        if (serviceInfo == null || serviceInfo.getUser() == null || serviceInfo.getStartDate() == null) {
+        if (serviceInfo == null) {
             return new VocationYearStats(0, 0, 0);
+        }
+        // Если дата начала службы не задана, используем базовый лимит 40,
+        // но всё равно учитываем уже созданные отпуска/добавленные дни в текущем году.
+        if (serviceInfo.getStartDate() == null) {
+            if (serviceInfo.getId() == null) {
+                return new VocationYearStats(40, 0, 40);
+            }
+            LocalDate yearStart = LocalDate.of(now.getYear(), 1, 1);
+            LocalDate yearEnd = LocalDate.of(now.getYear(), 12, 31);
+            int added = loadAddedDays(serviceInfo.getId(), yearStart, yearEnd);
+            int entitled = 40 + Math.max(0, added);
+            int used = loadPoolDaysUsed(serviceInfo.getId(), yearStart, yearEnd);
+            int available = Math.max(0, entitled - used);
+            return new VocationYearStats(entitled, used, available);
+        }
+        if (serviceInfo.getUser() == null) {
+            // без пользователя не можем учесть армию/стаж — считаем как минимум 40,
+            // но по возможности учитываем фактические отпуска в этом году
+            if (serviceInfo.getId() == null) {
+                return new VocationYearStats(40, 0, 40);
+            }
+            LocalDate yearStart = LocalDate.of(now.getYear(), 1, 1);
+            LocalDate yearEnd = LocalDate.of(now.getYear(), 12, 31);
+            int added = loadAddedDays(serviceInfo.getId(), yearStart, yearEnd);
+            int entitled = 40 + Math.max(0, added);
+            int used = loadPoolDaysUsed(serviceInfo.getId(), yearStart, yearEnd);
+            int available = Math.max(0, entitled - used);
+            return new VocationYearStats(entitled, used, available);
         }
 
         LocalDate yearStart = LocalDate.of(now.getYear(), 1, 1);
@@ -64,6 +92,21 @@ public class VocationBalanceService {
         int available = Math.max(0, entitled - used);
 
         return new VocationYearStats(entitled, used, available);
+    }
+
+    /**
+     * Тот же расчёт, что и у {@link #calcCurrentYearStats(ServiceInfo, LocalDate)}, без записи в {@link ServiceInfo}.
+     * Используется в UI редактора отпуска до сохранения.
+     */
+    public VocationYearStats calcCurrentYearStats(UUID serviceInfoId, LocalDate now) {
+        if (serviceInfoId == null) {
+            return new VocationYearStats(0, 0, 0);
+        }
+        ServiceInfo serviceInfo = loadForVacationCalc(serviceInfoId);
+        if (serviceInfo == null) {
+            return new VocationYearStats(0, 0, 0);
+        }
+        return calcCurrentYearStats(serviceInfo, now);
     }
 
     private int loadPoolDaysUsed(UUID serviceInfoId, LocalDate start, LocalDate end) {

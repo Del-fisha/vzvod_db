@@ -12,6 +12,8 @@ import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.LocalDate;
+
 @Route(value = "vocations/:id", layout = MainView.class)
 @ViewController(id = "Vocation.detail")
 @ViewDescriptor(path = "vocation-detail-view.xml")
@@ -42,24 +44,32 @@ public class VocationDetailView extends StandardDetailView<Vocation> {
         }
         event.getEntity().setType(VocationType.MAIN);
 
-        refreshBalance(serviceInfo);
+        refreshBalanceDisplay(serviceInfo);
     }
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         Vocation vocation = getEditedEntity();
         ServiceInfo serviceInfo = vocation != null ? vocation.getUserServiceInfo() : null;
-        refreshBalance(serviceInfo);
+        refreshBalanceDisplay(serviceInfo);
     }
 
-    private void refreshBalance(ServiceInfo serviceInfo) {
-        if (serviceInfo == null) {
+    @Subscribe
+    public void onAfterSave(AfterSaveEvent event) {
+        Vocation vocation = getEditedEntity();
+        ServiceInfo serviceInfo = vocation != null ? vocation.getUserServiceInfo() : null;
+        refreshBalanceDisplay(serviceInfo);
+    }
+
+    /** Только отображение; сохранение счётчиков на {@link ServiceInfo} — при коммите записи отпуска ({@link com.company.vzvod.listener.VocationChangedListener}). */
+    private void refreshBalanceDisplay(ServiceInfo serviceInfo) {
+        if (serviceInfo == null || serviceInfo.getId() == null) {
             vacationDaysUsedField.clear();
             vacationDaysAvailableField.clear();
             return;
         }
 
-        var stats = vocationBalanceService.recalcAndSave(serviceInfo.getId());
+        var stats = vocationBalanceService.calcCurrentYearStats(serviceInfo.getId(), LocalDate.now());
         vacationDaysUsedField.setValue(stats.used());
         vacationDaysAvailableField.setValue(stats.available());
     }

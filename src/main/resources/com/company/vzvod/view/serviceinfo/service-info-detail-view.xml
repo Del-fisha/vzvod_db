@@ -23,6 +23,10 @@
                 <property name="penalty"/>
                 <property name="medicalExamination"/>
                 <property name="qualificationClass"/>
+                <!-- Не редактируем в этом диалоге, но должны быть загружены,
+                     иначе EclipseLink fetch-group падает при сохранении detached ServiceInfo -->
+                <property name="vacationDaysEntitled"/>
+                <property name="vacationDaysAvailable"/>
             </fetchPlan>
             <loader id="serviceInfoDl"/>
         </instance>
