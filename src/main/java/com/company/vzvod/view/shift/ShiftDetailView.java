@@ -5,6 +5,7 @@ import com.company.vzvod.entity.CriminalViolation;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.Shift;
 import com.company.vzvod.entity.User;
+import com.company.vzvod.security.UiAccessService;
 import com.company.vzvod.service.DepartmentConverter;
 import com.company.vzvod.view.administrativeviolation.AdministrativeViolationDetailView;
 import com.company.vzvod.view.criminalviolation.CriminalViolationDetailView;
@@ -17,6 +18,7 @@ import io.jmix.flowui.component.SupportsTypedValue;
 import io.jmix.flowui.component.datepicker.TypedDatePicker;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.kit.action.Action;
+import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.CollectionPropertyContainer;
 import io.jmix.flowui.model.DataContext;
 import io.jmix.flowui.view.*;
@@ -35,6 +37,16 @@ public class ShiftDetailView extends StandardDetailView<Shift> {
 
     @Autowired
     private DialogWindows dialogWindows;
+
+    @Autowired
+    private UiAccessService uiAccessService;
+
+    @ViewComponent
+    private JmixButton removeUnitBtn;
+    @ViewComponent
+    private JmixButton removeAdminBtn;
+    @ViewComponent
+    private JmixButton removeCriminalBtn;
 
     @ViewComponent
     private DataGrid<ServiceInfo> unitsDataGrid;
@@ -85,6 +97,20 @@ public class ShiftDetailView extends StandardDetailView<Shift> {
         criminalViolationsDataGrid.setAllRowsVisible(true);
         replaceViolationCreate(adminViolationsDataGrid, this::openNewAdministrativeViolation);
         replaceViolationCreate(criminalViolationsDataGrid, this::openNewCriminalViolation);
+
+        if (!uiAccessService.hasFullAccessRole()) {
+            // detailShift: нет кнопки УДАЛИТЬ у списка сотрудников, списка админок, списка уголовок.
+            if (removeUnitBtn != null) removeUnitBtn.setVisible(false);
+            if (removeAdminBtn != null) removeAdminBtn.setVisible(false);
+            if (removeCriminalBtn != null) removeCriminalBtn.setVisible(false);
+
+            var unitsRemove = unitsDataGrid.getAction("remove");
+            if (unitsRemove != null) unitsRemove.setEnabled(false);
+            var adminRemove = adminViolationsDataGrid.getAction("remove");
+            if (adminRemove != null) adminRemove.setEnabled(false);
+            var criminalRemove = criminalViolationsDataGrid.getAction("remove");
+            if (criminalRemove != null) criminalRemove.setEnabled(false);
+        }
     }
 
     private void replaceViolationCreate(DataGrid<?> grid, Runnable openNew) {

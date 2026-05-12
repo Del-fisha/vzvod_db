@@ -315,7 +315,6 @@ public interface PolicemanRole {
 
     @MenuPolicy(menuIds = {
             "my_data",
-            "all_employees_to_read",
             "my_profile",
             "my_transport",
             "my_shifts",
@@ -323,24 +322,11 @@ public interface PolicemanRole {
             "my_criminal_violations",
             "my_penalties",
             "my_incentives",
-            "application",
             "events",
             "raports",
-            "all_vocations",
-            "all_administrative_violations",
-            "all_criminal_violations",
-            "Vocation.list",
-            "AdministrativeViolation.list",
-            "CriminalViolation.list",
             "future_events",
             "last_events",
             "deleted_events",
-            "menuAllShifts",
-            "User.list",
-            "Penalty.list",
-            "Incentive.list",
-            "DeletedEvent.list",
-            "Vehicle.list",
             "CompensatoryTimeRaportView"
     })
     void userMenu();

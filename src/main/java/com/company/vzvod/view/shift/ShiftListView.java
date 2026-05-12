@@ -2,12 +2,15 @@ package com.company.vzvod.view.shift;
 
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.Shift;
+import com.company.vzvod.security.UiAccessService;
 import com.company.vzvod.view.main.MainView;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.Route;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.view.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 @Route(value = "shifts", layout = MainView.class)
@@ -20,6 +23,15 @@ public class ShiftListView extends StandardListView<Shift> {
     @ViewComponent
     private CollectionLoader<Shift> shiftsDl;
 
+    @Autowired
+    private UiAccessService uiAccessService;
+
+    @ViewComponent
+    private Button removeButton;
+
+    @ViewComponent
+    private io.jmix.flowui.component.grid.DataGrid<Shift> shiftsDataGrid;
+
     private ServiceInfo serviceInfo;
 
     public void setServiceInfo(ServiceInfo serviceInfo) {
@@ -30,6 +42,21 @@ public class ShiftListView extends StandardListView<Shift> {
     public void onBeforeShow(BeforeShowEvent event) {
         shiftsDl.setParameter("serviceInfo", serviceInfo);
         shiftsDl.load();
+    }
+
+    @Subscribe
+    public void onReady(ReadyEvent event) {
+        if (uiAccessService.hasFullAccessRole()) {
+            return;
+        }
+        // Служебная информация -> Смены: не видит кнопку УДАЛИТЬ
+        if (removeButton != null) {
+            removeButton.setVisible(false);
+        }
+        var removeAction = shiftsDataGrid == null ? null : shiftsDataGrid.getAction("removeAction");
+        if (removeAction != null) {
+            removeAction.setEnabled(false);
+        }
     }
 
     @Supply(to = "shiftsDataGrid.adminViolationsCount", subject = "renderer")

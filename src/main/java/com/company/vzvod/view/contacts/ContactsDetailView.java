@@ -2,6 +2,7 @@ package com.company.vzvod.view.contacts;
 
 import com.company.vzvod.entity.Address;
 import com.company.vzvod.entity.Contacts;
+import com.company.vzvod.security.UiAccessService;
 import com.company.vzvod.view.address.AddressDetailView;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ClickEvent;
@@ -10,6 +11,7 @@ import io.jmix.flowui.component.checkbox.JmixCheckbox;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.model.InstanceLoader;
+import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -29,22 +31,27 @@ public class ContactsDetailView extends StandardDetailView<Contacts> {
     @ViewComponent
     private JmixButton habitationAddressCreateButton;
 
+    @ViewComponent
+    private TypedTextField<String> phoneNumberField;
+
     @Autowired
     private DialogWindows dialogWindows;
+
+    @Autowired
+    private UiAccessService uiAccessService;
 
     private boolean internalChange;
 
 
     @Subscribe
     public void onReady(ReadyEvent event) {
-        System.out.println("ContactsDetailView READY instance=" + System.identityHashCode(this)
-                + ", editedEntityId=" + (getEditedEntity() != null ? getEditedEntity().getId() : null));
+        if (!uiAccessService.hasFullAccessRole() && phoneNumberField != null) {
+            phoneNumberField.setReadOnly(true);
+        }
     }
 
     @Subscribe
     public void onAfterClose(View.AfterCloseEvent event) {
-        System.out.println("ContactsDetailView AFTER_CLOSE instance=" + System.identityHashCode(this)
-                + ", closeAction=" + event.getCloseAction());
     }
 
     @Subscribe(id = "contactsDl", target = Target.DATA_LOADER)
