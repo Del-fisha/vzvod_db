@@ -61,6 +61,12 @@ public class ServiceInfoDetailView extends StandardDetailView<ServiceInfo> {
     @ViewComponent
     private io.jmix.flowui.component.datepicker.TypedDatePicker<?> startOfPostField;
 
+    @ViewComponent
+    private JmixButton incentiveListButton;
+
+    @ViewComponent
+    private JmixButton penaltyListButton;
+
     @Subscribe
     public void onInitEntity(final InitEntityEvent<ServiceInfo> event) {
         ServiceInfo serviceInfo = event.getEntity();
@@ -82,6 +88,10 @@ public class ServiceInfoDetailView extends StandardDetailView<ServiceInfo> {
         if (postField != null) postField.setReadOnly(true);
         if (startDateField != null) startDateField.setReadOnly(true);
         if (startOfPostField != null) startOfPostField.setReadOnly(true);
+
+        // Поощрения/взыскания: кнопки видны, но не активны
+        if (incentiveListButton != null) incentiveListButton.setEnabled(false);
+        if (penaltyListButton != null) penaltyListButton.setEnabled(false);
     }
 
     /**
