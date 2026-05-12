@@ -8,6 +8,8 @@ import com.company.vzvod.entity.IdCard;
 import com.company.vzvod.entity.MetroStation;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.StatusInService;
+import com.company.vzvod.entity.StatusOfHousing;
+import com.company.vzvod.entity.TypeOfHousing;
 import com.company.vzvod.entity.User;
 import com.company.vzvod.entity.UserTelegramBinding;
 import com.company.vzvod.test_support.PreTestEntities;
@@ -69,17 +71,19 @@ class BotMeProfileIntegrationTest {
     @AfterEach
     void tearDown() {
         if (createdUserId != null) {
-            systemAuthenticator.runWithSystem(() -> {
-                dataManager.load(UserTelegramBinding.class)
-                        .query("select b from UserTelegramBinding b where b.user.id = :uid")
-                        .parameter("uid", createdUserId)
-                        .list()
-                        .forEach(dataManager::remove);
-                dataManager.load(User.class).id(createdUserId).optional().ifPresent(dataManager::remove);
-            });
+            systemAuthenticator.runWithSystem(() -> removeUserAndBinding(createdUserId));
             createdUserId = null;
         }
         systemAuthenticator.end();
+    }
+
+    private void removeUserAndBinding(UUID userId) {
+        dataManager.load(UserTelegramBinding.class)
+                .query("select b from UserTelegramBinding b where b.user.id = :uid")
+                .parameter("uid", userId)
+                .list()
+                .forEach(dataManager::remove);
+        dataManager.load(User.class).id(userId).optional().ifPresent(dataManager::remove);
     }
 
     private void persistUserWithBinding() {
@@ -107,11 +111,25 @@ class BotMeProfileIntegrationTest {
         createdUserId = user.getId();
 
         Contacts contacts = dataManager.create(Contacts.class);
-        Address address = dataManager.create(Address.class);
+        Address reg = dataManager.create(Address.class);
+        reg.setIndex("191014");
+        reg.setCity("Санкт-Петербург");
+        reg.setStreet("Невский проспект");
+        reg.setHouseNumber("1");
+        reg.setFlat("10");
+        reg.setTypeOfHousing(TypeOfHousing.FLAT);
+        reg.setStatusOfHousing(StatusOfHousing.RENTED);
+        Address hab = dataManager.create(Address.class);
+        hab.setIndex("191014");
+        hab.setCity("Санкт-Петербург");
+        hab.setStreet("Садовая");
+        hab.setHouseNumber("2");
+        hab.setTypeOfHousing(TypeOfHousing.FLAT);
+        hab.setStatusOfHousing(StatusOfHousing.OWNER);
         contacts.setUser(user);
         contacts.setPhoneNumber("+79115557788");
-        contacts.setHabitation(address);
-        contacts.setRegistration(address);
+        contacts.setHabitation(hab);
+        contacts.setRegistration(reg);
         contacts.setNearestMetroStation(MetroStation.BALTIYSKAYA);
         dataManager.save(contacts);
 
@@ -138,6 +156,9 @@ class BotMeProfileIntegrationTest {
                 .andExpect(jsonPath("$.department").value("Отделение № 1"))
                 .andExpect(jsonPath("$.breastplate").value("00659874"))
                 .andExpect(jsonPath("$.medicalExamination").value(false))
+                .andExpect(jsonPath("$.mobilePhoneMasked").value("+7 *** *** 77 88"))
+                .andExpect(jsonPath("$.registration.city").value("Санкт-Петербург"))
+                .andExpect(jsonPath("$.habitation.city").value("Санкт-Петербург"))
                 .andExpect(jsonPath("$.idCardIssued").exists())
                 .andExpect(jsonPath("$.idCardUntil").exists());
     }
@@ -204,6 +225,32 @@ class BotMeProfileIntegrationTest {
                         .content("{\"medicalExamination\":true}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.medicalExamination").value(true));
+    }
+
+    @Test
+    @DisplayName("PUT 200: адрес проживания (город)")
+    void patch_habitation_city_ok() throws Exception {
+        persistUserWithBinding();
+        mockMvc.perform(put("/api/bot/me/profile")
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", String.valueOf(CHAT_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"habitation\":{\"city\":\"Казань\"}}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.registration.city").value("Санкт-Петербург"))
+                .andExpect(jsonPath("$.habitation.city").value("Казань"));
+    }
+
+    @Test
+    @DisplayName("PUT 400: индекс адреса не 6 цифр")
+    void patch_registration_badIndex_returns400() throws Exception {
+        persistUserWithBinding();
+        mockMvc.perform(put("/api/bot/me/profile")
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", String.valueOf(CHAT_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"registration\":{\"index\":\"123\"}}"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
