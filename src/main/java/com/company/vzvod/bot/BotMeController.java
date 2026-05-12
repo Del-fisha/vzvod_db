@@ -2,6 +2,8 @@ package com.company.vzvod.bot;
 
 import com.company.vzvod.bot.dto.BotProfilePatchRequest;
 import com.company.vzvod.bot.dto.BotProfileResponse;
+import com.company.vzvod.bot.dto.BotShiftsResponse;
+import com.company.vzvod.bot.dto.BotVacationsResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,10 +20,16 @@ public class BotMeController {
 
     private final BotApiKeyAuthorizer apiKeyAuthorizer;
     private final BotMeProfileService botMeProfileService;
+    private final BotMeShiftsVocationsService botMeShiftsVocationsService;
 
-    public BotMeController(BotApiKeyAuthorizer apiKeyAuthorizer, BotMeProfileService botMeProfileService) {
+    public BotMeController(
+            BotApiKeyAuthorizer apiKeyAuthorizer,
+            BotMeProfileService botMeProfileService,
+            BotMeShiftsVocationsService botMeShiftsVocationsService
+    ) {
         this.apiKeyAuthorizer = apiKeyAuthorizer;
         this.botMeProfileService = botMeProfileService;
+        this.botMeShiftsVocationsService = botMeShiftsVocationsService;
     }
 
     @GetMapping("/profile")
@@ -32,6 +40,26 @@ public class BotMeController {
         apiKeyAuthorizer.verify(apiKey);
         long chatId = parseTelegramChatId(telegramChatIdHeader);
         return ResponseEntity.ok(botMeProfileService.loadProfile(chatId));
+    }
+
+    @GetMapping("/shifts")
+    public ResponseEntity<BotShiftsResponse> shifts(
+            @RequestHeader(value = "X-Api-Key", required = false) String apiKey,
+            @RequestHeader(value = "X-Telegram-Chat-Id", required = false) String telegramChatIdHeader
+    ) {
+        apiKeyAuthorizer.verify(apiKey);
+        long chatId = parseTelegramChatId(telegramChatIdHeader);
+        return ResponseEntity.ok(botMeShiftsVocationsService.loadShifts(chatId));
+    }
+
+    @GetMapping("/vacations")
+    public ResponseEntity<BotVacationsResponse> vacations(
+            @RequestHeader(value = "X-Api-Key", required = false) String apiKey,
+            @RequestHeader(value = "X-Telegram-Chat-Id", required = false) String telegramChatIdHeader
+    ) {
+        apiKeyAuthorizer.verify(apiKey);
+        long chatId = parseTelegramChatId(telegramChatIdHeader);
+        return ResponseEntity.ok(botMeShiftsVocationsService.loadVacations(chatId));
     }
 
     @PutMapping("/profile")
