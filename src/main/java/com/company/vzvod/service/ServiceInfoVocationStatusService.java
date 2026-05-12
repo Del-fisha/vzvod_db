@@ -2,7 +2,7 @@ package com.company.vzvod.service;
 
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.StatusInService;
-import io.jmix.core.DataManager;
+import io.jmix.core.UnconstrainedDataManager;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -12,9 +12,9 @@ import java.util.UUID;
 @Service
 public class ServiceInfoVocationStatusService {
 
-    private final DataManager dataManager;
+    private final UnconstrainedDataManager dataManager;
 
-    public ServiceInfoVocationStatusService(DataManager dataManager) {
+    public ServiceInfoVocationStatusService(UnconstrainedDataManager dataManager) {
         this.dataManager = dataManager;
     }
 

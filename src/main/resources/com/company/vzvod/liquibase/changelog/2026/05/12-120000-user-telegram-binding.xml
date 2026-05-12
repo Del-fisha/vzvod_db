@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="2026-05-12-120000-user-telegram-binding" author="vzvod">
+        <createTable tableName="USER_TELEGRAM_BINDING">
+            <column name="ID" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="USER_ID" type="uuid">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="CHAT_ID" type="bigint">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="REGISTERED_AT" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="USER_TELEGRAM_BINDING"
+                                 baseColumnNames="USER_ID"
+                                 constraintName="FK_USER_TELEGRAM_BINDING_USER"
+                                 referencedTableName="USER_"
+                                 referencedColumnNames="ID"
+                                 onDelete="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>

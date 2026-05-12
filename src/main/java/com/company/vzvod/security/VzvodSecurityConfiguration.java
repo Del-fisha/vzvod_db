@@ -47,4 +47,16 @@ public class VzvodSecurityConfiguration {
                 .csrf(csrf -> csrf.disable());
         return http.build();
     }
+
+    /**
+     * REST для микросервиса Telegram-бота. Доступ по {@code X-Api-Key} проверяется в контроллерах.
+     */
+    @Bean
+    @Order(1)
+    SecurityFilterChain botApiFilterChain(HttpSecurity http) throws Exception {
+        http.securityMatcher("/api/bot/**")
+                .authorizeHttpRequests(registry -> registry.anyRequest().permitAll())
+                .csrf(csrf -> csrf.disable());
+        return http.build();
+    }
 }
