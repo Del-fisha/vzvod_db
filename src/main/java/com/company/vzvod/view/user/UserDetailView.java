@@ -7,22 +7,26 @@ import com.company.vzvod.view.contacts.ContactsDetailView;
 import com.company.vzvod.view.education.EducationDetailView;
 import com.company.vzvod.view.main.MainView;
 import com.company.vzvod.view.serviceinfo.ServiceInfoDetailView;
-import com.company.vzvod.view.vehicle.VehicleDetailView;
 import com.company.vzvod.view.vehicle.VehicleListView;
 import com.vaadin.flow.component.ClickEvent;
+import com.company.vzvod.security.UiAccessService;
 import com.vaadin.flow.router.Route;
 import io.jmix.core.DataManager;
 import io.jmix.core.EntityStates;
 import io.jmix.core.LoadContext;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.Notifications;
+import io.jmix.flowui.component.combobox.JmixComboBox;
+import io.jmix.flowui.component.datepicker.TypedDatePicker;
 import io.jmix.flowui.kit.component.button.JmixButton;
+import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.model.DataContext;
 import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -66,6 +70,22 @@ public class UserDetailView extends StandardDetailView<User> {
     @ViewComponent
     private JmixButton changePasswordButton;
 
+    @Autowired
+    private UiAccessService uiAccessService;
+
+    @ViewComponent
+    private TypedTextField<String> lastNameField;
+    @ViewComponent
+    private TypedTextField<String> firstNameField;
+    @ViewComponent
+    private TypedTextField<String> patronymicField;
+    @ViewComponent
+    private TypedDatePicker<LocalDate> dateOfBirthField;
+    @ViewComponent
+    private JmixComboBox<ArmyService> armyServiceField;
+    @ViewComponent
+    private JmixComboBox<Gender> genderField;
+
     @Subscribe
     public void onInitEntity(final InitEntityEvent<User> event) {
         User user = event.getEntity();
@@ -96,6 +116,20 @@ public class UserDetailView extends StandardDetailView<User> {
     @Subscribe
     public void onReady(final ReadyEvent event) {
         updateChangePasswordButtonState();
+        applyFieldReadOnlyMode();
+    }
+
+    private void applyFieldReadOnlyMode() {
+        if (uiAccessService.hasFullAccessRole()) {
+            return;
+        }
+        // Мой профиль: видит, но изменить не может
+        lastNameField.setReadOnly(true);
+        firstNameField.setReadOnly(true);
+        patronymicField.setReadOnly(true);
+        dateOfBirthField.setReadOnly(true);
+        armyServiceField.setReadOnly(true);
+        genderField.setReadOnly(true);
     }
 
     private void updateChangePasswordButtonState() {

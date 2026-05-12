@@ -5,6 +5,7 @@ import com.company.vzvod.entity.Post;
 import com.company.vzvod.entity.Qualification;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.StatusInService;
+import com.company.vzvod.security.UiAccessService;
 import com.company.vzvod.view.idcard.IdCardDetailView;
 import com.company.vzvod.view.incentive.IncentiveListView;
 import com.company.vzvod.view.main.MainView;
@@ -46,6 +47,20 @@ public class ServiceInfoDetailView extends StandardDetailView<ServiceInfo> {
     @Autowired
     private ServiceInfoDialogSaveService serviceInfoDialogSaveService;
 
+    @Autowired
+    private UiAccessService uiAccessService;
+
+    @ViewComponent
+    private io.jmix.flowui.component.combobox.EntityComboBox<?> departmentField;
+    @ViewComponent
+    private io.jmix.flowui.component.select.JmixSelect<?> rankField;
+    @ViewComponent
+    private io.jmix.flowui.component.select.JmixSelect<?> postField;
+    @ViewComponent
+    private io.jmix.flowui.component.datepicker.TypedDatePicker<?> startDateField;
+    @ViewComponent
+    private io.jmix.flowui.component.datepicker.TypedDatePicker<?> startOfPostField;
+
     @Subscribe
     public void onInitEntity(final InitEntityEvent<ServiceInfo> event) {
         ServiceInfo serviceInfo = event.getEntity();
@@ -54,6 +69,19 @@ public class ServiceInfoDetailView extends StandardDetailView<ServiceInfo> {
         serviceInfo.setMedicalExamination(false);
         serviceInfo.setQualificationClass(Qualification.NONE);
 
+    }
+
+    @Subscribe
+    public void onReady(ReadyEvent event) {
+        if (uiAccessService.hasFullAccessRole()) {
+            return;
+        }
+        // Служебная информация: видит, но изменить не может
+        if (departmentField != null) departmentField.setReadOnly(true);
+        if (rankField != null) rankField.setReadOnly(true);
+        if (postField != null) postField.setReadOnly(true);
+        if (startDateField != null) startDateField.setReadOnly(true);
+        if (startOfPostField != null) startOfPostField.setReadOnly(true);
     }
 
     /**

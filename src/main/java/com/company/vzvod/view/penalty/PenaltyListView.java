@@ -2,11 +2,13 @@ package com.company.vzvod.view.penalty;
 
 import com.company.vzvod.entity.Penalty;
 import com.company.vzvod.entity.ServiceInfo;
+import com.company.vzvod.security.UiAccessService;
 import com.company.vzvod.view.main.MainView;
 import com.vaadin.flow.router.Route;
 import io.jmix.core.DataManager;
 import io.jmix.core.SaveContext;
 import io.jmix.flowui.model.CollectionLoader;
+import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -26,6 +28,15 @@ public class PenaltyListView extends StandardListView<Penalty> {
 
     @Autowired
     private DataManager dataManager;
+
+    @Autowired
+    private UiAccessService uiAccessService;
+
+    @ViewComponent
+    private JmixButton removeButton;
+
+    @ViewComponent
+    private io.jmix.flowui.component.grid.DataGrid<Penalty> penaltiesDataGrid;
 
     private ServiceInfo serviceInfo;
 
@@ -52,6 +63,21 @@ public class PenaltyListView extends StandardListView<Penalty> {
 
         if (!toSave.isEmpty()) {
             dataManager.save(new SaveContext().saving(toSave));
+        }
+    }
+
+    @Subscribe
+    public void onReady(ReadyEvent event) {
+        if (uiAccessService.hasFullAccessRole()) {
+            return;
+        }
+        // Взыскания: кнопка УДАЛИТЬ не активна
+        if (removeButton != null) {
+            removeButton.setEnabled(false);
+        }
+        var removeAction = penaltiesDataGrid == null ? null : penaltiesDataGrid.getAction("removeAction");
+        if (removeAction != null) {
+            removeAction.setEnabled(false);
         }
     }
 
