@@ -107,8 +107,15 @@ public class EventListView extends StandardListView<Event> {
             permanentDeleteButton.setVisible(true);
         }
 
-        // Кто уже прошёл ViewPolicy этого экрана, видит «БЕЗ ВЗВОДА» (тип действия включается при выборе строк).
-        archiveWithoutSquadButton.setVisible(true);
+        // Переключатели списков должны быть видны всем, кто открыл view
+        if (eventsPlannedBtn != null) eventsPlannedBtn.setVisible(true);
+        if (eventsPastBtn != null) eventsPastBtn.setVisible(true);
+        if (eventsWithoutSquadBtn != null) eventsWithoutSquadBtn.setVisible(true);
+
+        // Перенос (БЕЗ ВЗВОДА) только при FullAccessRole
+        if (archiveWithoutSquadButton != null) {
+            archiveWithoutSquadButton.setVisible(hasFullAccess());
+        }
         syncEventActionStates();
     }
 
@@ -129,6 +136,12 @@ public class EventListView extends StandardListView<Event> {
      */
     private void syncEventActionStates() {
         boolean hasSelection = !eventsDataGrid.getSelectedItems().isEmpty();
+
+        var archiveAct = eventsDataGrid.getAction("archiveWithoutSquadAction");
+        if (archiveAct != null) {
+            archiveAct.setEnabled(hasFullAccess() && hasSelection);
+        }
+
         var delAct = eventsDataGrid.getAction("permanentDeleteAction");
         if (delAct != null) {
             delAct.setEnabled(hasFullAccess() && hasSelection);

@@ -104,12 +104,21 @@ public class LastEventListView extends StandardListView<Event> {
             permanentDeleteButton.setVisible(true);
         }
 
-        archiveWithoutSquadButton.setVisible(true);
+        // Перенос (ВЕРНУТЬ) только при FullAccessRole
+        if (archiveWithoutSquadButton != null) {
+            archiveWithoutSquadButton.setVisible(hasFullAccess());
+        }
         syncEventActionStates();
     }
 
     private void syncEventActionStates() {
         boolean hasSelection = !eventsDataGrid.getSelectedItems().isEmpty();
+
+        var archiveAct = eventsDataGrid.getAction("archiveWithoutSquadAction");
+        if (archiveAct != null) {
+            archiveAct.setEnabled(hasFullAccess() && hasSelection);
+        }
+
         var delAct = eventsDataGrid.getAction("permanentDeleteAction");
         if (delAct != null) {
             delAct.setEnabled(hasFullAccess() && hasSelection);
