@@ -2,6 +2,7 @@ package com.company.vzvod.bot;
 
 import com.company.vzvod.bot.dto.BotColleagueItem;
 import com.company.vzvod.bot.dto.BotColleaguesResponse;
+import com.company.vzvod.bot.dto.BotShiftEndTimeRequest;
 import com.company.vzvod.bot.dto.BotShiftItem;
 import com.company.vzvod.bot.dto.BotShiftUpsertRequest;
 import com.company.vzvod.bot.dto.BotShiftsResponse;
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -161,6 +163,44 @@ public class BotMeShiftsVocationsService {
         }
         applyUpsert(shift, req);
         shift.setDepartmentToday(DepartmentConverter.departmentFromDate(req.date()));
+        Shift saved = unconstrainedDataManager.save(shift);
+        return toShiftItem(saved);
+    }
+
+    @Transactional
+    public BotShiftItem setShiftEndTime(long telegramChatId, UUID shiftId, BotShiftEndTimeRequest body) {
+        if (body == null || body.endTime() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "endTime required");
+        }
+        ServiceInfo si = requireServiceInfo(telegramChatId);
+        Shift shift = unconstrainedDataManager.load(Shift.class)
+                .id(shiftId)
+                .fetchPlan(f -> f
+                        .add("units")
+                        .add("id")
+                        .add("date")
+                        .add("number")
+                        .add("typeOfShift")
+                        .add("departmentToday")
+                        .add("startTime")
+                        .add("endTime"))
+                .optional()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "shift not found"));
+        boolean member = shift.getUnits().stream().anyMatch(u -> u.getId().equals(si.getId()));
+        if (!member) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "shift not accessible");
+        }
+        if (shift.getEndTime() != null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "end time already set");
+        }
+        LocalTime start = shift.getStartTime();
+        if (start == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "shift has no start time");
+        }
+        if (!body.endTime().isAfter(start)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "endTime must be after startTime");
+        }
+        shift.setEndTime(body.endTime());
         Shift saved = unconstrainedDataManager.save(shift);
         return toShiftItem(saved);
     }

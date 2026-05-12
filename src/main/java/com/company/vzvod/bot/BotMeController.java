@@ -3,6 +3,7 @@ package com.company.vzvod.bot;
 import com.company.vzvod.bot.dto.BotProfilePatchRequest;
 import com.company.vzvod.bot.dto.BotProfileResponse;
 import com.company.vzvod.bot.dto.BotColleaguesResponse;
+import com.company.vzvod.bot.dto.BotShiftEndTimeRequest;
 import com.company.vzvod.bot.dto.BotShiftItem;
 import com.company.vzvod.bot.dto.BotShiftUpsertRequest;
 import com.company.vzvod.bot.dto.BotShiftsResponse;
@@ -103,6 +104,18 @@ public class BotMeController {
         apiKeyAuthorizer.verify(apiKey);
         long chatId = parseTelegramChatId(telegramChatIdHeader);
         return ResponseEntity.ok(botMeShiftsVocationsService.updateShift(chatId, shiftId, body));
+    }
+
+    @PostMapping("/shifts/{shiftId}/end-time")
+    public ResponseEntity<BotShiftItem> setShiftEndTime(
+            @RequestHeader(value = "X-Api-Key", required = false) String apiKey,
+            @RequestHeader(value = "X-Telegram-Chat-Id", required = false) String telegramChatIdHeader,
+            @PathVariable("shiftId") UUID shiftId,
+            @RequestBody(required = false) BotShiftEndTimeRequest body
+    ) {
+        apiKeyAuthorizer.verify(apiKey);
+        long chatId = parseTelegramChatId(telegramChatIdHeader);
+        return ResponseEntity.ok(botMeShiftsVocationsService.setShiftEndTime(chatId, shiftId, body));
     }
 
     @PutMapping("/profile")

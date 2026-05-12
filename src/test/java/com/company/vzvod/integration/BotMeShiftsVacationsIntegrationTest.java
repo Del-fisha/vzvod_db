@@ -1,5 +1,6 @@
 package com.company.vzvod.integration;
 
+import com.company.vzvod.bot.dto.BotShiftEndTimeRequest;
 import com.company.vzvod.bot.dto.BotShiftUpsertRequest;
 import com.company.vzvod.entity.ArmyService;
 import com.company.vzvod.entity.Contacts;
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -32,6 +34,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -325,7 +328,103 @@ class BotMeShiftsVacationsIntegrationTest {
     }
 
     @Test
-    @DisplayName("GET /colleagues — коллеги отделения без текущего пользователя")
+    @DisplayName("POST /shifts/{id}/end-time — задать окончание открытой смены")
+    void postShiftEndTime_ok() throws Exception {
+        persistUserBindingOnly();
+        final UUID[] partnerSid = new UUID[1];
+        systemAuthenticator.runWithSystem(() -> {
+            User bound = dataManager.load(User.class).id(createdUserId).one();
+            Department dep = bound.getServiceInfo().getDepartment();
+            partnerSid[0] = persistActiveColleagueInDepartment(dep);
+        });
+
+        BotShiftUpsertRequest req = new BotShiftUpsertRequest(
+                LocalDate.of(2026, 5, 11),
+                "МП 31",
+                "VZVOD_ROUTE",
+                LocalTime.of(8, 0),
+                null,
+                partnerSid[0],
+                null,
+                null,
+                null,
+                null
+        );
+
+        MvcResult created = mockMvc.perform(post("/api/bot/me/shifts")
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        JsonNode node = objectMapper.readTree(created.getResponse().getContentAsString());
+        UUID shiftId = UUID.fromString(node.get("id").asText());
+
+        BotShiftEndTimeRequest endReq = new BotShiftEndTimeRequest(LocalTime.of(20, 0));
+        mockMvc.perform(post("/api/bot/me/shifts/" + shiftId + "/end-time")
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(endReq)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.endTime").exists());
+    }
+
+    @Test
+    @DisplayName("POST /shifts/{id}/end-time — 409 если окончание уже задано")
+    void postShiftEndTime_conflict() throws Exception {
+        persistUserShiftAndVocation();
+        BotShiftEndTimeRequest endReq = new BotShiftEndTimeRequest(LocalTime.of(23, 0));
+        mockMvc.perform(post("/api/bot/me/shifts/" + createdShiftId + "/end-time")
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(endReq)))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    @DisplayName("POST /shifts/{id}/end-time — 400 если окончание не позже начала")
+    void postShiftEndTime_badEndBeforeStart() throws Exception {
+        persistUserBindingOnly();
+        final UUID[] partnerSid = new UUID[1];
+        systemAuthenticator.runWithSystem(() -> {
+            User bound = dataManager.load(User.class).id(createdUserId).one();
+            Department dep = bound.getServiceInfo().getDepartment();
+            partnerSid[0] = persistActiveColleagueInDepartment(dep);
+        });
+
+        BotShiftUpsertRequest req = new BotShiftUpsertRequest(
+                LocalDate.of(2026, 5, 12),
+                "МП 31",
+                "VZVOD_ROUTE",
+                LocalTime.of(10, 0),
+                null,
+                partnerSid[0],
+                null,
+                null,
+                null,
+                null
+        );
+
+        MvcResult created = mockMvc.perform(post("/api/bot/me/shifts")
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        UUID shiftId = UUID.fromString(objectMapper.readTree(created.getResponse().getContentAsString()).get("id").asText());
+
+        BotShiftEndTimeRequest endReq = new BotShiftEndTimeRequest(LocalTime.of(9, 0));
+        mockMvc.perform(post("/api/bot/me/shifts/" + shiftId + "/end-time")
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(endReq)))
+                .andExpect(status().isBadRequest());
+    }
     void colleagues_ok() throws Exception {
         persistUserBindingOnly();
         systemAuthenticator.runWithSystem(() -> {
