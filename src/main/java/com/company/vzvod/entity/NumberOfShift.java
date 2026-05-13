@@ -14,7 +14,7 @@ public enum NumberOfShift implements EnumClass<String> {
     _6("МП 6"),
     _3("СП 3"),
     _18("СП 18"),
-    ANOTHER("Another");
+    ANOTHER("Другое");
 
     private final String id;
 
@@ -32,6 +32,9 @@ public enum NumberOfShift implements EnumClass<String> {
     public static NumberOfShift fromId(String id) {
         if (id == null) {
             return null;
+        }
+        if ("Another".equals(id)) {
+            return ANOTHER;
         }
         for (NumberOfShift v : NumberOfShift.values()) {
             if (v.getId().equals(id)) {

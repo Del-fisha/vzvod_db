@@ -1,11 +1,12 @@
 package com.company.vzvod.view.mainviewtopmenu;
 
 import com.company.vzvod.view.dashboard.WorkResultsStatisticsDialog;
+import com.company.vzvod.view.dashboard.TodayShiftDashboardView;
 import com.google.common.base.Strings;
-import com.vaadin.flow.router.Route;
-import io.jmix.flowui.view.DialogWindow;
+import com.vaadin.flow.component.UI;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.app.main.StandardMainView;
+import io.jmix.flowui.view.DialogWindow;
 import io.jmix.flowui.component.UiComponentUtils;
 import io.jmix.flowui.view.Subscribe;
 import io.jmix.flowui.view.ViewComponent;
@@ -14,7 +15,6 @@ import io.jmix.flowui.view.ViewDescriptor;
 import com.vaadin.flow.component.HtmlComponent;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.UI;
 import com.company.vzvod.view.userlist.UserListView;
 import com.company.vzvod.view.event.EventListView;
 import com.company.vzvod.view.print.PrintHubView;
@@ -52,6 +52,15 @@ public class MainViewTopMenu extends StandardMainView {
             w.open();
         });
         homeStatsWidgetSlot.add(stats);
+
+        HomeStatsCard todayShift = new HomeStatsCard(
+                "Сегодняшняя смена",
+                "Сводка по нарядам, показателям и нарушениям за текущую смену.",
+                "Открыть",
+                "var(--lumo-contrast-50pct)"
+        );
+        todayShift.addCardClickListener(() -> UI.getCurrent().navigate(TodayShiftDashboardView.class));
+        homeStatsWidgetSlot.add(todayShift);
 
         HomeStatsCard employees = new HomeStatsCard(
                 "Все сотрудники",
