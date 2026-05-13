@@ -1,13 +1,17 @@
 package com.company.vzvod.bot;
 
+import com.company.vzvod.bot.dto.BotAdministrativeViolationCreateRequest;
 import com.company.vzvod.bot.dto.BotProfilePatchRequest;
 import com.company.vzvod.bot.dto.BotProfileResponse;
 import com.company.vzvod.bot.dto.BotColleaguesResponse;
+import com.company.vzvod.bot.dto.BotCriminalViolationCreateRequest;
 import com.company.vzvod.bot.dto.BotShiftEndTimeRequest;
 import com.company.vzvod.bot.dto.BotShiftItem;
+import com.company.vzvod.bot.dto.BotShiftMetricDeltaRequest;
 import com.company.vzvod.bot.dto.BotShiftUpsertRequest;
 import com.company.vzvod.bot.dto.BotShiftsResponse;
 import com.company.vzvod.bot.dto.BotVacationsResponse;
+import com.company.vzvod.bot.dto.BotViolationOptionsResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -66,11 +70,12 @@ public class BotMeController {
             @RequestHeader(value = "X-Api-Key", required = false) String apiKey,
             @RequestHeader(value = "X-Telegram-Chat-Id", required = false) String telegramChatIdHeader,
             @RequestParam("department") int department,
-            @RequestParam(value = "page", defaultValue = "0") int page
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "excludeShiftId", required = false) UUID excludeShiftId
     ) {
         apiKeyAuthorizer.verify(apiKey);
         long chatId = parseTelegramChatId(telegramChatIdHeader);
-        return ResponseEntity.ok(botMeShiftsVocationsService.loadColleagues(chatId, department, page));
+        return ResponseEntity.ok(botMeShiftsVocationsService.loadColleagues(chatId, department, page, excludeShiftId));
     }
 
     @GetMapping("/vacations")
@@ -81,6 +86,17 @@ public class BotMeController {
         apiKeyAuthorizer.verify(apiKey);
         long chatId = parseTelegramChatId(telegramChatIdHeader);
         return ResponseEntity.ok(botMeShiftsVocationsService.loadVacations(chatId));
+    }
+
+    @GetMapping("/shifts/{shiftId}")
+    public ResponseEntity<BotShiftItem> shift(
+            @RequestHeader(value = "X-Api-Key", required = false) String apiKey,
+            @RequestHeader(value = "X-Telegram-Chat-Id", required = false) String telegramChatIdHeader,
+            @PathVariable("shiftId") UUID shiftId
+    ) {
+        apiKeyAuthorizer.verify(apiKey);
+        long chatId = parseTelegramChatId(telegramChatIdHeader);
+        return ResponseEntity.ok(botMeShiftsVocationsService.loadShift(chatId, shiftId));
     }
 
     @PostMapping("/shifts")
@@ -116,6 +132,62 @@ public class BotMeController {
         apiKeyAuthorizer.verify(apiKey);
         long chatId = parseTelegramChatId(telegramChatIdHeader);
         return ResponseEntity.ok(botMeShiftsVocationsService.setShiftEndTime(chatId, shiftId, body));
+    }
+
+    @PostMapping("/shifts/{shiftId}/ibd-with-migrant")
+    public ResponseEntity<BotShiftItem> adjustIbdWithMigrant(
+            @RequestHeader(value = "X-Api-Key", required = false) String apiKey,
+            @RequestHeader(value = "X-Telegram-Chat-Id", required = false) String telegramChatIdHeader,
+            @PathVariable("shiftId") UUID shiftId,
+            @RequestBody(required = false) BotShiftMetricDeltaRequest body
+    ) {
+        apiKeyAuthorizer.verify(apiKey);
+        long chatId = parseTelegramChatId(telegramChatIdHeader);
+        return ResponseEntity.ok(botMeShiftsVocationsService.adjustIbdWithMigrant(chatId, shiftId, body));
+    }
+
+    @PostMapping("/shifts/{shiftId}/count-of-statements")
+    public ResponseEntity<BotShiftItem> adjustCountOfStatements(
+            @RequestHeader(value = "X-Api-Key", required = false) String apiKey,
+            @RequestHeader(value = "X-Telegram-Chat-Id", required = false) String telegramChatIdHeader,
+            @PathVariable("shiftId") UUID shiftId,
+            @RequestBody(required = false) BotShiftMetricDeltaRequest body
+    ) {
+        apiKeyAuthorizer.verify(apiKey);
+        long chatId = parseTelegramChatId(telegramChatIdHeader);
+        return ResponseEntity.ok(botMeShiftsVocationsService.adjustCountOfStatements(chatId, shiftId, body));
+    }
+
+    @GetMapping("/violation-options")
+    public ResponseEntity<BotViolationOptionsResponse> violationOptions(
+            @RequestHeader(value = "X-Api-Key", required = false) String apiKey
+    ) {
+        apiKeyAuthorizer.verify(apiKey);
+        return ResponseEntity.ok(botMeShiftsVocationsService.loadViolationOptions());
+    }
+
+    @PostMapping("/shifts/{shiftId}/administrative-violations")
+    public ResponseEntity<BotShiftItem> createAdministrativeViolation(
+            @RequestHeader(value = "X-Api-Key", required = false) String apiKey,
+            @RequestHeader(value = "X-Telegram-Chat-Id", required = false) String telegramChatIdHeader,
+            @PathVariable("shiftId") UUID shiftId,
+            @RequestBody(required = false) BotAdministrativeViolationCreateRequest body
+    ) {
+        apiKeyAuthorizer.verify(apiKey);
+        long chatId = parseTelegramChatId(telegramChatIdHeader);
+        return ResponseEntity.ok(botMeShiftsVocationsService.createAdministrativeViolation(chatId, shiftId, body));
+    }
+
+    @PostMapping("/shifts/{shiftId}/criminal-violations")
+    public ResponseEntity<BotShiftItem> createCriminalViolation(
+            @RequestHeader(value = "X-Api-Key", required = false) String apiKey,
+            @RequestHeader(value = "X-Telegram-Chat-Id", required = false) String telegramChatIdHeader,
+            @PathVariable("shiftId") UUID shiftId,
+            @RequestBody(required = false) BotCriminalViolationCreateRequest body
+    ) {
+        apiKeyAuthorizer.verify(apiKey);
+        long chatId = parseTelegramChatId(telegramChatIdHeader);
+        return ResponseEntity.ok(botMeShiftsVocationsService.createCriminalViolation(chatId, shiftId, body));
     }
 
     @PutMapping("/profile")
