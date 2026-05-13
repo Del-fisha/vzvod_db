@@ -44,6 +44,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -470,20 +471,25 @@ class BotMeShiftsVacationsIntegrationTest {
     @Test
     void colleagues_ok() throws Exception {
         persistUserBindingOnly();
+        final UUID[] colleagueSiId = new UUID[1];
         systemAuthenticator.runWithSystem(() -> {
             User bound = dataManager.load(User.class).id(createdUserId).one();
             Department dep = bound.getServiceInfo().getDepartment();
-            persistActiveColleagueInDepartment(dep);
+            colleagueSiId[0] = persistActiveColleagueInDepartment(dep);
         });
 
-        mockMvc.perform(get("/api/bot/me/colleagues")
+        MvcResult result = mockMvc.perform(get("/api/bot/me/colleagues")
                         .param("department", "1")
                         .header("X-Api-Key", API_KEY)
                         .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.items.length()").value(1))
-                .andExpect(jsonPath("$.items[0].serviceInfoId").exists())
-                .andExpect(jsonPath("$.items[0].label").value("Пётр П."));
+                .andReturn();
+
+        JsonNode items = objectMapper.readTree(result.getResponse().getContentAsString()).get("items");
+        assertThat(items).anySatisfy(item -> {
+            assertThat(item.get("serviceInfoId").asText()).isEqualTo(colleagueSiId[0].toString());
+            assertThat(item.get("label").asText()).isEqualTo("Пётр П.");
+        });
     }
 
     @Test
@@ -646,5 +652,180 @@ class BotMeShiftsVacationsIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("POST /shifts — 400 если у создателя уже есть незавершённая смена")
+    void postShift_openShiftCreatorReturns400() throws Exception {
+        persistUserBindingOnly();
+        final UUID[] partnerSid = new UUID[1];
+        systemAuthenticator.runWithSystem(() -> {
+            User bound = dataManager.load(User.class).id(createdUserId).one();
+            Department dep = bound.getServiceInfo().getDepartment();
+            partnerSid[0] = persistActiveColleagueInDepartment(dep);
+
+            ServiceInfo creatorSi = bound.getServiceInfo();
+            Shift open = dataManager.create(Shift.class);
+            open.setDate(LocalDate.of(2026, 5, 20));
+            open.setNumber(NumberOfShift._31);
+            open.setTypeOfShift(TypeOfShift.VZVOD_ROUTE);
+            open.setDepartmentToday(Dep.FIRST);
+            open.setStartTime(LocalTime.of(8, 0));
+            Set<ServiceInfo> units = new HashSet<>();
+            units.add(creatorSi);
+            open.setUnits(units);
+            dataManager.save(open);
+        });
+
+        BotShiftUpsertRequest req = new BotShiftUpsertRequest(
+                LocalDate.of(2026, 5, 21),
+                "МП 31",
+                "VZVOD_ROUTE",
+                LocalTime.of(9, 0),
+                null,
+                partnerSid[0],
+                null,
+                null,
+                null,
+                null
+        );
+
+        mockMvc.perform(post("/api/bot/me/shifts")
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("GET /colleagues — не показывает сотрудника в другой незавершённой смене")
+    void colleagues_excludesParticipantInOpenShift() throws Exception {
+        persistUserBindingOnly();
+        final UUID[] busyColleagueSiId = new UUID[1];
+        systemAuthenticator.runWithSystem(() -> {
+            User bound = dataManager.load(User.class).id(createdUserId).one();
+            Department dep = bound.getServiceInfo().getDepartment();
+            busyColleagueSiId[0] = persistActiveColleagueInDepartment(dep);
+
+            ServiceInfo colleagueSi = dataManager.load(ServiceInfo.class).id(busyColleagueSiId[0]).one();
+            Shift open = dataManager.create(Shift.class);
+            open.setDate(LocalDate.of(2026, 5, 22));
+            open.setNumber(NumberOfShift._31);
+            open.setTypeOfShift(TypeOfShift.VZVOD_ROUTE);
+            open.setDepartmentToday(Dep.FIRST);
+            open.setStartTime(LocalTime.of(8, 0));
+            Set<ServiceInfo> units = new HashSet<>();
+            units.add(colleagueSi);
+            open.setUnits(units);
+            dataManager.save(open);
+        });
+
+        MvcResult result = mockMvc.perform(get("/api/bot/me/colleagues")
+                        .param("department", "1")
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JsonNode items = objectMapper.readTree(result.getResponse().getContentAsString()).get("items");
+        assertThat(items).noneMatch(item ->
+                busyColleagueSiId[0].toString().equals(item.get("serviceInfoId").asText()));
+    }
+
+    @Test
+    @DisplayName("POST /shifts/{id}/ibd-with-migrant — инкремент и декремент на открытой смене")
+    void postShift_adjustIbdWithMigrant() throws Exception {
+        persistUserBindingOnly();
+        final UUID[] shiftId = new UUID[1];
+        systemAuthenticator.runWithSystem(() -> {
+            User bound = dataManager.load(User.class).id(createdUserId).one();
+            ServiceInfo si = bound.getServiceInfo();
+            Shift open = dataManager.create(Shift.class);
+            open.setDate(LocalDate.of(2026, 5, 23));
+            open.setNumber(NumberOfShift._31);
+            open.setTypeOfShift(TypeOfShift.VZVOD_ROUTE);
+            open.setDepartmentToday(Dep.FIRST);
+            open.setStartTime(LocalTime.of(8, 0));
+            open.setIbdWithMigrant(0);
+            Set<ServiceInfo> units = new HashSet<>();
+            units.add(si);
+            open.setUnits(units);
+            shiftId[0] = dataManager.save(open).getId();
+        });
+
+        mockMvc.perform(post("/api/bot/me/shifts/" + shiftId[0] + "/ibd-with-migrant")
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"delta\":1}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.ibdWithMigrant").value(1));
+
+        mockMvc.perform(post("/api/bot/me/shifts/" + shiftId[0] + "/ibd-with-migrant")
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"delta\":-1}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.ibdWithMigrant").value(0));
+    }
+
+    @Test
+    @DisplayName("POST /shifts/{id}/administrative-violations — создание записи с полями")
+    void postShift_createAdministrativeViolation() throws Exception {
+        persistUserBindingOnly();
+        final UUID[] shiftId = new UUID[1];
+        systemAuthenticator.runWithSystem(() -> {
+            User bound = dataManager.load(User.class).id(createdUserId).one();
+            ServiceInfo si = bound.getServiceInfo();
+            Shift open = dataManager.create(Shift.class);
+            open.setDate(LocalDate.of(2026, 5, 24));
+            open.setNumber(NumberOfShift._31);
+            open.setTypeOfShift(TypeOfShift.VZVOD_ROUTE);
+            open.setDepartmentToday(Dep.FIRST);
+            open.setStartTime(LocalTime.of(8, 0));
+            Set<ServiceInfo> units = new HashSet<>();
+            units.add(si);
+            open.setUnits(units);
+            shiftId[0] = dataManager.save(open).getId();
+        });
+
+        mockMvc.perform(post("/api/bot/me/shifts/" + shiftId[0] + "/administrative-violations")
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"impactId\":0,\"articleId\":0}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.administrativeViolationsCount").value(1));
+    }
+
+    @Test
+    @DisplayName("POST /shifts/{id}/criminal-violations — создание записи с полями")
+    void postShift_createCriminalViolation() throws Exception {
+        persistUserBindingOnly();
+        final UUID[] shiftId = new UUID[1];
+        systemAuthenticator.runWithSystem(() -> {
+            User bound = dataManager.load(User.class).id(createdUserId).one();
+            ServiceInfo si = bound.getServiceInfo();
+            Shift open = dataManager.create(Shift.class);
+            open.setDate(LocalDate.of(2026, 5, 25));
+            open.setNumber(NumberOfShift._31);
+            open.setTypeOfShift(TypeOfShift.VZVOD_ROUTE);
+            open.setDepartmentToday(Dep.FIRST);
+            open.setStartTime(LocalTime.of(8, 0));
+            Set<ServiceInfo> units = new HashSet<>();
+            units.add(si);
+            open.setUnits(units);
+            shiftId[0] = dataManager.save(open).getId();
+        });
+
+        mockMvc.perform(post("/api/bot/me/shifts/" + shiftId[0] + "/criminal-violations")
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"impactId\":0,\"typeId\":1}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.criminalViolationsCount").value(1));
     }
 }

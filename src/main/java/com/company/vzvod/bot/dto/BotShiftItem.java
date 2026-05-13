@@ -24,6 +24,8 @@ public record BotShiftItem(
         Integer countOfClaims,
         Integer ibdWithMigrant,
         Integer ibdWithoutMigrant,
+        Integer administrativeViolationsCount,
+        Integer criminalViolationsCount,
         /** Первый напарник (совместимость со старыми клиентами); null, если кроме вас никого нет. */
         UUID partnerServiceInfoId,
         /** Все участники смены кроме текущего пользователя (id {@code ServiceInfo}), по возрастанию id. */
