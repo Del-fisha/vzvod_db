@@ -146,6 +146,18 @@ public class BotMeController {
         return ResponseEntity.ok(botMeShiftsVocationsService.adjustIbdWithMigrant(chatId, shiftId, body));
     }
 
+    @PostMapping("/shifts/{shiftId}/count-of-statements")
+    public ResponseEntity<BotShiftItem> adjustCountOfStatements(
+            @RequestHeader(value = "X-Api-Key", required = false) String apiKey,
+            @RequestHeader(value = "X-Telegram-Chat-Id", required = false) String telegramChatIdHeader,
+            @PathVariable("shiftId") UUID shiftId,
+            @RequestBody(required = false) BotShiftMetricDeltaRequest body
+    ) {
+        apiKeyAuthorizer.verify(apiKey);
+        long chatId = parseTelegramChatId(telegramChatIdHeader);
+        return ResponseEntity.ok(botMeShiftsVocationsService.adjustCountOfStatements(chatId, shiftId, body));
+    }
+
     @GetMapping("/violation-options")
     public ResponseEntity<BotViolationOptionsResponse> violationOptions(
             @RequestHeader(value = "X-Api-Key", required = false) String apiKey

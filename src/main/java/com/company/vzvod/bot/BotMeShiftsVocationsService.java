@@ -293,6 +293,24 @@ public class BotMeShiftsVocationsService {
         return toShiftItem(saved, si.getId());
     }
 
+    @Transactional
+    public BotShiftItem adjustCountOfStatements(long telegramChatId, UUID shiftId, BotShiftMetricDeltaRequest body) {
+        int delta = requireMetricDelta(body);
+        ServiceInfo si = requireServiceInfo(telegramChatId);
+        Shift shift = loadOpenShiftForParticipant(shiftId, si.getId());
+        int current = shift.getCountOfStatements() == null ? 0 : shift.getCountOfStatements();
+        if (delta > 0) {
+            shift.setCountOfStatements(current + delta);
+        } else {
+            if (current + delta < 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "countOfStatements cannot be negative");
+            }
+            shift.setCountOfStatements(current + delta);
+        }
+        Shift saved = unconstrainedDataManager.save(shift);
+        return toShiftItem(saved, si.getId());
+    }
+
     @Transactional(readOnly = true)
     public BotViolationOptionsResponse loadViolationOptions() {
         List<BotEnumOption> impacts = new ArrayList<>(Impact.values().length);

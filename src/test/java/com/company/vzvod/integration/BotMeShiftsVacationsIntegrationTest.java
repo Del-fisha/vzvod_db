@@ -772,6 +772,44 @@ class BotMeShiftsVacationsIntegrationTest {
     }
 
     @Test
+    @DisplayName("POST /shifts/{id}/count-of-statements — инкремент и декремент на открытой смене")
+    void postShift_adjustCountOfStatements() throws Exception {
+        persistUserBindingOnly();
+        final UUID[] shiftId = new UUID[1];
+        systemAuthenticator.runWithSystem(() -> {
+            User bound = dataManager.load(User.class).id(createdUserId).one();
+            ServiceInfo si = bound.getServiceInfo();
+            Shift open = dataManager.create(Shift.class);
+            open.setDate(LocalDate.of(2026, 5, 24));
+            open.setNumber(NumberOfShift._31);
+            open.setTypeOfShift(TypeOfShift.VZVOD_ROUTE);
+            open.setDepartmentToday(Dep.FIRST);
+            open.setStartTime(LocalTime.of(8, 0));
+            open.setCountOfStatements(0);
+            Set<ServiceInfo> units = new HashSet<>();
+            units.add(si);
+            open.setUnits(units);
+            shiftId[0] = dataManager.save(open).getId();
+        });
+
+        mockMvc.perform(post("/api/bot/me/shifts/" + shiftId[0] + "/count-of-statements")
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"delta\":1}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.countOfStatements").value(1));
+
+        mockMvc.perform(post("/api/bot/me/shifts/" + shiftId[0] + "/count-of-statements")
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"delta\":-1}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.countOfStatements").value(0));
+    }
+
+    @Test
     @DisplayName("POST /shifts/{id}/administrative-violations — создание записи с полями")
     void postShift_createAdministrativeViolation() throws Exception {
         persistUserBindingOnly();
