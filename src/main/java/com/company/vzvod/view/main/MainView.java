@@ -16,6 +16,7 @@ import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.router.Route;
 import com.company.vzvod.entity.User;
+import com.company.vzvod.security.UiAccessService;
 import com.company.vzvod.view.userlist.UserListView;
 import com.company.vzvod.view.event.EventListView;
 import com.company.vzvod.view.print.PrintHubView;
@@ -26,7 +27,7 @@ import io.jmix.flowui.view.ViewController;
 import io.jmix.flowui.view.ViewDescriptor;
 import io.jmix.flowui.view.ViewComponent;
 import io.jmix.flowui.kit.component.button.JmixButton;
-import io.jmix.flowui.view.MessageBundle;
+import io.jmix.flowui.kit.component.main.ListMenu;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.company.vzvod.notification.UserNotificationService;
 import com.company.vzvod.notification.UserNotificationService.StoredOverduePayload;
@@ -40,6 +41,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jmix.core.DataManager;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.view.DialogWindow;
+import io.jmix.flowui.view.MessageBundle;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -73,8 +75,14 @@ public class MainView extends StandardMainView {
     @Autowired
     private DialogWindows dialogWindows;
 
+    @Autowired
+    private UiAccessService uiAccessService;
+
     @ViewComponent
     private MessageBundle messageBundle;
+
+    @ViewComponent
+    private ListMenu menu;
 
     @ViewComponent
     private VerticalLayout homeStatsWidgetSlot;
@@ -99,6 +107,7 @@ public class MainView extends StandardMainView {
         applySavedSettings(storageKeyPrefix, audio, volumeSlider, muteButton);
         installUiSoundEffects();
         installHomeStatsWidget();
+        configureDashboardMessageMenuVisibility();
 
         // Autoplay may still be blocked by browser policies; best-effort start.
         UI.getCurrent().getPage().executeJs(
@@ -107,6 +116,16 @@ public class MainView extends StandardMainView {
         );
 
         showLoginNotifications();
+    }
+
+    private void configureDashboardMessageMenuVisibility() {
+        if (menu == null) {
+            return;
+        }
+        ListMenu.MenuItem dashboardMessageItem = menu.getMenuItem("dashboard_message");
+        if (dashboardMessageItem != null) {
+            dashboardMessageItem.setVisible(uiAccessService.hasFullAccessRole());
+        }
     }
 
     private void installHomeStatsWidget() {
