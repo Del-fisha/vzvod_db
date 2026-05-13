@@ -31,6 +31,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -72,13 +73,45 @@ public class BotMeShiftsVocationsService {
                         .add("typeOfShift")
                         .add("departmentToday")
                         .add("startTime")
-                        .add("endTime"))
+                        .add("endTime")
+                        .add("countOfStatements")
+                        .add("countOfClaims")
+                        .add("ibdWithMigrant")
+                        .add("ibdWithoutMigrant")
+                        .add("units"))
                 .list();
         List<BotShiftItem> items = new ArrayList<>(shifts.size());
         for (Shift s : shifts) {
-            items.add(toShiftItem(s));
+            items.add(toShiftItem(s, serviceInfoId));
         }
         return new BotShiftsResponse(items);
+    }
+
+    @Transactional(readOnly = true)
+    public BotShiftItem loadShift(long telegramChatId, UUID shiftId) {
+        ServiceInfo si = requireServiceInfo(telegramChatId);
+        Shift shift = unconstrainedDataManager.load(Shift.class)
+                .id(shiftId)
+                .fetchPlan(f -> f
+                        .add("units")
+                        .add("id")
+                        .add("date")
+                        .add("number")
+                        .add("typeOfShift")
+                        .add("departmentToday")
+                        .add("startTime")
+                        .add("endTime")
+                        .add("countOfStatements")
+                        .add("countOfClaims")
+                        .add("ibdWithMigrant")
+                        .add("ibdWithoutMigrant"))
+                .optional()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "shift not found"));
+        boolean member = shift.getUnits().stream().anyMatch(u -> u.getId().equals(si.getId()));
+        if (!member) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "shift not accessible");
+        }
+        return toShiftItem(shift, si.getId());
     }
 
     @Transactional(readOnly = true)
@@ -126,14 +159,14 @@ public class BotMeShiftsVocationsService {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "service info missing");
         }
         Shift shift = unconstrainedDataManager.create(Shift.class);
-        applyUpsert(shift, req);
+        applyCreate(shift, req);
         shift.setDepartmentToday(DepartmentConverter.departmentFromDate(req.date()));
         shift.getUnits().clear();
         shift.getUnits().add(si);
         ServiceInfo partner = loadAndValidatePartner(req.partnerServiceInfoId(), user.getId());
         shift.getUnits().add(partner);
         Shift saved = unconstrainedDataManager.save(shift);
-        return toShiftItem(saved);
+        return toShiftItem(saved, si.getId());
     }
 
     @Transactional
@@ -157,14 +190,27 @@ public class BotMeShiftsVocationsService {
                         .add("ibdWithoutMigrant"))
                 .optional()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "shift not found"));
-        boolean member = shift.getUnits().stream().anyMatch(u -> u.getId().equals(si.getId()));
+        UUID mySid = si.getId();
+        boolean member = shift.getUnits().stream()
+                .anyMatch(u -> u != null && mySid.equals(u.getId()));
         if (!member) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "shift not accessible");
         }
-        applyUpsert(shift, req);
+        applyUpdate(shift, req);
         shift.setDepartmentToday(DepartmentConverter.departmentFromDate(req.date()));
+        if (req.partnerServiceInfoId() != null) {
+            User user = loadUserWithServiceInfo(telegramChatId);
+            ServiceInfo partner = loadAndValidatePartner(req.partnerServiceInfoId(), user.getId());
+            UUID partnerSid = partner.getId();
+            boolean already = shift.getUnits().stream()
+                    .anyMatch(u -> u != null && partnerSid.equals(u.getId()));
+            if (already) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "user already in shift");
+            }
+            shift.getUnits().add(partner);
+        }
         Shift saved = unconstrainedDataManager.save(shift);
-        return toShiftItem(saved);
+        return toShiftItem(saved, si.getId());
     }
 
     @Transactional
@@ -202,7 +248,7 @@ public class BotMeShiftsVocationsService {
         }
         shift.setEndTime(body.endTime());
         Shift saved = unconstrainedDataManager.save(shift);
-        return toShiftItem(saved);
+        return toShiftItem(saved, si.getId());
     }
 
     private void validateCreate(BotShiftUpsertRequest req) {
@@ -271,7 +317,7 @@ public class BotMeShiftsVocationsService {
         return (fn == null ? "" : fn + " ") + initial;
     }
 
-    private static void applyUpsert(Shift shift, BotShiftUpsertRequest req) {
+    private static void applyCreate(Shift shift, BotShiftUpsertRequest req) {
         shift.setDate(req.date());
         shift.setNumber(NumberOfShift.fromId(req.routeId().trim()));
         shift.setTypeOfShift(TypeOfShift.fromId(req.typeOfShiftId().trim()));
@@ -281,6 +327,31 @@ public class BotMeShiftsVocationsService {
         shift.setCountOfClaims(req.countOfClaims() != null ? req.countOfClaims() : 0);
         shift.setIbdWithMigrant(req.ibdWithMigrant() != null ? req.ibdWithMigrant() : 0);
         shift.setIbdWithoutMigrant(req.ibdWithoutMigrant() != null ? req.ibdWithoutMigrant() : 0);
+    }
+
+    /**
+     * Обновление: {@code null} в счётчиках и {@code endTime} не перезаписывает уже сохранённые значения.
+     */
+    private static void applyUpdate(Shift shift, BotShiftUpsertRequest req) {
+        shift.setDate(req.date());
+        shift.setNumber(NumberOfShift.fromId(req.routeId().trim()));
+        shift.setTypeOfShift(TypeOfShift.fromId(req.typeOfShiftId().trim()));
+        shift.setStartTime(req.startTime());
+        if (req.endTime() != null) {
+            shift.setEndTime(req.endTime());
+        }
+        if (req.countOfStatements() != null) {
+            shift.setCountOfStatements(req.countOfStatements());
+        }
+        if (req.countOfClaims() != null) {
+            shift.setCountOfClaims(req.countOfClaims());
+        }
+        if (req.ibdWithMigrant() != null) {
+            shift.setIbdWithMigrant(req.ibdWithMigrant());
+        }
+        if (req.ibdWithoutMigrant() != null) {
+            shift.setIbdWithoutMigrant(req.ibdWithoutMigrant());
+        }
     }
 
     private User loadUserWithServiceInfo(long telegramChatId) {
@@ -308,19 +379,42 @@ public class BotMeShiftsVocationsService {
         return si;
     }
 
-    private BotShiftItem toShiftItem(Shift s) {
+    private BotShiftItem toShiftItem(Shift s, UUID viewerServiceInfoId) {
         NumberOfShift route = s.getNumber();
         TypeOfShift type = s.getTypeOfShift();
         Dep dep = s.getDepartmentToday();
+        List<UUID> others = otherParticipantServiceInfoIds(s, viewerServiceInfoId);
+        UUID partnerSiId = others.isEmpty() ? null : others.get(0);
         return new BotShiftItem(
                 s.getId(),
                 s.getDate(),
                 route == null ? null : route.getId(),
                 type == null ? null : enumMessage("TypeOfShift", type.name()),
+                type == null ? null : type.getId(),
                 dep == null ? null : enumMessage("Dep", dep.name()),
                 s.getStartTime(),
-                s.getEndTime()
+                s.getEndTime(),
+                s.getCountOfStatements(),
+                s.getCountOfClaims(),
+                s.getIbdWithMigrant(),
+                s.getIbdWithoutMigrant(),
+                partnerSiId,
+                others
         );
+    }
+
+    private static List<UUID> otherParticipantServiceInfoIds(Shift s, UUID viewerServiceInfoId) {
+        if (viewerServiceInfoId == null || s.getUnits() == null) {
+            return List.of();
+        }
+        List<UUID> ids = new ArrayList<>();
+        for (ServiceInfo u : s.getUnits()) {
+            if (u != null && u.getId() != null && !viewerServiceInfoId.equals(u.getId())) {
+                ids.add(u.getId());
+            }
+        }
+        ids.sort(Comparator.naturalOrder());
+        return List.copyOf(ids);
     }
 
     @Transactional(readOnly = true)

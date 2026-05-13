@@ -83,6 +83,17 @@ public class BotMeController {
         return ResponseEntity.ok(botMeShiftsVocationsService.loadVacations(chatId));
     }
 
+    @GetMapping("/shifts/{shiftId}")
+    public ResponseEntity<BotShiftItem> shift(
+            @RequestHeader(value = "X-Api-Key", required = false) String apiKey,
+            @RequestHeader(value = "X-Telegram-Chat-Id", required = false) String telegramChatIdHeader,
+            @PathVariable("shiftId") UUID shiftId
+    ) {
+        apiKeyAuthorizer.verify(apiKey);
+        long chatId = parseTelegramChatId(telegramChatIdHeader);
+        return ResponseEntity.ok(botMeShiftsVocationsService.loadShift(chatId, shiftId));
+    }
+
     @PostMapping("/shifts")
     public ResponseEntity<BotShiftItem> createShift(
             @RequestHeader(value = "X-Api-Key", required = false) String apiKey,

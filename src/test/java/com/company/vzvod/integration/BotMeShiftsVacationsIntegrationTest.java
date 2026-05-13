@@ -165,6 +165,10 @@ class BotMeShiftsVacationsIntegrationTest {
         shift.setDepartmentToday(Dep.FIRST);
         shift.setStartTime(LocalTime.of(8, 0));
         shift.setEndTime(LocalTime.of(20, 0));
+        shift.setCountOfStatements(2);
+        shift.setCountOfClaims(3);
+        shift.setIbdWithMigrant(4);
+        shift.setIbdWithoutMigrant(5);
         Set<ServiceInfo> units = new HashSet<>();
         units.add(serviceInfo);
         shift.setUnits(units);
@@ -272,7 +276,41 @@ class BotMeShiftsVacationsIntegrationTest {
                 .andExpect(jsonPath("$.items.length()").value(1))
                 .andExpect(jsonPath("$.items[0].id").exists())
                 .andExpect(jsonPath("$.items[0].route").value("МП 28"))
-                .andExpect(jsonPath("$.items[0].shiftType").value("Маршрут взвода"));
+                .andExpect(jsonPath("$.items[0].shiftType").value("Маршрут взвода"))
+                .andExpect(jsonPath("$.items[0].typeOfShiftId").value("VZVOD_ROUTE"));
+    }
+
+    @Test
+    @DisplayName("GET /shifts/{id} — одна смена участника")
+    void getShift_ok() throws Exception {
+        persistUserShiftAndVocation();
+
+        mockMvc.perform(get("/api/bot/me/shifts/" + createdShiftId)
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(createdShiftId.toString()))
+                .andExpect(jsonPath("$.typeOfShiftId").value("VZVOD_ROUTE"))
+                .andExpect(jsonPath("$.countOfStatements").value(2));
+    }
+
+    @Test
+    @DisplayName("PUT /shifts/{id} — без счётчиков в JSON не затирают БД")
+    void putShift_preservesCountersWhenOmitted() throws Exception {
+        persistUserShiftAndVocation();
+
+        String json = """
+                {"date":"2026-06-01","routeId":"МП 32","typeOfShiftId":"BAT_POST","startTime":"10:00","endTime":"22:00"}
+                """;
+
+        mockMvc.perform(put("/api/bot/me/shifts/" + createdShiftId)
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.countOfStatements").value(2))
+                .andExpect(jsonPath("$.countOfClaims").value(3));
     }
 
     @Test
@@ -324,6 +362,9 @@ class BotMeShiftsVacationsIntegrationTest {
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.route").value("МП 31"))
                 .andExpect(jsonPath("$.shiftType").value("Маршрут взвода"))
+                .andExpect(jsonPath("$.partnerServiceInfoId").value(partnerSid[0].toString()))
+                .andExpect(jsonPath("$.otherParticipantServiceInfoIds.length()").value(1))
+                .andExpect(jsonPath("$.otherParticipantServiceInfoIds[0]").value(partnerSid[0].toString()))
                 .andExpect(jsonPath("$.endTime").doesNotExist());
     }
 
@@ -425,6 +466,8 @@ class BotMeShiftsVacationsIntegrationTest {
                         .content(objectMapper.writeValueAsString(endReq)))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
     void colleagues_ok() throws Exception {
         persistUserBindingOnly();
         systemAuthenticator.runWithSystem(() -> {
@@ -470,5 +513,138 @@ class BotMeShiftsVacationsIntegrationTest {
                 .andExpect(jsonPath("$.id").value(createdShiftId.toString()))
                 .andExpect(jsonPath("$.route").value("МП 32"))
                 .andExpect(jsonPath("$.shiftType").value("Пост батальона"));
+    }
+
+    @Test
+    @DisplayName("PUT /shifts/{id} — добавление напарника к смене только с текущим пользователем")
+    void putShift_addPartner() throws Exception {
+        persistUserShiftAndVocation();
+        final UUID[] partnerSi = new UUID[1];
+        systemAuthenticator.runWithSystem(() -> {
+            User bound = dataManager.load(User.class).id(createdUserId).one();
+            Department dep = bound.getServiceInfo().getDepartment();
+            partnerSi[0] = persistActiveColleagueInDepartment(dep);
+        });
+
+        BotShiftUpsertRequest req = new BotShiftUpsertRequest(
+                LocalDate.of(2026, 1, 15),
+                NumberOfShift._28.getId(),
+                TypeOfShift.VZVOD_ROUTE.getId(),
+                LocalTime.of(8, 0),
+                LocalTime.of(20, 0),
+                partnerSi[0],
+                null,
+                null,
+                null,
+                null
+        );
+
+        mockMvc.perform(put("/api/bot/me/shifts/" + createdShiftId)
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.partnerServiceInfoId").value(partnerSi[0].toString()))
+                .andExpect(jsonPath("$.otherParticipantServiceInfoIds.length()").value(1))
+                .andExpect(jsonPath("$.otherParticipantServiceInfoIds[0]").value(partnerSi[0].toString()));
+    }
+
+    @Test
+    @DisplayName("PUT /shifts/{id} — добавление второго напарника не удаляет первого")
+    void putShift_appendsSecondParticipant() throws Exception {
+        persistUserBindingOnly();
+        final UUID[] p1 = new UUID[1];
+        final UUID[] p2 = new UUID[1];
+        systemAuthenticator.runWithSystem(() -> {
+            User bound = dataManager.load(User.class).id(createdUserId).one();
+            Department dep = bound.getServiceInfo().getDepartment();
+            p1[0] = persistActiveColleagueInDepartment(dep);
+            p2[0] = persistActiveColleagueInDepartment(dep);
+        });
+
+        BotShiftUpsertRequest createReq = new BotShiftUpsertRequest(
+                LocalDate.of(2026, 5, 18),
+                "МП 31",
+                "VZVOD_ROUTE",
+                LocalTime.of(8, 0),
+                null,
+                p1[0],
+                null,
+                null,
+                null,
+                null
+        );
+
+        MvcResult created = mockMvc.perform(post("/api/bot/me/shifts")
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createReq)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        UUID shiftId = UUID.fromString(objectMapper.readTree(created.getResponse().getContentAsString()).get("id").asText());
+
+        BotShiftUpsertRequest addSecond = new BotShiftUpsertRequest(
+                LocalDate.of(2026, 5, 18),
+                "МП 31",
+                "VZVOD_ROUTE",
+                LocalTime.of(8, 0),
+                null,
+                p2[0],
+                null,
+                null,
+                null,
+                null
+        );
+
+        mockMvc.perform(put("/api/bot/me/shifts/" + shiftId)
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(addSecond)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.otherParticipantServiceInfoIds.length()").value(2));
+    }
+
+    @Test
+    @DisplayName("PUT /shifts/{id} — нельзя добавить в смену того же участника повторно")
+    void putShift_duplicateParticipantReturns400() throws Exception {
+        persistUserBindingOnly();
+        final UUID[] partnerSid = new UUID[1];
+        systemAuthenticator.runWithSystem(() -> {
+            User bound = dataManager.load(User.class).id(createdUserId).one();
+            Department dep = bound.getServiceInfo().getDepartment();
+            partnerSid[0] = persistActiveColleagueInDepartment(dep);
+        });
+
+        BotShiftUpsertRequest req = new BotShiftUpsertRequest(
+                LocalDate.of(2026, 5, 10),
+                "МП 31",
+                "VZVOD_ROUTE",
+                LocalTime.of(8, 0),
+                null,
+                partnerSid[0],
+                null,
+                null,
+                null,
+                null
+        );
+
+        MvcResult created = mockMvc.perform(post("/api/bot/me/shifts")
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        UUID shiftId = UUID.fromString(objectMapper.readTree(created.getResponse().getContentAsString()).get("id").asText());
+
+        mockMvc.perform(put("/api/bot/me/shifts/" + shiftId)
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isBadRequest());
     }
 }
