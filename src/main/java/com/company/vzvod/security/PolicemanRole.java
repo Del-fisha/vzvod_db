@@ -309,7 +309,8 @@ public interface PolicemanRole {
             "Department.list",
             "MainViewTopMenu",
             "CompensatoryTimeRaportView",
-            "WorkResultsStatisticsDialog"
+            "WorkResultsStatisticsDialog",
+            "TodayShiftDashboardView"
     })
     void userViews();
 
@@ -327,7 +328,8 @@ public interface PolicemanRole {
             "future_events",
             "last_events",
             "deleted_events",
-            "CompensatoryTimeRaportView"
+            "CompensatoryTimeRaportView",
+            "today_shift_dashboard"
     })
     void userMenu();
 

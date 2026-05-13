@@ -35,6 +35,7 @@ import com.company.vzvod.notification.OverdueItemDto;
 import com.company.vzvod.notification.OverdueItemType;
 import com.company.vzvod.entity.UserNotification;
 import com.company.vzvod.view.dashboard.WorkResultsStatisticsDialog;
+import com.company.vzvod.view.dashboard.TodayShiftDashboardView;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jmix.core.DataManager;
 import io.jmix.flowui.DialogWindows;
@@ -125,6 +126,15 @@ public class MainView extends StandardMainView {
             w.open();
         });
         homeStatsWidgetSlot.add(stats);
+
+        HomeStatsCard todayShift = new HomeStatsCard(
+                messageBundle.getMessage("openTodayShiftDashboardBtn.text"),
+                messageBundle.getMessage("openTodayShiftDashboardBtn.subtitle"),
+                messageBundle.getMessage("openTodayShiftDashboardBtn.cta"),
+                "var(--lumo-contrast-50pct)"
+        );
+        todayShift.addCardClickListener(() -> UI.getCurrent().navigate(TodayShiftDashboardView.class));
+        homeStatsWidgetSlot.add(todayShift);
 
         HomeStatsCard employees = new HomeStatsCard(
                 "Все сотрудники",
