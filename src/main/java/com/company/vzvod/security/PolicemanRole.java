@@ -328,8 +328,7 @@ public interface PolicemanRole {
             "future_events",
             "last_events",
             "deleted_events",
-            "CompensatoryTimeRaportView",
-            "today_shift_dashboard"
+            "CompensatoryTimeRaportView"
     })
     void userMenu();
 
