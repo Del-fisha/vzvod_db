@@ -19,10 +19,6 @@
     </menu>
 
     <menu id="application" title="msg://com.company.vzvod/menu.application.title" opened="true">
-        <item id="today_shift_dashboard" view="TodayShiftDashboardView"
-              title="msg://com.company.vzvod/menu.today_shift.title"/>
-        <item id="dashboard_message" view="DashboardMessageComposeView"
-              title="msg://com.company.vzvod/menu.dashboard_message.title"/>
         <item view="User.list" title="msg://com.company.vzvod.view.user/userListView.title"/>
         <item view="Penalty.list" title="msg://com.company.vzvod.view.penalty/penaltyListView.title"/>
         <item view="Incentive.list" title="msg://com.company.vzvod.view.penalty/incentiveListView.title"/>

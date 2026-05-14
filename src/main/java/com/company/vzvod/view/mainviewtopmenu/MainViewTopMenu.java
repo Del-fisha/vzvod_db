@@ -1,5 +1,7 @@
 package com.company.vzvod.view.mainviewtopmenu;
 
+import com.company.vzvod.security.UiAccessService;
+import com.company.vzvod.view.dashboard.DashboardMessageComposeView;
 import com.company.vzvod.view.dashboard.WorkResultsStatisticsDialog;
 import com.company.vzvod.view.dashboard.TodayShiftDashboardView;
 import com.google.common.base.Strings;
@@ -18,6 +20,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.company.vzvod.view.userlist.UserListView;
 import com.company.vzvod.view.event.EventListView;
 import com.company.vzvod.view.print.PrintHubView;
+import io.jmix.core.Messages;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @ViewController(id = "MainViewTopMenu")
@@ -26,6 +29,12 @@ public class MainViewTopMenu extends StandardMainView {
 
     @Autowired
     private DialogWindows dialogWindows;
+
+    @Autowired
+    private Messages messages;
+
+    @Autowired
+    private UiAccessService uiAccessService;
 
     @ViewComponent
     private VerticalLayout homeStatsWidgetSlot;
@@ -54,13 +63,24 @@ public class MainViewTopMenu extends StandardMainView {
         homeStatsWidgetSlot.add(stats);
 
         HomeStatsCard todayShift = new HomeStatsCard(
-                "Сегодняшняя смена",
-                "Сводка по нарядам, показателям и нарушениям за текущую смену.",
-                "Открыть",
+                messages.getMessage("com.company.vzvod.view.main/openTodayShiftDashboardBtn.text"),
+                messages.getMessage("com.company.vzvod.view.main/openTodayShiftDashboardBtn.subtitle"),
+                messages.getMessage("com.company.vzvod.view.main/openTodayShiftDashboardBtn.cta"),
                 "var(--lumo-contrast-50pct)"
         );
         todayShift.addCardClickListener(() -> UI.getCurrent().navigate(TodayShiftDashboardView.class));
         homeStatsWidgetSlot.add(todayShift);
+
+        if (uiAccessService.hasFullAccessRole()) {
+            HomeStatsCard dashboardMessage = new HomeStatsCard(
+                    messages.getMessage("com.company.vzvod.view.main/openDashboardMessageBtn.text"),
+                    messages.getMessage("com.company.vzvod.view.main/openDashboardMessageBtn.subtitle"),
+                    messages.getMessage("com.company.vzvod.view.main/openDashboardMessageBtn.cta"),
+                    "var(--lumo-secondary-color)"
+            );
+            dashboardMessage.addCardClickListener(() -> UI.getCurrent().navigate(DashboardMessageComposeView.class));
+            homeStatsWidgetSlot.add(dashboardMessage);
+        }
 
         HomeStatsCard employees = new HomeStatsCard(
                 "Все сотрудники",

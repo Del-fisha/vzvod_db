@@ -27,7 +27,6 @@ import io.jmix.flowui.view.ViewController;
 import io.jmix.flowui.view.ViewDescriptor;
 import io.jmix.flowui.view.ViewComponent;
 import io.jmix.flowui.kit.component.button.JmixButton;
-import io.jmix.flowui.kit.component.main.ListMenu;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.company.vzvod.notification.UserNotificationService;
 import com.company.vzvod.notification.UserNotificationService.StoredOverduePayload;
@@ -35,6 +34,7 @@ import com.company.vzvod.notification.UserNotificationKind;
 import com.company.vzvod.notification.OverdueItemDto;
 import com.company.vzvod.notification.OverdueItemType;
 import com.company.vzvod.entity.UserNotification;
+import com.company.vzvod.view.dashboard.DashboardMessageComposeView;
 import com.company.vzvod.view.dashboard.WorkResultsStatisticsDialog;
 import com.company.vzvod.view.dashboard.TodayShiftDashboardView;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -82,9 +82,6 @@ public class MainView extends StandardMainView {
     private MessageBundle messageBundle;
 
     @ViewComponent
-    private ListMenu menu;
-
-    @ViewComponent
     private VerticalLayout homeStatsWidgetSlot;
 
     @Subscribe
@@ -107,7 +104,6 @@ public class MainView extends StandardMainView {
         applySavedSettings(storageKeyPrefix, audio, volumeSlider, muteButton);
         installUiSoundEffects();
         installHomeStatsWidget();
-        configureDashboardMessageMenuVisibility();
 
         // Autoplay may still be blocked by browser policies; best-effort start.
         UI.getCurrent().getPage().executeJs(
@@ -116,16 +112,6 @@ public class MainView extends StandardMainView {
         );
 
         showLoginNotifications();
-    }
-
-    private void configureDashboardMessageMenuVisibility() {
-        if (menu == null) {
-            return;
-        }
-        ListMenu.MenuItem dashboardMessageItem = menu.getMenuItem("dashboard_message");
-        if (dashboardMessageItem != null) {
-            dashboardMessageItem.setVisible(uiAccessService.hasFullAccessRole());
-        }
     }
 
     private void installHomeStatsWidget() {
@@ -154,6 +140,17 @@ public class MainView extends StandardMainView {
         );
         todayShift.addCardClickListener(() -> UI.getCurrent().navigate(TodayShiftDashboardView.class));
         homeStatsWidgetSlot.add(todayShift);
+
+        if (uiAccessService.hasFullAccessRole()) {
+            HomeStatsCard dashboardMessage = new HomeStatsCard(
+                    messageBundle.getMessage("openDashboardMessageBtn.text"),
+                    messageBundle.getMessage("openDashboardMessageBtn.subtitle"),
+                    messageBundle.getMessage("openDashboardMessageBtn.cta"),
+                    "var(--lumo-secondary-color)"
+            );
+            dashboardMessage.addCardClickListener(() -> UI.getCurrent().navigate(DashboardMessageComposeView.class));
+            homeStatsWidgetSlot.add(dashboardMessage);
+        }
 
         HomeStatsCard employees = new HomeStatsCard(
                 "Все сотрудники",
