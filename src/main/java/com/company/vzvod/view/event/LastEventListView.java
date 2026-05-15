@@ -7,6 +7,7 @@ import com.company.vzvod.view.deletedevent.DeletedEventListView;
 import com.company.vzvod.view.main.MainView;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.ItemDoubleClickEvent;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.component.UI;
 import io.jmix.core.security.CurrentAuthentication;
@@ -111,17 +112,40 @@ public class LastEventListView extends StandardListView<Event> {
         syncEventActionStates();
     }
 
+    @Subscribe("eventsDataGrid")
+    public void onEventsDataGridItemDoubleClick(ItemDoubleClickEvent<Event> event) {
+        if (!hasFullAccess() || eventsDataGrid.getSelectedItems().size() != 1) {
+            return;
+        }
+        var editAction = eventsDataGrid.getAction("editAction");
+        if (editAction != null) {
+            editAction.actionPerform(eventsDataGrid);
+        }
+    }
+
     private void syncEventActionStates() {
+        boolean fullAccess = hasFullAccess();
         boolean hasSelection = !eventsDataGrid.getSelectedItems().isEmpty();
+        boolean singleSelection = eventsDataGrid.getSelectedItems().size() == 1;
+
+        var createAct = eventsDataGrid.getAction("createAction");
+        if (createAct != null) {
+            createAct.setEnabled(fullAccess);
+        }
+
+        var editAct = eventsDataGrid.getAction("editAction");
+        if (editAct != null) {
+            editAct.setEnabled(fullAccess && singleSelection);
+        }
 
         var archiveAct = eventsDataGrid.getAction("archiveWithoutSquadAction");
         if (archiveAct != null) {
-            archiveAct.setEnabled(hasFullAccess() && hasSelection);
+            archiveAct.setEnabled(fullAccess && hasSelection);
         }
 
         var delAct = eventsDataGrid.getAction("permanentDeleteAction");
         if (delAct != null) {
-            delAct.setEnabled(hasFullAccess() && hasSelection);
+            delAct.setEnabled(fullAccess && hasSelection);
         }
     }
 

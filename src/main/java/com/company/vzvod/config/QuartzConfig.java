@@ -1,5 +1,6 @@
 package com.company.vzvod.config;
 
+import com.company.vzvod.job.BotTelegramBindingDailyReconciliationJob;
 import com.company.vzvod.job.ServiceInfoVocationStatusDailySyncJob;
 import com.company.vzvod.job.ServiceInfoYearlyRecalcJob;
 import org.quartz.*;
@@ -51,6 +52,29 @@ public class QuartzConfig {
                 .withSchedule(
                         // Каждый день в 00:05 (по Мск), чтобы статус гарантированно "переехал" на новую дату.
                         cronSchedule("0 5 0 ? * *")
+                                .inTimeZone(TimeZone.getTimeZone("Europe/Moscow"))
+                )
+                .build();
+    }
+
+    @Bean
+    public JobDetail botTelegramBindingDailyReconciliationJobDetail() {
+        return newJob(BotTelegramBindingDailyReconciliationJob.class)
+                .withIdentity("botTelegramBindingDailyReconciliation")
+                .storeDurably()
+                .build();
+    }
+
+    @Bean
+    public Trigger botTelegramBindingDailyReconciliationTrigger(
+            JobDetail botTelegramBindingDailyReconciliationJobDetail
+    ) {
+        return newTrigger()
+                .forJob(botTelegramBindingDailyReconciliationJobDetail)
+                .withIdentity("botTelegramBindingDailyReconciliationTrigger")
+                .withSchedule(
+                        // После синхронизации статусов отпусков: снять устаревшие привязки Telegram.
+                        cronSchedule("0 10 0 ? * *")
                                 .inTimeZone(TimeZone.getTimeZone("Europe/Moscow"))
                 )
                 .build();
