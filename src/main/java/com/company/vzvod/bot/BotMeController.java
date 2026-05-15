@@ -1,6 +1,7 @@
 package com.company.vzvod.bot;
 
 import com.company.vzvod.bot.dto.BotAdministrativeViolationCreateRequest;
+import com.company.vzvod.bot.dto.BotEventsResponse;
 import com.company.vzvod.bot.dto.BotProfilePatchRequest;
 import com.company.vzvod.bot.dto.BotProfileResponse;
 import com.company.vzvod.bot.dto.BotColleaguesResponse;
@@ -34,15 +35,18 @@ public class BotMeController {
     private final BotApiKeyAuthorizer apiKeyAuthorizer;
     private final BotMeProfileService botMeProfileService;
     private final BotMeShiftsVocationsService botMeShiftsVocationsService;
+    private final BotMeEventsService botMeEventsService;
 
     public BotMeController(
             BotApiKeyAuthorizer apiKeyAuthorizer,
             BotMeProfileService botMeProfileService,
-            BotMeShiftsVocationsService botMeShiftsVocationsService
+            BotMeShiftsVocationsService botMeShiftsVocationsService,
+            BotMeEventsService botMeEventsService
     ) {
         this.apiKeyAuthorizer = apiKeyAuthorizer;
         this.botMeProfileService = botMeProfileService;
         this.botMeShiftsVocationsService = botMeShiftsVocationsService;
+        this.botMeEventsService = botMeEventsService;
     }
 
     @GetMapping("/profile")
@@ -86,6 +90,16 @@ public class BotMeController {
         apiKeyAuthorizer.verify(apiKey);
         long chatId = parseTelegramChatId(telegramChatIdHeader);
         return ResponseEntity.ok(botMeShiftsVocationsService.loadVacations(chatId));
+    }
+
+    @GetMapping("/events")
+    public ResponseEntity<BotEventsResponse> events(
+            @RequestHeader(value = "X-Api-Key", required = false) String apiKey,
+            @RequestHeader(value = "X-Telegram-Chat-Id", required = false) String telegramChatIdHeader
+    ) {
+        apiKeyAuthorizer.verify(apiKey);
+        long chatId = parseTelegramChatId(telegramChatIdHeader);
+        return ResponseEntity.ok(botMeEventsService.loadUpcomingEvents(chatId));
     }
 
     @GetMapping("/shifts/{shiftId}")
