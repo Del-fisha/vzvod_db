@@ -121,30 +121,42 @@ public class EventListView extends StandardListView<Event> {
 
     @Subscribe("eventsDataGrid")
     public void onEventsDataGridItemDoubleClick(ItemDoubleClickEvent<Event> apEvent) {
-        if (!hasFullAccess()) {
+        if (!hasFullAccess() || eventsDataGrid.getSelectedItems().size() != 1) {
             return;
         }
         var editAction = eventsDataGrid.getAction("editAction");
-        if (editAction != null && editAction.isEnabled()) {
+        if (editAction != null) {
             editAction.actionPerform(eventsDataGrid);
         }
     }
 
     /**
-     * list_itemTracking включает действие при выборе строки; здесь ограничиваем только финальное «Удалить»
-     * ролью system-full-access (полицейский без этого — не видит кнопку).
+     * list_itemTracking включает действие при выборе строки; для list_create/list_edit при MULTI
+     * явно синхронизируем enabled по FullAccessRole и числу выбранных строк.
      */
     private void syncEventActionStates() {
+        boolean fullAccess = hasFullAccess();
         boolean hasSelection = !eventsDataGrid.getSelectedItems().isEmpty();
+        boolean singleSelection = eventsDataGrid.getSelectedItems().size() == 1;
+
+        var createAct = eventsDataGrid.getAction("createAction");
+        if (createAct != null) {
+            createAct.setEnabled(fullAccess);
+        }
+
+        var editAct = eventsDataGrid.getAction("editAction");
+        if (editAct != null) {
+            editAct.setEnabled(fullAccess && singleSelection);
+        }
 
         var archiveAct = eventsDataGrid.getAction("archiveWithoutSquadAction");
         if (archiveAct != null) {
-            archiveAct.setEnabled(hasFullAccess() && hasSelection);
+            archiveAct.setEnabled(fullAccess && hasSelection);
         }
 
         var delAct = eventsDataGrid.getAction("permanentDeleteAction");
         if (delAct != null) {
-            delAct.setEnabled(hasFullAccess() && hasSelection);
+            delAct.setEnabled(fullAccess && hasSelection);
         }
     }
 
