@@ -2,8 +2,10 @@ package com.company.vzvod.integration;
 
 import com.company.vzvod.bot.dto.BotShiftEndTimeRequest;
 import com.company.vzvod.bot.dto.BotShiftUpsertRequest;
+import com.company.vzvod.entity.AdministrativeViolation;
 import com.company.vzvod.entity.ArmyService;
 import com.company.vzvod.entity.Contacts;
+import com.company.vzvod.entity.CriminalViolation;
 import com.company.vzvod.entity.Dep;
 import com.company.vzvod.entity.Department;
 import com.company.vzvod.entity.IdCard;
@@ -16,7 +18,6 @@ import com.company.vzvod.entity.User;
 import com.company.vzvod.entity.UserTelegramBinding;
 import com.company.vzvod.entity.Vocation;
 import com.company.vzvod.entity.VocationType;
-import com.company.vzvod.security.crypto.UserPiiEncryptionMigrator;
 import com.company.vzvod.test_support.PreTestEntities;
 import io.jmix.core.DataManager;
 import io.jmix.core.security.SystemAuthenticator;
@@ -29,7 +30,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -59,11 +59,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class BotMeShiftsVacationsIntegrationTest {
 
     private static final String API_KEY = "test-bot-api-key";
-    private static final long CHAT_ID = 88_088_088_088L;
-
-    @MockBean
-    @SuppressWarnings("unused")
-    private UserPiiEncryptionMigrator userPiiEncryptionMigrator;
+    private static final long CHAT_ID = 88_088_088_087L;
 
     @Autowired
     private MockMvc mockMvc;
@@ -88,45 +84,61 @@ class BotMeShiftsVacationsIntegrationTest {
 
     @AfterEach
     void tearDown() {
-        if (createdUserId != null || createdPartnerUserId != null) {
-            systemAuthenticator.runWithSystem(() -> {
-                if (createdUserId != null) {
-                    dataManager.load(User.class).id(createdUserId).optional().ifPresent(user -> {
-                        if (user.getServiceInfo() != null) {
-                            UUID sid = user.getServiceInfo().getId();
-                            dataManager.load(Shift.class)
-                                    .query("select s from Shift s join s.units u where u.id = :sid")
-                                    .parameter("sid", sid)
-                                    .list()
-                                    .forEach(dataManager::remove);
-                        }
-                    });
-                    dataManager.load(UserTelegramBinding.class)
-                            .query("select b from UserTelegramBinding b where b.user.id = :uid")
-                            .parameter("uid", createdUserId)
-                            .list()
-                            .forEach(dataManager::remove);
-                    dataManager.load(User.class).id(createdUserId).optional().ifPresent(dataManager::remove);
-                }
-                if (createdPartnerUserId != null) {
-                    dataManager.load(User.class).id(createdPartnerUserId).optional().ifPresent(user -> {
-                        if (user.getServiceInfo() != null) {
-                            UUID sid = user.getServiceInfo().getId();
-                            dataManager.load(Shift.class)
-                                    .query("select s from Shift s join s.units u where u.id = :sid")
-                                    .parameter("sid", sid)
-                                    .list()
-                                    .forEach(dataManager::remove);
-                        }
-                    });
-                    dataManager.load(User.class).id(createdPartnerUserId).optional().ifPresent(dataManager::remove);
-                }
-            });
-            createdUserId = null;
-            createdPartnerUserId = null;
-            createdShiftId = null;
-        }
+        systemAuthenticator.runWithSystem(() -> {
+            dataManager.load(UserTelegramBinding.class)
+                    .query("select b from UserTelegramBinding b where b.chatId = :cid")
+                    .parameter("cid", CHAT_ID)
+                    .list()
+                    .forEach(dataManager::remove);
+            if (createdUserId != null) {
+                removeUserGraph(createdUserId);
+            }
+            if (createdPartnerUserId != null) {
+                removeUserGraph(createdPartnerUserId);
+            }
+        });
+        createdUserId = null;
+        createdPartnerUserId = null;
+        createdShiftId = null;
         systemAuthenticator.end();
+    }
+
+    private void removeUserGraph(UUID userId) {
+        dataManager.load(User.class).id(userId).optional().ifPresent(user -> {
+            if (user.getServiceInfo() != null) {
+                UUID sid = user.getServiceInfo().getId();
+                dataManager.load(Shift.class)
+                        .query("select s from Shift s join s.units u where u.id = :sid")
+                        .parameter("sid", sid)
+                        .list()
+                        .forEach(this::removeShiftGraph);
+                dataManager.load(Vocation.class)
+                        .query("select v from Vocation v where v.userServiceInfo.id = :sid")
+                        .parameter("sid", sid)
+                        .list()
+                        .forEach(dataManager::remove);
+            }
+            dataManager.load(UserTelegramBinding.class)
+                    .query("select b from UserTelegramBinding b where b.user.id = :uid")
+                    .parameter("uid", userId)
+                    .list()
+                    .forEach(dataManager::remove);
+            dataManager.remove(user);
+        });
+    }
+
+    private void removeShiftGraph(Shift shift) {
+        dataManager.load(CriminalViolation.class)
+                .query("select v from CriminalViolation v where v.shift.id = :shiftId")
+                .parameter("shiftId", shift.getId())
+                .list()
+                .forEach(dataManager::remove);
+        dataManager.load(AdministrativeViolation.class)
+                .query("select v from AdministrativeViolation v where v.shift.id = :shiftId")
+                .parameter("shiftId", shift.getId())
+                .list()
+                .forEach(dataManager::remove);
+        dataManager.remove(shift);
     }
 
     private void persistUserShiftAndVocation() {

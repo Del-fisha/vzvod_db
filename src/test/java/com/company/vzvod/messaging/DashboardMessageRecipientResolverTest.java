@@ -1,5 +1,6 @@
 package com.company.vzvod.messaging;
 
+import com.company.vzvod.entity.ArmyService;
 import com.company.vzvod.entity.*;
 import com.company.vzvod.service.DepartmentConverter;
 import com.company.vzvod.service.ShiftOperationalDay;
@@ -17,7 +18,9 @@ import org.springframework.test.context.ActiveProfiles;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -50,6 +53,9 @@ class DashboardMessageRecipientResolverTest {
     private UUID commanderDep2Id;
     private UUID comVzvodId;
     private UUID inactiveWorkerId;
+    private final List<UUID> createdShiftIds = new ArrayList<>();
+    private final List<UUID> createdUserIds = new ArrayList<>();
+    private final List<UUID> createdDepartmentIds = new ArrayList<>();
 
     @BeforeEach
     void setUp() {
@@ -66,7 +72,7 @@ class DashboardMessageRecipientResolverTest {
         commanderDep1Id = createUserWithServiceInfo(Post.COM_OTD, dep1, StatusInService.ACTIVE);
         commanderDep2Id = createUserWithServiceInfo(Post.COM_OTD, dep2, StatusInService.ACTIVE);
         comVzvodId = createUserWithServiceInfo(Post.COM_VZVOD, null, StatusInService.ACTIVE);
-        inactiveWorkerId = createUserWithServiceInfo(Post.POLICEMAN, dep1, StatusInService.VOCATION);
+        inactiveWorkerId = createUserWithServiceInfo(Post.POLICEMAN, dep1, StatusInService.SICK_LEAVE);
 
         Shift shiftDep1 = dataManager.create(Shift.class);
         shiftDep1.setDate(operationalDate);
@@ -77,7 +83,7 @@ class DashboardMessageRecipientResolverTest {
                 loadServiceInfo(shiftWorkerDep1Id),
                 loadServiceInfo(departmentWorkerDep1Id)
         )));
-        dataManager.save(shiftDep1);
+        createdShiftIds.add(dataManager.save(shiftDep1).getId());
 
         Shift shiftDep2 = dataManager.create(Shift.class);
         shiftDep2.setDate(operationalDate);
@@ -85,11 +91,20 @@ class DashboardMessageRecipientResolverTest {
         shiftDep2.setTypeOfShift(TypeOfShift.VZVOD_ROUTE);
         shiftDep2.setDepartmentToday(DepartmentConverter.departmentFromDate(operationalDate));
         shiftDep2.setUnits(new HashSet<>(Set.of(loadServiceInfo(shiftWorkerDep2Id))));
-        dataManager.save(shiftDep2);
+        createdShiftIds.add(dataManager.save(shiftDep2).getId());
     }
 
     @AfterEach
     void tearDown() {
+        createdShiftIds.forEach(id ->
+                dataManager.load(Shift.class).id(id).optional().ifPresent(dataManager::remove));
+        createdShiftIds.clear();
+        createdUserIds.forEach(id ->
+                dataManager.load(User.class).id(id).optional().ifPresent(dataManager::remove));
+        createdUserIds.clear();
+        createdDepartmentIds.forEach(id ->
+                dataManager.load(Department.class).id(id).optional().ifPresent(dataManager::remove));
+        createdDepartmentIds.clear();
         systemAuthenticator.end();
     }
 
@@ -176,6 +191,8 @@ class DashboardMessageRecipientResolverTest {
     @Test
     @DisplayName("Сотрудники в строю — только StatusInService.ACTIVE")
     void activeEmployees() {
+        assertEquals(StatusInService.SICK_LEAVE, loadServiceInfo(inactiveWorkerId).getStatus());
+
         Set<UUID> recipients = recipientResolver.resolve(
                 DashboardMessageAudience.ACTIVE_EMPLOYEES,
                 senderId,
@@ -183,13 +200,19 @@ class DashboardMessageRecipientResolverTest {
         );
 
         assertTrue(recipients.contains(shiftWorkerDep1Id));
-        assertFalse(recipients.contains(inactiveWorkerId));
+        for (UUID userId : createdUserIds) {
+            if (loadServiceInfo(userId).getStatus() != StatusInService.ACTIVE) {
+                assertFalse(recipients.contains(userId));
+            }
+        }
     }
 
     private Department saveDepartment(int number) {
         Department department = dataManager.create(Department.class);
         department.setNumber(number);
-        return dataManager.save(department);
+        Department saved = dataManager.save(department);
+        createdDepartmentIds.add(saved.getId());
+        return saved;
     }
 
     private UUID createUserWithServiceInfo(Post post, Department department, StatusInService status) {
@@ -199,6 +222,7 @@ class DashboardMessageRecipientResolverTest {
         user.setFirstName("Имя");
         user.setLastName("Фамилия");
         user.setPatronymic("Отчество");
+        user.setArmyService(ArmyService.NOT_SERVED);
         user = dataManager.save(user);
 
         ServiceInfo serviceInfo = dataManager.create(ServiceInfo.class);
@@ -208,6 +232,7 @@ class DashboardMessageRecipientResolverTest {
         serviceInfo.setDepartment(department);
         serviceInfo.setToken("token-" + UUID.randomUUID());
         dataManager.save(serviceInfo);
+        createdUserIds.add(user.getId());
         return user.getId();
     }
 

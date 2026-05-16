@@ -10,7 +10,6 @@ import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.StatusInService;
 import com.company.vzvod.entity.User;
 import com.company.vzvod.entity.UserTelegramBinding;
-import com.company.vzvod.security.crypto.UserPiiEncryptionMigrator;
 import com.company.vzvod.test_support.PreTestEntities;
 import io.jmix.core.DataManager;
 import io.jmix.core.security.SystemAuthenticator;
@@ -21,7 +20,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -47,10 +45,6 @@ class BotMeEventsIntegrationTest {
 
     private static final String API_KEY = "test-bot-api-key";
     private static final long CHAT_ID = 88_088_088_089L;
-
-    @MockBean
-    @SuppressWarnings("unused")
-    private UserPiiEncryptionMigrator userPiiEncryptionMigrator;
 
     @Autowired
     private MockMvc mockMvc;
@@ -109,6 +103,30 @@ class BotMeEventsIntegrationTest {
                 .andExpect(jsonPath("$.items[0].name").value("Сегодня"))
                 .andExpect(jsonPath("$.items[1].name").value("Скоро"))
                 .andExpect(jsonPath("$.items[2].name").value("Далёкое"));
+    }
+
+    @Test
+    @DisplayName("пустое имя события заменяется на «—»")
+    void blankEventNameBecomesDash() throws Exception {
+        persistUserBinding();
+        LocalDate today = LocalDate.now();
+        createdEventIds.add(saveEvent("   ", today).getId());
+
+        mockMvc.perform(get("/api/bot/me/events")
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items.length()").value(1))
+                .andExpect(jsonPath("$.items[0].name").value("—"));
+    }
+
+    @Test
+    @DisplayName("404 если chat_id не привязан")
+    void notFoundWhenChatNotBound() throws Exception {
+        mockMvc.perform(get("/api/bot/me/events")
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", "99999999999"))
+                .andExpect(status().isNotFound());
     }
 
     private Event saveEvent(String name, LocalDate date) {

@@ -13,7 +13,6 @@ import com.company.vzvod.entity.TypeOfHousing;
 import com.company.vzvod.entity.User;
 import com.company.vzvod.entity.UserTelegramBinding;
 import com.company.vzvod.test_support.PreTestEntities;
-import com.company.vzvod.security.crypto.UserPiiEncryptionMigrator;
 import io.jmix.core.DataManager;
 import io.jmix.core.security.SystemAuthenticator;
 import org.junit.jupiter.api.AfterEach;
@@ -23,7 +22,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.http.MediaType;
@@ -47,10 +45,6 @@ class BotMeProfileIntegrationTest {
 
     private static final String API_KEY = "test-bot-api-key";
     private static final long CHAT_ID = 77_077_077_077L;
-
-    @MockBean
-    @SuppressWarnings("unused")
-    private UserPiiEncryptionMigrator userPiiEncryptionMigrator;
 
     @Autowired
     private MockMvc mockMvc;

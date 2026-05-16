@@ -16,8 +16,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import com.company.vzvod.security.crypto.UserPiiEncryptionMigrator;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -44,11 +42,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class BotAuthIntegrationTest {
 
     private static final String API_KEY = "test-bot-api-key";
-
-    /** Не запускать PII-мигратор: в тестовой БД есть seed-user admin без ФИО — preUpdate падает по Bean Validation. */
-    @MockBean
-    @SuppressWarnings("unused")
-    private UserPiiEncryptionMigrator userPiiEncryptionMigrator;
 
     @Autowired
     private MockMvc mockMvc;
