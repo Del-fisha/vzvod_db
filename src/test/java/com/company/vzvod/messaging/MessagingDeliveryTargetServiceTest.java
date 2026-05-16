@@ -15,6 +15,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -39,22 +40,33 @@ class MessagingDeliveryTargetServiceTest {
 
     private UUID userWithTelegramId;
     private UUID userWithoutTelegramId;
+    private long telegramChatId;
+    private final List<UUID> createdUserIds = new ArrayList<>();
 
     @BeforeEach
     void setUp() {
         systemAuthenticator.begin();
+        telegramChatId = System.nanoTime();
         userWithTelegramId = createUser("telegram-user");
         userWithoutTelegramId = createUser("no-telegram-user");
 
         UserTelegramBinding binding = dataManager.create(UserTelegramBinding.class);
         binding.setUser(dataManager.getReference(User.class, userWithTelegramId));
-        binding.setChatId(123456789L);
+        binding.setChatId(telegramChatId);
         binding.setRegisteredAt(OffsetDateTime.now());
         dataManager.save(binding);
     }
 
     @AfterEach
     void tearDown() {
+        dataManager.load(UserTelegramBinding.class)
+                .query("select b from UserTelegramBinding b where b.chatId = :cid")
+                .parameter("cid", telegramChatId)
+                .list()
+                .forEach(dataManager::remove);
+        createdUserIds.forEach(id ->
+                dataManager.load(User.class).id(id).optional().ifPresent(dataManager::remove));
+        createdUserIds.clear();
         systemAuthenticator.end();
     }
 
@@ -67,7 +79,7 @@ class MessagingDeliveryTargetServiceTest {
 
         assertEquals(1, targets.size());
         assertEquals(userWithTelegramId, targets.getFirst().userId());
-        assertEquals(123456789L, targets.getFirst().chatId());
+        assertEquals(telegramChatId, targets.getFirst().chatId());
     }
 
     @Test
@@ -84,6 +96,7 @@ class MessagingDeliveryTargetServiceTest {
         user.setLastName("Фамилия");
         user.setPatronymic("Отчество");
         user = dataManager.save(user);
+        createdUserIds.add(user.getId());
         return user.getId();
     }
 }

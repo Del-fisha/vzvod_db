@@ -63,6 +63,7 @@ class DashboardMessageSendServiceTest {
 
     @AfterEach
     void tearDown() {
+        dataManager.load(User.class).id(senderId).optional().ifPresent(dataManager::remove);
         systemAuthenticator.end();
     }
 
@@ -94,7 +95,7 @@ class DashboardMessageSendServiceTest {
 
         verify(notificationServiceClient).sendDashboardMessage(argThat(request ->
                 request.senderUserId().equals(senderId)
-                        && request.senderDisplayName().equals("Фамилия И.О.")
+                        && request.senderDisplayName().equals("Фамилия И. О.")
                         && request.body().equals("Строка 1\nСтрока 2")
                         && request.recipientUserIds().contains(senderId)
         ));

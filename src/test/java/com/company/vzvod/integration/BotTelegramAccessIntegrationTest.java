@@ -9,7 +9,6 @@ import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.StatusInService;
 import com.company.vzvod.entity.User;
 import com.company.vzvod.entity.UserTelegramBinding;
-import com.company.vzvod.security.crypto.UserPiiEncryptionMigrator;
 import com.company.vzvod.test_support.PreTestEntities;
 import io.jmix.core.DataManager;
 import io.jmix.core.UnconstrainedDataManager;
@@ -20,7 +19,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -36,10 +34,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @DisplayName("Закрытие доступа Telegram-бота при изменении данных сотрудника")
 class BotTelegramAccessIntegrationTest {
-
-    @MockBean
-    @SuppressWarnings("unused")
-    private UserPiiEncryptionMigrator userPiiEncryptionMigrator;
 
     @Autowired
     private DataManager dataManager;
