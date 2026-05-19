@@ -2,8 +2,10 @@ package com.company.vzvod.security;
 
 import com.company.vzvod.entity.User;
 import io.jmix.securitydata.user.AbstractDatabaseUserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -11,6 +13,17 @@ import java.util.Collection;
 @Primary
 @Component("UserRepository")
 public class DatabaseUserRepository extends AbstractDatabaseUserRepository<User> {
+
+    @Autowired
+    private PostBasedRoleAuthorityService postBasedRoleAuthorityService;
+
+    @Override
+    public User loadUserByUsername(String username) throws UsernameNotFoundException {
+        loadUsersByUsernameFromDatabase(username).stream()
+                .findFirst()
+                .ifPresent(postBasedRoleAuthorityService::syncRoleAssignmentsForUser);
+        return super.loadUserByUsername(username);
+    }
 
     @Override
     protected Class<User> getUserClass() {

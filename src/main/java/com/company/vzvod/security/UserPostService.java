@@ -2,7 +2,7 @@ package com.company.vzvod.security;
 
 import com.company.vzvod.entity.Post;
 import com.company.vzvod.entity.ServiceInfo;
-import io.jmix.core.DataManager;
+import io.jmix.core.UnconstrainedDataManager;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -10,9 +10,9 @@ import java.util.UUID;
 @Component
 public class UserPostService {
 
-    private final DataManager dataManager;
+    private final UnconstrainedDataManager dataManager;
 
-    public UserPostService(DataManager dataManager) {
+    public UserPostService(UnconstrainedDataManager dataManager) {
         this.dataManager = dataManager;
     }
 
