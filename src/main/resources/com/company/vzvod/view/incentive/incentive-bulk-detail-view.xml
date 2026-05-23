@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://incentiveBulkDetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="incentiveDc"
+                  class="com.company.vzvod.entity.Incentive">
+            <fetchPlan extends="_base"/>
+        </instance>
+        <collection id="serviceInfosDc"
+                    class="com.company.vzvod.entity.ServiceInfo">
+            <fetchPlan extends="_base">
+                <property name="user">
+                    <property name="firstName"/>
+                    <property name="lastName"/>
+                    <property name="patronymic"/>
+                </property>
+                <property name="department" fetchPlan="_base"/>
+            </fetchPlan>
+            <loader id="serviceInfosDl" readOnly="true">
+                <query>
+                    <![CDATA[select e from ServiceInfo e order by e.user.lastName, e.user.firstName]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <actions>
+        <action id="closeAction" type="view_close"/>
+    </actions>
+    <layout>
+        <formLayout id="form">
+            <responsiveSteps>
+                <responsiveStep minWidth="0" columns="1"/>
+                <responsiveStep minWidth="40em" columns="2"/>
+            </responsiveSteps>
+            <multiSelectComboBoxPicker id="usersPicker"
+                                       metaClass="ServiceInfo"
+                                       itemsContainer="serviceInfosDc"
+                                       label="msg://incentiveBulkDetailView.users.label"
+                                       required="true"
+                                       width="100%">
+                <actions>
+                    <action id="entityLookupAction" type="entity_lookup"/>
+                    <action id="entityClearAction" type="entity_clear"/>
+                </actions>
+            </multiSelectComboBoxPicker>
+            <select id="initiatorField" dataContainer="incentiveDc" property="initiator"/>
+            <select id="incentiveTypeField" dataContainer="incentiveDc" property="incentiveType"/>
+            <datePicker id="dateField" dataContainer="incentiveDc" property="date"/>
+            <textField id="orderNumberField" dataContainer="incentiveDc" property="orderNumber"/>
+            <textField id="descriptionField" dataContainer="incentiveDc" property="description"/>
+        </formLayout>
+        <hbox id="detailActions">
+            <button id="saveAndCloseButton" text="msg:///actions.Save"/>
+            <button id="closeButton" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

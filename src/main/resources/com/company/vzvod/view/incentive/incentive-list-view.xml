@@ -60,6 +60,8 @@
         <hbox id="buttonsPanel" classNames="buttons-panel">
             <startSlot>
                 <button id="createButton" action="incentivesDataGrid.createAction"/>
+                <button id="createMultipleButton"
+                        text="msg://incentiveListView.createMultipleButton"/>
                 <button id="editButton" action="incentivesDataGrid.editAction"/>
                 <button id="removeButton" action="incentivesDataGrid.removeAction"/>
             </startSlot>
