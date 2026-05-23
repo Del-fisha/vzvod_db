@@ -74,5 +74,16 @@ public class MyIncentiveListView extends StandardListView<Incentive> {
             return;
         }
     }
+
+    @Install(to = "incentivesDataGrid.createAction", subject = "initializer")
+    private void incentivesDataGridCreateInitializer(Incentive incentive) {
+        ServiceInfo serviceInfo = (ServiceInfo) incentivesDl.getParameter("serviceInfo");
+        if (serviceInfo == null) {
+            serviceInfo = currentUserServiceInfoLoader.loadCurrentUserServiceInfo();
+        }
+        if (serviceInfo != null) {
+            incentive.setUserServiceInfo(serviceInfo);
+        }
+    }
 }
 
