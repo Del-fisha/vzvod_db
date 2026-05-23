@@ -86,5 +86,16 @@ public class MyPenaltyListView extends StandardListView<Penalty> {
     public void onPenaltiesDlPostLoad(CollectionLoader.PostLoadEvent<Penalty> event) {
         penaltyExpirationService.saveChanged(event.getLoadedEntities(), LocalDate.now());
     }
+
+    @Install(to = "penaltiesDataGrid.createAction", subject = "initializer")
+    private void penaltiesDataGridCreateInitializer(Penalty penalty) {
+        ServiceInfo serviceInfo = (ServiceInfo) penaltiesDl.getParameter("serviceInfo");
+        if (serviceInfo == null) {
+            serviceInfo = currentUserServiceInfoLoader.loadCurrentUserServiceInfo();
+        }
+        if (serviceInfo != null) {
+            penalty.setUserServiceInfo(serviceInfo);
+        }
+    }
 }
 

@@ -19,9 +19,13 @@ public class CurrentUserServiceInfoLoader {
 
     public ServiceInfo loadCurrentUserServiceInfo() {
         User user = (User) currentAuthentication.getUser();
+        if (user == null) {
+            return null;
+        }
         return dataManager.load(ServiceInfo.class)
                 .query("select si from ServiceInfo si where si.user = :user")
                 .parameter("user", user)
+                .fetchPlan(fp -> fp.add("user"))
                 .optional()
                 .orElse(null);
     }
