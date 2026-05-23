@@ -4,7 +4,9 @@ import com.company.vzvod.entity.Incentive;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.security.UiAccessService;
 import com.company.vzvod.view.main.MainView;
+import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.router.Route;
+import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.*;
@@ -23,6 +25,12 @@ public class IncentiveListView extends StandardListView<Incentive> {
 
     @Autowired
     private UiAccessService uiAccessService;
+
+    @Autowired
+    private DialogWindows dialogWindows;
+
+    @ViewComponent
+    private JmixButton createMultipleButton;
 
     @ViewComponent
     private JmixButton removeButton;
@@ -44,6 +52,9 @@ public class IncentiveListView extends StandardListView<Incentive> {
 
     @Subscribe
     public void onReady(ReadyEvent event) {
+        if (createMultipleButton != null) {
+            createMultipleButton.setVisible(uiAccessService.hasFullAccessRole());
+        }
         if (uiAccessService.hasFullAccessRole()) {
             return;
         }
@@ -55,6 +66,18 @@ public class IncentiveListView extends StandardListView<Incentive> {
         if (removeAction != null) {
             removeAction.setEnabled(false);
         }
+    }
+
+    @Subscribe(id = "createMultipleButton", subject = "clickListener")
+    public void onCreateMultipleButtonClick(ClickEvent<JmixButton> event) {
+        DialogWindow<IncentiveBulkDetailView> window = dialogWindows
+                .view(this, IncentiveBulkDetailView.class)
+                .build();
+        if (serviceInfo != null) {
+            window.getView().setPreselectedServiceInfo(serviceInfo);
+        }
+        window.addAfterCloseListener(closeEvent -> incentivesDl.load());
+        window.open();
     }
 
 
