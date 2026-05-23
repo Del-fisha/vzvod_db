@@ -25,7 +25,7 @@
             <datePicker id="startedField" property="started"/>
             <datePicker id="untilField" property="until"/>
             <select id="typeField" property="type" itemsEnum="com.company.vzvod.entity.TypeOfEducation"/>
-            <select id="statusField" property="status"/> <!--ToDo Изменить msg-->
+            <select id="statusField" property="status" readOnly="true"/>
             <textField id="nameOfInstitutionField" property="nameOfInstitution"/>
         </formLayout>
         <hbox id="detailActions">
