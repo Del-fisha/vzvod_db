@@ -14,9 +14,12 @@ import java.util.UUID;
 public class UserDialogSaveService {
 
     private final DataManager dataManager;
+    private final EducationStatusService educationStatusService;
 
-    public UserDialogSaveService(DataManager dataManager) {
+    public UserDialogSaveService(DataManager dataManager,
+                                 EducationStatusService educationStatusService) {
         this.dataManager = dataManager;
+        this.educationStatusService = educationStatusService;
     }
 
     /**
@@ -41,10 +44,14 @@ public class UserDialogSaveService {
             }
         }
 
+        Education education = edited.getEducation();
+        if (education != null) {
+            educationStatusService.applyStatusFromUntil(education);
+        }
         return dataManager.save(edited);
     }
 
-    private static void applyEditableFields(User from, User to) {
+    private void applyEditableFields(User from, User to) {
         to.setUsername(from.getUsername());
         to.setPassword(from.getPassword());
         to.setFirstName(from.getFirstName());
@@ -56,7 +63,15 @@ public class UserDialogSaveService {
 
         Education education = from.getEducation();
         if (education != null) {
-            to.setEducation(education);
+            educationStatusService.applyStatusFromUntil(education);
+            Education persistedEducation = to.getEducation();
+            if (persistedEducation != null
+                    && education.getId() != null
+                    && education.getId().equals(persistedEducation.getId())) {
+                applyEducationFields(education, persistedEducation);
+            } else {
+                to.setEducation(education);
+            }
         }
 
         Contacts contacts = from.getContactsInfo();
@@ -68,6 +83,14 @@ public class UserDialogSaveService {
         if (serviceInfo != null) {
             to.setServiceInfo(serviceInfo);
         }
+    }
+
+    private static void applyEducationFields(Education from, Education to) {
+        to.setStarted(from.getStarted());
+        to.setUntil(from.getUntil());
+        to.setType(from.getType());
+        to.setStatus(from.getStatus());
+        to.setNameOfInstitution(from.getNameOfInstitution());
     }
 }
 

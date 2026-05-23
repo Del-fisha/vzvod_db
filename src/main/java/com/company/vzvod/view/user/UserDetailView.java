@@ -337,18 +337,48 @@ public class UserDetailView extends StandardDetailView<User> {
             return;
         }
 
+        boolean userPersisted = !entityStates.isNew(user) && user.getId() != null;
 
         Education education = user.getEducation();
         if (education == null) {
-            education = dataManager.create(Education.class);
+            education = userPersisted
+                    ? dataManager.create(Education.class)
+                    : getViewData().getDataContext().create(Education.class);
             user.setEducation(education);
         }
 
-        dialogWindows.detail(this, Education.class)
+        DialogWindow<EducationDetailView> window = userPersisted
+                ? dialogWindows.detail(this, Education.class)
+                .withViewClass(EducationDetailView.class)
+                .editEntity(education)
+                .build()
+                : dialogWindows.detail(this, Education.class)
                 .withViewClass(EducationDetailView.class)
                 .withParentDataContext(getViewData().getDataContext())
                 .editEntity(education)
-                .open();
+                .build();
+
+        if (userPersisted) {
+            window.addAfterCloseListener(closeEvent -> {
+                if (!closeEvent.closedWith(StandardOutcome.SAVE)) {
+                    return;
+                }
+
+                Education savedEducation = window.getView().getEditedEntity();
+                Education persistedEducation = dataManager.load(Education.class)
+                        .id(savedEducation.getId())
+                        .one();
+                user.setEducation(persistedEducation);
+
+                User persistedUser = dataManager.load(User.class)
+                        .id(user.getId())
+                        .one();
+                persistedUser.setEducation(persistedEducation);
+                dataManager.save(persistedUser);
+            });
+        }
+
+        window.open();
     }
 
     @Subscribe(id = "vehicleCreateButton", subject = "clickListener")
