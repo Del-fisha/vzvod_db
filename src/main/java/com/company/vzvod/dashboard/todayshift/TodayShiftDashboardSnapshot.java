@@ -13,6 +13,8 @@ public record TodayShiftDashboardSnapshot(
         int totalAdministrativeViolations,
         int totalCriminalViolations,
         List<ArticleCountRow> administrativeByArticle,
-        List<CriminalTypeCountRow> criminalByType
+        List<CriminalTypeCountRow> criminalByType,
+        List<RouteDetailsRow> routeDetails,
+        List<PeriodMetricRow> periodMetrics
 ) {
 }
