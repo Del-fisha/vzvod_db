@@ -10,6 +10,7 @@ public enum TypeOfShift implements EnumClass<String> {
 
     BAT_POST("BAT_POST"),
     VZVOD_ROUTE("VZVOD_ROUTE"),
+    CHECKING("CHECKING"),
     STRENGTHENING("Strengthening");
 
     private final String id;

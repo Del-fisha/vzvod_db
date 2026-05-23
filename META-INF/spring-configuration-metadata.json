@@ -1,0 +1,157 @@
+{
+  "groups": [
+    {
+      "name": "vaadin",
+      "type": "com.vaadin.flow.spring.VaadinConfigurationProperties",
+      "sourceType": "com.vaadin.flow.spring.VaadinConfigurationProperties"
+    },
+    {
+      "name": "vaadin.bun",
+      "type": "com.vaadin.flow.spring.VaadinConfigurationProperties$Bun",
+      "sourceType": "com.vaadin.flow.spring.VaadinConfigurationProperties",
+      "sourceMethod": "getBun()"
+    },
+    {
+      "name": "vaadin.devmode",
+      "type": "com.vaadin.flow.spring.VaadinConfigurationProperties$Devmode",
+      "sourceType": "com.vaadin.flow.spring.VaadinConfigurationProperties",
+      "sourceMethod": "getDevmode()"
+    },
+    {
+      "name": "vaadin.frontend",
+      "type": "com.vaadin.flow.spring.VaadinConfigurationProperties$Frontend",
+      "sourceType": "com.vaadin.flow.spring.VaadinConfigurationProperties",
+      "sourceMethod": "getFrontend()"
+    },
+    {
+      "name": "vaadin.pnpm",
+      "type": "com.vaadin.flow.spring.VaadinConfigurationProperties$Pnpm",
+      "sourceType": "com.vaadin.flow.spring.VaadinConfigurationProperties",
+      "sourceMethod": "getPnpm()"
+    },
+    {
+      "name": "vaadin.react",
+      "type": "com.vaadin.flow.spring.VaadinConfigurationProperties$React",
+      "sourceType": "com.vaadin.flow.spring.VaadinConfigurationProperties",
+      "sourceMethod": "getReact()"
+    }
+  ],
+  "properties": [
+    {
+      "name": "vaadin.allowed-packages",
+      "type": "java.util.List<java.lang.String>",
+      "description": "List of allowed packages that should be scanned.",
+      "sourceType": "com.vaadin.flow.spring.VaadinConfigurationProperties"
+    },
+    {
+      "name": "vaadin.async-supported",
+      "type": "java.lang.Boolean",
+      "description": "Whether asynchronous operations are supported.",
+      "sourceType": "com.vaadin.flow.spring.VaadinConfigurationProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "vaadin.blocked-packages",
+      "type": "java.util.List<java.lang.String>",
+      "description": "List of blocked packages that shouldn't be scanned.",
+      "sourceType": "com.vaadin.flow.spring.VaadinConfigurationProperties"
+    },
+    {
+      "name": "vaadin.bun.enable",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.vaadin.flow.spring.VaadinConfigurationProperties$Bun",
+      "defaultValue": false
+    },
+    {
+      "name": "vaadin.devmode-caching",
+      "type": "java.lang.Boolean",
+      "description": "Enables class scan caching between reloads when using Spring Boot DevTools.",
+      "sourceType": "com.vaadin.flow.spring.VaadinConfigurationProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "vaadin.devmode.hosts-allowed",
+      "type": "java.lang.String",
+      "description": "A comma separated list of IP addresses, potentially with wildcards, which can connect to the dev tools. If not specified, only localhost connections are allowed.",
+      "sourceType": "com.vaadin.flow.spring.VaadinConfigurationProperties$Devmode",
+      "defaultValue": ""
+    },
+    {
+      "name": "vaadin.devmode.remote-address-header",
+      "type": "java.lang.String",
+      "description": "The name of the custom HTTP header that contains the client IP address. If not specified, {@literal X-Forwarded-For} will be checked.",
+      "sourceType": "com.vaadin.flow.spring.VaadinConfigurationProperties$Devmode"
+    },
+    {
+      "name": "vaadin.exclude-urls",
+      "type": "java.util.List<java.lang.String>",
+      "description": "URL patterns that should not be handled by the Vaadin servlet when mapped to the context root.",
+      "sourceType": "com.vaadin.flow.spring.VaadinConfigurationProperties"
+    },
+    {
+      "name": "vaadin.frontend.hotdeploy",
+      "type": "java.lang.Boolean",
+      "description": "Whether a frontend development server (Vite) is used in development mode or not.",
+      "sourceType": "com.vaadin.flow.spring.VaadinConfigurationProperties$Frontend",
+      "defaultValue": false
+    },
+    {
+      "name": "vaadin.launch-browser",
+      "type": "java.lang.Boolean",
+      "description": "Whether a browser should be launched on startup when in development mode.",
+      "sourceType": "com.vaadin.flow.spring.VaadinConfigurationProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "vaadin.launch-browser-delay",
+      "type": "java.lang.Integer",
+      "description": "Timeout until a new browser should be launched on startup when in development mode.",
+      "sourceType": "com.vaadin.flow.spring.VaadinConfigurationProperties",
+      "defaultValue": 30
+    },
+    {
+      "name": "vaadin.load-on-startup",
+      "type": "java.lang.Boolean",
+      "description": "Whether servlet is loaded on startup.",
+      "sourceType": "com.vaadin.flow.spring.VaadinConfigurationProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "vaadin.pnpm.enable",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.vaadin.flow.spring.VaadinConfigurationProperties$Pnpm",
+      "defaultValue": false
+    },
+    {
+      "name": "vaadin.react.enable",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.vaadin.flow.spring.VaadinConfigurationProperties$React",
+      "defaultValue": true
+    },
+    {
+      "name": "vaadin.url-mapping",
+      "type": "java.lang.String",
+      "description": "Base URL mapping of the Vaadin servlet.",
+      "sourceType": "com.vaadin.flow.spring.VaadinConfigurationProperties",
+      "defaultValue": "\/*"
+    },
+    {
+      "name": "vaadin.blacklisted-packages",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "com.vaadin.flow.spring.VaadinConfigurationProperties",
+      "deprecated": true,
+      "deprecation": {}
+    },
+    {
+      "name": "vaadin.whitelisted-packages",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "com.vaadin.flow.spring.VaadinConfigurationProperties",
+      "deprecated": true,
+      "deprecation": {}
+    }
+  ],
+  "hints": [],
+  "ignored": {
+    "properties": []
+  }
+}

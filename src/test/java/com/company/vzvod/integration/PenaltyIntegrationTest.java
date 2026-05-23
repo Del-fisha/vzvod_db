@@ -45,6 +45,19 @@ public class PenaltyIntegrationTest {
     }
 
     @Test
+    @DisplayName("При сохранении дата старше года — статус COMPLETED")
+    void saveWithDateOlderThanYear_setsCompleted() {
+        penalty.setDate(LocalDate.now().minusYears(2));
+
+        Penalty saved = dataManager.save(penalty);
+
+        assertEquals(PenaltyStatus.COMPLETED, saved.getPenaltyStatus());
+
+        Penalty loaded = dataManager.load(Penalty.class).id(saved.getId()).one();
+        assertEquals(PenaltyStatus.COMPLETED, loaded.getPenaltyStatus());
+    }
+
+    @Test
     @DisplayName("Тест сохранения в БД")
     void testSave() {
         Penalty savedPenalty = dataManager.save(penalty);

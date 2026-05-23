@@ -44,7 +44,7 @@ public class VzvodApplication implements AppShellConfigurator {
     @Bean
     @Primary
     @ConfigurationProperties("main.datasource")
-    @Profile({"test", "prod"})
+    @Profile({"test-postgres", "prod"})
     DataSourceProperties dataSourceProperties() {
         return new DataSourceProperties();
     }
@@ -52,7 +52,7 @@ public class VzvodApplication implements AppShellConfigurator {
     @Bean
     @Primary
     @ConfigurationProperties("main.datasource.hikari")
-    @Profile({"test", "prod"})
+    @Profile({"test-postgres", "prod"})
     DataSource dataSource(final DataSourceProperties dataSourceProperties) {
         return dataSourceProperties.initializeDataSourceBuilder().build();
     }

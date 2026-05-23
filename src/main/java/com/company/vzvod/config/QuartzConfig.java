@@ -1,6 +1,7 @@
 package com.company.vzvod.config;
 
 import com.company.vzvod.job.BotTelegramBindingDailyReconciliationJob;
+import com.company.vzvod.job.PenaltyExpirationDailyJob;
 import com.company.vzvod.job.ServiceInfoVocationStatusDailySyncJob;
 import com.company.vzvod.job.ServiceInfoYearlyRecalcJob;
 import org.quartz.*;
@@ -52,6 +53,26 @@ public class QuartzConfig {
                 .withSchedule(
                         // Каждый день в 00:05 (по Мск), чтобы статус гарантированно "переехал" на новую дату.
                         cronSchedule("0 5 0 ? * *")
+                                .inTimeZone(TimeZone.getTimeZone("Europe/Moscow"))
+                )
+                .build();
+    }
+
+    @Bean
+    public JobDetail penaltyExpirationDailyJobDetail() {
+        return newJob(PenaltyExpirationDailyJob.class)
+                .withIdentity("penaltyExpirationDaily")
+                .storeDurably()
+                .build();
+    }
+
+    @Bean
+    public Trigger penaltyExpirationDailyTrigger(JobDetail penaltyExpirationDailyJobDetail) {
+        return newTrigger()
+                .forJob(penaltyExpirationDailyJobDetail)
+                .withIdentity("penaltyExpirationDailyTrigger")
+                .withSchedule(
+                        cronSchedule("0 15 0 ? * *")
                                 .inTimeZone(TimeZone.getTimeZone("Europe/Moscow"))
                 )
                 .build();

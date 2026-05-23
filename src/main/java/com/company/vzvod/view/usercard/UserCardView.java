@@ -1,6 +1,7 @@
 package com.company.vzvod.view.usercard;
 
 import com.company.vzvod.entity.*;
+import com.company.vzvod.service.PenaltyExpirationService;
 import com.company.vzvod.service.VocationBalanceService;
 import com.company.vzvod.view.shiftblank.ShiftBlankView;
 import com.vaadin.flow.component.ClickEvent;
@@ -115,6 +116,9 @@ public class UserCardView extends StandardView {
     @Autowired
     private Metadata metadata;
 
+    @Autowired
+    private PenaltyExpirationService penaltyExpirationService;
+
     @Subscribe
     public void onQueryParametersChange(QueryParametersChangeEvent event) {
         List<String> params = event.getQueryParameters()
@@ -145,6 +149,11 @@ public class UserCardView extends StandardView {
     @Subscribe
     public void onReady(ReadyEvent event) {
         applyAccordionContentSizing();
+    }
+
+    @Subscribe(id = "penaltiesDl", target = Target.DATA_LOADER)
+    public void onPenaltiesDlPostLoad(CollectionLoader.PostLoadEvent<Penalty> event) {
+        penaltyExpirationService.saveChanged(event.getLoadedEntities(), LocalDate.now());
     }
 
     @Subscribe("colleaguesDataGrid")
