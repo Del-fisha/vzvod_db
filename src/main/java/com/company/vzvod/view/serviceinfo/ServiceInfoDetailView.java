@@ -60,6 +60,8 @@ public class ServiceInfoDetailView extends StandardDetailView<ServiceInfo> {
     private io.jmix.flowui.component.datepicker.TypedDatePicker<?> startDateField;
     @ViewComponent
     private io.jmix.flowui.component.datepicker.TypedDatePicker<?> startOfPostField;
+    @ViewComponent
+    private io.jmix.flowui.component.textfield.JmixIntegerField monthsOfServiceBeforeLastAppointmentField;
 
     @ViewComponent
     private JmixButton incentiveListButton;
@@ -74,6 +76,7 @@ public class ServiceInfoDetailView extends StandardDetailView<ServiceInfo> {
         serviceInfo.setPost(Post.POLICEMAN);
         serviceInfo.setMedicalExamination(false);
         serviceInfo.setQualificationClass(Qualification.NONE);
+        serviceInfo.setMonthsOfServiceBeforeLastAppointment(0);
 
     }
 
@@ -88,6 +91,9 @@ public class ServiceInfoDetailView extends StandardDetailView<ServiceInfo> {
         if (postField != null) postField.setReadOnly(true);
         if (startDateField != null) startDateField.setReadOnly(true);
         if (startOfPostField != null) startOfPostField.setReadOnly(true);
+        if (monthsOfServiceBeforeLastAppointmentField != null) {
+            monthsOfServiceBeforeLastAppointmentField.setReadOnly(true);
+        }
 
         // Поощрения/взыскания: кнопки видны, но не активны
         if (incentiveListButton != null) incentiveListButton.setEnabled(false);

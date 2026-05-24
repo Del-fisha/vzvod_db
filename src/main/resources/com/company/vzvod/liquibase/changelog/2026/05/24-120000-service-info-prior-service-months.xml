@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="2026-05-24-120000-1" author="cursor">
+        <addColumn tableName="SERVICE_INFO">
+            <column name="MONTHS_OF_SERVICE_BEFORE_LAST_APPOINTMENT" type="INT"/>
+        </addColumn>
+
+        <addNotNullConstraint columnName="MONTHS_OF_SERVICE_BEFORE_LAST_APPOINTMENT"
+                              defaultNullValue="0"
+                              tableName="SERVICE_INFO"/>
+    </changeSet>
+
+</databaseChangeLog>

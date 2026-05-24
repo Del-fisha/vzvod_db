@@ -20,7 +20,7 @@ public class VocationBalanceService {
 
     /**
      * Пересчитывает положено/остаток отпуска за календарный год вокруг «сегодня».
-     * Номинал на год = норматив по стажу на 01.01 + доп. +5/+5 после достижения 10 или 15 лет в течение года
+     * Номинал на год = норматив по выслуге (месяцы) на 01.01 + доп. +5 за пороги 120/180/240 мес. в течение года
      * (если на 01.01 порог ещё не пройден) + сумма «добавлено дней» по выезду.
      * Списание — только с пула: {@code countOfDays - daysAddedByDeparture} по основному и части основного.
      */
@@ -165,6 +165,7 @@ public class VocationBalanceService {
                 .id(serviceInfoId)
                 .fetchPlan(fp -> fp
                         .add("startDate")
+                        .add("monthsOfServiceBeforeLastAppointment")
                         .add("status")
                         .add("vacationDaysEntitled")
                         .add("vacationDaysAvailable")

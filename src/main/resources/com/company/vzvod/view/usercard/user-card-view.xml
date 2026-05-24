@@ -25,6 +25,7 @@
                     <property name="breastplate"/>
                     <property name="startDate"/>
                     <property name="startOfPost"/>
+                    <property name="monthsOfServiceBeforeLastAppointment"/>
                     <property name="vacationDaysAvailable"/>
                     <property name="vacationDaysEntitled"/>
                     <property name="idCard">
@@ -241,6 +242,9 @@
                             </formItem>
                             <formItem>
                                 <textField property="startOfPost" readOnly="true"/>
+                            </formItem>
+                            <formItem>
+                                <integerField property="monthsOfServiceBeforeLastAppointment" readOnly="true"/>
                             </formItem>
                         </formLayout>
                     </vbox>
