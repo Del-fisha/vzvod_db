@@ -493,10 +493,13 @@ public class TodayShiftDashboardService {
                         .add("countOfStatements")
                         .add("countOfClaims")
                         .add("ibdWithMigrant")
-                        .add("units", u -> u.add("user", user -> user
-                                .add("lastName")
-                                .add("firstName")
-                                .add("patronymic")))
+                        .add("units", u -> u
+                                .add("post")
+                                .add("rank")
+                                .add("user", user -> user
+                                        .add("lastName")
+                                        .add("firstName")
+                                        .add("patronymic")))
                         .add("administrativeViolations", av -> av.add("article"))
                         .add("criminalViolations", cv -> cv.add("type")));
 
