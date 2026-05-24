@@ -7,6 +7,7 @@ import com.company.vzvod.dashboard.todayshift.RouteDetailsRow;
 import com.company.vzvod.dashboard.todayshift.ShiftRouteRow;
 import com.company.vzvod.dashboard.todayshift.TodayShiftDashboardSnapshot;
 import com.company.vzvod.entity.*;
+import com.company.vzvod.util.EmployeeOrdering;
 import io.jmix.core.DataManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -557,10 +558,9 @@ public class TodayShiftDashboardService {
             return "";
         }
         return shift.getUnits().stream()
+                .sorted(EmployeeOrdering.serviceInfoComparator())
                 .map(ServiceInfo::getUser)
                 .filter(Objects::nonNull)
-                .sorted(Comparator.comparing(User::getLastName, Comparator.nullsLast(String::compareToIgnoreCase))
-                        .thenComparing(User::getFirstName, Comparator.nullsLast(String::compareToIgnoreCase)))
                 .map(User::getShortFio)
                 .filter(s -> s != null && !s.isBlank())
                 .distinct()

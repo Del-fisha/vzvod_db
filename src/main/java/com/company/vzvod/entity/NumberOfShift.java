@@ -28,6 +28,18 @@ public enum NumberOfShift implements EnumClass<String> {
         return id;
     }
 
+    /**
+     * Тип смены по умолчанию для выбранного маршрута (можно изменить вручную в форме).
+     */
+    @Nullable
+    public TypeOfShift defaultTypeOfShift() {
+        return switch (this) {
+            case _28, _30, _31, _32 -> TypeOfShift.VZVOD_ROUTE;
+            case _5, _6, _3, _18 -> TypeOfShift.BAT_POST;
+            case ANOTHER -> TypeOfShift.CHECKING;
+        };
+    }
+
     @Nullable
     public static NumberOfShift fromId(String id) {
         if (id == null) {

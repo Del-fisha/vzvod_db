@@ -95,7 +95,7 @@
                         where
                             (:department is null and si.department is null)
                             or si.department = :department
-                        order by u.lastName, u.firstName
+                        order by u.serviceInfo.post, u.serviceInfo.rank desc, u.lastName
                     ]]>
                 </query>
             </loader>

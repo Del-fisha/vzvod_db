@@ -443,7 +443,7 @@ public class DashboardStatisticsService {
         List<DepartmentEmployeesRow> rows = new ArrayList<>();
         for (Department d : departments) {
             List<ServiceInfo> sis = dataManager.load(ServiceInfo.class)
-                    .query("select e from ServiceInfo e where e.department.id = :id order by e.user.lastName")
+                    .query("select e from ServiceInfo e where e.department.id = :id order by e.post, e.rank desc, e.user.lastName")
                     .parameter("id", d.getId())
                     .list();
             LinkedHashMap<UUID, String> employeeLabels = new LinkedHashMap<>();

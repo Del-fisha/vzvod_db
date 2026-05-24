@@ -6,38 +6,29 @@
     <data>
         <collection id="serviceInfoesDc"
                     class="com.company.vzvod.entity.ServiceInfo">
-            <fetchPlan extends="_base"/>
+            <fetchPlan extends="_base">
+                <property name="user">
+                    <property name="firstName"/>
+                    <property name="lastName"/>
+                    <property name="patronymic"/>
+                    <property name="shortFio"/>
+                </property>
+            </fetchPlan>
             <loader id="serviceInfoesDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from ServiceInfo e
-                               left join e.department dep
-                               left join e.user u
-                           order by coalesce(dep.number, 2147483647),
-                               coalesce(e.post, 'ZZ'),
-                               CASE WHEN u.lastName IS NULL THEN 1 ELSE 0 END asc,
-                               u.lastName asc]]>
+                    <![CDATA[select e from ServiceInfo e]]>
                 </query>
             </loader>
         </collection>
     </data>
     <facets>
         <dataLoadCoordinator auto="true"/>
-        <urlQueryParameters>
-            <pagination component="pagination"/>
-        </urlQueryParameters>
     </facets>
     <actions>
         <action id="selectAction" type="lookup_select"/>
         <action id="discardAction" type="lookup_discard"/>
     </actions>
     <layout>
-        <hbox id="buttonsPanel" classNames="buttons-panel">
-            <startSlot>
-            </startSlot>
-            <endSlot>
-                <simplePagination id="pagination" dataLoader="serviceInfoesDl"/>
-            </endSlot>
-        </hbox>
         <dataGrid id="serviceInfoesDataGrid"
                   width="100%"
                   minHeight="20em"
@@ -46,9 +37,10 @@
             <actions>
             </actions>
             <columns resizable="true">
+                <column property="employeeShortFio"
+                        header="msg://com.company.vzvod.view.serviceinfo/serviceInfoListView.column.employeeShortFio"/>
                 <column property="post"/>
                 <column property="rank"/>
-                <column property="user"/>
             </columns>
         </dataGrid>
         <hbox id="lookupActions" visible="false">

@@ -139,7 +139,8 @@ public class BotMeShiftsVocationsService {
         Set<UUID> busyInOpenShifts = openShiftParticipantIdsExcept(excludeShiftId);
         List<User> users = unconstrainedDataManager.load(User.class)
                 .query("select u from User u join u.serviceInfo si join si.department d "
-                        + "where d.number = :dn and u.id <> :uid and si.status = :st order by u.lastName, u.firstName")
+                        + "where d.number = :dn and u.id <> :uid and si.status = :st "
+                        + "order by si.post, si.rank desc, u.lastName")
                 .parameter("dn", department)
                 .parameter("uid", myId)
                 .parameter("st", StatusInService.ACTIVE.getId())

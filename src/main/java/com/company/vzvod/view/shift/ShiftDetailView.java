@@ -2,11 +2,14 @@ package com.company.vzvod.view.shift;
 
 import com.company.vzvod.entity.AdministrativeViolation;
 import com.company.vzvod.entity.CriminalViolation;
+import com.company.vzvod.entity.Impact;
+import com.company.vzvod.entity.NumberOfShift;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.Shift;
 import com.company.vzvod.entity.User;
 import com.company.vzvod.security.UiAccessService;
 import com.company.vzvod.service.DepartmentConverter;
+import com.company.vzvod.util.EmployeeOrdering;
 import com.company.vzvod.view.administrativeviolation.AdministrativeViolationDetailView;
 import com.company.vzvod.view.criminalviolation.CriminalViolationDetailView;
 import com.company.vzvod.view.main.MainView;
@@ -19,8 +22,10 @@ import io.jmix.flowui.component.datepicker.TypedDatePicker;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.kit.action.Action;
 import io.jmix.flowui.kit.component.button.JmixButton;
+import io.jmix.flowui.model.CollectionContainer;
 import io.jmix.flowui.model.CollectionPropertyContainer;
 import io.jmix.flowui.model.DataContext;
+import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -63,6 +68,9 @@ public class ShiftDetailView extends StandardDetailView<Shift> {
     @ViewComponent
     private CollectionPropertyContainer<CriminalViolation> criminalViolationsDc;
 
+    @ViewComponent
+    private CollectionPropertyContainer<ServiceInfo> unitsDc;
+
     @Subscribe
     public void onInitEntity(final InitEntityEvent<Shift> event) {
 
@@ -78,6 +86,18 @@ public class ShiftDetailView extends StandardDetailView<Shift> {
         shift.setCountOfStatements(0);
         shift.setDepartmentToday(DepartmentConverter.departmentFromDate(shift.getDate()));
 
+    }
+
+    @Subscribe(id = "shiftDc", target = Target.DATA_CONTAINER)
+    public void onShiftDcItemPropertyChange(InstanceContainer.ItemPropertyChangeEvent<Shift> event) {
+        if ("number".equals(event.getProperty())) {
+            applyDefaultTypeOfShift();
+        }
+    }
+
+    @Subscribe(id = "unitsDc", target = Target.DATA_CONTAINER)
+    public void onUnitsDcCollectionChange(CollectionContainer.CollectionChangeEvent<ServiceInfo> event) {
+        sortUnits();
     }
 
     @Subscribe("dateField")
@@ -97,6 +117,7 @@ public class ShiftDetailView extends StandardDetailView<Shift> {
         criminalViolationsDataGrid.setAllRowsVisible(true);
         replaceViolationCreate(adminViolationsDataGrid, this::openNewAdministrativeViolation);
         replaceViolationCreate(criminalViolationsDataGrid, this::openNewCriminalViolation);
+        sortUnits();
 
         if (!uiAccessService.hasFullAccessRole()) {
             // detailShift: нет кнопки УДАЛИТЬ у списка сотрудников, списка админок, списка уголовок.
@@ -113,6 +134,20 @@ public class ShiftDetailView extends StandardDetailView<Shift> {
         }
     }
 
+    private void applyDefaultTypeOfShift() {
+        NumberOfShift route = getEditedEntity().getNumber();
+        if (route != null) {
+            getEditedEntity().setTypeOfShift(route.defaultTypeOfShift());
+        }
+    }
+
+    private void sortUnits() {
+        if (unitsDc == null) {
+            return;
+        }
+        unitsDc.getMutableItems().sort(EmployeeOrdering.serviceInfoComparator());
+    }
+
     private void replaceViolationCreate(DataGrid<?> grid, Runnable openNew) {
         Action action = grid.getAction("create");
         if (!(action instanceof CreateAction<?> createAction)) {
@@ -126,6 +161,7 @@ public class ShiftDetailView extends StandardDetailView<Shift> {
         DataContext parentDc = getViewData().getDataContext();
         AdministrativeViolation v = parentDc.create(AdministrativeViolation.class);
         v.setShift(getEditedEntity());
+        v.setImpact(Impact.WITHOUT_IMPACT);
         dialogWindows.detail(this, AdministrativeViolation.class)
                 .withListDataComponent(adminViolationsDataGrid)
                 .withParentDataContext(parentDc)
@@ -138,6 +174,7 @@ public class ShiftDetailView extends StandardDetailView<Shift> {
         DataContext parentDc = getViewData().getDataContext();
         CriminalViolation v = parentDc.create(CriminalViolation.class);
         v.setShift(getEditedEntity());
+        v.setImpact(Impact.WITHOUT_IMPACT);
         dialogWindows.detail(this, CriminalViolation.class)
                 .withListDataComponent(criminalViolationsDataGrid)
                 .withParentDataContext(parentDc)
