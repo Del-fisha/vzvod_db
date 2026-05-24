@@ -6,10 +6,11 @@ import org.springframework.lang.Nullable;
 
 public enum TypeOfCriminal implements EnumClass<Integer> {
 
-    FEDERAL_WANTED(1),
-    WATCH_LIST(2),
-    HOT_PURSUIT(3),
-    IDENTIFICATION(4);
+    HOT_PURSUIT(1),
+    IDENTIFICATION(2),
+    FEDERAL_WANTED(3),
+    LOCAL_SEARCH(4),
+    WATCH_LIST(5);
 
     private final Integer id;
 

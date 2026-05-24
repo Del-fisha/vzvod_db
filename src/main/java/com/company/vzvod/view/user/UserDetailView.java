@@ -1,5 +1,6 @@
 package com.company.vzvod.view.user;
 
+import com.company.vzvod.aop.UserDetailViewDataLoadSupport;
 import com.company.vzvod.entity.*;
 import com.company.vzvod.service.UserReadService;
 import com.company.vzvod.service.UserDialogSaveService;
@@ -140,11 +141,7 @@ public class UserDetailView extends StandardDetailView<User> {
 
     @Install(to = "userDl", target = Target.DATA_LOADER)
     private User userDlLoadDelegate(LoadContext<User> loadContext) {
-        UUID id = (UUID) loadContext.getId();
-
-        userReadService.getUserCached(id);
-
-        return dataManager.load(User.class).id(id).one();
+        return UserDetailViewDataLoadSupport.load(loadContext);
     }
 
     @Subscribe
@@ -210,6 +207,16 @@ public class UserDetailView extends StandardDetailView<User> {
         boolean userPersisted = !entityStates.isNew(user) && user.getId() != null;
 
         ServiceInfo serviceInfo = user.getServiceInfo();
+        if (serviceInfo == null && userPersisted) {
+            serviceInfo = dataManager.load(ServiceInfo.class)
+                    .query("select si from ServiceInfo si where si.user.id = :uid")
+                    .parameter("uid", user.getId())
+                    .optional()
+                    .orElse(null);
+            if (serviceInfo != null) {
+                user.setServiceInfo(serviceInfo);
+            }
+        }
         if (serviceInfo == null) {
             // For persisted User we want ServiceInfo to save in its own dialog (DB),
             // so avoid creating it inside parent's DataContext.

@@ -80,9 +80,30 @@ public class UserDialogSaveService {
         }
 
         ServiceInfo serviceInfo = from.getServiceInfo();
-        if (serviceInfo != null) {
+        if (serviceInfo != null && shouldApplyServiceInfo(to, serviceInfo)) {
             to.setServiceInfo(serviceInfo);
         }
+    }
+
+    /**
+     * Never replace an existing persisted ServiceInfo with another instance (especially a new one
+     * created in UI when {@code user.getServiceInfo()} was null). That leaves the old row orphaned
+     * with penalties/vocations while the User points at an empty ServiceInfo.
+     */
+    private boolean shouldApplyServiceInfo(User to, ServiceInfo candidate) {
+        ServiceInfo existing = to.getServiceInfo();
+        if (existing == null) {
+            return true;
+        }
+        UUID existingId = existing.getId();
+        UUID candidateId = candidate.getId();
+        if (existingId == null) {
+            return true;
+        }
+        if (candidateId == null) {
+            return false;
+        }
+        return existingId.equals(candidateId);
     }
 
     private static void applyEducationFields(Education from, Education to) {
