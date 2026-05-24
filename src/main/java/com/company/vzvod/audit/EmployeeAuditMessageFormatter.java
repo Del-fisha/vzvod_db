@@ -40,7 +40,8 @@ final class EmployeeAuditMessageFormatter {
             Map.entry("department", "подразделение"),
             Map.entry("phone", "телефон"),
             Map.entry("email", "email"),
-            Map.entry("breastplate", "номер жетона")
+            Map.entry("breastplate", "номер жетона"),
+            Map.entry("monthsOfServiceBeforeLastAppointment", "месяцев выслуги до последнего устройства")
     );
 
     private EmployeeAuditMessageFormatter() {

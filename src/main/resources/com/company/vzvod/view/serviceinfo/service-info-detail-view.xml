@@ -17,6 +17,7 @@
                 <property name="breastplate"/>
                 <property name="startDate"/>
                 <property name="startOfPost"/>
+                <property name="monthsOfServiceBeforeLastAppointment"/>
                 <property name="department"/>
                 <property name="shifts"/>
                 <property name="incentive"/>
@@ -88,6 +89,12 @@
 
                 <formItem>
                     <datePicker id="startOfPostField" property="startOfPost"/>
+                </formItem>
+
+                <formItem>
+                    <integerField id="monthsOfServiceBeforeLastAppointmentField"
+                                  property="monthsOfServiceBeforeLastAppointment"
+                                  min="0"/>
                 </formItem>
 
                 <formItem>

@@ -2,17 +2,15 @@ package com.company.vzvod.listener;
 
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.service.VocationBalanceService;
-import io.jmix.core.DataManager;
 import io.jmix.core.event.EntityChangedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @Component
 public class ServiceInfoChangedListener {
-
-    @Autowired
-    private DataManager dataManager;
 
     @Autowired
     private VocationBalanceService vocationBalanceService;
@@ -25,13 +23,13 @@ public class ServiceInfoChangedListener {
 
         boolean needRecalc =
                 event.getType() == EntityChangedEvent.Type.CREATED
-                        || event.getChanges().isChanged("startDate");
+                        || event.getChanges().isChanged("startDate")
+                        || event.getChanges().isChanged("monthsOfServiceBeforeLastAppointment");
 
         if (!needRecalc) {
             return;
         }
 
-        ServiceInfo serviceInfo = dataManager.load(event.getEntityId()).one();
-        vocationBalanceService.recalcAndSave(serviceInfo.getId());
+        vocationBalanceService.recalcAndSave((UUID) event.getEntityId().getValue());
     }
 }

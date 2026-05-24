@@ -8,50 +8,65 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
 /**
- * Норматив основного отпуска по стажу службы ({@link ServiceInfo#getStartDate()}) с учётом прибавки
- * года за армейскую службу ({@link User#getArmyService()} {@code == SERVED}).
- * <p>
- * Календарные лимиты: до 10 лет включительно (порог считается через {@link ChronoUnit#YEARS} + армия)
- * — 40 дней; после 15 лет включительно — 50 дней; между ними — 45 дней.
- * Смена номинального лимита с 01.01 каждого года опирается на стаж по состоянию на эту дату.
- * Если порог ({@code 10} или {@code 15}) пересекается в течение года, после даты перехода
- * к доступному добавляется дополнительно {@value #MID_YEAR_TIER_DELTA} дней.
+ * Норматив основного отпуска по общей выслуге в месяцах:
+ * <ul>
+ *     <li>месяцы от {@link ServiceInfo#getStartDate()} до даты расчёта;</li>
+ *     <li>плюс {@link ServiceInfo#getMonthsOfServiceBeforeLastAppointment()};</li>
+ *     <li>плюс 12 месяцев при {@link User#getArmyService()} {@code == SERVED}.</li>
+ * </ul>
+ * Пороги отпуска: 120 / 180 / 240 месяцев (10 / 15 / 20 лет). Для отображения пользователю
+ * используйте {@link #effectiveYears(ServiceInfo, LocalDate)} — полные годы (целочисленное деление).
  */
 public final class VocationService {
 
+    private static final int MONTHS_PER_YEAR = 12;
+    private static final int MONTHS_TEN_YEARS = 10 * MONTHS_PER_YEAR;
+    private static final int MONTHS_FIFTEEN_YEARS = 15 * MONTHS_PER_YEAR;
+    private static final int MONTHS_TWENTY_YEARS = 20 * MONTHS_PER_YEAR;
+    private static final int ARMY_CREDIT_MONTHS = MONTHS_PER_YEAR;
+
     private static final int DAYS_BELOW_TEN_YEAR_THRESHOLD = 40;
     private static final int DAYS_FROM_TEN_TO_FIFTEEN = 45;
-    private static final int DAYS_FROM_FIFTEEN = 50;
-    /** Дополнительно к доступному после наступления 10-й или 15-й год выслуги внутри календарного года. */
+    private static final int DAYS_FROM_FIFTEEN_TO_NINETEEN = 50;
+    private static final int DAYS_FROM_TWENTY = 55;
+    /** Дополнительно к доступному после порога 120 / 180 / 240 месяцев внутри календарного года. */
     static final int MID_YEAR_TIER_DELTA = 5;
 
     private VocationService() {
     }
 
-    public static int effectiveYears(ServiceInfo serviceInfo, LocalDate onDate) {
+    /**
+     * Общая выслуга в месяцах на дату {@code onDate}.
+     */
+    public static int effectiveMonths(ServiceInfo serviceInfo, LocalDate onDate) {
         if (serviceInfo == null || serviceInfo.getStartDate() == null || onDate == null) {
             return 0;
         }
-        int policeYears = (int) ChronoUnit.YEARS.between(serviceInfo.getStartDate(), onDate);
-        int army = armyCreditYears(serviceInfo.getUser());
-        return policeYears + army;
+        LocalDate startDate = serviceInfo.getStartDate();
+        int monthsAtCurrentPost = onDate.isBefore(startDate)
+                ? 0
+                : (int) ChronoUnit.MONTHS.between(startDate, onDate);
+        return monthsAtCurrentPost + priorServiceMonths(serviceInfo) + armyCreditMonths(serviceInfo.getUser());
     }
 
     /**
-     * Плановые дни основного отпуска («положено» на год) только по номинальной норме на заданную дату,
-     * без промежуточной надбавки и без дней выезда.
+     * Полные годы выслуги для отображения (без дробной части месяцев).
      */
+    public static int effectiveYears(ServiceInfo serviceInfo, LocalDate onDate) {
+        return effectiveMonths(serviceInfo, onDate) / MONTHS_PER_YEAR;
+    }
+
     public static int nominalDaysAvailable(ServiceInfo serviceInfo, LocalDate date) {
-        int years = effectiveYears(serviceInfo, date);
-        return tierDaysForSeniorityYears(years);
+        int months = effectiveMonths(serviceInfo, date);
+        return tierDaysForSeniorityMonths(months);
     }
 
     /**
-     * Сумма +{@value #MID_YEAR_TIER_DELTA} за каждый порог из (10 лет, 15 лет), который:
+     * Сумма +{@value #MID_YEAR_TIER_DELTA} за каждый порог (120, 180, 240 месяцев), который:
      * <ul>
      *     <li>ещё не был достигнут на {@code yearStartInclusive};</li>
-     *     <li>наступает не позже {@code evaluationDateInclusive}</li>
-     *     <li>и попадает в текущий календарный год (начало года — {@code yearStartInclusive}).</li>
+     *     <li>достигнут не позже {@code evaluationDateInclusive};</li>
+     *     <li>относится к календарному году с началом {@code yearStartInclusive}.</li>
      * </ul>
      */
     public static int midYearSeniorityBonuses(ServiceInfo serviceInfo,
@@ -61,26 +76,23 @@ public final class VocationService {
                 || yearStartInclusive == null || evaluationDateInclusive == null) {
             return 0;
         }
-        LocalDate policeStart = serviceInfo.getStartDate();
         LocalDate until = evaluationDateInclusive.isBefore(yearStartInclusive)
                 ? yearStartInclusive.minusDays(1)
                 : evaluationDateInclusive;
-        int armyYears = armyCreditYears(serviceInfo.getUser());
+
+        int monthsAtJan1 = effectiveMonths(serviceInfo, yearStartInclusive);
+        int monthsAtUntil = effectiveMonths(serviceInfo, until);
 
         int bonus = 0;
-        LocalDate jan1 = yearStartInclusive;
-        LocalDate tenth = policeStart.plusYears(Math.max(0, 10 - armyYears));
-        if (effectiveYears(serviceInfo, jan1) < 10
-                && !tenth.isBefore(jan1) && !tenth.isAfter(until)) {
+        if (monthsAtJan1 < MONTHS_TEN_YEARS && monthsAtUntil >= MONTHS_TEN_YEARS) {
             bonus += MID_YEAR_TIER_DELTA;
         }
-
-        LocalDate fifteenth = policeStart.plusYears(Math.max(0, 15 - armyYears));
-        if (effectiveYears(serviceInfo, jan1) < 15
-                && !fifteenth.isBefore(jan1) && !fifteenth.isAfter(until)) {
+        if (monthsAtJan1 < MONTHS_FIFTEEN_YEARS && monthsAtUntil >= MONTHS_FIFTEEN_YEARS) {
             bonus += MID_YEAR_TIER_DELTA;
         }
-
+        if (monthsAtJan1 < MONTHS_TWENTY_YEARS && monthsAtUntil >= MONTHS_TWENTY_YEARS) {
+            bonus += MID_YEAR_TIER_DELTA;
+        }
         return bonus;
     }
 
@@ -93,26 +105,31 @@ public final class VocationService {
         return nominalDaysAvailable(serviceInfo, date);
     }
 
-    /**
-     * Сколько дней из отпуска списано с календарного «пула»: {@code countOfDays - daysAddedByDeparture}.
-     */
     public static int poolDaysDebited(Integer countOfDays, Integer daysAddedByDeparture) {
         int total = countOfDays == null ? 0 : countOfDays;
         int added = daysAddedByDeparture == null ? 0 : daysAddedByDeparture;
         return Math.max(0, total - added);
     }
 
-    private static int tierDaysForSeniorityYears(int years) {
-        if (years >= 15) {
-            return DAYS_FROM_FIFTEEN;
+    private static int tierDaysForSeniorityMonths(int months) {
+        if (months >= MONTHS_TWENTY_YEARS) {
+            return DAYS_FROM_TWENTY;
         }
-        if (years >= 10) {
+        if (months >= MONTHS_FIFTEEN_YEARS) {
+            return DAYS_FROM_FIFTEEN_TO_NINETEEN;
+        }
+        if (months >= MONTHS_TEN_YEARS) {
             return DAYS_FROM_TEN_TO_FIFTEEN;
         }
         return DAYS_BELOW_TEN_YEAR_THRESHOLD;
     }
 
-    private static int armyCreditYears(User user) {
-        return user != null && user.getArmyService() == ArmyService.SERVED ? 1 : 0;
+    private static int armyCreditMonths(User user) {
+        return user != null && user.getArmyService() == ArmyService.SERVED ? ARMY_CREDIT_MONTHS : 0;
+    }
+
+    private static int priorServiceMonths(ServiceInfo serviceInfo) {
+        Integer months = serviceInfo.getMonthsOfServiceBeforeLastAppointment();
+        return months == null ? 0 : Math.max(0, months);
     }
 }
