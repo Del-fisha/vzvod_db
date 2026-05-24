@@ -9,8 +9,9 @@ public enum Impact implements EnumClass<Integer> {
 
     WITHOUT_IMPACT(0),
     PHYSICAL_FORCE(1),
-    SPECIAL_TOOLS(2),
-    WEAPON(3)
+    PHYSICAL_FORCE_AND_SPECIAL_TOOLS(2),
+    SPECIAL_TOOLS(3),
+    WEAPON(4)
     ;
 
     private final Integer id;

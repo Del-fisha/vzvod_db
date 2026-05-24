@@ -12,7 +12,7 @@
                         join u.serviceInfo si
                         where si.post not in ('A', 'B')
                           and si.department.number = 1
-                        order by u.lastName, u.firstName
+                        order by u.serviceInfo.post, u.serviceInfo.rank desc, u.lastName
                     ]]>
                 </query>
             </loader>
@@ -29,7 +29,7 @@
                         join u.serviceInfo si
                         where si.post not in ('A', 'B')
                           and si.department.number = 2
-                        order by u.lastName, u.firstName
+                        order by u.serviceInfo.post, u.serviceInfo.rank desc, u.lastName
                     ]]>
                 </query>
             </loader>
@@ -43,7 +43,7 @@
                     <![CDATA[
                 select u from User u
                 where u.serviceInfo.post not in ('D', 'E')
-                order by u.lastName, u.firstName
+                order by u.serviceInfo.post, u.serviceInfo.rank desc, u.lastName
             ]]>
                 </query>
             </loader>

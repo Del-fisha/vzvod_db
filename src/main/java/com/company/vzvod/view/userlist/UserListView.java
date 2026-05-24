@@ -1,6 +1,7 @@
 package com.company.vzvod.view.userlist;
 
 import com.company.vzvod.entity.User;
+import com.company.vzvod.util.EmployeeOrdering;
 import com.company.vzvod.view.main.MainView;
 import com.company.vzvod.view.usercard.UserCardView;
 import com.vaadin.flow.component.grid.ItemClickEvent;
@@ -12,9 +13,7 @@ import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 
 @Route(value = "user-list-view", layout = MainView.class)
 @ViewController("UserListView")
@@ -49,13 +48,11 @@ public class UserListView extends StandardView {
                 .navigate();
     }
 
-    // пример подписки на клик по строке грида без отдела
     @Subscribe("noDeptDataGrid")
     public void onNoDeptDataGridItemClick(ItemClickEvent<User> event) {
         openUserCard(event.getItem());
     }
 
-    // аналогично для других гридов:
     @Subscribe("dept1DataGrid")
     public void onDept1DataGridItemClick(ItemClickEvent<User> event) {
         openUserCard(event.getItem());
@@ -68,18 +65,19 @@ public class UserListView extends StandardView {
 
     @Install(to = "usersNoDeptDl", target = Target.DATA_LOADER)
     private List<User> usersNoDeptDlLoadDelegate(io.jmix.core.LoadContext<User> loadContext) {
-        // Keep DB ordering by non-sensitive fields only (post). Names are encrypted, so sort by names in-memory if needed.
-        return dataManager.load(User.class)
+        List<User> users = dataManager.load(User.class)
                 .query("""
                         select u
                         from User u
                         left join u.serviceInfo si
                         left join si.department d
                         where d is null
-                        order by u.serviceInfo.post
+                        order by u.serviceInfo.post, u.serviceInfo.rank desc
                         """)
                 .fetchPlan(loadContext.getFetchPlan())
                 .list();
+        users.sort(EmployeeOrdering.userComparator());
+        return users;
     }
 
     @Install(to = "dept1UsersDl", target = Target.DATA_LOADER)
@@ -95,8 +93,7 @@ public class UserListView extends StandardView {
                         """)
                 .fetchPlan(loadContext.getFetchPlan())
                 .list();
-
-        users.sort(defaultUserNameComparator());
+        users.sort(EmployeeOrdering.userComparator());
         return users;
     }
 
@@ -113,23 +110,7 @@ public class UserListView extends StandardView {
                         """)
                 .fetchPlan(loadContext.getFetchPlan())
                 .list();
-
-        users.sort(defaultUserNameComparator());
+        users.sort(EmployeeOrdering.userComparator());
         return users;
-    }
-
-    private static Comparator<User> defaultUserNameComparator() {
-        return Comparator
-                .comparing((User u) -> normalize(u.getLastName()), Comparator.nullsLast(String::compareTo))
-                .thenComparing(u -> normalize(u.getFirstName()), Comparator.nullsLast(String::compareTo))
-                .thenComparing(u -> normalize(u.getPatronymic()), Comparator.nullsLast(String::compareTo));
-    }
-
-    private static String normalize(String s) {
-        if (s == null) {
-            return null;
-        }
-        String t = s.trim().replaceAll("\\s+", " ");
-        return t.toLowerCase(Locale.ROOT);
     }
 }

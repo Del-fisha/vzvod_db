@@ -131,6 +131,13 @@ public class ServiceInfo {
         this.status = statusInService == null ? null : statusInService.getId();
     }
 
+    @Transient
+    @JmixProperty
+    @DependsOnProperties({"user"})
+    public String getEmployeeShortFio() {
+        return user == null ? "" : user.getShortFio();
+    }
+
     @InstanceName
     @DependsOnProperties("user")
     public String getInstanceName() {

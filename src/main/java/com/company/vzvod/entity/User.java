@@ -10,6 +10,7 @@ import io.jmix.core.metamodel.annotation.Composition;
 import io.jmix.core.metamodel.annotation.DependsOnProperties;
 import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
+import io.jmix.core.metamodel.annotation.JmixProperty;
 import io.jmix.security.authentication.JmixUserDetails;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -191,6 +192,9 @@ public class User implements JmixUserDetails {
         return result.replaceAll("\\s+", " ");
     }
 
+    @Transient
+    @JmixProperty
+    @DependsOnProperties({"firstName", "lastName", "patronymic"})
     public String getShortFio() {
         String ln = lastName == null ? "" : lastName.trim();
         String fn = firstName == null ? "" : firstName.trim();

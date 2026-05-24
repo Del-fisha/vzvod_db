@@ -7,10 +7,13 @@
                   class="com.company.vzvod.entity.Shift">
             <fetchPlan extends="_base">
                 <property name="units">
+                    <property name="post"/>
+                    <property name="rank"/>
                     <property name="user">
                         <property name="firstName"/>
                         <property name="lastName"/>
                         <property name="patronymic"/>
+                        <property name="shortFio"/>
                     </property>
                     <property name="department" fetchPlan="_base"/>
                 </property>
@@ -63,9 +66,10 @@
                               dataContainer="unitsDc"
                               width="100%">
                         <columns>
-                            <column property="user.lastName" header="msg://com.company.vzvod.view.shift/shiftDetailView.unitsGrid.lastName"/>
-                            <column property="user.firstName" header="msg://com.company.vzvod.view.shift/shiftDetailView.unitsGrid.firstName"/>
-                            <column property="user.patronymic" header="msg://com.company.vzvod.view.shift/shiftDetailView.unitsGrid.patronymic"/>
+                            <column property="employeeShortFio"
+                                    header="msg://com.company.vzvod.view.shift/shiftDetailView.unitsGrid.shortFio"/>
+                            <column property="post"/>
+                            <column property="rank"/>
                         </columns>
                         <actions>
                             <!-- создаёт связь с уже существующим ServiceInfo -->

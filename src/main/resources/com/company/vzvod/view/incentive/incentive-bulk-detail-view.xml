@@ -19,7 +19,7 @@
             </fetchPlan>
             <loader id="serviceInfosDl" readOnly="true">
                 <query>
-                    <![CDATA[select e from ServiceInfo e order by e.user.lastName, e.user.firstName]]>
+                    <![CDATA[select e from ServiceInfo e order by e.post, e.rank desc, e.user.lastName]]>
                 </query>
             </loader>
         </collection>

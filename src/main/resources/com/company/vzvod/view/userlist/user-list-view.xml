@@ -21,7 +21,7 @@
                         left join u.serviceInfo si
                         left join si.department d
                         where d is null
-                        order by u.serviceInfo.post
+                        order by u.serviceInfo.post, u.serviceInfo.rank desc, u.lastName
                     ]]>
                 </query>
             </loader>

@@ -4,6 +4,7 @@ import com.company.vzvod.entity.AdministrativeViolation;
 import com.company.vzvod.entity.CriminalViolation;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.Shift;
+import com.company.vzvod.util.EmployeeOrdering;
 import com.company.vzvod.view.main.MainView;
 import com.vaadin.flow.router.Route;
 import io.jmix.flowui.component.grid.DataGrid;
@@ -49,6 +50,13 @@ public class ShiftBlankView extends StandardView {
         unitsDataGrid.setAllRowsVisible(true);
         adminViolationsDataGrid.setAllRowsVisible(true);
         criminalViolationsDataGrid.setAllRowsVisible(true);
+        sortUnits();
+    }
+
+    private void sortUnits() {
+        if (unitsDc != null) {
+            unitsDc.getMutableItems().sort(EmployeeOrdering.serviceInfoComparator());
+        }
     }
 
     /**
@@ -67,6 +75,7 @@ public class ShiftBlankView extends StandardView {
         UUID id = UUID.fromString(params.get(0));
         shiftDl.setEntityId(id);
         shiftDl.load();
+        sortUnits();
     }
 
 }
