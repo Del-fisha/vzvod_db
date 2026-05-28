@@ -550,13 +550,11 @@ public class BotMeShiftsVocationsService {
     }
 
     private static String colleagueLabel(User u) {
-        String fn = u.getFirstName();
-        String ln = u.getLastName();
-        if (ln == null || ln.isBlank()) {
-            return fn == null ? "—" : fn;
+        if (u == null) {
+            return "—";
         }
-        String initial = ln.substring(0, 1).toUpperCase(Locale.ROOT) + ".";
-        return (fn == null ? "" : fn + " ") + initial;
+        String shortFio = u.getShortFio();
+        return shortFio.isBlank() ? "Сотрудник" : shortFio;
     }
 
     private static void applyCreate(Shift shift, BotShiftUpsertRequest req) {

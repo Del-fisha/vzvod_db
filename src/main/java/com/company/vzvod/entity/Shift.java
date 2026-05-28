@@ -44,10 +44,6 @@ public class Shift {
         this.number = routeNumber == null ? null : routeNumber.getId();
     }
 
-    /**
-     * Как {@link #getNumber()} / {@link User#getGender()}: в БД строка {@link TypeOfShift#getId()},
-     * в коде {@link TypeOfShift}.
-     */
     @Column(name = "TYPE_OF_SHIFT")
     private String typeOfShift;
 

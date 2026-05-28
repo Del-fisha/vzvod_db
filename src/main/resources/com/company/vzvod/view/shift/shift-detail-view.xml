@@ -74,7 +74,8 @@
                         <actions>
                             <!-- создаёт связь с уже существующим ServiceInfo -->
                             <action id="add" type="list_add"/>
-                            <action id="remove" type="list_remove"/>
+                            <!-- list_exclude: только отвязать ServiceInfo от смены, не удалять запись -->
+                            <action id="remove" type="list_exclude"/>
                         </actions>
                     </dataGrid>
 
