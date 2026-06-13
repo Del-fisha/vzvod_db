@@ -127,9 +127,22 @@ public class UserCardView extends StandardView {
 
         if (params != null && !params.isEmpty()) {
             UUID id = UUID.fromString(params.get(0));
-            userDl.setEntityId(id);
-            userDl.load();
+            loadUserIntoView(id);
         }
+    }
+
+    /**
+     * Загружает пользователя с fetch plan карточки. Без этого при выборе из {@code colleaguesDc}
+     * в persistence context остаётся урезанный инстанс (без dateOfBirth, contactsInfo и т.д.).
+     */
+    private void loadUserIntoView(UUID userId) {
+        User user = dataManager.load(User.class)
+                .id(userId)
+                .fetchPlan(userDl.getFetchPlan())
+                .one();
+        userDl.setEntityId(userId);
+        userDc.setItem(user);
+        refreshUserData();
     }
 
     public User getViewedUser() {
@@ -159,13 +172,10 @@ public class UserCardView extends StandardView {
     @Subscribe("colleaguesDataGrid")
     public void onColleaguesDataGridItemClick(ItemClickEvent<User> event) {
         User selected = event.getItem();
-        if (selected == null) {
+        if (selected == null || selected.getId() == null) {
             return;
         }
-
-        userDl.setEntityId(selected.getId());
-        userDl.load();
-        refreshUserData();
+        loadUserIntoView(selected.getId());
     }
 
     /**

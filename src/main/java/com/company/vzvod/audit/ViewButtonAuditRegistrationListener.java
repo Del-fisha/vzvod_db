@@ -22,9 +22,6 @@ public class ViewButtonAuditRegistrationListener {
         if (!(view instanceof com.vaadin.flow.component.Component root)) {
             return;
         }
-        if (!view.getClass().getName().startsWith("com.company.vzvod.view.")) {
-            return;
-        }
         UI ui = UI.getCurrent();
         if (ui == null || !ui.isAttached()) {
             return;

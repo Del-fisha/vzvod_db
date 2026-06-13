@@ -9,6 +9,7 @@ import java.util.concurrent.CompletableFuture;
 public class VaadinButtonClickAuditListener {
 
     private static final String AUDIT_REGISTERED = "data-audit-click-registered";
+    private static final String AUDIT_ATTACH_WATCHER = "data-audit-attach-watcher";
 
     private final LoggingServiceClient loggingClient;
     private final AuditActorResolver actorResolver;
@@ -25,13 +26,22 @@ public class VaadinButtonClickAuditListener {
     }
 
     public void registerButtonsIn(com.vaadin.flow.component.Component root) {
+        registerAttachWatcherIfNeeded(root);
         if (root instanceof Button button) {
-            registerButtonIfNeeded(button);
+            registerIfNeeded(button);
         }
         root.getChildren().forEach(this::registerButtonsIn);
     }
 
-    private void registerButtonIfNeeded(Button button) {
+    private void registerAttachWatcherIfNeeded(com.vaadin.flow.component.Component component) {
+        if ("true".equals(component.getElement().getAttribute(AUDIT_ATTACH_WATCHER))) {
+            return;
+        }
+        component.getElement().setAttribute(AUDIT_ATTACH_WATCHER, "true");
+        component.addAttachListener(event -> registerButtonsIn(event.getSource()));
+    }
+
+    public void registerIfNeeded(Button button) {
         if ("true".equals(button.getElement().getAttribute(AUDIT_REGISTERED))) {
             return;
         }

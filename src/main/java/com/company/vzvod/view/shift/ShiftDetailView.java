@@ -21,6 +21,7 @@ import io.jmix.flowui.component.SupportsTypedValue;
 import io.jmix.flowui.component.datepicker.TypedDatePicker;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.kit.action.Action;
+import io.jmix.flowui.kit.action.BaseAction;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.CollectionContainer;
 import io.jmix.flowui.model.CollectionPropertyContainer;
@@ -30,6 +31,7 @@ import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 
 @Route(value = "shifts/:id", layout = MainView.class)
 @ViewController(id = "Shift.detail")
@@ -117,6 +119,7 @@ public class ShiftDetailView extends StandardDetailView<Shift> {
         criminalViolationsDataGrid.setAllRowsVisible(true);
         replaceViolationCreate(adminViolationsDataGrid, this::openNewAdministrativeViolation);
         replaceViolationCreate(criminalViolationsDataGrid, this::openNewCriminalViolation);
+        configureUnitsDetachAction();
         sortUnits();
 
         if (!uiAccessService.hasFullAccessRole()) {
@@ -146,6 +149,27 @@ public class ShiftDetailView extends StandardDetailView<Shift> {
             return;
         }
         unitsDc.getMutableItems().sort(EmployeeOrdering.serviceInfoComparator());
+    }
+
+    /**
+     * list_remove для ManyToMany удаляет ServiceInfo из БД (Jmix RemoveOperation.saveIfNeeded).
+     * Явно отвязываем сотрудника от смены, не трогая запись ServiceInfo.
+     */
+    private void configureUnitsDetachAction() {
+        Action remove = unitsDataGrid.getAction("remove");
+        if (remove instanceof BaseAction baseRemove) {
+            baseRemove.withHandler(event -> detachSelectedUnitsFromShift());
+        }
+    }
+
+    private void detachSelectedUnitsFromShift() {
+        var selected = new ArrayList<>(unitsDataGrid.getSelectedItems());
+        if (selected.isEmpty()) {
+            return;
+        }
+        getEditedEntity().getUnits().removeAll(selected);
+        sortUnits();
+        selected.forEach(unitsDataGrid::deselect);
     }
 
     private void replaceViolationCreate(DataGrid<?> grid, Runnable openNew) {
