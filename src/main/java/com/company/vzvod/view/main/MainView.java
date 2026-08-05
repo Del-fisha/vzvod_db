@@ -35,6 +35,7 @@ import com.company.vzvod.notification.OverdueItemDto;
 import com.company.vzvod.notification.OverdueItemType;
 import com.company.vzvod.entity.UserNotification;
 import com.company.vzvod.view.dashboard.DashboardMessageComposeView;
+import com.company.vzvod.view.orientations.OrientationsView;
 import com.company.vzvod.view.dashboard.WorkResultsStatisticsDialog;
 import com.company.vzvod.view.dashboard.TodayShiftDashboardView;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -103,7 +104,6 @@ public class MainView extends StandardMainView {
 
         applySavedSettings(storageKeyPrefix, audio, volumeSlider, muteButton);
         installUiSoundEffects();
-        installHomeStatsWidget();
 
         // Autoplay may still be blocked by browser policies; best-effort start.
         UI.getCurrent().getPage().executeJs(
@@ -112,6 +112,11 @@ public class MainView extends StandardMainView {
         );
 
         showLoginNotifications();
+    }
+
+    @Subscribe
+    public void onReady(final ReadyEvent event) {
+        installHomeStatsWidget();
     }
 
     private void installHomeStatsWidget() {
@@ -150,6 +155,15 @@ public class MainView extends StandardMainView {
             );
             dashboardMessage.addCardClickListener(() -> UI.getCurrent().navigate(DashboardMessageComposeView.class));
             homeStatsWidgetSlot.add(dashboardMessage);
+
+            HomeStatsCard orientations = new HomeStatsCard(
+                    messageBundle.getMessage("openOrientationsBtn.text"),
+                    messageBundle.getMessage("openOrientationsBtn.subtitle"),
+                    messageBundle.getMessage("openOrientationsBtn.cta"),
+                    "var(--lumo-primary-color)"
+            );
+            orientations.addCardClickListener(() -> UI.getCurrent().navigate(OrientationsView.class));
+            homeStatsWidgetSlot.add(orientations);
         }
 
         HomeStatsCard employees = new HomeStatsCard(

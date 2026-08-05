@@ -19,6 +19,7 @@
     </menu>
 
     <menu id="application" title="msg://com.company.vzvod/menu.application.title" opened="true">
+        <item view="OrientationsView" title="msg://com.company.vzvod.view.orientations/orientationsView.title"/>
         <item view="User.list" title="msg://com.company.vzvod.view.user/userListView.title"/>
         <item view="Penalty.list" title="msg://com.company.vzvod.view.penalty/penaltyListView.title"/>
         <item view="Incentive.list" title="msg://com.company.vzvod.view.penalty/incentiveListView.title"/>
