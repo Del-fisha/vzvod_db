@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="2026-08-05-111800-1" author="cursor">
+        <createTable tableName="ALL_TODAY_SHIFTS">
+            <column name="ID" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="DATE_" type="DATE"/>
+            <column name="DEPARTMENT" type="INT"/>
+        </createTable>
+
+        <createIndex tableName="ALL_TODAY_SHIFTS"
+                     indexName="IDX_ALL_TODAY_SHIFTS_DATE_DEP"
+                     unique="true">
+            <column name="DATE_"/>
+            <column name="DEPARTMENT"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

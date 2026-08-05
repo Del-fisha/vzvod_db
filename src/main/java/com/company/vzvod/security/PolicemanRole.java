@@ -132,6 +132,14 @@ public interface PolicemanRole {
     void shiftFullAccess();
 
     @EntityAttributePolicy(
+            entityClass = AllTodayShifts.class,
+            attributes = {"id", "date", "department"},
+            action = EntityAttributePolicyAction.VIEW
+    )
+    @EntityPolicy(entityClass = AllTodayShifts.class, actions = {EntityPolicyAction.READ})
+    void allTodayShiftsRead();
+
+    @EntityAttributePolicy(
             entityClass = Vocation.class,
             attributes = {
                     "id",
@@ -310,7 +318,9 @@ public interface PolicemanRole {
             "MainViewTopMenu",
             "CompensatoryTimeRaportView",
             "WorkResultsStatisticsDialog",
-            "TodayShiftDashboardView"
+            "TodayShiftDashboardView",
+            "DayShiftDashboardView",
+            "AllTodayShifts.list"
     })
     void userViews();
 

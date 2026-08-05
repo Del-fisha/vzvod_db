@@ -60,6 +60,14 @@ public class TodayShiftDashboardService {
     public TodayShiftDashboardSnapshot loadSnapshot(LocalDateTime wallClock, ZoneId zoneId) {
         LocalDate operationalDate = ShiftOperationalDay.resolveOperationalDate(wallClock, zoneId);
         Dep department = DepartmentConverter.departmentFromDate(operationalDate);
+        return loadSnapshot(operationalDate, department);
+    }
+
+    /**
+     * Дашборд за конкретный операционный день и отделение (исторические сутки из AllTodayShifts).
+     */
+    @Transactional(readOnly = true)
+    public TodayShiftDashboardSnapshot loadSnapshot(LocalDate operationalDate, Dep department) {
         List<Shift> shifts = loadShifts(operationalDate, department);
 
         List<ShiftRouteRow> routes = new ArrayList<>();

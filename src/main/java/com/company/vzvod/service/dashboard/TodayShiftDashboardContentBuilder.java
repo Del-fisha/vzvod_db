@@ -1,11 +1,12 @@
 package com.company.vzvod.service.dashboard;
 
-import com.company.vzvod.entity.ArticleOfAdministrative;
-import com.company.vzvod.entity.TypeOfCriminal;
 import com.company.vzvod.dashboard.todayshift.PeriodMetricRow;
 import com.company.vzvod.dashboard.todayshift.RouteDetailsRow;
 import com.company.vzvod.dashboard.todayshift.ShiftRouteRow;
 import com.company.vzvod.dashboard.todayshift.TodayShiftDashboardSnapshot;
+import com.company.vzvod.entity.ArticleOfAdministrative;
+import com.company.vzvod.entity.Dep;
+import com.company.vzvod.entity.TypeOfCriminal;
 import com.company.vzvod.service.TodayShiftDashboardService;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
@@ -22,6 +23,7 @@ import io.jmix.flowui.kit.component.button.JmixButton;
 import org.springframework.stereotype.Component;
 
 import java.text.MessageFormat;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
@@ -52,8 +54,14 @@ public class TodayShiftDashboardContentBuilder {
     }
 
     public Scroller buildScroller(Runnable onRefresh) {
-        TodayShiftDashboardSnapshot snapshot = todayShiftDashboardService.loadSnapshot();
+        return buildScroller(todayShiftDashboardService.loadSnapshot(), onRefresh);
+    }
 
+    public Scroller buildScroller(LocalDate date, Dep department, Runnable onRefresh) {
+        return buildScroller(todayShiftDashboardService.loadSnapshot(date, department), onRefresh);
+    }
+
+    public Scroller buildScroller(TodayShiftDashboardSnapshot snapshot, Runnable onRefresh) {
         Scroller scroller = uiComponents.create(Scroller.class);
         scroller.setSizeFull();
         scroller.addClassName("today-shift-dashboard__scroller");

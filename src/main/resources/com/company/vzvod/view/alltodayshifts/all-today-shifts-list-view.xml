@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://allTodayShiftsListView.title"
+      focusComponent="daysDataGrid">
+    <data>
+        <collection id="daysDc"
+                    class="com.company.vzvod.entity.AllTodayShifts">
+            <fetchPlan extends="_base"/>
+            <loader id="daysDl" readOnly="true">
+                <query>
+                    <![CDATA[
+                        select e from AllTodayShifts e
+                        order by e.date desc, e.department asc
+                    ]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="routesDc"
+                    class="com.company.vzvod.entity.Shift">
+            <fetchPlan extends="_base">
+                <property name="units">
+                    <property name="user">
+                        <property name="lastName"/>
+                        <property name="firstName"/>
+                        <property name="patronymic"/>
+                    </property>
+                    <property name="post"/>
+                    <property name="rank"/>
+                </property>
+            </fetchPlan>
+            <loader id="routesDl" readOnly="true">
+                <query>
+                    <![CDATA[
+                        select e from Shift e
+                        where :date is not null
+                          and :department is not null
+                          and e.date = :date
+                          and e.departmentToday = :department
+                        order by e.number asc
+                    ]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="false"/>
+    </facets>
+    <layout padding="false" spacing="false" height="100%" expand="splitBox">
+        <hbox id="splitBox" width="100%" height="100%" spacing="true" padding="true" alignItems="STRETCH">
+            <vbox id="daysBox" width="40%" height="100%" minWidth="18em" spacing="true" expand="daysDataGrid">
+                <span text="msg://allTodayShiftsListView.daysCaption"/>
+                <dataGrid id="daysDataGrid"
+                          width="100%"
+                          height="100%"
+                          dataContainer="daysDc"
+                          columnReorderingAllowed="true"
+                          selectionMode="SINGLE">
+                    <columns resizable="true">
+                        <column property="date" header="msg://allTodayShiftsListView.column.date"/>
+                        <column property="department" header="msg://allTodayShiftsListView.column.department"/>
+                    </columns>
+                </dataGrid>
+            </vbox>
+            <vbox id="routesBox" width="60%" height="100%" spacing="true" expand="routesDataGrid">
+                <span id="routesCaption" text="msg://allTodayShiftsListView.routesCaption"/>
+                <dataGrid id="routesDataGrid"
+                          width="100%"
+                          height="100%"
+                          dataContainer="routesDc"
+                          columnReorderingAllowed="true"
+                          selectionMode="SINGLE">
+                    <columns resizable="true">
+                        <column property="number" header="msg://allTodayShiftsListView.column.routeNumber"/>
+                        <column key="employeesShortFio"
+                                header="msg://allTodayShiftsListView.column.employees"/>
+                    </columns>
+                </dataGrid>
+            </vbox>
+        </hbox>
+    </layout>
+</view>
