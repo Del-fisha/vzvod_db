@@ -2,6 +2,7 @@ package com.company.vzvod.view.mainviewtopmenu;
 
 import com.company.vzvod.security.UiAccessService;
 import com.company.vzvod.view.dashboard.DashboardMessageComposeView;
+import com.company.vzvod.view.orientations.OrientationsView;
 import com.company.vzvod.view.dashboard.WorkResultsStatisticsDialog;
 import com.company.vzvod.view.dashboard.TodayShiftDashboardView;
 import com.google.common.base.Strings;
@@ -44,6 +45,11 @@ public class MainViewTopMenu extends StandardMainView {
         installHomeStatsWidget();
     }
 
+    @Subscribe
+    public void onReady(final ReadyEvent event) {
+        installHomeStatsWidget();
+    }
+
     private void installHomeStatsWidget() {
         if (homeStatsWidgetSlot == null) {
             return;
@@ -80,6 +86,15 @@ public class MainViewTopMenu extends StandardMainView {
             );
             dashboardMessage.addCardClickListener(() -> UI.getCurrent().navigate(DashboardMessageComposeView.class));
             homeStatsWidgetSlot.add(dashboardMessage);
+
+            HomeStatsCard orientations = new HomeStatsCard(
+                    messages.getMessage("com.company.vzvod.view.main/openOrientationsBtn.text"),
+                    messages.getMessage("com.company.vzvod.view.main/openOrientationsBtn.subtitle"),
+                    messages.getMessage("com.company.vzvod.view.main/openOrientationsBtn.cta"),
+                    "var(--lumo-primary-color)"
+            );
+            orientations.addCardClickListener(() -> UI.getCurrent().navigate(OrientationsView.class));
+            homeStatsWidgetSlot.add(orientations);
         }
 
         HomeStatsCard employees = new HomeStatsCard(
