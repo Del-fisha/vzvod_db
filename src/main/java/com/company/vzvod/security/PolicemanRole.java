@@ -134,9 +134,9 @@ public interface PolicemanRole {
     @EntityAttributePolicy(
             entityClass = AllTodayShifts.class,
             attributes = {"id", "date", "department"},
-            action = EntityAttributePolicyAction.VIEW
+            action = EntityAttributePolicyAction.MODIFY
     )
-    @EntityPolicy(entityClass = AllTodayShifts.class, actions = {EntityPolicyAction.READ})
+    @EntityPolicy(entityClass = AllTodayShifts.class, actions = {EntityPolicyAction.READ, EntityPolicyAction.DELETE})
     void allTodayShiftsRead();
 
     @EntityAttributePolicy(

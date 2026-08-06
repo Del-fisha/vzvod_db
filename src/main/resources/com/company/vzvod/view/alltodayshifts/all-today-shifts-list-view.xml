@@ -62,13 +62,18 @@
                 </dataGrid>
             </vbox>
             <vbox id="routesBox" width="60%" height="100%" spacing="true" expand="routesDataGrid">
+                <hbox id="routesButtonsPanel" classNames="buttons-panel" width="100%">
+                    <button id="removeShiftButton"
+                            text="msg://allTodayShiftsListView.removeShift"
+                            themeNames="error"/>
+                </hbox>
                 <span id="routesCaption" text="msg://allTodayShiftsListView.routesCaption"/>
                 <dataGrid id="routesDataGrid"
                           width="100%"
                           height="100%"
                           dataContainer="routesDc"
                           columnReorderingAllowed="true"
-                          selectionMode="SINGLE">
+                          selectionMode="MULTI">
                     <columns resizable="true">
                         <column property="number" header="msg://allTodayShiftsListView.column.routeNumber"/>
                         <column key="employeesShortFio"

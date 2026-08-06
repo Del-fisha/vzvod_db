@@ -14,7 +14,6 @@ import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.StatusOfHousing;
 import com.company.vzvod.entity.TypeOfHousing;
 import com.company.vzvod.entity.User;
-import com.company.vzvod.entity.UserTelegramBinding;
 import io.jmix.core.FetchPlanBuilder;
 import io.jmix.core.UnconstrainedDataManager;
 import org.springframework.context.MessageSource;
@@ -49,17 +48,17 @@ public class BotMeProfileService {
     }
 
     @Transactional(readOnly = true)
-    public BotProfileResponse loadProfile(long telegramChatId) {
-        User user = loadActiveUserForChat(telegramChatId);
+    public BotProfileResponse loadProfile(UUID userId) {
+        User user = loadActiveUser(userId);
         return toResponse(user);
     }
 
     @Transactional
-    public BotProfileResponse updateProfile(long telegramChatId, BotProfilePatchRequest patch) {
+    public BotProfileResponse updateProfile(UUID userId, BotProfilePatchRequest patch) {
         if (patch == null || !patch.hasAnyField()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "no fields to update");
         }
-        User user = loadActiveUserForChat(telegramChatId);
+        User user = loadActiveUser(userId);
         ServiceInfo si = user.getServiceInfo();
         if (si == null) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "service info missing");
@@ -154,16 +153,8 @@ public class BotMeProfileService {
                 .add("statusOfHousing");
     }
 
-    private User loadActiveUserForChat(long telegramChatId) {
-        UserTelegramBinding binding = unconstrainedDataManager.load(UserTelegramBinding.class)
-                .query("select b from UserTelegramBinding b where b.chatId = :cid")
-                .parameter("cid", telegramChatId)
-                .optional()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "telegram chat not bound"));
-
-        UUID userId = binding.getUser().getId();
+    private User loadActiveUser(UUID userId) {
         activeUserChecker.requireActive(userId);
-
         return unconstrainedDataManager.load(User.class)
                 .id(userId)
                 .fetchPlan(this::buildUserProfileFetchPlan)

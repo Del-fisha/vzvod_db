@@ -3,16 +3,12 @@ package com.company.vzvod.bot.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record BotVocationItem(
-        UUID id,
+public record BotVocationCreateRequest(
+        Integer typeId,
         LocalDate startDate,
         LocalDate endDate,
-        Integer countOfDays,
-        Integer typeId,
-        String typeLabel,
         Boolean hasDeparture,
         String cityToDrive,
         Integer daysAddedByDeparture

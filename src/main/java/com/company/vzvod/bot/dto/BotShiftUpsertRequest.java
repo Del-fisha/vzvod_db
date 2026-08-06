@@ -4,11 +4,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.UUID;
 
 /**
- * Тело {@code POST|PUT /api/bot/me/shifts}: поля смены как в карточке «Моя смена».
- * Счётчики опциональны — по умолчанию 0, как при создании в UI.
+ * Тело {@code POST|PUT /api/bot/me/shifts} и {@code /api/mobile/me/shifts}.
+ * Напарники: {@code partnerServiceInfoId} и/или {@code partnerServiceInfoIds} (несколько).
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record BotShiftUpsertRequest(
@@ -20,11 +21,13 @@ public record BotShiftUpsertRequest(
         LocalTime startTime,
         /** Задаётся позже при завершении смены; для POST/PUT может быть null. */
         LocalTime endTime,
-        /** Второй участник смены (служба в отделении 1 или 2); обязателен при создании через бота. */
+        /** Один напарник (совместимость со старым клиентом/ботом). */
         UUID partnerServiceInfoId,
         Integer countOfStatements,
         Integer countOfClaims,
         Integer ibdWithMigrant,
-        Integer ibdWithoutMigrant
+        Integer ibdWithoutMigrant,
+        /** Несколько напарников; объединяется с {@link #partnerServiceInfoId}. */
+        List<UUID> partnerServiceInfoIds
 ) {
 }

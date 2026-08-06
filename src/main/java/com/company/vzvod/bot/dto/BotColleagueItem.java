@@ -7,6 +7,7 @@ import java.util.UUID;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record BotColleagueItem(
         UUID serviceInfoId,
-        String label
+        String label,
+        Integer department
 ) {
 }

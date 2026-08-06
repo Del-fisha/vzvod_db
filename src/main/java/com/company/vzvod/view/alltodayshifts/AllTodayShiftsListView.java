@@ -5,28 +5,34 @@ import com.company.vzvod.entity.Dep;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.Shift;
 import com.company.vzvod.entity.User;
+import com.company.vzvod.service.AllTodayShiftsDeleteService;
 import com.company.vzvod.util.EmployeeOrdering;
 import com.company.vzvod.view.dashboard.DayShiftDashboardView;
 import com.company.vzvod.view.main.MainView;
 import com.company.vzvod.view.shift.ShiftDetailView;
-import com.company.vzvod.view.shiftblank.ShiftBlankView;
-import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.grid.ItemDoubleClickEvent;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
+import io.jmix.flowui.Dialogs;
+import io.jmix.flowui.Notifications;
 import io.jmix.flowui.ViewNavigators;
+import io.jmix.flowui.action.DialogAction;
+import io.jmix.flowui.component.grid.DataGrid;
+import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Route(value = "all-today-shifts", layout = MainView.class)
@@ -34,20 +40,32 @@ import java.util.stream.Collectors;
 @ViewDescriptor(path = "all-today-shifts-list-view.xml")
 public class AllTodayShiftsListView extends StandardListView<AllTodayShifts> {
 
-    private static final long ROUTE_CLICK_DELAY_MS = 280L;
-
     @ViewComponent
     private CollectionLoader<AllTodayShifts> daysDl;
 
     @ViewComponent
     private CollectionLoader<Shift> routesDl;
 
+    @ViewComponent
+    private DataGrid<AllTodayShifts> daysDataGrid;
+
+    @ViewComponent
+    private DataGrid<Shift> routesDataGrid;
+
     @Autowired
     private ViewNavigators viewNavigators;
 
-    private ClickVersusDoubleClickCoordinator routeClickCoordinator;
-    private Shift pendingRouteShift;
-    private UI pendingRouteUi;
+    @Autowired
+    private AllTodayShiftsDeleteService deleteService;
+
+    @Autowired
+    private Dialogs dialogs;
+
+    @Autowired
+    private Notifications notifications;
+
+    @Autowired
+    private MessageBundle messageBundle;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -76,25 +94,41 @@ public class AllTodayShiftsListView extends StandardListView<AllTodayShifts> {
     }
 
     @Subscribe("routesDataGrid")
-    public void onRoutesDataGridItemClick(ItemClickEvent<Shift> event) {
-        Shift shift = event.getItem();
-        if (shift == null || shift.getId() == null) {
-            return;
-        }
-        pendingRouteShift = shift;
-        pendingRouteUi = UI.getCurrent();
-        routeClickCoordinator().onClick();
-    }
-
-    @Subscribe("routesDataGrid")
     public void onRoutesDataGridItemDoubleClick(ItemDoubleClickEvent<Shift> event) {
         Shift shift = event.getItem();
         if (shift == null || shift.getId() == null) {
             return;
         }
-        pendingRouteShift = shift;
-        pendingRouteUi = UI.getCurrent();
-        routeClickCoordinator().onDoubleClick();
+        openShiftDetail(shift);
+    }
+
+    @Subscribe("removeShiftButton")
+    public void onRemoveShiftButtonClick(ClickEvent<JmixButton> event) {
+        Set<Shift> selected = routesDataGrid.getSelectedItems();
+        if (selected == null || selected.isEmpty()) {
+            notifications.create(messageBundle.getMessage("allTodayShiftsListView.selectShiftToRemove"))
+                    .withType(Notifications.Type.WARNING)
+                    .show();
+            return;
+        }
+        List<Shift> toRemove = new ArrayList<>(selected);
+        AllTodayShifts selectedDay = daysDataGrid.getSingleSelectedItem();
+        LocalDate dayDate = selectedDay != null ? selectedDay.getDate() : null;
+        Dep dayDepartment = selectedDay != null ? selectedDay.getDepartment() : null;
+
+        dialogs.createOptionDialog()
+                .withHeader(messageBundle.getMessage("allTodayShiftsListView.removeShift"))
+                .withText(messageBundle.getMessage("allTodayShiftsListView.removeShift.confirm"))
+                .withActions(
+                        new DialogAction(DialogAction.Type.YES)
+                                .withHandler(e -> {
+                                    deleteService.deleteShifts(toRemove);
+                                    daysDl.load();
+                                    refreshRoutesAfterDelete(dayDate, dayDepartment);
+                                }),
+                        new DialogAction(DialogAction.Type.NO)
+                )
+                .open();
     }
 
     @Supply(to = "routesDataGrid.employeesShortFio", subject = "renderer")
@@ -102,45 +136,34 @@ public class AllTodayShiftsListView extends StandardListView<AllTodayShifts> {
         return new TextRenderer<>(this::formatEmployees);
     }
 
-    private ClickVersusDoubleClickCoordinator routeClickCoordinator() {
-        if (routeClickCoordinator == null) {
-            routeClickCoordinator = new ClickVersusDoubleClickCoordinator(
-                    ROUTE_CLICK_DELAY_MS,
-                    () -> openPendingRoute(RouteRowOpenTarget.forSingleClick()),
-                    () -> openPendingRoute(RouteRowOpenTarget.forDoubleClick())
-            );
-        }
-        return routeClickCoordinator;
-    }
-
-    private void openPendingRoute(RouteRowOpenTarget target) {
-        Shift shift = pendingRouteShift;
-        if (shift == null || shift.getId() == null) {
+    private void refreshRoutesAfterDelete(LocalDate dayDate, Dep dayDepartment) {
+        if (dayDate == null || dayDepartment == null) {
+            clearRoutes();
             return;
         }
-        UI ui = pendingRouteUi != null ? pendingRouteUi : UI.getCurrent();
-        if (ui == null) {
-            openRoute(shift, target);
+        AllTodayShifts remainingDay = daysDl.getContainer().getItems().stream()
+                .filter(day -> dayDate.equals(day.getDate()) && dayDepartment.equals(day.getDepartment()))
+                .findFirst()
+                .orElse(null);
+        if (remainingDay == null) {
+            clearRoutes();
             return;
         }
-        ui.access(() -> openRoute(shift, target));
+        daysDataGrid.select(remainingDay);
+        loadRoutes(remainingDay);
     }
 
-    private void openRoute(Shift shift, RouteRowOpenTarget target) {
-        if (target == RouteRowOpenTarget.SHIFT_DETAIL) {
-            openShiftDetail(shift);
-        } else {
-            openShiftBlank(shift.getId());
-        }
+    private void clearRoutes() {
+        routesDl.setParameter("date", null);
+        routesDl.setParameter("department", null);
+        routesDl.load();
     }
 
     private void loadRoutes(AllTodayShifts day) {
         LocalDate date = day.getDate();
         Dep department = day.getDepartment();
         if (date == null || department == null) {
-            routesDl.setParameter("date", null);
-            routesDl.setParameter("department", null);
-            routesDl.load();
+            clearRoutes();
             return;
         }
         routesDl.setParameter("date", date);
@@ -154,13 +177,6 @@ public class AllTodayShiftsListView extends StandardListView<AllTodayShifts> {
                         "date", List.of(date.toString()),
                         "department", List.of(String.valueOf(department.getId()))
                 )))
-                .withBackwardNavigation(true)
-                .navigate();
-    }
-
-    private void openShiftBlank(UUID shiftId) {
-        viewNavigators.view(this, ShiftBlankView.class)
-                .withQueryParameters(QueryParameters.of("shiftId", shiftId.toString()))
                 .withBackwardNavigation(true)
                 .navigate();
     }

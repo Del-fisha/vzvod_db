@@ -50,6 +50,25 @@ class ClickVersusDoubleClickCoordinatorTest {
         assertEquals(List.of("double"), actions);
     }
 
+    @Test
+    @DisplayName("cancelPending отменяет отложенный single")
+    void cancelPending_skipsSingle() {
+        List<String> actions = new ArrayList<>();
+        ManualScheduler scheduler = new ManualScheduler();
+        ClickVersusDoubleClickCoordinator coordinator = new ClickVersusDoubleClickCoordinator(
+                200,
+                scheduler,
+                () -> actions.add("single"),
+                () -> actions.add("double")
+        );
+
+        coordinator.onClick();
+        coordinator.cancelPending();
+        scheduler.runDue();
+
+        assertTrue(actions.isEmpty());
+    }
+
     private static final class ManualScheduler implements ClickVersusDoubleClickCoordinator.Scheduler {
         private final AtomicReference<Runnable> pending = new AtomicReference<>();
 

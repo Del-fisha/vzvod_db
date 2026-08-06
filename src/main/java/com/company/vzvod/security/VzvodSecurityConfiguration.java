@@ -59,4 +59,16 @@ public class VzvodSecurityConfiguration {
                 .csrf(csrf -> csrf.disable());
         return http.build();
     }
+
+    /**
+     * REST для Android-клиента. Доступ по логину/паролю + {@code X-Mobile-Token} в контроллерах.
+     */
+    @Bean
+    @Order(2)
+    SecurityFilterChain mobileApiFilterChain(HttpSecurity http) throws Exception {
+        http.securityMatcher("/api/mobile/**")
+                .authorizeHttpRequests(registry -> registry.anyRequest().permitAll())
+                .csrf(csrf -> csrf.disable());
+        return http.build();
+    }
 }

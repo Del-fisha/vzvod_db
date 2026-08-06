@@ -1,0 +1,70 @@
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by net.rubygrapefruit.platform.internal.NativeLibraryLoader in an unnamed module (file:/C:/Users/del-f/.gradle/wrapper/dists/gradle-8.12.1-bin/eumc4uhoysa37zql93vfjkxy0/gradle-8.12.1/lib/native-platform-0.22-milestone-27.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.12.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :clean
+> Task :bootBuildInfo
+D:\Shtopor\core\src\main\java\com\company\vzvod\security\VzvodFlowUiSecurity.java:28: warning: [removal] MvcRequestMatcher in org.springframework.security.web.servlet.util.matcher has been deprecated and marked for removal
+            MvcRequestMatcher.Builder mvcRequestMatcherBuilder = new MvcRequestMatcher.Builder(
+            ^
+D:\Shtopor\core\src\main\java\com\company\vzvod\security\VzvodFlowUiSecurity.java:28: warning: [removal] MvcRequestMatcher in org.springframework.security.web.servlet.util.matcher has been deprecated and marked for removal
+            MvcRequestMatcher.Builder mvcRequestMatcherBuilder = new MvcRequestMatcher.Builder(
+                                                                     ^
+D:\Shtopor\core\src\main\java\com\company\vzvod\security\VzvodFlowUiSecurity.java:30: warning: [removal] MvcRequestMatcher in org.springframework.security.web.servlet.util.matcher has been deprecated and marked for removal
+            MvcRequestMatcher errorPageRequestMatcher = mvcRequestMatcherBuilder.pattern(
+            ^
+
+> Task :compileJava
+D:\Shtopor\core\src\main\java\com\company\vzvod\view\raport\CompensatoryTimeRaportView.java:213: warning: [removal] StreamResource in com.vaadin.flow.server has been deprecated and marked for removal
+        StreamResource resource = new StreamResource(fileName, () -> new ByteArrayInputStream(bytes));
+        ^
+D:\Shtopor\core\src\main\java\com\company\vzvod\view\raport\CompensatoryTimeRaportView.java:213: warning: [removal] StreamResource in com.vaadin.flow.server has been deprecated and marked for removal
+        StreamResource resource = new StreamResource(fileName, () -> new ByteArrayInputStream(bytes));
+                                      ^
+D:\Shtopor\core\src\main\java\com\company\vzvod\view\raport\DailyShiftRaportView.java:238: warning: [removal] StreamResource in com.vaadin.flow.server has been deprecated and marked for removal
+        StreamResource resource = new StreamResource(fileName, () -> new ByteArrayInputStream(bytes));
+        ^
+D:\Shtopor\core\src\main\java\com\company\vzvod\view\raport\DailyShiftRaportView.java:238: warning: [removal] StreamResource in com.vaadin.flow.server has been deprecated and marked for removal
+        StreamResource resource = new StreamResource(fileName, () -> new ByteArrayInputStream(bytes));
+                                      ^
+D:\Shtopor\core\src\main\java\com\company\vzvod\view\raport\ServiceBookSupplementView.java:171: warning: [removal] StreamResource in com.vaadin.flow.server has been deprecated and marked for removal
+        StreamResource resource = new StreamResource(fileName, () -> new ByteArrayInputStream(bytes));
+        ^
+D:\Shtopor\core\src\main\java\com\company\vzvod\view\raport\ServiceBookSupplementView.java:171: warning: [removal] StreamResource in com.vaadin.flow.server has been deprecated and marked for removal
+        StreamResource resource = new StreamResource(fileName, () -> new ByteArrayInputStream(bytes));
+                                      ^
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+9 warnings
+Enhancing entities in root project 'Vzvod' for source set 'main'
+Project entities:
+    JPA: [com.company.vzvod.entity.Address, com.company.vzvod.entity.Department, com.company.vzvod.entity.Penalty, com.company.vzvod.entity.CriminalViolation, com.company.vzvod.entity.Violation, com.company.vzvod.entity.Vocation, com.company.vzvod.entity.UserNotificationRecipient, com.company.vzvod.entity.UserTelegramBinding, com.company.vzvod.entity.IdCard, com.company.vzvod.entity.AdministrativeViolation, com.company.vzvod.entity.Event, com.company.vzvod.entity.Education, com.company.vzvod.entity.ServiceInfo, com.company.vzvod.entity.UserMobileBinding, com.company.vzvod.entity.UserNotification, com.company.vzvod.entity.Contacts, com.company.vzvod.entity.DeletedEvent, com.company.vzvod.entity.Shift, com.company.vzvod.entity.AllTodayShifts, com.company.vzvod.entity.Incentive, com.company.vzvod.entity.User, com.company.vzvod.entity.Vehicle];
+    DTO: [];
+Project converters: [com.company.vzvod.security.crypto.EncryptedLocalDateConverter, com.company.vzvod.security.crypto.EncryptedStringConverter].
+Running EclipseLink enhancer in root project 'Vzvod' for source set 'main'
+Running Jmix enhancer in root project 'Vzvod' for source set 'main'
+
+> Task :vaadinPrepareFrontend
+> Task :processResources
+> Task :classes
+> Task :hillaConfigure
+
+> Task :vaadinBuildFrontend
+Use the './' prefix for files in the 'D:\Shtopor\core\.\src\main\frontend' folder: 'generated/jar-resources/theme/lumo/checkbox/jmix-switch-styles.js', please update your annotations.
+
+> Task :resolveMainClassName
+> Task :bootJar
+
+[Incubating] Problems report is available at: file:///D:/Shtopor/core/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.12.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 36s
+10 actionable tasks: 10 executed

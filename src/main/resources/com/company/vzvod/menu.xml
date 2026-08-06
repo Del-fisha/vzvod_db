@@ -19,14 +19,14 @@
     </menu>
 
     <menu id="application" title="msg://com.company.vzvod/menu.application.title" opened="true">
-        <item view="OrientationsView" title="msg://com.company.vzvod.view.orientations/orientationsView.title"/>
+        <item id="menuAllShifts" view="AllTodayShifts.list"
+              title="msg://com.company.vzvod/menu.all_shifts.title"/>
+<!--        <item view="OrientationsView" title="msg://com.company.vzvod.view.orientations/orientationsView.title"/>-->
         <item view="User.list" title="msg://com.company.vzvod.view.user/userListView.title"/>
         <item view="Penalty.list" title="msg://com.company.vzvod.view.penalty/penaltyListView.title"/>
         <item view="Incentive.list" title="msg://com.company.vzvod.view.penalty/incentiveListView.title"/>
         <item view="Vehicle.list" title="msg://vehicleListView.title"/>
         <item id="all_vocations" view="Vocation.list" title="msg://com.company.vzvod.view.vocation/vocationListView.title"/>
-        <item id="menuAllShifts" view="AllTodayShifts.list"
-              title="msg://com.company.vzvod/menu.all_shifts.title"/>
         <item id="all_administrative_violations" view="AdministrativeViolation.list"
               title="msg://com.company.vzvod.view.administrativeviolation/administrativeViolationListView.title"/>
         <item id="all_criminal_violations" view="CriminalViolation.list"

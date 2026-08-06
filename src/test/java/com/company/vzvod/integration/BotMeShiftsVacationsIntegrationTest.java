@@ -363,7 +363,7 @@ class BotMeShiftsVacationsIntegrationTest {
                 null,
                 null,
                 null,
-                null
+                null, null
         );
 
         mockMvc.perform(post("/api/bot/me/shifts")
@@ -402,7 +402,7 @@ class BotMeShiftsVacationsIntegrationTest {
                 null,
                 null,
                 null,
-                null
+                null, null
         );
 
         MvcResult created = mockMvc.perform(post("/api/bot/me/shifts")
@@ -459,7 +459,7 @@ class BotMeShiftsVacationsIntegrationTest {
                 null,
                 null,
                 null,
-                null
+                null, null
         );
 
         MvcResult created = mockMvc.perform(post("/api/bot/me/shifts")
@@ -519,7 +519,7 @@ class BotMeShiftsVacationsIntegrationTest {
                 1,
                 2,
                 0,
-                0
+                0, null
         );
 
         mockMvc.perform(put("/api/bot/me/shifts/" + createdShiftId)
@@ -554,7 +554,7 @@ class BotMeShiftsVacationsIntegrationTest {
                 null,
                 null,
                 null,
-                null
+                null, null
         );
 
         mockMvc.perform(put("/api/bot/me/shifts/" + createdShiftId)
@@ -591,7 +591,7 @@ class BotMeShiftsVacationsIntegrationTest {
                 null,
                 null,
                 null,
-                null
+                null, null
         );
 
         MvcResult created = mockMvc.perform(post("/api/bot/me/shifts")
@@ -613,7 +613,7 @@ class BotMeShiftsVacationsIntegrationTest {
                 null,
                 null,
                 null,
-                null
+                null, null
         );
 
         mockMvc.perform(put("/api/bot/me/shifts/" + shiftId)
@@ -646,7 +646,7 @@ class BotMeShiftsVacationsIntegrationTest {
                 null,
                 null,
                 null,
-                null
+                null, null
         );
 
         MvcResult created = mockMvc.perform(post("/api/bot/me/shifts")
@@ -699,7 +699,7 @@ class BotMeShiftsVacationsIntegrationTest {
                 null,
                 null,
                 null,
-                null
+                null, null
         );
 
         mockMvc.perform(post("/api/bot/me/shifts")

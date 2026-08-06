@@ -49,6 +49,10 @@ public final class ClickVersusDoubleClickCoordinator {
         onDouble.run();
     }
 
+    public void cancelPending() {
+        scheduler.cancel();
+    }
+
     private static final class DefaultScheduler implements Scheduler {
         private static final ScheduledExecutorService EXECUTOR =
                 Executors.newSingleThreadScheduledExecutor(r -> {

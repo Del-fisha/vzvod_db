@@ -33,17 +33,20 @@ import java.util.UUID;
 public class BotMeController {
 
     private final BotApiKeyAuthorizer apiKeyAuthorizer;
+    private final BotTelegramBindingService telegramBindingService;
     private final BotMeProfileService botMeProfileService;
     private final BotMeShiftsVocationsService botMeShiftsVocationsService;
     private final BotMeEventsService botMeEventsService;
 
     public BotMeController(
             BotApiKeyAuthorizer apiKeyAuthorizer,
+            BotTelegramBindingService telegramBindingService,
             BotMeProfileService botMeProfileService,
             BotMeShiftsVocationsService botMeShiftsVocationsService,
             BotMeEventsService botMeEventsService
     ) {
         this.apiKeyAuthorizer = apiKeyAuthorizer;
+        this.telegramBindingService = telegramBindingService;
         this.botMeProfileService = botMeProfileService;
         this.botMeShiftsVocationsService = botMeShiftsVocationsService;
         this.botMeEventsService = botMeEventsService;
@@ -55,8 +58,8 @@ public class BotMeController {
             @RequestHeader(value = "X-Telegram-Chat-Id", required = false) String telegramChatIdHeader
     ) {
         apiKeyAuthorizer.verify(apiKey);
-        long chatId = parseTelegramChatId(telegramChatIdHeader);
-        return ResponseEntity.ok(botMeProfileService.loadProfile(chatId));
+        UUID userId = resolveUserId(telegramChatIdHeader);
+        return ResponseEntity.ok(botMeProfileService.loadProfile(userId));
     }
 
     @GetMapping("/shifts")
@@ -65,8 +68,8 @@ public class BotMeController {
             @RequestHeader(value = "X-Telegram-Chat-Id", required = false) String telegramChatIdHeader
     ) {
         apiKeyAuthorizer.verify(apiKey);
-        long chatId = parseTelegramChatId(telegramChatIdHeader);
-        return ResponseEntity.ok(botMeShiftsVocationsService.loadShifts(chatId));
+        UUID userId = resolveUserId(telegramChatIdHeader);
+        return ResponseEntity.ok(botMeShiftsVocationsService.loadShifts(userId));
     }
 
     @GetMapping("/colleagues")
@@ -78,8 +81,8 @@ public class BotMeController {
             @RequestParam(value = "excludeShiftId", required = false) UUID excludeShiftId
     ) {
         apiKeyAuthorizer.verify(apiKey);
-        long chatId = parseTelegramChatId(telegramChatIdHeader);
-        return ResponseEntity.ok(botMeShiftsVocationsService.loadColleagues(chatId, department, page, excludeShiftId));
+        UUID userId = resolveUserId(telegramChatIdHeader);
+        return ResponseEntity.ok(botMeShiftsVocationsService.loadColleagues(userId, department, page, excludeShiftId));
     }
 
     @GetMapping("/vacations")
@@ -88,8 +91,8 @@ public class BotMeController {
             @RequestHeader(value = "X-Telegram-Chat-Id", required = false) String telegramChatIdHeader
     ) {
         apiKeyAuthorizer.verify(apiKey);
-        long chatId = parseTelegramChatId(telegramChatIdHeader);
-        return ResponseEntity.ok(botMeShiftsVocationsService.loadVacations(chatId));
+        UUID userId = resolveUserId(telegramChatIdHeader);
+        return ResponseEntity.ok(botMeShiftsVocationsService.loadVacations(userId));
     }
 
     @GetMapping("/events")
@@ -98,8 +101,8 @@ public class BotMeController {
             @RequestHeader(value = "X-Telegram-Chat-Id", required = false) String telegramChatIdHeader
     ) {
         apiKeyAuthorizer.verify(apiKey);
-        long chatId = parseTelegramChatId(telegramChatIdHeader);
-        return ResponseEntity.ok(botMeEventsService.loadUpcomingEvents(chatId));
+        UUID userId = resolveUserId(telegramChatIdHeader);
+        return ResponseEntity.ok(botMeEventsService.loadUpcomingEvents(userId));
     }
 
     @GetMapping("/shifts/{shiftId}")
@@ -109,8 +112,8 @@ public class BotMeController {
             @PathVariable("shiftId") UUID shiftId
     ) {
         apiKeyAuthorizer.verify(apiKey);
-        long chatId = parseTelegramChatId(telegramChatIdHeader);
-        return ResponseEntity.ok(botMeShiftsVocationsService.loadShift(chatId, shiftId));
+        UUID userId = resolveUserId(telegramChatIdHeader);
+        return ResponseEntity.ok(botMeShiftsVocationsService.loadShift(userId, shiftId));
     }
 
     @PostMapping("/shifts")
@@ -120,8 +123,8 @@ public class BotMeController {
             @RequestBody(required = false) BotShiftUpsertRequest body
     ) {
         apiKeyAuthorizer.verify(apiKey);
-        long chatId = parseTelegramChatId(telegramChatIdHeader);
-        return ResponseEntity.status(HttpStatus.CREATED).body(botMeShiftsVocationsService.createShift(chatId, body));
+        UUID userId = resolveUserId(telegramChatIdHeader);
+        return ResponseEntity.status(HttpStatus.CREATED).body(botMeShiftsVocationsService.createShift(userId, body));
     }
 
     @PutMapping("/shifts/{shiftId}")
@@ -132,8 +135,8 @@ public class BotMeController {
             @RequestBody(required = false) BotShiftUpsertRequest body
     ) {
         apiKeyAuthorizer.verify(apiKey);
-        long chatId = parseTelegramChatId(telegramChatIdHeader);
-        return ResponseEntity.ok(botMeShiftsVocationsService.updateShift(chatId, shiftId, body));
+        UUID userId = resolveUserId(telegramChatIdHeader);
+        return ResponseEntity.ok(botMeShiftsVocationsService.updateShift(userId, shiftId, body));
     }
 
     @PostMapping("/shifts/{shiftId}/end-time")
@@ -144,8 +147,8 @@ public class BotMeController {
             @RequestBody(required = false) BotShiftEndTimeRequest body
     ) {
         apiKeyAuthorizer.verify(apiKey);
-        long chatId = parseTelegramChatId(telegramChatIdHeader);
-        return ResponseEntity.ok(botMeShiftsVocationsService.setShiftEndTime(chatId, shiftId, body));
+        UUID userId = resolveUserId(telegramChatIdHeader);
+        return ResponseEntity.ok(botMeShiftsVocationsService.setShiftEndTime(userId, shiftId, body));
     }
 
     @PostMapping("/shifts/{shiftId}/ibd-with-migrant")
@@ -156,8 +159,8 @@ public class BotMeController {
             @RequestBody(required = false) BotShiftMetricDeltaRequest body
     ) {
         apiKeyAuthorizer.verify(apiKey);
-        long chatId = parseTelegramChatId(telegramChatIdHeader);
-        return ResponseEntity.ok(botMeShiftsVocationsService.adjustIbdWithMigrant(chatId, shiftId, body));
+        UUID userId = resolveUserId(telegramChatIdHeader);
+        return ResponseEntity.ok(botMeShiftsVocationsService.adjustIbdWithMigrant(userId, shiftId, body));
     }
 
     @PostMapping("/shifts/{shiftId}/count-of-statements")
@@ -168,8 +171,8 @@ public class BotMeController {
             @RequestBody(required = false) BotShiftMetricDeltaRequest body
     ) {
         apiKeyAuthorizer.verify(apiKey);
-        long chatId = parseTelegramChatId(telegramChatIdHeader);
-        return ResponseEntity.ok(botMeShiftsVocationsService.adjustCountOfStatements(chatId, shiftId, body));
+        UUID userId = resolveUserId(telegramChatIdHeader);
+        return ResponseEntity.ok(botMeShiftsVocationsService.adjustCountOfStatements(userId, shiftId, body));
     }
 
     @GetMapping("/violation-options")
@@ -188,8 +191,8 @@ public class BotMeController {
             @RequestBody(required = false) BotAdministrativeViolationCreateRequest body
     ) {
         apiKeyAuthorizer.verify(apiKey);
-        long chatId = parseTelegramChatId(telegramChatIdHeader);
-        return ResponseEntity.ok(botMeShiftsVocationsService.createAdministrativeViolation(chatId, shiftId, body));
+        UUID userId = resolveUserId(telegramChatIdHeader);
+        return ResponseEntity.ok(botMeShiftsVocationsService.createAdministrativeViolation(userId, shiftId, body));
     }
 
     @PostMapping("/shifts/{shiftId}/criminal-violations")
@@ -200,8 +203,8 @@ public class BotMeController {
             @RequestBody(required = false) BotCriminalViolationCreateRequest body
     ) {
         apiKeyAuthorizer.verify(apiKey);
-        long chatId = parseTelegramChatId(telegramChatIdHeader);
-        return ResponseEntity.ok(botMeShiftsVocationsService.createCriminalViolation(chatId, shiftId, body));
+        UUID userId = resolveUserId(telegramChatIdHeader);
+        return ResponseEntity.ok(botMeShiftsVocationsService.createCriminalViolation(userId, shiftId, body));
     }
 
     @PutMapping("/profile")
@@ -211,16 +214,17 @@ public class BotMeController {
             @RequestBody(required = false) BotProfilePatchRequest body
     ) {
         apiKeyAuthorizer.verify(apiKey);
-        long chatId = parseTelegramChatId(telegramChatIdHeader);
-        return ResponseEntity.ok(botMeProfileService.updateProfile(chatId, body));
+        UUID userId = resolveUserId(telegramChatIdHeader);
+        return ResponseEntity.ok(botMeProfileService.updateProfile(userId, body));
     }
 
-    private static long parseTelegramChatId(String header) {
-        if (header == null || header.isBlank()) {
+    private UUID resolveUserId(String telegramChatIdHeader) {
+        if (telegramChatIdHeader == null || telegramChatIdHeader.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "X-Telegram-Chat-Id is required");
         }
         try {
-            return Long.parseLong(header.trim());
+            long chatId = Long.parseLong(telegramChatIdHeader.trim());
+            return telegramBindingService.requireActiveUserIdByChatId(chatId);
         } catch (NumberFormatException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid X-Telegram-Chat-Id");
         }

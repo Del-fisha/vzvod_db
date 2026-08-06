@@ -13,6 +13,7 @@ import com.company.vzvod.bot.dto.BotShiftsResponse;
 import com.company.vzvod.bot.dto.BotVacationBalance;
 import com.company.vzvod.bot.dto.BotVacationsResponse;
 import com.company.vzvod.bot.dto.BotViolationOptionsResponse;
+import com.company.vzvod.bot.dto.BotVocationCreateRequest;
 import com.company.vzvod.bot.dto.BotVocationItem;
 import com.company.vzvod.entity.AdministrativeViolation;
 import com.company.vzvod.entity.ArticleOfAdministrative;
@@ -27,7 +28,6 @@ import com.company.vzvod.entity.Shift;
 import com.company.vzvod.entity.TypeOfCriminal;
 import com.company.vzvod.entity.TypeOfShift;
 import com.company.vzvod.entity.User;
-import com.company.vzvod.entity.UserTelegramBinding;
 import com.company.vzvod.entity.Vocation;
 import com.company.vzvod.entity.VocationType;
 import com.company.vzvod.service.DepartmentConverter;
@@ -43,6 +43,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -72,8 +73,8 @@ public class BotMeShiftsVocationsService {
     }
 
     @Transactional(readOnly = true)
-    public BotShiftsResponse loadShifts(long telegramChatId) {
-        UUID serviceInfoId = loadServiceInfoId(telegramChatId);
+    public BotShiftsResponse loadShifts(UUID userId) {
+        UUID serviceInfoId = loadServiceInfoId(userId);
         List<Shift> shifts = unconstrainedDataManager.load(Shift.class)
                 .query("select distinct s from Shift s join s.units u where u.id = :sid order by s.date desc, s.startTime desc")
                 .parameter("sid", serviceInfoId)
@@ -100,8 +101,8 @@ public class BotMeShiftsVocationsService {
     }
 
     @Transactional(readOnly = true)
-    public BotShiftItem loadShift(long telegramChatId, UUID shiftId) {
-        ServiceInfo si = requireServiceInfo(telegramChatId);
+    public BotShiftItem loadShift(UUID userId, UUID shiftId) {
+        ServiceInfo si = requireServiceInfo(userId);
         Shift shift = unconstrainedDataManager.load(Shift.class)
                 .id(shiftId)
                 .fetchPlan(f -> f
@@ -126,26 +127,31 @@ public class BotMeShiftsVocationsService {
         return toShiftItem(shift, si.getId());
     }
 
+    /**
+     * Список активных сотрудников для выбора напарника.
+     * {@code preferredDepartment} — отделение «сегодня» (первыми в списке), затем другое.
+     * В ответе всегда оба отделения; подпись — краткое ФИО ({@code Фамилия И. О.}).
+     */
     @Transactional(readOnly = true)
-    public BotColleaguesResponse loadColleagues(long telegramChatId, int department, int page, UUID excludeShiftId) {
-        if (department != 1 && department != 2) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "department must be 1 or 2");
+    public BotColleaguesResponse loadColleagues(UUID userId, int preferredDepartment, int page, UUID excludeShiftId) {
+        if (preferredDepartment != 1 && preferredDepartment != 2) {
+            preferredDepartment = 1;
         }
         if (page < 0) {
             page = 0;
         }
-        User me = loadUserWithServiceInfo(telegramChatId);
+        User me = loadUserWithServiceInfo(userId);
         UUID myId = me.getId();
         Set<UUID> busyInOpenShifts = openShiftParticipantIdsExcept(excludeShiftId);
         List<User> users = unconstrainedDataManager.load(User.class)
                 .query("select u from User u join u.serviceInfo si join si.department d "
-                        + "where d.number = :dn and u.id <> :uid and si.status = :st "
-                        + "order by si.post, si.rank desc, u.lastName")
-                .parameter("dn", department)
+                        + "where d.number in (1, 2) and u.id <> :uid and si.status = :st "
+                        + "order by u.lastName, u.firstName")
                 .parameter("uid", myId)
                 .parameter("st", StatusInService.ACTIVE.getId())
                 .maxResults(COLLEAGUES_MAX_FETCH)
                 .list();
+        int preferred = preferredDepartment;
         List<User> available = new ArrayList<>(users.size());
         for (User u : users) {
             ServiceInfo si = u.getServiceInfo();
@@ -154,11 +160,31 @@ public class BotMeShiftsVocationsService {
             }
             available.add(u);
         }
-        int from = page * COLLEAGUES_PAGE_SIZE;
+        available.sort((a, b) -> {
+            int da = departmentNumber(a);
+            int db = departmentNumber(b);
+            boolean aPref = da == preferred;
+            boolean bPref = db == preferred;
+            if (aPref != bPref) {
+                return aPref ? -1 : 1;
+            }
+            String la = a.getLastName() == null ? "" : a.getLastName();
+            String lb = b.getLastName() == null ? "" : b.getLastName();
+            int byLast = la.compareToIgnoreCase(lb);
+            if (byLast != 0) {
+                return byLast;
+            }
+            String fa = a.getFirstName() == null ? "" : a.getFirstName();
+            String fb = b.getFirstName() == null ? "" : b.getFirstName();
+            return fa.compareToIgnoreCase(fb);
+        });
+        // Для мобильного клиента отдаём весь доступный список одной страницей.
+        int pageSize = Math.max(COLLEAGUES_PAGE_SIZE, available.size());
+        int from = page * pageSize;
         if (from >= available.size()) {
             return new BotColleaguesResponse(List.of(), false);
         }
-        int to = Math.min(from + COLLEAGUES_PAGE_SIZE, available.size());
+        int to = Math.min(from + pageSize, available.size());
         boolean hasMore = to < available.size();
         List<BotColleagueItem> items = new ArrayList<>(to - from);
         for (int i = from; i < to; i++) {
@@ -167,15 +193,23 @@ public class BotMeShiftsVocationsService {
             if (si == null) {
                 continue;
             }
-            items.add(new BotColleagueItem(si.getId(), colleagueLabel(u)));
+            items.add(new BotColleagueItem(si.getId(), colleagueLabel(u), departmentNumber(u)));
         }
         return new BotColleaguesResponse(items, hasMore);
     }
 
+    private static int departmentNumber(User u) {
+        if (u == null || u.getServiceInfo() == null || u.getServiceInfo().getDepartment() == null) {
+            return 0;
+        }
+        Integer n = u.getServiceInfo().getDepartment().getNumber();
+        return n == null ? 0 : n;
+    }
+
     @Transactional
-    public BotShiftItem createShift(long telegramChatId, BotShiftUpsertRequest req) {
+    public BotShiftItem createShift(UUID userId, BotShiftUpsertRequest req) {
         validateCreate(req);
-        User user = loadUserWithServiceInfo(telegramChatId);
+        User user = loadUserWithServiceInfo(userId);
         ServiceInfo si = user.getServiceInfo();
         if (si == null) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "service info missing");
@@ -186,17 +220,19 @@ public class BotMeShiftsVocationsService {
         shift.setDepartmentToday(DepartmentConverter.departmentFromDate(req.date()));
         shift.getUnits().clear();
         shift.getUnits().add(si);
-        ServiceInfo partner = loadAndValidatePartner(req.partnerServiceInfoId(), user.getId());
-        assertNotInOtherOpenShift(partner.getId(), null);
-        shift.getUnits().add(partner);
+        for (UUID partnerId : resolvePartnerIds(req)) {
+            ServiceInfo partner = loadAndValidatePartner(partnerId, user.getId());
+            assertNotInOtherOpenShift(partner.getId(), null);
+            shift.getUnits().add(partner);
+        }
         Shift saved = unconstrainedDataManager.save(shift);
         return toShiftItem(saved, si.getId());
     }
 
     @Transactional
-    public BotShiftItem updateShift(long telegramChatId, UUID shiftId, BotShiftUpsertRequest req) {
+    public BotShiftItem updateShift(UUID userId, UUID shiftId, BotShiftUpsertRequest req) {
         validateUpdate(req);
-        ServiceInfo si = requireServiceInfo(telegramChatId);
+        ServiceInfo si = requireServiceInfo(userId);
         Shift shift = unconstrainedDataManager.load(Shift.class)
                 .id(shiftId)
                 .fetchPlan(f -> f
@@ -222,28 +258,31 @@ public class BotMeShiftsVocationsService {
         }
         applyUpdate(shift, req);
         shift.setDepartmentToday(DepartmentConverter.departmentFromDate(req.date()));
-        if (req.partnerServiceInfoId() != null) {
-            User user = loadUserWithServiceInfo(telegramChatId);
-            ServiceInfo partner = loadAndValidatePartner(req.partnerServiceInfoId(), user.getId());
-            UUID partnerSid = partner.getId();
-            boolean already = shift.getUnits().stream()
-                    .anyMatch(u -> u != null && partnerSid.equals(u.getId()));
-            if (already) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "user already in shift");
+        List<UUID> partnerIds = resolvePartnerIds(req);
+        if (!partnerIds.isEmpty()) {
+            User user = loadUserWithServiceInfo(userId);
+            for (UUID partnerId : partnerIds) {
+                ServiceInfo partner = loadAndValidatePartner(partnerId, user.getId());
+                UUID partnerSid = partner.getId();
+                boolean already = shift.getUnits().stream()
+                        .anyMatch(u -> u != null && partnerSid.equals(u.getId()));
+                if (already) {
+                    continue;
+                }
+                assertNotInOtherOpenShift(partnerSid, shiftId);
+                shift.getUnits().add(partner);
             }
-            assertNotInOtherOpenShift(partnerSid, shiftId);
-            shift.getUnits().add(partner);
         }
         Shift saved = unconstrainedDataManager.save(shift);
         return toShiftItem(saved, si.getId());
     }
 
     @Transactional
-    public BotShiftItem setShiftEndTime(long telegramChatId, UUID shiftId, BotShiftEndTimeRequest body) {
+    public BotShiftItem setShiftEndTime(UUID userId, UUID shiftId, BotShiftEndTimeRequest body) {
         if (body == null || body.endTime() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "endTime required");
         }
-        ServiceInfo si = requireServiceInfo(telegramChatId);
+        ServiceInfo si = requireServiceInfo(userId);
         Shift shift = unconstrainedDataManager.load(Shift.class)
                 .id(shiftId)
                 .fetchPlan(f -> f
@@ -277,37 +316,83 @@ public class BotMeShiftsVocationsService {
     }
 
     @Transactional
-    public BotShiftItem adjustIbdWithMigrant(long telegramChatId, UUID shiftId, BotShiftMetricDeltaRequest body) {
+    public BotShiftItem adjustIbdWithMigrant(UUID userId, UUID shiftId, BotShiftMetricDeltaRequest body) {
         int delta = requireMetricDelta(body);
-        ServiceInfo si = requireServiceInfo(telegramChatId);
+        ServiceInfo si = requireServiceInfo(userId);
         Shift shift = loadOpenShiftForParticipant(shiftId, si.getId());
         int current = shift.getIbdWithMigrant() == null ? 0 : shift.getIbdWithMigrant();
-        if (delta > 0) {
-            shift.setIbdWithMigrant(current + delta);
-        } else {
-            if (current + delta < 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ibdWithMigrant cannot be negative");
-            }
-            shift.setIbdWithMigrant(current + delta);
+        int next = Math.max(0, current + delta);
+        if (next == current) {
+            return toShiftItem(shift, si.getId());
         }
+        shift.setIbdWithMigrant(next);
         Shift saved = unconstrainedDataManager.save(shift);
         return toShiftItem(saved, si.getId());
     }
 
     @Transactional
-    public BotShiftItem adjustCountOfStatements(long telegramChatId, UUID shiftId, BotShiftMetricDeltaRequest body) {
+    public BotShiftItem adjustCountOfStatements(UUID userId, UUID shiftId, BotShiftMetricDeltaRequest body) {
         int delta = requireMetricDelta(body);
-        ServiceInfo si = requireServiceInfo(telegramChatId);
+        ServiceInfo si = requireServiceInfo(userId);
         Shift shift = loadOpenShiftForParticipant(shiftId, si.getId());
         int current = shift.getCountOfStatements() == null ? 0 : shift.getCountOfStatements();
-        if (delta > 0) {
-            shift.setCountOfStatements(current + delta);
-        } else {
-            if (current + delta < 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "countOfStatements cannot be negative");
-            }
-            shift.setCountOfStatements(current + delta);
+        int next = Math.max(0, current + delta);
+        if (next == current) {
+            return toShiftItem(shift, si.getId());
         }
+        shift.setCountOfStatements(next);
+        Shift saved = unconstrainedDataManager.save(shift);
+        return toShiftItem(saved, si.getId());
+    }
+
+    @Transactional
+    public BotShiftItem adjustIbdWithoutMigrant(UUID userId, UUID shiftId, BotShiftMetricDeltaRequest body) {
+        int delta = requireMetricDelta(body);
+        ServiceInfo si = requireServiceInfo(userId);
+        Shift shift = loadOpenShiftForParticipant(shiftId, si.getId());
+        int current = shift.getIbdWithoutMigrant() == null ? 0 : shift.getIbdWithoutMigrant();
+        int next = Math.max(0, current + delta);
+        if (next == current) {
+            return toShiftItem(shift, si.getId());
+        }
+        shift.setIbdWithoutMigrant(next);
+        Shift saved = unconstrainedDataManager.save(shift);
+        return toShiftItem(saved, si.getId());
+    }
+
+    @Transactional
+    public BotShiftItem adjustCountOfClaims(UUID userId, UUID shiftId, BotShiftMetricDeltaRequest body) {
+        int delta = requireMetricDelta(body);
+        ServiceInfo si = requireServiceInfo(userId);
+        Shift shift = loadOpenShiftForParticipant(shiftId, si.getId());
+        int current = shift.getCountOfClaims() == null ? 0 : shift.getCountOfClaims();
+        int next = Math.max(0, current + delta);
+        if (next == current) {
+            return toShiftItem(shift, si.getId());
+        }
+        shift.setCountOfClaims(next);
+        Shift saved = unconstrainedDataManager.save(shift);
+        return toShiftItem(saved, si.getId());
+    }
+
+    /**
+     * «Мигрант ±»: одновременно меняет ibdWithoutMigrant и ibdWithMigrant на delta (±1).
+     * Ниже нуля не уходит — остаётся 0 без ошибки.
+     */
+    @Transactional
+    public BotShiftItem adjustMigrantCheck(UUID userId, UUID shiftId, BotShiftMetricDeltaRequest body) {
+        int delta = requireMetricDelta(body);
+        ServiceInfo si = requireServiceInfo(userId);
+        Shift shift = loadOpenShiftForParticipant(shiftId, si.getId());
+        int without = shift.getIbdWithoutMigrant() == null ? 0 : shift.getIbdWithoutMigrant();
+        int with = shift.getIbdWithMigrant() == null ? 0 : shift.getIbdWithMigrant();
+        int nextWithout = Math.max(0, without + delta);
+        int nextWith = Math.max(0, with + delta);
+        if (nextWithout == without && nextWith == with) {
+            return toShiftItem(shift, si.getId());
+        }
+        shift.setIbdWithoutMigrant(nextWithout);
+        shift.setIbdWithMigrant(nextWith);
         Shift saved = unconstrainedDataManager.save(shift);
         return toShiftItem(saved, si.getId());
     }
@@ -330,14 +415,14 @@ public class BotMeShiftsVocationsService {
     }
 
     @Transactional
-    public BotShiftItem createAdministrativeViolation(long telegramChatId, UUID shiftId,
+    public BotShiftItem createAdministrativeViolation(UUID userId, UUID shiftId,
                                                       BotAdministrativeViolationCreateRequest body) {
         if (body == null || body.impactId() == null || body.articleId() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "impactId and articleId required");
         }
         Impact impact = requireImpact(body.impactId());
         ArticleOfAdministrative article = requireAdministrativeArticle(body.articleId());
-        ServiceInfo si = requireServiceInfo(telegramChatId);
+        ServiceInfo si = requireServiceInfo(userId);
         Shift shift = loadOpenShiftForParticipant(shiftId, si.getId());
         AdministrativeViolation violation = unconstrainedDataManager.create(AdministrativeViolation.class);
         violation.setShift(shift);
@@ -349,14 +434,14 @@ public class BotMeShiftsVocationsService {
     }
 
     @Transactional
-    public BotShiftItem createCriminalViolation(long telegramChatId, UUID shiftId,
+    public BotShiftItem createCriminalViolation(UUID userId, UUID shiftId,
                                                 BotCriminalViolationCreateRequest body) {
         if (body == null || body.impactId() == null || body.typeId() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "impactId and typeId required");
         }
         Impact impact = requireImpact(body.impactId());
         TypeOfCriminal type = requireCriminalType(body.typeId());
-        ServiceInfo si = requireServiceInfo(telegramChatId);
+        ServiceInfo si = requireServiceInfo(userId);
         Shift shift = loadOpenShiftForParticipant(shiftId, si.getId());
         CriminalViolation violation = unconstrainedDataManager.create(CriminalViolation.class);
         violation.setShift(shift);
@@ -451,9 +536,27 @@ public class BotMeShiftsVocationsService {
 
     private void validateCreate(BotShiftUpsertRequest req) {
         validateCommon(req);
-        if (req.partnerServiceInfoId() == null) {
+        if (resolvePartnerIds(req).isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "partnerServiceInfoId required");
         }
+    }
+
+    /**
+     * Объединяет одиночный partnerServiceInfoId и список partnerServiceInfoIds без дублей.
+     */
+    private static List<UUID> resolvePartnerIds(BotShiftUpsertRequest req) {
+        LinkedHashSet<UUID> ids = new LinkedHashSet<>();
+        if (req.partnerServiceInfoId() != null) {
+            ids.add(req.partnerServiceInfoId());
+        }
+        if (req.partnerServiceInfoIds() != null) {
+            for (UUID id : req.partnerServiceInfoIds()) {
+                if (id != null) {
+                    ids.add(id);
+                }
+            }
+        }
+        return List.copyOf(ids);
     }
 
     private void validateUpdate(BotShiftUpsertRequest req) {
@@ -594,24 +697,16 @@ public class BotMeShiftsVocationsService {
         }
     }
 
-    private User loadUserWithServiceInfo(long telegramChatId) {
-        UserTelegramBinding binding = unconstrainedDataManager.load(UserTelegramBinding.class)
-                .query("select b from UserTelegramBinding b where b.chatId = :cid")
-                .parameter("cid", telegramChatId)
-                .optional()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "telegram chat not bound"));
-
-        UUID userId = binding.getUser().getId();
+    private User loadUserWithServiceInfo(UUID userId) {
         activeUserChecker.requireActive(userId);
-
         return unconstrainedDataManager.load(User.class)
                 .id(userId)
                 .fetchPlan(fp -> fp.add("serviceInfo", sf -> sf.add("id")))
                 .one();
     }
 
-    private ServiceInfo requireServiceInfo(long telegramChatId) {
-        User user = loadUserWithServiceInfo(telegramChatId);
+    private ServiceInfo requireServiceInfo(UUID userId) {
+        User user = loadUserWithServiceInfo(userId);
         ServiceInfo si = user.getServiceInfo();
         if (si == null) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "service info missing");
@@ -660,8 +755,8 @@ public class BotMeShiftsVocationsService {
     }
 
     @Transactional(readOnly = true)
-    public BotVacationsResponse loadVacations(long telegramChatId) {
-        User user = loadUserWithVacationFields(telegramChatId);
+    public BotVacationsResponse loadVacations(UUID userId) {
+        User user = loadUserWithVacationFields(userId);
         ServiceInfo si = user.getServiceInfo();
         if (si == null) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "service info missing");
@@ -681,30 +776,85 @@ public class BotMeShiftsVocationsService {
             VocationType t = v.getType();
             String typeLabel = t == null ? null : enumMessage("VocationType", t.name());
             items.add(new BotVocationItem(
+                    v.getId(),
                     v.getStartDate(),
                     v.getEndDate(),
                     v.getCountOfDays(),
-                    typeLabel
+                    v.getTypeId(),
+                    typeLabel,
+                    v.isHasDeparture(),
+                    v.getCityToDrive(),
+                    v.getDaysAddedByDeparture()
             ));
         }
         return new BotVacationsResponse(balance, items);
     }
 
-    private UUID loadServiceInfoId(long telegramChatId) {
-        ServiceInfo si = requireServiceInfo(telegramChatId);
+    @Transactional
+    public BotVacationsResponse createVocation(UUID userId, BotVocationCreateRequest body) {
+        if (body == null || body.typeId() == null || body.startDate() == null || body.endDate() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "typeId, startDate, endDate required");
+        }
+        if (body.endDate().isBefore(body.startDate())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "endDate before startDate");
+        }
+        VocationType type = VocationType.fromId(body.typeId());
+        if (type == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "unknown vocation type");
+        }
+        User user = loadUserWithVacationFields(userId);
+        ServiceInfo si = user.getServiceInfo();
+        if (si == null) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "service info missing");
+        }
+        int days = (int) java.time.temporal.ChronoUnit.DAYS.between(body.startDate(), body.endDate()) + 1;
+        boolean departure = Boolean.TRUE.equals(body.hasDeparture());
+        int added = body.daysAddedByDeparture() == null ? 0 : Math.max(0, body.daysAddedByDeparture());
+        int debit = days + (departure ? added : 0);
+        int available = si.getVacationDaysAvailable() == null ? 0 : si.getVacationDaysAvailable();
+        if (debit > available) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "not enough vacation days");
+        }
+        if (departure && (body.cityToDrive() == null || body.cityToDrive().isBlank())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "cityToDrive required when hasDeparture");
+        }
+        Vocation v = unconstrainedDataManager.create(Vocation.class);
+        v.setUserServiceInfo(si);
+        v.setType(type);
+        v.setStartDate(body.startDate());
+        v.setEndDate(body.endDate());
+        v.setCountOfDays(days);
+        v.setHasDeparture(departure);
+        v.setCityToDrive(departure ? body.cityToDrive().trim() : null);
+        v.setDaysAddedByDeparture(departure ? added : 0);
+        unconstrainedDataManager.save(v);
+        return loadVacations(userId);
+    }
+
+    @Transactional
+    public BotVacationsResponse deleteVocation(UUID userId, UUID vocationId) {
+        ServiceInfo si = requireServiceInfo(userId);
+        Vocation v = unconstrainedDataManager.load(Vocation.class)
+                .id(vocationId)
+                .optional()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "vocation not found"));
+        if (v.getUserServiceInfo() == null || !si.getId().equals(v.getUserServiceInfo().getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not your vocation");
+        }
+        if (v.getStartDate() != null && !v.getStartDate().isAfter(java.time.LocalDate.now())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "only future vocations can be deleted");
+        }
+        unconstrainedDataManager.remove(v);
+        return loadVacations(userId);
+    }
+
+    private UUID loadServiceInfoId(UUID userId) {
+        ServiceInfo si = requireServiceInfo(userId);
         return si.getId();
     }
 
-    private User loadUserWithVacationFields(long telegramChatId) {
-        UserTelegramBinding binding = unconstrainedDataManager.load(UserTelegramBinding.class)
-                .query("select b from UserTelegramBinding b where b.chatId = :cid")
-                .parameter("cid", telegramChatId)
-                .optional()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "telegram chat not bound"));
-
-        UUID userId = binding.getUser().getId();
+    private User loadUserWithVacationFields(UUID userId) {
         activeUserChecker.requireActive(userId);
-
         return unconstrainedDataManager.load(User.class)
                 .id(userId)
                 .fetchPlan(fp -> fp.add("serviceInfo", sf -> sf
