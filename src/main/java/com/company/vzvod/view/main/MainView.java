@@ -35,7 +35,6 @@ import com.company.vzvod.notification.OverdueItemDto;
 import com.company.vzvod.notification.OverdueItemType;
 import com.company.vzvod.entity.UserNotification;
 import com.company.vzvod.view.dashboard.DashboardMessageComposeView;
-import com.company.vzvod.view.orientations.OrientationsView;
 import com.company.vzvod.view.dashboard.WorkResultsStatisticsDialog;
 import com.company.vzvod.view.dashboard.TodayShiftDashboardView;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -99,10 +98,19 @@ public class MainView extends StandardMainView {
 
         VolumeSlider volumeSlider = new VolumeSlider(audio.getVolume());
         Button muteButton = new Button();
-        Component controls = buildControls(storageKeyPrefix, audio, volumeSlider, muteButton);
+        Button keysMuteButton = new Button();
+        Component controls = buildControls(
+                storageKeyPrefix,
+                audio,
+                volumeSlider,
+                muteButton,
+                hoverSfx,
+                clickSfx,
+                keysMuteButton
+        );
         attachToContent(controls);
 
-        applySavedSettings(storageKeyPrefix, audio, volumeSlider, muteButton);
+        applySavedSettings(storageKeyPrefix, audio, volumeSlider, muteButton, hoverSfx, clickSfx, keysMuteButton);
         installUiSoundEffects();
 
         // Autoplay may still be blocked by browser policies; best-effort start.
@@ -155,15 +163,6 @@ public class MainView extends StandardMainView {
             );
             dashboardMessage.addCardClickListener(() -> UI.getCurrent().navigate(DashboardMessageComposeView.class));
             homeStatsWidgetSlot.add(dashboardMessage);
-
-            HomeStatsCard orientations = new HomeStatsCard(
-                    messageBundle.getMessage("openOrientationsBtn.text"),
-                    messageBundle.getMessage("openOrientationsBtn.subtitle"),
-                    messageBundle.getMessage("openOrientationsBtn.cta"),
-                    "var(--lumo-primary-color)"
-            );
-            orientations.addCardClickListener(() -> UI.getCurrent().navigate(OrientationsView.class));
-            homeStatsWidgetSlot.add(orientations);
         }
 
         HomeStatsCard employees = new HomeStatsCard(
@@ -460,24 +459,67 @@ public class MainView extends StandardMainView {
         return audio;
     }
 
-    private Component buildControls(String storageKeyPrefix, BgAudio audio, VolumeSlider volume, Button mute) {
-        volume.setWidth("160px");
+    private Component buildControls(String storageKeyPrefix,
+                                    BgAudio audio,
+                                    VolumeSlider volume,
+                                    Button mute,
+                                    BgAudio hoverSfx,
+                                    BgAudio clickSfx,
+                                    Button keysMute) {
+        volume.setWidth("88px");
         volume.addInputListener(v -> {
             audio.setVolume(v);
             saveVolume(storageKeyPrefix, audio.getVolume());
         });
 
         mute.setText(audio.isMuted() ? "Unmute" : "Mute");
+        mute.addClassName("audio-ctrl-btn");
+        mute.getElement().setAttribute("theme", "tertiary-inline small");
+        mute.getStyle()
+                .set("--lumo-button-size", "14px")
+                .set("height", "14px")
+                .set("min-height", "14px")
+                .set("max-height", "14px")
+                .set("padding", "0 6px");
         mute.addClickListener(e -> {
             audio.setMuted(!audio.isMuted());
             mute.setText(audio.isMuted() ? "Unmute" : "Mute");
             saveMuted(storageKeyPrefix, audio.isMuted());
         });
 
-        HorizontalLayout box = new HorizontalLayout(volume, mute);
+        keysMute.setText(hoverSfx.isMuted() ? "SFX Off" : "SFX");
+        keysMute.addClassName("audio-ctrl-btn");
+        keysMute.getElement().setAttribute("theme", "tertiary-inline small");
+        keysMute.getStyle()
+                .set("--lumo-button-size", "14px")
+                .set("height", "14px")
+                .set("min-height", "14px")
+                .set("max-height", "14px")
+                .set("padding", "0 6px");
+        keysMute.addClickListener(e -> {
+            boolean muted = !hoverSfx.isMuted();
+            hoverSfx.setMuted(muted);
+            clickSfx.setMuted(muted);
+            keysMute.setText(muted ? "SFX Off" : "SFX");
+            saveSfxMuted(storageKeyPrefix, muted);
+        });
+
+        HorizontalLayout box = new HorizontalLayout(volume, mute, keysMute);
         box.addClassName("bg-audio-controls");
         box.setPadding(false);
         box.setSpacing(true);
+        box.setAlignItems(FlexComponent.Alignment.CENTER);
+        box.getStyle()
+                .set("position", "fixed")
+                .set("top", "12px")
+                .set("right", "12px")
+                .set("bottom", "auto")
+                .set("left", "auto")
+                .set("z-index", "10000")
+                .set("max-height", "18px")
+                .set("--lumo-button-size", "14px");
+        // AppLayout may create a containing block for position:fixed; pin to viewport via body.
+        box.getElement().executeJs("document.body.appendChild(this)");
         return box;
     }
 
@@ -502,7 +544,13 @@ public class MainView extends StandardMainView {
         return "vzvod.bgAudio";
     }
 
-    private void applySavedSettings(String storageKeyPrefix, BgAudio audio, VolumeSlider volume, Button mute) {
+    private void applySavedSettings(String storageKeyPrefix,
+                                    BgAudio audio,
+                                    VolumeSlider volume,
+                                    Button mute,
+                                    BgAudio hoverSfx,
+                                    BgAudio clickSfx,
+                                    Button keysMute) {
         UI.getCurrent().getPage()
                 .executeJs("return localStorage.getItem($0)", storageKeyPrefix + ".volume")
                 .then(String.class, raw -> {
@@ -527,6 +575,18 @@ public class MainView extends StandardMainView {
                     boolean muted = "true".equalsIgnoreCase(raw);
                     audio.setMuted(muted);
                     mute.setText(audio.isMuted() ? "Unmute" : "Mute");
+                });
+
+        UI.getCurrent().getPage()
+                .executeJs("return localStorage.getItem($0)", storageKeyPrefix + ".sfxMuted")
+                .then(String.class, raw -> {
+                    if (raw == null || raw.isBlank()) {
+                        return;
+                    }
+                    boolean muted = "true".equalsIgnoreCase(raw);
+                    hoverSfx.setMuted(muted);
+                    clickSfx.setMuted(muted);
+                    keysMute.setText(muted ? "SFX Off" : "SFX");
                 });
     }
 
@@ -593,6 +653,14 @@ public class MainView extends StandardMainView {
         UI.getCurrent().getPage().executeJs(
                 "localStorage.setItem($0, String($1))",
                 storageKeyPrefix + ".muted",
+                muted
+        );
+    }
+
+    private void saveSfxMuted(String storageKeyPrefix, boolean muted) {
+        UI.getCurrent().getPage().executeJs(
+                "localStorage.setItem($0, String($1))",
+                storageKeyPrefix + ".sfxMuted",
                 muted
         );
     }

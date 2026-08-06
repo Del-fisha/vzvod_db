@@ -66,18 +66,25 @@
 }
 
 .bg-audio-controls {
-  position: fixed;
-  right: var(--lumo-space-m);
-  bottom: var(--lumo-space-m);
-  z-index: 1000;
-  padding: var(--lumo-space-xs) var(--lumo-space-s);
-  border-radius: var(--lumo-border-radius-m);
-  background: color-mix(in srgb, var(--lumo-base-color) 50%, transparent);
+  position: fixed !important;
+  right: var(--lumo-space-m) !important;
+  top: var(--lumo-space-m) !important;
+  bottom: auto !important;
+  left: auto !important;
+  z-index: 10000 !important;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 9px;
+  line-height: 1;
+  background: color-mix(in srgb, var(--lumo-base-color) 25%, transparent);
   box-shadow: var(--lumo-box-shadow-s);
   align-items: center;
 }
 
 .bg-volume-slider {
+  width: 88px;
+  height: 2px;
   accent-color: var(--lumo-primary-color);
 }
 
