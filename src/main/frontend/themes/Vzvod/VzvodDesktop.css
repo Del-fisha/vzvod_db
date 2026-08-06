@@ -65,46 +65,95 @@ html {
 }
 
 .bg-audio-controls {
-  gap: var(--lumo-space-s);
-  padding: 10px 12px;
-  border-radius: 12px;
+  position: fixed !important;
+  top: 12px !important;
+  right: 12px !important;
+  bottom: auto !important;
+  left: auto !important;
+  z-index: 10000 !important;
+
+  --lumo-button-size: 14px;
+  --lumo-size-s: 14px;
+  --lumo-size-m: 14px;
+  --lumo-font-size-m: 9px;
+  --lumo-space-m: 2px;
+
+  gap: 4px !important;
+  padding: 2px 6px !important;
+  border-radius: 6px !important;
+  font-size: 9px !important;
+  line-height: 1 !important;
+  align-items: center !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: 18px !important;
 
   /* semi-transparent dark panel */
-  background: rgba(18, 18, 20, 0.5);
+  background: rgba(18, 18, 20, 0.25) !important;
   color: rgba(255, 255, 255, 0.9);
 
   /* subtle border + blur like desktop apps */
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.14);
   backdrop-filter: blur(12px) saturate(140%);
   -webkit-backdrop-filter: blur(12px) saturate(140%);
 }
 
-.bg-audio-controls vaadin-button {
-  height: 32px;
-  min-width: 32px;
-  padding: 0 12px !important;
-  border-radius: 10px !important;
+/* Override global Vzvod.css button padding (!important) */
+.bg-audio-controls vaadin-button,
+.bg-audio-controls .jmix-button {
+  --lumo-button-size: 14px !important;
+  height: 14px !important;
+  min-height: 14px !important;
+  max-height: 14px !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 6px !important;
+  border-radius: 4px !important;
+  font-size: 9px !important;
+  font-weight: 500 !important;
+  line-height: 1 !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  transform: none !important;
+  transition: background 0.15s ease !important;
 
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.92);
-  box-shadow: none;
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: rgba(255, 255, 255, 0.92) !important;
+  cursor: pointer;
 }
 
-.bg-audio-controls vaadin-button:hover {
-  background: rgba(255, 255, 255, 0.14);
-  transform: none;
+.bg-audio-controls vaadin-button::part(label),
+.bg-audio-controls vaadin-button::part(prefix),
+.bg-audio-controls vaadin-button::part(suffix) {
+  padding: 0 !important;
+  margin: 0 !important;
+  line-height: 1 !important;
+  font-size: 9px !important;
 }
 
-.bg-audio-controls vaadin-button:active {
-  background: rgba(255, 255, 255, 0.18);
+.bg-audio-controls vaadin-button:hover,
+.bg-audio-controls .jmix-button:hover {
+  background: rgba(255, 255, 255, 0.14) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.bg-audio-controls vaadin-button:active,
+.bg-audio-controls .jmix-button:active {
+  background: rgba(255, 255, 255, 0.18) !important;
+  transform: none !important;
 }
 
 .bg-volume-slider {
-  width: 160px;
-  height: 4px;
+  width: 88px !important;
+  height: 2px !important;
+  margin: 0 !important;
+  padding: 0 !important;
   accent-color: rgba(255, 255, 255, 0.85);
   opacity: 0.92;
+  align-self: center;
 }
 
 .user-card-view vaadin-accordion-panel::part(content) {
