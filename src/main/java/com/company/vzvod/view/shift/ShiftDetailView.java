@@ -83,8 +83,8 @@ public class ShiftDetailView extends StandardDetailView<Shift> {
         shift.getUnits().add(user.getServiceInfo());
         shift.setDate(LocalDate.now());
         shift.setCountOfClaims(0);
-        shift.setIbdWithMigrant(0);
-        shift.setIbdWithoutMigrant(0);
+        shift.setIbdr(0);
+        shift.setMigrant(0);
         shift.setCountOfStatements(0);
         shift.setDepartmentToday(DepartmentConverter.departmentFromDate(shift.getDate()));
 
@@ -107,8 +107,13 @@ public class ShiftDetailView extends StandardDetailView<Shift> {
             SupportsTypedValue.TypedValueChangeEvent<TypedDatePicker<LocalDate>, LocalDate> event) {
 
         LocalDate date = event.getValue();
-        if (date != null) {
-            getEditedEntity().setDepartmentToday(DepartmentConverter.departmentFromDate(date));
+        if (date == null) {
+            return;
+        }
+        // Не помечаем DataContext dirty, если отделение уже соответствует дате (типично при открытии).
+        var next = DepartmentConverter.departmentFromDate(date);
+        if (getEditedEntity().getDepartmentToday() != next) {
+            getEditedEntity().setDepartmentToday(next);
         }
     }
 
@@ -135,6 +140,16 @@ public class ShiftDetailView extends StandardDetailView<Shift> {
             var criminalRemove = criminalViolationsDataGrid.getAction("remove");
             if (criminalRemove != null) criminalRemove.setEnabled(false);
         }
+    }
+
+    /**
+     * Сортировка units / привязка полей при открытии из списка «Все смены» может
+     * ложно пометить DataContext как изменённый → диалог «сохранить» и зависание оверлея.
+     * После инициализации сбрасываем флаг; реальные правки пользователя снова его выставят.
+     */
+    @Subscribe
+    public void onReady(final ReadyEvent event) {
+        clearChanges();
     }
 
     private void applyDefaultTypeOfShift() {

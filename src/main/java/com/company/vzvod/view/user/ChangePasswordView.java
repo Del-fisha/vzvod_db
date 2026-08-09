@@ -1,6 +1,7 @@
 package com.company.vzvod.view.user;
 
 import com.company.vzvod.entity.User;
+import com.company.vzvod.mobile.MobileAuthService;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.textfield.PasswordField;
 import io.jmix.core.DataManager;
@@ -29,6 +30,8 @@ public class ChangePasswordView extends StandardView {
     @Autowired
     private Messages messages;
 
+    @Autowired
+    private MobileAuthService mobileAuthService;
 
     @ViewComponent
     private PasswordField oldPasswordField;
@@ -94,8 +97,7 @@ public class ChangePasswordView extends StandardView {
 
         user.setPassword(passwordEncoder.encode(newPass));
         dataManager.save(user);
-
-        close(StandardOutcome.SAVE);
+        mobileAuthService.revokeBindingsForUser(user.getId());
 
         close(StandardOutcome.SAVE);
     }

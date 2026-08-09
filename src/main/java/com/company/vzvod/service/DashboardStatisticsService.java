@@ -65,8 +65,8 @@ public class DashboardStatisticsService {
                 ? countAdministrative(si, overall.from(), overall.to(), query) : 0;
         long cr = query.metrics().contains(WorkMetric.CRIMINAL_VIOLATIONS)
                 ? countCriminal(si, overall.from(), overall.to(), query) : 0;
-        long ibd = query.metrics().contains(WorkMetric.IBD_WITH_MIGRANT)
-                ? sumIbdWithMigrant(si, overall.from(), overall.to()) : 0;
+        long ibd = query.metrics().contains(WorkMetric.IBDR)
+                ? sumIbdr(si, overall.from(), overall.to()) : 0;
         return new EmployeePeriodTotals(userId, adm, cr, ibd);
     }
 
@@ -113,8 +113,8 @@ public class DashboardStatisticsService {
         if (query.metrics().contains(WorkMetric.CRIMINAL_VIOLATIONS)) {
             sum += countCriminalDistinctViolationsForDepartment(departmentId, from, to, query);
         }
-        if (query.metrics().contains(WorkMetric.IBD_WITH_MIGRANT)) {
-            sum += sumIbdWithMigrantDistinctShiftsForDepartment(departmentId, from, to);
+        if (query.metrics().contains(WorkMetric.IBDR)) {
+            sum += sumIbdrDistinctShiftsForDepartment(departmentId, from, to);
         }
         return sum;
     }
@@ -127,8 +127,8 @@ public class DashboardStatisticsService {
         if (query.metrics().contains(WorkMetric.CRIMINAL_VIOLATIONS)) {
             sum += countCriminal(si, from, to, query);
         }
-        if (query.metrics().contains(WorkMetric.IBD_WITH_MIGRANT)) {
-            sum += sumIbdWithMigrant(si, from, to);
+        if (query.metrics().contains(WorkMetric.IBDR)) {
+            sum += sumIbdr(si, from, to);
         }
         return sum;
     }
@@ -246,9 +246,9 @@ public class DashboardStatisticsService {
         return out;
     }
 
-    private long sumIbdWithMigrant(ServiceInfo si, LocalDate from, LocalDate to) {
+    private long sumIbdr(ServiceInfo si, LocalDate from, LocalDate to) {
         String jpql = """
-                select coalesce(sum(coalesce(s.ibdWithMigrant, 0)), 0)
+                select coalesce(sum(coalesce(s.ibdr, 0)), 0)
                 from Shift s join s.units u
                 where u.id = :svcInfoPk
                   and s.date >= :from and s.date <= :to
@@ -261,10 +261,10 @@ public class DashboardStatisticsService {
         return v == null ? 0L : v;
     }
 
-    private long sumIbdWithMigrantDistinctShiftsForDepartment(UUID departmentId, LocalDate from, LocalDate to) {
-        // В Shift.ibdWithMigrant хранится итог по наряду — суммируем один раз на Shift.
+    private long sumIbdrDistinctShiftsForDepartment(UUID departmentId, LocalDate from, LocalDate to) {
+        // В Shift.ibdr хранится итог по наряду — суммируем один раз на Shift.
         String jpql = """
-                select distinct s.id as sid, coalesce(s.ibdWithMigrant, 0) as v
+                select distinct s.id as sid, coalesce(s.ibdr, 0) as v
                 from Shift s
                 join s.units u
                 where u.department.id = :dep

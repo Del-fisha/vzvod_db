@@ -11,6 +11,6 @@ public record EmployeePeriodTotals(
         UUID employeeUserId,
         long administrativeViolations,
         long criminalViolations,
-        long ibdWithMigrant
+        long ibdr
 ) {
 }

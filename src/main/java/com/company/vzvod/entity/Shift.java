@@ -99,11 +99,11 @@ public class Shift {
     @Column(name = "COUNT_OF_CLAIMS")
     private Integer countOfClaims;
 
-    @Column(name = "IBD_WITH_MIGRANT")
-    private Integer ibdWithMigrant;
+    @Column(name = "IBDR")
+    private Integer ibdr;
 
-    @Column(name = "IBD_WITHOUT_MIGRANT")
-    private Integer ibdWithoutMigrant;
+    @Column(name = "MIGRANT")
+    private Integer migrant;
 
 
     @InstanceName

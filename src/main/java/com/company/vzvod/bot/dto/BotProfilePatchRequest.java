@@ -11,13 +11,16 @@ public record BotProfilePatchRequest(
         String breastplate,
         Boolean medicalExamination,
         BotAddressPatch registration,
-        BotAddressPatch habitation
+        BotAddressPatch habitation,
+        /** Идентификатор {@link com.company.vzvod.entity.MetroStation#getId()}; {@code null} — не менять. */
+        Integer nearestMetro
 ) {
 
     public boolean hasAnyField() {
         return (breastplate != null && !breastplate.isBlank())
                 || medicalExamination != null
                 || (registration != null && registration.hasAny())
-                || (habitation != null && habitation.hasAny());
+                || (habitation != null && habitation.hasAny())
+                || nearestMetro != null;
     }
 }

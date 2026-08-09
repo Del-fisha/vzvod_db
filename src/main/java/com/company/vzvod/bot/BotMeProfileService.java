@@ -8,6 +8,7 @@ import com.company.vzvod.entity.Address;
 import com.company.vzvod.entity.Contacts;
 import com.company.vzvod.entity.Department;
 import com.company.vzvod.entity.IdCard;
+import com.company.vzvod.entity.MetroStation;
 import com.company.vzvod.entity.Post;
 import com.company.vzvod.entity.Rank;
 import com.company.vzvod.entity.ServiceInfo;
@@ -76,7 +77,8 @@ public class BotMeProfileService {
         unconstrainedDataManager.save(si);
 
         boolean needContacts = (patch.registration() != null && patch.registration().hasAny())
-                || (patch.habitation() != null && patch.habitation().hasAny());
+                || (patch.habitation() != null && patch.habitation().hasAny())
+                || patch.nearestMetro() != null;
         if (needContacts) {
             Contacts contacts = loadContactsForUpdate(user.getId());
             boolean needSaveContactsRow = false;
@@ -84,6 +86,15 @@ public class BotMeProfileService {
             Address hab = contacts.getHabitation();
             boolean regPatch = patch.registration() != null && patch.registration().hasAny();
             boolean habPatch = patch.habitation() != null && patch.habitation().hasAny();
+
+            if (patch.nearestMetro() != null) {
+                MetroStation station = MetroStation.fromId(patch.nearestMetro());
+                if (station == null) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid nearestMetro");
+                }
+                contacts.setNearestMetroStation(station);
+                needSaveContactsRow = true;
+            }
 
             if (regPatch) {
                 if (reg == null) {
@@ -130,6 +141,7 @@ public class BotMeProfileService {
                 .add("patronymic")
                 .add("contactsInfo", c -> c
                         .add("phoneNumber")
+                        .add("nearestMetroStation")
                         .add("registration", this::buildAddressFetchPlan)
                         .add("habitation", this::buildAddressFetchPlan))
                 .add("serviceInfo", sf -> sf
@@ -176,6 +188,7 @@ public class BotMeProfileService {
         String phone = contacts != null ? contacts.getPhoneNumber() : null;
         Address reg = contacts != null ? contacts.getRegistration() : null;
         Address hab = contacts != null ? contacts.getHabitation() : null;
+        MetroStation metro = contacts != null ? contacts.getNearestMetroStation() : null;
         return new BotProfileResponse(
                 user.getId(),
                 user.getDisplayName(),
@@ -188,7 +201,9 @@ public class BotMeProfileService {
                 toAddressResponse(reg),
                 toAddressResponse(hab),
                 card != null ? card.getIssued() : null,
-                card != null ? card.getUntil() : null
+                card != null ? card.getUntil() : null,
+                metro == null ? null : metro.getId(),
+                metroMessage(metro)
         );
     }
 
@@ -230,6 +245,7 @@ public class BotMeProfileService {
                 .parameter("uid", userId)
                 .fetchPlan(cfp -> cfp
                         .add("user")
+                        .add("nearestMetroStation")
                         .add("registration", this::buildAddressFetchPlan)
                         .add("habitation", this::buildAddressFetchPlan))
                 .optional()
@@ -329,6 +345,13 @@ public class BotMeProfileService {
             return null;
         }
         return enumMessage("Post", post.name());
+    }
+
+    private String metroMessage(MetroStation station) {
+        if (station == null) {
+            return null;
+        }
+        return enumMessage("MetroStation", station.name());
     }
 
     private String enumMessage(String enumSimpleName, String enumConstantName) {

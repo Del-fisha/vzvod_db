@@ -8,6 +8,7 @@ import com.company.vzvod.entity.ArticleOfAdministrative;
 import com.company.vzvod.entity.Dep;
 import com.company.vzvod.entity.TypeOfCriminal;
 import com.company.vzvod.service.TodayShiftDashboardService;
+import com.company.vzvod.shift.ShiftStatusBadgeFactory;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -147,8 +148,13 @@ public class TodayShiftDashboardContentBuilder {
         grid.add(
                 kpiCard(
                         msg("ibd"),
-                        snapshot.totalIbdWithMigrant(),
+                        snapshot.totalIbdr(),
                         "today-shift-dashboard__kpi-card--ibd"
+                ),
+                kpiCard(
+                        msg("migrant"),
+                        snapshot.totalMigrant(),
+                        "today-shift-dashboard__kpi-card--migrant"
                 ),
                 kpiCard(
                         msg("statements"),
@@ -241,7 +247,10 @@ public class TodayShiftDashboardContentBuilder {
         employeesValue.setText(employees);
         employeesValue.addClassName("today-shift-dashboard__route-employees");
 
-        card.add(routeLabel, routeValue, employeesValue);
+        HorizontalLayout status = ShiftStatusBadgeFactory.create(route.endTime(), messages);
+        status.addClassName("today-shift-dashboard__route-status");
+
+        card.add(routeLabel, routeValue, status, employeesValue);
         return card;
     }
 

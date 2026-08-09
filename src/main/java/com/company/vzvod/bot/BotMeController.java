@@ -2,6 +2,8 @@ package com.company.vzvod.bot;
 
 import com.company.vzvod.bot.dto.BotAdministrativeViolationCreateRequest;
 import com.company.vzvod.bot.dto.BotCatalogOptionsResponse;
+import com.company.vzvod.bot.dto.BotEventCreateRequest;
+import com.company.vzvod.bot.dto.BotEventItem;
 import com.company.vzvod.bot.dto.BotEventsResponse;
 import com.company.vzvod.bot.dto.BotProfilePatchRequest;
 import com.company.vzvod.bot.dto.BotProfileResponse;
@@ -106,6 +108,17 @@ public class BotMeController {
         return ResponseEntity.ok(botMeEventsService.loadUpcomingEvents(userId));
     }
 
+    @PostMapping("/events")
+    public ResponseEntity<BotEventItem> createEvent(
+            @RequestHeader(value = "X-Api-Key", required = false) String apiKey,
+            @RequestHeader(value = "X-Telegram-Chat-Id", required = false) String telegramChatIdHeader,
+            @RequestBody(required = false) BotEventCreateRequest body
+    ) {
+        apiKeyAuthorizer.verify(apiKey);
+        UUID userId = resolveUserId(telegramChatIdHeader);
+        return ResponseEntity.status(HttpStatus.CREATED).body(botMeEventsService.createEvent(userId, body));
+    }
+
     @GetMapping("/shifts/{shiftId}")
     public ResponseEntity<BotShiftItem> shift(
             @RequestHeader(value = "X-Api-Key", required = false) String apiKey,
@@ -152,8 +165,8 @@ public class BotMeController {
         return ResponseEntity.ok(botMeShiftsVocationsService.setShiftEndTime(userId, shiftId, body));
     }
 
-    @PostMapping("/shifts/{shiftId}/ibd-with-migrant")
-    public ResponseEntity<BotShiftItem> adjustIbdWithMigrant(
+    @PostMapping("/shifts/{shiftId}/ibdr")
+    public ResponseEntity<BotShiftItem> adjustIbdr(
             @RequestHeader(value = "X-Api-Key", required = false) String apiKey,
             @RequestHeader(value = "X-Telegram-Chat-Id", required = false) String telegramChatIdHeader,
             @PathVariable("shiftId") UUID shiftId,
@@ -161,7 +174,31 @@ public class BotMeController {
     ) {
         apiKeyAuthorizer.verify(apiKey);
         UUID userId = resolveUserId(telegramChatIdHeader);
-        return ResponseEntity.ok(botMeShiftsVocationsService.adjustIbdWithMigrant(userId, shiftId, body));
+        return ResponseEntity.ok(botMeShiftsVocationsService.adjustIbdr(userId, shiftId, body));
+    }
+
+    @PostMapping("/shifts/{shiftId}/migrant")
+    public ResponseEntity<BotShiftItem> adjustMigrant(
+            @RequestHeader(value = "X-Api-Key", required = false) String apiKey,
+            @RequestHeader(value = "X-Telegram-Chat-Id", required = false) String telegramChatIdHeader,
+            @PathVariable("shiftId") UUID shiftId,
+            @RequestBody(required = false) BotShiftMetricDeltaRequest body
+    ) {
+        apiKeyAuthorizer.verify(apiKey);
+        UUID userId = resolveUserId(telegramChatIdHeader);
+        return ResponseEntity.ok(botMeShiftsVocationsService.adjustMigrant(userId, shiftId, body));
+    }
+
+    @PostMapping("/shifts/{shiftId}/migrant-and-ibdr")
+    public ResponseEntity<BotShiftItem> adjustMigrantAndIbdr(
+            @RequestHeader(value = "X-Api-Key", required = false) String apiKey,
+            @RequestHeader(value = "X-Telegram-Chat-Id", required = false) String telegramChatIdHeader,
+            @PathVariable("shiftId") UUID shiftId,
+            @RequestBody(required = false) BotShiftMetricDeltaRequest body
+    ) {
+        apiKeyAuthorizer.verify(apiKey);
+        UUID userId = resolveUserId(telegramChatIdHeader);
+        return ResponseEntity.ok(botMeShiftsVocationsService.adjustMigrantAndIbdr(userId, shiftId, body));
     }
 
     @PostMapping("/shifts/{shiftId}/count-of-statements")

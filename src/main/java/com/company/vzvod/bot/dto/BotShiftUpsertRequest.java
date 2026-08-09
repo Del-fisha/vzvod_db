@@ -25,8 +25,8 @@ public record BotShiftUpsertRequest(
         UUID partnerServiceInfoId,
         Integer countOfStatements,
         Integer countOfClaims,
-        Integer ibdWithMigrant,
-        Integer ibdWithoutMigrant,
+        Integer ibdr,
+        Integer migrant,
         /** Несколько напарников; объединяется с {@link #partnerServiceInfoId}. */
         List<UUID> partnerServiceInfoIds
 ) {

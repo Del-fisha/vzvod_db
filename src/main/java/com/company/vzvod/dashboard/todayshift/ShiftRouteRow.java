@@ -1,4 +1,10 @@
 package com.company.vzvod.dashboard.todayshift;
 
-public record ShiftRouteRow(String routeLabel, String employees) {
+import java.time.LocalTime;
+
+public record ShiftRouteRow(
+        String routeLabel,
+        String employees,
+        LocalTime endTime
+) {
 }

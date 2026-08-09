@@ -54,9 +54,9 @@ class TodayShiftDashboardServiceDayTest {
     @Test
     @DisplayName("loadSnapshot(date, dep) возвращает маршруты только выбранного дня и отделения")
     void loadSnapshotForDay_filtersByDateAndDepartment() {
-        createShift(day, Dep.FIRST, NumberOfShift._28);
-        createShift(day, Dep.SECOND, NumberOfShift._30);
-        createShift(day.plusDays(1), Dep.FIRST, NumberOfShift._31);
+        createShift(day, Dep.FIRST, NumberOfShift._28, 0, 0, LocalTime.of(21, 0));
+        createShift(day, Dep.SECOND, NumberOfShift._30, 0, 0, LocalTime.of(21, 0));
+        createShift(day.plusDays(1), Dep.FIRST, NumberOfShift._31, 0, 0, LocalTime.of(21, 0));
 
         TodayShiftDashboardSnapshot snapshot = dashboardService.loadSnapshot(day, Dep.FIRST);
 
@@ -66,14 +66,38 @@ class TodayShiftDashboardServiceDayTest {
         assertEquals(NumberOfShift._28.getId(), snapshot.routes().get(0).routeLabel());
     }
 
-    private void createShift(LocalDate date, Dep department, NumberOfShift number) {
+    @Test
+    @DisplayName("KPI: сумма migrant за день как у ibdr; endTime в карточке маршрута")
+    void loadSnapshotForDay_sumsMigrantAndExposesEndTime() {
+        createShift(day, Dep.FIRST, NumberOfShift._28, 3, 5, null);
+        createShift(day, Dep.FIRST, NumberOfShift._30, 2, 4, LocalTime.of(21, 0));
+
+        TodayShiftDashboardSnapshot snapshot = dashboardService.loadSnapshot(day, Dep.FIRST);
+
+        assertEquals(5, snapshot.totalIbdr());
+        assertEquals(9, snapshot.totalMigrant());
+        assertEquals(2, snapshot.routes().size());
+        assertTrue(snapshot.routes().stream().anyMatch(r -> r.endTime() == null));
+        assertTrue(snapshot.routes().stream().anyMatch(r -> LocalTime.of(21, 0).equals(r.endTime())));
+    }
+
+    private void createShift(
+            LocalDate date,
+            Dep department,
+            NumberOfShift number,
+            int ibdr,
+            int migrant,
+            LocalTime endTime
+    ) {
         Shift shift = dataManager.create(Shift.class);
         shift.setDate(date);
         shift.setDepartmentToday(department);
         shift.setNumber(number);
         shift.setTypeOfShift(TypeOfShift.VZVOD_ROUTE);
         shift.setStartTime(LocalTime.of(9, 0));
-        shift.setEndTime(LocalTime.of(21, 0));
+        shift.setEndTime(endTime);
+        shift.setIbdr(ibdr);
+        shift.setMigrant(migrant);
         dataManager.save(shift);
     }
 

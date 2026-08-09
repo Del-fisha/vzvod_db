@@ -47,9 +47,9 @@ public class ShiftIntegrationTest {
         shift.setTypeOfShift(TypeOfShift.VZVOD_ROUTE);
         shift.setNumber(NumberOfShift._28);
         shift.setDate(LocalDate.now());
-        shift.setIbdWithoutMigrant(45);
+        shift.setMigrant(45);
         shift.setCountOfStatements(2);
-        shift.setIbdWithMigrant(60);
+        shift.setIbdr(60);
         shift.setCountOfClaims(1);
     }
 
@@ -66,10 +66,10 @@ public class ShiftIntegrationTest {
 
         Shift loadedShift = dataManager.load(Shift.class).id(savedShiftId).one();
 
-        assertEquals(savedShift.getIbdWithoutMigrant(), loadedShift.getIbdWithoutMigrant());
+        assertEquals(savedShift.getMigrant(), loadedShift.getMigrant());
         assertEquals(savedShift.getCountOfStatements(), loadedShift.getCountOfStatements());
         assertEquals(savedShift.getDepartmentToday(), loadedShift.getDepartmentToday());
-        assertEquals(savedShift.getIbdWithMigrant(), loadedShift.getIbdWithMigrant());
+        assertEquals(savedShift.getIbdr(), loadedShift.getIbdr());
         assertEquals(savedShift.getCountOfClaims(), loadedShift.getCountOfClaims());
         assertEquals(savedShift.getTypeOfShift(), loadedShift.getTypeOfShift());
         assertEquals(savedShift.getStartTime(), loadedShift.getStartTime());
@@ -95,18 +95,18 @@ public class ShiftIntegrationTest {
         loadedShift.setTypeOfShift(TypeOfShift.BAT_POST);
         loadedShift.setDepartmentToday(Dep.FIRST);
         loadedShift.setNumber(NumberOfShift._6);
-        loadedShift.setIbdWithoutMigrant(30);
+        loadedShift.setMigrant(30);
         loadedShift.setCountOfStatements(3);
-        loadedShift.setIbdWithMigrant(66);
+        loadedShift.setIbdr(66);
         loadedShift.setCountOfClaims(0);
 
         Shift saveLoadedShift = dataManager.save(loadedShift);
         Shift updatedShift = dataManager.load(Shift.class).id(saveLoadedShift.getId()).one();
 
-        assertEquals(loadedShift.getIbdWithoutMigrant(), updatedShift.getIbdWithoutMigrant());
+        assertEquals(loadedShift.getMigrant(), updatedShift.getMigrant());
         assertEquals(loadedShift.getCountOfStatements(), updatedShift.getCountOfStatements());
         assertEquals(loadedShift.getDepartmentToday(), updatedShift.getDepartmentToday());
-        assertEquals(loadedShift.getIbdWithMigrant(), updatedShift.getIbdWithMigrant());
+        assertEquals(loadedShift.getIbdr(), updatedShift.getIbdr());
         assertEquals(loadedShift.getCountOfClaims(), updatedShift.getCountOfClaims());
         assertEquals(loadedShift.getTypeOfShift(), updatedShift.getTypeOfShift());
         assertEquals(loadedShift.getStartTime(), updatedShift.getStartTime());
@@ -116,9 +116,9 @@ public class ShiftIntegrationTest {
         assertEquals(loadedShift.getId(), updatedShift.getId());
 
         assertEquals(TypeOfShift.BAT_POST, updatedShift.getTypeOfShift());
-        assertEquals(30, updatedShift.getIbdWithoutMigrant());
+        assertEquals(30, updatedShift.getMigrant());
         assertEquals(3, updatedShift.getCountOfStatements());
-        assertEquals(66, updatedShift.getIbdWithMigrant());
+        assertEquals(66, updatedShift.getIbdr());
         assertEquals(Dep.FIRST, updatedShift.getDepartmentToday());
         assertEquals(0, updatedShift.getCountOfClaims());
         assertEquals(NumberOfShift._6, updatedShift.getNumber());

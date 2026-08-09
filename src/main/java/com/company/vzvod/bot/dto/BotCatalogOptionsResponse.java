@@ -5,6 +5,7 @@ import java.util.List;
 public record BotCatalogOptionsResponse(
         List<BotEnumOption> vocationTypes,
         List<BotShiftRouteOption> shiftRoutes,
-        List<BotStringEnumOption> shiftTypes
+        List<BotStringEnumOption> shiftTypes,
+        List<BotEnumOption> metroStations
 ) {
 }

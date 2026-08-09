@@ -121,8 +121,8 @@ public interface PolicemanRole {
                     "units",
                     "countOfStatements",
                     "countOfClaims",
-                    "ibdWithoutMigrant",
-                    "ibdWithMigrant",
+                    "ibdr",
+                    "migrant",
                     "administrativeViolations",
                     "criminalViolations"
             },

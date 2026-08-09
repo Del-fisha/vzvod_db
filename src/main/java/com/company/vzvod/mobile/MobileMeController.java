@@ -4,12 +4,15 @@ import com.company.vzvod.bot.BotMeEventsService;
 import com.company.vzvod.bot.BotMeExtrasService;
 import com.company.vzvod.bot.BotMeProfileService;
 import com.company.vzvod.bot.BotMeShiftsVocationsService;
+import com.company.vzvod.bot.BotMeTodayDashboardService;
 import com.company.vzvod.bot.dto.BotAdministrativeViolationCreateRequest;
 import com.company.vzvod.bot.dto.BotCatalogOptionsResponse;
 import com.company.vzvod.bot.dto.BotColleaguesResponse;
 import com.company.vzvod.bot.dto.BotCriminalViolationCreateRequest;
 import com.company.vzvod.bot.dto.BotEducationDto;
 import com.company.vzvod.bot.dto.BotEducationUpsertRequest;
+import com.company.vzvod.bot.dto.BotEventCreateRequest;
+import com.company.vzvod.bot.dto.BotEventItem;
 import com.company.vzvod.bot.dto.BotEventsResponse;
 import com.company.vzvod.bot.dto.BotProfilePatchRequest;
 import com.company.vzvod.bot.dto.BotProfileResponse;
@@ -18,6 +21,7 @@ import com.company.vzvod.bot.dto.BotShiftItem;
 import com.company.vzvod.bot.dto.BotShiftMetricDeltaRequest;
 import com.company.vzvod.bot.dto.BotShiftUpsertRequest;
 import com.company.vzvod.bot.dto.BotShiftsResponse;
+import com.company.vzvod.bot.dto.BotTodayDashboardResponse;
 import com.company.vzvod.bot.dto.BotVacationsResponse;
 import com.company.vzvod.bot.dto.BotVehicleItem;
 import com.company.vzvod.bot.dto.BotVehicleUpsertRequest;
@@ -48,19 +52,22 @@ public class MobileMeController {
     private final BotMeShiftsVocationsService shiftsService;
     private final BotMeEventsService eventsService;
     private final BotMeExtrasService extrasService;
+    private final BotMeTodayDashboardService todayDashboardService;
 
     public MobileMeController(
             MobileAuthService mobileAuthService,
             BotMeProfileService profileService,
             BotMeShiftsVocationsService shiftsService,
             BotMeEventsService eventsService,
-            BotMeExtrasService extrasService
+            BotMeExtrasService extrasService,
+            BotMeTodayDashboardService todayDashboardService
     ) {
         this.mobileAuthService = mobileAuthService;
         this.profileService = profileService;
         this.shiftsService = shiftsService;
         this.eventsService = eventsService;
         this.extrasService = extrasService;
+        this.todayDashboardService = todayDashboardService;
     }
 
     @GetMapping("/profile")
@@ -160,33 +167,34 @@ public class MobileMeController {
         return ResponseEntity.ok(shiftsService.setShiftEndTime(userId(token), shiftId, body));
     }
 
-    /** ИБДР ± → ibdWithoutMigrant */
-    @PostMapping("/shifts/{shiftId}/ibd-without-migrant")
-    public ResponseEntity<BotShiftItem> adjustIbdWithout(
+    /** ИБДР ± */
+    @PostMapping("/shifts/{shiftId}/ibdr")
+    public ResponseEntity<BotShiftItem> adjustIbdr(
             @RequestHeader(value = "X-Mobile-Token", required = false) String token,
             @PathVariable UUID shiftId,
             @RequestBody(required = false) BotShiftMetricDeltaRequest body
     ) {
-        return ResponseEntity.ok(shiftsService.adjustIbdWithoutMigrant(userId(token), shiftId, body));
+        return ResponseEntity.ok(shiftsService.adjustIbdr(userId(token), shiftId, body));
     }
 
-    /** Мигрант ± → оба счётчика IBD */
-    @PostMapping("/shifts/{shiftId}/migrant-check")
+    /** Мигрант ± */
+    @PostMapping("/shifts/{shiftId}/migrant")
     public ResponseEntity<BotShiftItem> adjustMigrant(
             @RequestHeader(value = "X-Mobile-Token", required = false) String token,
             @PathVariable UUID shiftId,
             @RequestBody(required = false) BotShiftMetricDeltaRequest body
     ) {
-        return ResponseEntity.ok(shiftsService.adjustMigrantCheck(userId(token), shiftId, body));
+        return ResponseEntity.ok(shiftsService.adjustMigrant(userId(token), shiftId, body));
     }
 
-    @PostMapping("/shifts/{shiftId}/ibd-with-migrant")
-    public ResponseEntity<BotShiftItem> adjustIbdWith(
+    /** Мигрант + ИБДР ± */
+    @PostMapping("/shifts/{shiftId}/migrant-and-ibdr")
+    public ResponseEntity<BotShiftItem> adjustMigrantAndIbdr(
             @RequestHeader(value = "X-Mobile-Token", required = false) String token,
             @PathVariable UUID shiftId,
             @RequestBody(required = false) BotShiftMetricDeltaRequest body
     ) {
-        return ResponseEntity.ok(shiftsService.adjustIbdWithMigrant(userId(token), shiftId, body));
+        return ResponseEntity.ok(shiftsService.adjustMigrantAndIbdr(userId(token), shiftId, body));
     }
 
     @PostMapping("/shifts/{shiftId}/count-of-statements")
@@ -275,6 +283,21 @@ public class MobileMeController {
     @GetMapping("/events")
     public ResponseEntity<BotEventsResponse> events(@RequestHeader(value = "X-Mobile-Token", required = false) String token) {
         return ResponseEntity.ok(eventsService.loadUpcomingEvents(userId(token)));
+    }
+
+    @PostMapping("/events")
+    public ResponseEntity<BotEventItem> createEvent(
+            @RequestHeader(value = "X-Mobile-Token", required = false) String token,
+            @RequestBody(required = false) BotEventCreateRequest body
+    ) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventsService.createEvent(userId(token), body));
+    }
+
+    @GetMapping("/today-dashboard")
+    public ResponseEntity<BotTodayDashboardResponse> todayDashboard(
+            @RequestHeader(value = "X-Mobile-Token", required = false) String token
+    ) {
+        return ResponseEntity.ok(todayDashboardService.loadTodayDashboard(userId(token)));
     }
 
     private UUID userId(String token) {

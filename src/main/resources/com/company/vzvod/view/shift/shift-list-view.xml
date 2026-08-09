@@ -72,8 +72,8 @@
                     <column property="number"/>
                     <column property="departmentToday"/>
 <!--                    <column property="typeOfShift"/>-->
-                    <column property="ibdWithMigrant"/>
-<!--                    <column property="ibdWithoutMigrant"/>-->
+                    <column property="ibdr"/>
+<!--                    <column property="migrant"/>-->
 <!--                    <column property="countOfStatements"/>-->
 <!--                    <column property="countOfClaims"/>-->
 

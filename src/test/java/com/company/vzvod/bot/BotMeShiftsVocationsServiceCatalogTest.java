@@ -4,6 +4,7 @@ import com.company.vzvod.bot.dto.BotCatalogOptionsResponse;
 import com.company.vzvod.bot.dto.BotEnumOption;
 import com.company.vzvod.bot.dto.BotShiftRouteOption;
 import com.company.vzvod.bot.dto.BotStringEnumOption;
+import com.company.vzvod.entity.MetroStation;
 import com.company.vzvod.entity.NumberOfShift;
 import com.company.vzvod.entity.TypeOfShift;
 import com.company.vzvod.entity.VocationType;
@@ -103,5 +104,25 @@ class BotMeShiftsVocationsServiceCatalogTest {
                 .findFirst()
                 .orElseThrow();
         assertEquals(TypeOfShift.CHECKING.getId(), another.defaultTypeOfShiftId());
+    }
+
+    @Test
+    @DisplayName("возвращает все станции метро с подписями")
+    void loadCatalogOptions_includesAllMetroStations() {
+        BotCatalogOptionsResponse response = service.loadCatalogOptions();
+
+        assertEquals(MetroStation.values().length, response.metroStations().size());
+        Set<Integer> ids = response.metroStations().stream()
+                .map(BotEnumOption::id)
+                .collect(Collectors.toSet());
+        for (MetroStation station : MetroStation.values()) {
+            assertTrue(ids.contains(station.getId()), "missing metro station " + station.name());
+        }
+
+        BotEnumOption baltiyskaya = response.metroStations().stream()
+                .filter(m -> MetroStation.BALTIYSKAYA.getId().equals(m.id()))
+                .findFirst()
+                .orElseThrow();
+        assertEquals("BALTIYSKAYA", baltiyskaya.label());
     }
 }

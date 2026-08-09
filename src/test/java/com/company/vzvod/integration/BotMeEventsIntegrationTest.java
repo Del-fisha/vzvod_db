@@ -20,6 +20,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import com.jayway.jsonpath.JsonPath;
+import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -33,6 +35,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -118,6 +121,40 @@ class BotMeEventsIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items.length()").value(1))
                 .andExpect(jsonPath("$.items[0].name").value("—"));
+    }
+
+    @Test
+    @DisplayName("POST 201: создаёт спортивное мероприятие по названию и заполняет shiftOfDepartment")
+    void createEvent_sportName_returnsCreatedWithSportType() throws Exception {
+        persistUserBinding();
+        LocalDate date = LocalDate.now().plusDays(10);
+
+        String response = mockMvc.perform(post("/api/bot/me/events")
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Матч Зенит\",\"date\":\"" + date + "\",\"place\":\"Газпром Арена\"}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value("Матч Зенит"))
+                .andExpect(jsonPath("$.place").value("Газпром Арена"))
+                .andExpect(jsonPath("$.eventType").value(EventType.SPORT.getId()))
+                .andExpect(jsonPath("$.shiftOfDepartment").exists())
+                .andReturn().getResponse().getContentAsString();
+
+        UUID createdId = UUID.fromString(JsonPath.read(response, "$.id").toString());
+        createdEventIds.add(createdId);
+    }
+
+    @Test
+    @DisplayName("POST 400: без имени или даты")
+    void createEvent_missingFields_returns400() throws Exception {
+        persistUserBinding();
+        mockMvc.perform(post("/api/bot/me/events")
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

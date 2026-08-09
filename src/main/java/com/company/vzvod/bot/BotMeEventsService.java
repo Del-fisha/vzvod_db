@@ -1,11 +1,17 @@
 package com.company.vzvod.bot;
 
+import com.company.vzvod.bot.dto.BotEventCreateRequest;
 import com.company.vzvod.bot.dto.BotEventItem;
 import com.company.vzvod.bot.dto.BotEventsResponse;
 import com.company.vzvod.entity.Event;
+import com.company.vzvod.entity.EventType;
+import com.company.vzvod.service.DepartmentConverter;
+import com.company.vzvod.service.event_service.EventTypeLoader;
 import io.jmix.core.UnconstrainedDataManager;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -46,9 +52,55 @@ public class BotMeEventsService {
             if (e.getDate() == null) {
                 continue;
             }
-            String name = e.getName();
-            items.add(new BotEventItem(e.getDate(), name == null || name.isBlank() ? "—" : name.trim()));
+            items.add(toItem(e));
         }
         return new BotEventsResponse(items);
+    }
+
+    @Transactional
+    public BotEventItem createEvent(UUID userId, BotEventCreateRequest req) {
+        activeUserChecker.requireActive(userId);
+        if (req == null || req.name() == null || req.name().isBlank() || req.date() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "name and date are required");
+        }
+        String name = req.name().trim();
+
+        EventType type = EventType.OTHER;
+        if (req.eventType() != null && !req.eventType().isBlank()) {
+            EventType parsed = EventType.fromId(req.eventType().trim());
+            if (parsed == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid eventType");
+            }
+            type = parsed;
+        }
+        if (type == EventType.OTHER && EventTypeLoader.isSport(name)) {
+            type = EventType.SPORT;
+        }
+
+        Event event = unconstrainedDataManager.create(Event.class);
+        event.setName(name);
+        event.setDate(req.date());
+        event.setTime(req.time());
+        event.setPlace(req.place());
+        event.setDescription(req.description());
+        event.setEventType(type);
+        event.setShiftOfDepartment(DepartmentConverter.departmentFromDateToInt(req.date()));
+
+        Event saved = unconstrainedDataManager.save(event);
+        return toItem(saved);
+    }
+
+    private static BotEventItem toItem(Event e) {
+        String name = e.getName();
+        EventType type = e.getEventType();
+        return new BotEventItem(
+                e.getId(),
+                e.getDate(),
+                e.getTime(),
+                name == null || name.isBlank() ? "—" : name.trim(),
+                e.getPlace(),
+                type == null ? null : type.getId(),
+                e.getShiftOfDepartment()
+        );
     }
 }

@@ -180,8 +180,8 @@ class BotMeShiftsVacationsIntegrationTest {
         shift.setEndTime(LocalTime.of(20, 0));
         shift.setCountOfStatements(2);
         shift.setCountOfClaims(3);
-        shift.setIbdWithMigrant(4);
-        shift.setIbdWithoutMigrant(5);
+        shift.setIbdr(4);
+        shift.setMigrant(5);
         Set<ServiceInfo> units = new HashSet<>();
         units.add(serviceInfo);
         shift.setUnits(units);
@@ -746,8 +746,8 @@ class BotMeShiftsVacationsIntegrationTest {
     }
 
     @Test
-    @DisplayName("POST /shifts/{id}/ibd-with-migrant — инкремент и декремент на открытой смене")
-    void postShift_adjustIbdWithMigrant() throws Exception {
+    @DisplayName("POST /shifts/{id}/ibdr — инкремент и декремент на открытой смене")
+    void postShift_adjustIbdr() throws Exception {
         persistUserBindingOnly();
         final UUID[] shiftId = new UUID[1];
         systemAuthenticator.runWithSystem(() -> {
@@ -759,28 +759,119 @@ class BotMeShiftsVacationsIntegrationTest {
             open.setTypeOfShift(TypeOfShift.VZVOD_ROUTE);
             open.setDepartmentToday(Dep.FIRST);
             open.setStartTime(LocalTime.of(8, 0));
-            open.setIbdWithMigrant(0);
+            open.setIbdr(0);
             Set<ServiceInfo> units = new HashSet<>();
             units.add(si);
             open.setUnits(units);
             shiftId[0] = dataManager.save(open).getId();
         });
 
-        mockMvc.perform(post("/api/bot/me/shifts/" + shiftId[0] + "/ibd-with-migrant")
+        mockMvc.perform(post("/api/bot/me/shifts/" + shiftId[0] + "/ibdr")
                         .header("X-Api-Key", API_KEY)
                         .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"delta\":1}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ibdWithMigrant").value(1));
+                .andExpect(jsonPath("$.ibdr").value(1));
 
-        mockMvc.perform(post("/api/bot/me/shifts/" + shiftId[0] + "/ibd-with-migrant")
+        mockMvc.perform(post("/api/bot/me/shifts/" + shiftId[0] + "/ibdr")
                         .header("X-Api-Key", API_KEY)
                         .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"delta\":-1}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ibdWithMigrant").value(0));
+                .andExpect(jsonPath("$.ibdr").value(0));
+    }
+
+    @Test
+    @DisplayName("POST /shifts/{id}/migrant — только migrant; минус от нуля остаётся 0")
+    void postShift_adjustMigrant() throws Exception {
+        persistUserBindingOnly();
+        final UUID[] shiftId = new UUID[1];
+        systemAuthenticator.runWithSystem(() -> {
+            User bound = dataManager.load(User.class).id(createdUserId).one();
+            ServiceInfo si = bound.getServiceInfo();
+            Shift open = dataManager.create(Shift.class);
+            open.setDate(LocalDate.of(2026, 5, 23));
+            open.setNumber(NumberOfShift._31);
+            open.setTypeOfShift(TypeOfShift.VZVOD_ROUTE);
+            open.setDepartmentToday(Dep.FIRST);
+            open.setStartTime(LocalTime.of(8, 0));
+            open.setIbdr(4);
+            open.setMigrant(0);
+            Set<ServiceInfo> units = new HashSet<>();
+            units.add(si);
+            open.setUnits(units);
+            shiftId[0] = dataManager.save(open).getId();
+        });
+
+        mockMvc.perform(post("/api/bot/me/shifts/" + shiftId[0] + "/migrant")
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"delta\":1}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.migrant").value(1))
+                .andExpect(jsonPath("$.ibdr").value(4));
+
+        mockMvc.perform(post("/api/bot/me/shifts/" + shiftId[0] + "/migrant")
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"delta\":-1}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.migrant").value(0))
+                .andExpect(jsonPath("$.ibdr").value(4));
+
+        mockMvc.perform(post("/api/bot/me/shifts/" + shiftId[0] + "/migrant")
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"delta\":-1}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.migrant").value(0))
+                .andExpect(jsonPath("$.ibdr").value(4));
+    }
+
+    @Test
+    @DisplayName("POST /shifts/{id}/migrant-and-ibdr — оба счётчика ±1")
+    void postShift_adjustMigrantAndIbdr() throws Exception {
+        persistUserBindingOnly();
+        final UUID[] shiftId = new UUID[1];
+        systemAuthenticator.runWithSystem(() -> {
+            User bound = dataManager.load(User.class).id(createdUserId).one();
+            ServiceInfo si = bound.getServiceInfo();
+            Shift open = dataManager.create(Shift.class);
+            open.setDate(LocalDate.of(2026, 5, 23));
+            open.setNumber(NumberOfShift._31);
+            open.setTypeOfShift(TypeOfShift.VZVOD_ROUTE);
+            open.setDepartmentToday(Dep.FIRST);
+            open.setStartTime(LocalTime.of(8, 0));
+            open.setIbdr(1);
+            open.setMigrant(2);
+            Set<ServiceInfo> units = new HashSet<>();
+            units.add(si);
+            open.setUnits(units);
+            shiftId[0] = dataManager.save(open).getId();
+        });
+
+        mockMvc.perform(post("/api/bot/me/shifts/" + shiftId[0] + "/migrant-and-ibdr")
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"delta\":1}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.ibdr").value(2))
+                .andExpect(jsonPath("$.migrant").value(3));
+
+        mockMvc.perform(post("/api/bot/me/shifts/" + shiftId[0] + "/migrant-and-ibdr")
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"delta\":-1}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.ibdr").value(1))
+                .andExpect(jsonPath("$.migrant").value(2));
     }
 
     @Test

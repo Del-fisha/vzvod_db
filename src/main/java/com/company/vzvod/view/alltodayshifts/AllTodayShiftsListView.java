@@ -6,6 +6,7 @@ import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.Shift;
 import com.company.vzvod.entity.User;
 import com.company.vzvod.service.AllTodayShiftsDeleteService;
+import com.company.vzvod.shift.ShiftStatusBadgeFactory;
 import com.company.vzvod.util.EmployeeOrdering;
 import com.company.vzvod.view.dashboard.DayShiftDashboardView;
 import com.company.vzvod.view.main.MainView;
@@ -13,10 +14,12 @@ import com.company.vzvod.view.shift.ShiftDetailView;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.grid.ItemDoubleClickEvent;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
+import io.jmix.core.Messages;
 import io.jmix.flowui.Dialogs;
 import io.jmix.flowui.Notifications;
 import io.jmix.flowui.ViewNavigators;
@@ -66,6 +69,9 @@ public class AllTodayShiftsListView extends StandardListView<AllTodayShifts> {
 
     @Autowired
     private MessageBundle messageBundle;
+
+    @Autowired
+    private Messages messages;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -134,6 +140,11 @@ public class AllTodayShiftsListView extends StandardListView<AllTodayShifts> {
     @Supply(to = "routesDataGrid.employeesShortFio", subject = "renderer")
     protected Renderer<Shift> employeesShortFioRenderer() {
         return new TextRenderer<>(this::formatEmployees);
+    }
+
+    @Supply(to = "routesDataGrid.shiftStatus", subject = "renderer")
+    protected Renderer<Shift> shiftStatusRenderer() {
+        return new ComponentRenderer<>(shift -> ShiftStatusBadgeFactory.create(shift, messages));
     }
 
     private void refreshRoutesAfterDelete(LocalDate dayDate, Dep dayDepartment) {
