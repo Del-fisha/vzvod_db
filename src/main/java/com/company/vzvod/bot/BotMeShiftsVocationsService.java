@@ -1,6 +1,7 @@
 package com.company.vzvod.bot;
 
 import com.company.vzvod.bot.dto.BotAdministrativeViolationCreateRequest;
+import com.company.vzvod.bot.dto.BotCatalogOptionsResponse;
 import com.company.vzvod.bot.dto.BotColleagueItem;
 import com.company.vzvod.bot.dto.BotColleaguesResponse;
 import com.company.vzvod.bot.dto.BotCriminalViolationCreateRequest;
@@ -8,8 +9,10 @@ import com.company.vzvod.bot.dto.BotEnumOption;
 import com.company.vzvod.bot.dto.BotShiftEndTimeRequest;
 import com.company.vzvod.bot.dto.BotShiftItem;
 import com.company.vzvod.bot.dto.BotShiftMetricDeltaRequest;
+import com.company.vzvod.bot.dto.BotShiftRouteOption;
 import com.company.vzvod.bot.dto.BotShiftUpsertRequest;
 import com.company.vzvod.bot.dto.BotShiftsResponse;
+import com.company.vzvod.bot.dto.BotStringEnumOption;
 import com.company.vzvod.bot.dto.BotVacationBalance;
 import com.company.vzvod.bot.dto.BotVacationsResponse;
 import com.company.vzvod.bot.dto.BotViolationOptionsResponse;
@@ -412,6 +415,35 @@ public class BotMeShiftsVocationsService {
             types.add(new BotEnumOption(type.getId(), enumMessage("TypeOfCriminal", type.name())));
         }
         return new BotViolationOptionsResponse(List.copyOf(impacts), List.copyOf(articles), List.copyOf(types));
+    }
+
+    @Transactional(readOnly = true)
+    public BotCatalogOptionsResponse loadCatalogOptions() {
+        List<BotEnumOption> vocationTypes = new ArrayList<>(VocationType.values().length);
+        for (VocationType type : VocationType.values()) {
+            vocationTypes.add(new BotEnumOption(type.getId(), enumMessage("VocationType", type.name())));
+        }
+
+        List<BotShiftRouteOption> shiftRoutes = new ArrayList<>(NumberOfShift.values().length);
+        for (NumberOfShift route : NumberOfShift.values()) {
+            TypeOfShift defaultType = route.defaultTypeOfShift();
+            shiftRoutes.add(new BotShiftRouteOption(
+                    route.getId(),
+                    enumMessage("NumberOfShift", route.name()),
+                    defaultType == null ? null : defaultType.getId()
+            ));
+        }
+
+        List<BotStringEnumOption> shiftTypes = new ArrayList<>(TypeOfShift.values().length);
+        for (TypeOfShift type : TypeOfShift.values()) {
+            shiftTypes.add(new BotStringEnumOption(type.getId(), enumMessage("TypeOfShift", type.name())));
+        }
+
+        return new BotCatalogOptionsResponse(
+                List.copyOf(vocationTypes),
+                List.copyOf(shiftRoutes),
+                List.copyOf(shiftTypes)
+        );
     }
 
     @Transactional

@@ -5,10 +5,13 @@ import com.company.vzvod.entity.User;
 import com.company.vzvod.entity.Vocation;
 import com.company.vzvod.entity.VocationType;
 import com.company.vzvod.service.VocationBalanceService;
+import com.company.vzvod.service.VocationDialogSaveService;
 import com.company.vzvod.view.main.MainView;
-import io.jmix.flowui.component.textfield.JmixIntegerField;
 import com.vaadin.flow.router.Route;
 import io.jmix.core.security.CurrentAuthentication;
+import io.jmix.flowui.component.textfield.JmixIntegerField;
+import io.jmix.flowui.model.DataContext;
+import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -26,6 +29,12 @@ public class VocationDetailView extends StandardDetailView<Vocation> {
 
     @Autowired
     private VocationBalanceService vocationBalanceService;
+
+    @Autowired
+    private VocationDialogSaveService vocationDialogSaveService;
+
+    @ViewComponent
+    private InstanceContainer<Vocation> vocationDc;
 
     @ViewComponent
     private JmixIntegerField vacationDaysUsedField;
@@ -52,6 +61,27 @@ public class VocationDetailView extends StandardDetailView<Vocation> {
         Vocation vocation = getEditedEntity();
         ServiceInfo serviceInfo = vocation != null ? vocation.getUserServiceInfo() : null;
         refreshBalanceDisplay(serviceInfo);
+    }
+
+    @Subscribe
+    public void onBeforeSave(final BeforeSaveEvent event) {
+        Vocation vocation = getEditedEntity();
+        event.preventSave();
+
+        Vocation saved = vocationDialogSaveService.saveFromDialog(vocation);
+
+        DataContext parent = getViewData().getDataContext().getParent();
+        if (parent != null) {
+            parent.merge(saved);
+            getViewData().getDataContext().clear();
+            event.resume(close(StandardOutcome.SAVE));
+            return;
+        }
+
+        getViewData().getDataContext().clear();
+        vocationDc.setItem(saved);
+        clearChanges();
+        event.resume(close(StandardOutcome.SAVE));
     }
 
     @Subscribe

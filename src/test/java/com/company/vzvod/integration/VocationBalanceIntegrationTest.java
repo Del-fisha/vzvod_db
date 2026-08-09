@@ -116,5 +116,66 @@ public class VocationBalanceIntegrationTest {
         assertEquals(13, stats.used()); // только пул: (10-2) + 5
         assertEquals((baseJan1Nominal + 2) - 13, stats.available());
     }
+
+    @Test
+    @DisplayName("ADDITIONAL списывает дни из положено/остаток")
+    void additional_affectsBalance() {
+        var before = vocationBalanceService.recalcAndSave(serviceInfo.getId());
+        int year = LocalDate.now().getYear();
+
+        Vocation additional = dataManager.create(Vocation.class);
+        additional.setUserServiceInfo(serviceInfo);
+        additional.setType(VocationType.ADDITIONAL);
+        additional.setStartDate(LocalDate.of(year, 2, 1));
+        additional.setEndDate(LocalDate.of(year, 2, 5)); // 5 дней
+        additional.setHasDeparture(false);
+        additional.setDaysAddedByDeparture(0);
+        dataManager.save(additional);
+
+        var after = vocationBalanceService.recalcAndSave(serviceInfo.getId());
+
+        assertEquals(before.entitled(), after.entitled());
+        assertEquals(before.used() + 5, after.used());
+        assertEquals(before.available() - 5, after.available());
+
+        ServiceInfo reloaded = dataManager.load(ServiceInfo.class).id(serviceInfo.getId()).one();
+        assertEquals(after.entitled(), reloaded.getVacationDaysEntitled());
+        assertEquals(after.available(), reloaded.getVacationDaysAvailable());
+    }
+
+    @Test
+    @DisplayName("Учебный отпуск и Цпп не меняют положено/остаток")
+    void studyLeaveAndPtc_doNotAffectBalance() {
+        var before = vocationBalanceService.recalcAndSave(serviceInfo.getId());
+        int year = LocalDate.now().getYear();
+
+        Vocation study = dataManager.create(Vocation.class);
+        study.setUserServiceInfo(serviceInfo);
+        study.setType(VocationType.STUDY_LEAVE);
+        study.setStartDate(LocalDate.of(year, 4, 1));
+        study.setEndDate(LocalDate.of(year, 4, 14));
+        study.setHasDeparture(false);
+        study.setDaysAddedByDeparture(0);
+        dataManager.save(study);
+
+        Vocation ptc = dataManager.create(Vocation.class);
+        ptc.setUserServiceInfo(serviceInfo);
+        ptc.setType(VocationType.PTC);
+        ptc.setStartDate(LocalDate.of(year, 5, 1));
+        ptc.setEndDate(LocalDate.of(year, 5, 10));
+        ptc.setHasDeparture(false);
+        ptc.setDaysAddedByDeparture(0);
+        dataManager.save(ptc);
+
+        var after = vocationBalanceService.recalcAndSave(serviceInfo.getId());
+
+        assertEquals(before.entitled(), after.entitled());
+        assertEquals(before.used(), after.used());
+        assertEquals(before.available(), after.available());
+
+        ServiceInfo reloaded = dataManager.load(ServiceInfo.class).id(serviceInfo.getId()).one();
+        assertEquals(before.entitled(), reloaded.getVacationDaysEntitled());
+        assertEquals(before.available(), reloaded.getVacationDaysAvailable());
+    }
 }
 
