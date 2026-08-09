@@ -22,8 +22,8 @@ public record BotShiftItem(
         LocalTime endTime,
         Integer countOfStatements,
         Integer countOfClaims,
-        Integer ibdWithMigrant,
-        Integer ibdWithoutMigrant,
+        Integer ibdr,
+        Integer migrant,
         Integer administrativeViolationsCount,
         Integer criminalViolationsCount,
         /** Первый напарник (совместимость со старыми клиентами); null, если кроме вас никого нет. */

@@ -1,0 +1,28 @@
+.shift-status-badge {
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.shift-status-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  display: inline-block;
+}
+
+.shift-status-dot--started {
+  background: var(--lumo-success-color);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--lumo-success-color) 25%, transparent);
+}
+
+.shift-status-dot--finished {
+  background: var(--lumo-error-color);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--lumo-error-color) 25%, transparent);
+}
+
+.shift-status-label {
+  font-size: var(--lumo-font-size-s);
+  color: var(--lumo-body-text-color);
+  white-space: nowrap;
+}

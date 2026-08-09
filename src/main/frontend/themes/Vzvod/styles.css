@@ -9,3 +9,4 @@
 
 @import url('view/user-card-view.css');
 @import url('view/today-shift-dashboard-view.css');
+@import url('components/shift-status-badge.css');

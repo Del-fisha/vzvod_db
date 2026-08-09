@@ -84,8 +84,8 @@
                 <textField property="typeOfShift" readOnly="true"/>
                 <textField property="date" readOnly="true"/>
                 <textField property="countOfStatements" readOnly="true"/>
-                <textField property="ibdWithMigrant" readOnly="true"/>
-                <textField property="ibdWithoutMigrant" readOnly="true"/>
+                <textField property="ibdr" readOnly="true"/>
+                <textField property="migrant" readOnly="true"/>
                 <textField property="countOfClaims" readOnly="true"/>
                 <textField property="startTime" readOnly="true"/>
                 <textField property="endTime" readOnly="true"/>

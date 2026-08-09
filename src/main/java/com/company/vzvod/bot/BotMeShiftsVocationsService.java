@@ -24,6 +24,7 @@ import com.company.vzvod.entity.CriminalViolation;
 import com.company.vzvod.entity.Dep;
 import com.company.vzvod.entity.Department;
 import com.company.vzvod.entity.Impact;
+import com.company.vzvod.entity.MetroStation;
 import com.company.vzvod.entity.NumberOfShift;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.StatusInService;
@@ -92,8 +93,8 @@ public class BotMeShiftsVocationsService {
                         .add("endTime")
                         .add("countOfStatements")
                         .add("countOfClaims")
-                        .add("ibdWithMigrant")
-                        .add("ibdWithoutMigrant")
+                        .add("ibdr")
+                        .add("migrant")
                         .add("units"))
                 .list();
         List<BotShiftItem> items = new ArrayList<>(shifts.size());
@@ -119,8 +120,8 @@ public class BotMeShiftsVocationsService {
                         .add("endTime")
                         .add("countOfStatements")
                         .add("countOfClaims")
-                        .add("ibdWithMigrant")
-                        .add("ibdWithoutMigrant"))
+                        .add("ibdr")
+                        .add("migrant"))
                 .optional()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "shift not found"));
         boolean member = shift.getUnits().stream().anyMatch(u -> u.getId().equals(si.getId()));
@@ -249,8 +250,8 @@ public class BotMeShiftsVocationsService {
                         .add("endTime")
                         .add("countOfStatements")
                         .add("countOfClaims")
-                        .add("ibdWithMigrant")
-                        .add("ibdWithoutMigrant"))
+                        .add("ibdr")
+                        .add("migrant"))
                 .optional()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "shift not found"));
         UUID mySid = si.getId();
@@ -319,16 +320,16 @@ public class BotMeShiftsVocationsService {
     }
 
     @Transactional
-    public BotShiftItem adjustIbdWithMigrant(UUID userId, UUID shiftId, BotShiftMetricDeltaRequest body) {
+    public BotShiftItem adjustIbdr(UUID userId, UUID shiftId, BotShiftMetricDeltaRequest body) {
         int delta = requireMetricDelta(body);
         ServiceInfo si = requireServiceInfo(userId);
         Shift shift = loadOpenShiftForParticipant(shiftId, si.getId());
-        int current = shift.getIbdWithMigrant() == null ? 0 : shift.getIbdWithMigrant();
+        int current = shift.getIbdr() == null ? 0 : shift.getIbdr();
         int next = Math.max(0, current + delta);
         if (next == current) {
             return toShiftItem(shift, si.getId());
         }
-        shift.setIbdWithMigrant(next);
+        shift.setIbdr(next);
         Shift saved = unconstrainedDataManager.save(shift);
         return toShiftItem(saved, si.getId());
     }
@@ -349,16 +350,16 @@ public class BotMeShiftsVocationsService {
     }
 
     @Transactional
-    public BotShiftItem adjustIbdWithoutMigrant(UUID userId, UUID shiftId, BotShiftMetricDeltaRequest body) {
+    public BotShiftItem adjustMigrant(UUID userId, UUID shiftId, BotShiftMetricDeltaRequest body) {
         int delta = requireMetricDelta(body);
         ServiceInfo si = requireServiceInfo(userId);
         Shift shift = loadOpenShiftForParticipant(shiftId, si.getId());
-        int current = shift.getIbdWithoutMigrant() == null ? 0 : shift.getIbdWithoutMigrant();
+        int current = shift.getMigrant() == null ? 0 : shift.getMigrant();
         int next = Math.max(0, current + delta);
         if (next == current) {
             return toShiftItem(shift, si.getId());
         }
-        shift.setIbdWithoutMigrant(next);
+        shift.setMigrant(next);
         Shift saved = unconstrainedDataManager.save(shift);
         return toShiftItem(saved, si.getId());
     }
@@ -379,23 +380,23 @@ public class BotMeShiftsVocationsService {
     }
 
     /**
-     * «Мигрант ±»: одновременно меняет ibdWithoutMigrant и ibdWithMigrant на delta (±1).
+     * «Мигрант + ИБДР ±»: одновременно меняет migrant и ibdr на delta (±1).
      * Ниже нуля не уходит — остаётся 0 без ошибки.
      */
     @Transactional
-    public BotShiftItem adjustMigrantCheck(UUID userId, UUID shiftId, BotShiftMetricDeltaRequest body) {
+    public BotShiftItem adjustMigrantAndIbdr(UUID userId, UUID shiftId, BotShiftMetricDeltaRequest body) {
         int delta = requireMetricDelta(body);
         ServiceInfo si = requireServiceInfo(userId);
         Shift shift = loadOpenShiftForParticipant(shiftId, si.getId());
-        int without = shift.getIbdWithoutMigrant() == null ? 0 : shift.getIbdWithoutMigrant();
-        int with = shift.getIbdWithMigrant() == null ? 0 : shift.getIbdWithMigrant();
+        int without = shift.getMigrant() == null ? 0 : shift.getMigrant();
+        int with = shift.getIbdr() == null ? 0 : shift.getIbdr();
         int nextWithout = Math.max(0, without + delta);
         int nextWith = Math.max(0, with + delta);
         if (nextWithout == without && nextWith == with) {
             return toShiftItem(shift, si.getId());
         }
-        shift.setIbdWithoutMigrant(nextWithout);
-        shift.setIbdWithMigrant(nextWith);
+        shift.setMigrant(nextWithout);
+        shift.setIbdr(nextWith);
         Shift saved = unconstrainedDataManager.save(shift);
         return toShiftItem(saved, si.getId());
     }
@@ -439,10 +440,16 @@ public class BotMeShiftsVocationsService {
             shiftTypes.add(new BotStringEnumOption(type.getId(), enumMessage("TypeOfShift", type.name())));
         }
 
+        List<BotEnumOption> metroStations = new ArrayList<>(MetroStation.values().length);
+        for (MetroStation station : MetroStation.values()) {
+            metroStations.add(new BotEnumOption(station.getId(), enumMessage("MetroStation", station.name())));
+        }
+
         return new BotCatalogOptionsResponse(
                 List.copyOf(vocationTypes),
                 List.copyOf(shiftRoutes),
-                List.copyOf(shiftTypes)
+                List.copyOf(shiftTypes),
+                List.copyOf(metroStations)
         );
     }
 
@@ -509,8 +516,8 @@ public class BotMeShiftsVocationsService {
                         .add("endTime")
                         .add("countOfStatements")
                         .add("countOfClaims")
-                        .add("ibdWithMigrant")
-                        .add("ibdWithoutMigrant"))
+                        .add("ibdr")
+                        .add("migrant"))
                 .optional()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "shift not found"));
         boolean member = shift.getUnits().stream()
@@ -700,8 +707,8 @@ public class BotMeShiftsVocationsService {
         shift.setEndTime(req.endTime());
         shift.setCountOfStatements(req.countOfStatements() != null ? req.countOfStatements() : 0);
         shift.setCountOfClaims(req.countOfClaims() != null ? req.countOfClaims() : 0);
-        shift.setIbdWithMigrant(req.ibdWithMigrant() != null ? req.ibdWithMigrant() : 0);
-        shift.setIbdWithoutMigrant(req.ibdWithoutMigrant() != null ? req.ibdWithoutMigrant() : 0);
+        shift.setIbdr(req.ibdr() != null ? req.ibdr() : 0);
+        shift.setMigrant(req.migrant() != null ? req.migrant() : 0);
     }
 
     /**
@@ -721,11 +728,11 @@ public class BotMeShiftsVocationsService {
         if (req.countOfClaims() != null) {
             shift.setCountOfClaims(req.countOfClaims());
         }
-        if (req.ibdWithMigrant() != null) {
-            shift.setIbdWithMigrant(req.ibdWithMigrant());
+        if (req.ibdr() != null) {
+            shift.setIbdr(req.ibdr());
         }
-        if (req.ibdWithoutMigrant() != null) {
-            shift.setIbdWithoutMigrant(req.ibdWithoutMigrant());
+        if (req.migrant() != null) {
+            shift.setMigrant(req.migrant());
         }
     }
 
@@ -763,8 +770,8 @@ public class BotMeShiftsVocationsService {
                 s.getEndTime(),
                 s.getCountOfStatements(),
                 s.getCountOfClaims(),
-                s.getIbdWithMigrant(),
-                s.getIbdWithoutMigrant(),
+                s.getIbdr(),
+                s.getMigrant(),
                 countAdministrativeViolations(s.getId()),
                 countCriminalViolations(s.getId()),
                 partnerSiId,

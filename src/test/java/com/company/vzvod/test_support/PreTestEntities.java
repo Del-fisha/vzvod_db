@@ -34,9 +34,9 @@ public class PreTestEntities {
         shift.setTypeOfShift(TypeOfShift.VZVOD_ROUTE);
         shift.setNumber(NumberOfShift._28);
         shift.setDate(LocalDate.now());
-        shift.setIbdWithoutMigrant(45);
+        shift.setMigrant(45);
         shift.setCountOfStatements(2);
-        shift.setIbdWithMigrant(60);
+        shift.setIbdr(60);
         shift.setCountOfClaims(1);
     }
 

@@ -22,6 +22,9 @@ public record BotProfileResponse(
         BotAddressResponse registration,
         BotAddressResponse habitation,
         LocalDate idCardIssued,
-        LocalDate idCardUntil
+        LocalDate idCardUntil,
+        /** Идентификатор {@link com.company.vzvod.entity.MetroStation#getId()} ближайшей станции метро. */
+        Integer nearestMetro,
+        String nearestMetroLabel
 ) {
 }

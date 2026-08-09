@@ -77,6 +77,14 @@
   color: var(--lumo-primary-text-color);
 }
 
+.today-shift-dashboard__kpi-card--migrant .today-shift-dashboard__kpi-value {
+  color: var(--lumo-primary-text-color);
+}
+
+.today-shift-dashboard__route-status {
+  margin-top: var(--lumo-space-xs);
+}
+
 .today-shift-dashboard__kpi-card--administrative .today-shift-dashboard__kpi-value,
 .today-shift-dashboard__kpi-card--criminal .today-shift-dashboard__kpi-value {
   color: var(--lumo-error-text-color);

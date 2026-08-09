@@ -119,6 +119,22 @@ public class MobileAuthService {
                 });
     }
 
+    /**
+     * После смены пароля мобильный токен должен перестать работать —
+     * клиент получит 401 и запросит повторный вход.
+     */
+    @Transactional
+    public void revokeBindingsForUser(UUID userId) {
+        if (userId == null) {
+            return;
+        }
+        dataManager.load(UserMobileBinding.class)
+                .query("select b from UserMobileBinding b where b.user.id = :uid")
+                .parameter("uid", userId)
+                .list()
+                .forEach(dataManager::remove);
+    }
+
     private String issueToken(User user, String deviceId) {
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         String token = randomToken();

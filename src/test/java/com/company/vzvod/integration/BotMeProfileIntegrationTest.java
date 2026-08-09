@@ -154,7 +154,9 @@ class BotMeProfileIntegrationTest {
                 .andExpect(jsonPath("$.registration.city").value("Санкт-Петербург"))
                 .andExpect(jsonPath("$.habitation.city").value("Санкт-Петербург"))
                 .andExpect(jsonPath("$.idCardIssued").exists())
-                .andExpect(jsonPath("$.idCardUntil").exists());
+                .andExpect(jsonPath("$.idCardUntil").exists())
+                .andExpect(jsonPath("$.nearestMetro").value(MetroStation.BALTIYSKAYA.getId()))
+                .andExpect(jsonPath("$.nearestMetroLabel").value("Балтийская"));
     }
 
     @Test
@@ -244,6 +246,32 @@ class BotMeProfileIntegrationTest {
                         .header("X-Telegram-Chat-Id", String.valueOf(CHAT_ID))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"registration\":{\"index\":\"123\"}}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("PUT 200: ближайшая станция метро")
+    void patch_nearestMetro_ok() throws Exception {
+        persistUserWithBinding();
+        mockMvc.perform(put("/api/bot/me/profile")
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", String.valueOf(CHAT_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nearestMetro\":" + MetroStation.NEVSKY_PROSPEKT.getId() + "}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nearestMetro").value(MetroStation.NEVSKY_PROSPEKT.getId()))
+                .andExpect(jsonPath("$.nearestMetroLabel").value("Невский проспект"));
+    }
+
+    @Test
+    @DisplayName("PUT 400: неверный nearestMetro")
+    void patch_nearestMetro_invalid_returns400() throws Exception {
+        persistUserWithBinding();
+        mockMvc.perform(put("/api/bot/me/profile")
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", String.valueOf(CHAT_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nearestMetro\":999999}"))
                 .andExpect(status().isBadRequest());
     }
 

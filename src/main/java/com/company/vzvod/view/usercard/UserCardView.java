@@ -364,7 +364,7 @@ public class UserCardView extends StandardView {
 
     private int sumIbdr(ServiceInfo serviceInfo, LocalDate from) {
         String q = """
-                select coalesce(sum(coalesce(s.ibdWithMigrant, 0) + coalesce(s.ibdWithoutMigrant, 0)), 0)
+                select coalesce(sum(coalesce(s.ibdr, 0) + coalesce(s.migrant, 0)), 0)
                 from Shift s
                 join s.units si
                 where si = :serviceInfo

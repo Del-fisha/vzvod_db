@@ -80,12 +80,12 @@ class DashboardStatisticsServiceIntegrationTest {
 
         Shift shift1 = shiftOn(REF, si1);
         addAdminViolation(shift1, ArticleOfAdministrative._18_8);
-        shift1.setIbdWithMigrant(0);
+        shift1.setIbdr(0);
         dataManager.save(shift1);
 
         Shift shift2 = shiftOn(REF.minusDays(1), si2);
         addCriminalViolation(shift2, TypeOfCriminal.FEDERAL_WANTED);
-        shift2.setIbdWithMigrant(0);
+        shift2.setIbdr(0);
         dataManager.save(shift2);
 
         StatsQuery q = new StatsQuery(
@@ -122,7 +122,7 @@ class DashboardStatisticsServiceIntegrationTest {
         dataManager.save(s1);
 
         Shift s2 = shiftOn(REF, si2);
-        s2.setIbdWithMigrant(5);
+        s2.setIbdr(5);
         dataManager.save(s2);
 
         StatsQuery q = new StatsQuery(
@@ -196,7 +196,7 @@ class DashboardStatisticsServiceIntegrationTest {
         ServiceInfo si = u.getServiceInfo();
 
         Shift sh1 = shiftOn(REF.withDayOfMonth(1), si);
-        sh1.setIbdWithMigrant(4);
+        sh1.setIbdr(4);
         addAdminViolation(sh1, ArticleOfAdministrative._11_15);
         dataManager.save(sh1);
 
@@ -219,7 +219,7 @@ class DashboardStatisticsServiceIntegrationTest {
         assertEquals(u.getId(), r.employeeTotalsOrNull().employeeUserId());
         assertEquals(1, r.employeeTotalsOrNull().administrativeViolations());
         assertEquals(1, r.employeeTotalsOrNull().criminalViolations());
-        assertEquals(4, r.employeeTotalsOrNull().ibdWithMigrant());
+        assertEquals(4, r.employeeTotalsOrNull().ibdr());
     }
 
     @Test
@@ -274,8 +274,8 @@ class DashboardStatisticsServiceIntegrationTest {
         shift.setTypeOfShift(TypeOfShift.VZVOD_ROUTE);
         shift.setNumber(NumberOfShift._28);
         shift.setDate(date);
-        shift.setIbdWithoutMigrant(0);
-        shift.setIbdWithMigrant(0);
+        shift.setMigrant(0);
+        shift.setIbdr(0);
         shift.setCountOfStatements(0);
         shift.setCountOfClaims(0);
         shift.getUnits().add(unit);

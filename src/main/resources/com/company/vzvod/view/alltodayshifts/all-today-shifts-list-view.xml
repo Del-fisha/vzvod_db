@@ -76,6 +76,10 @@
                           selectionMode="MULTI">
                     <columns resizable="true">
                         <column property="number" header="msg://allTodayShiftsListView.column.routeNumber"/>
+                        <column key="shiftStatus"
+                                header="msg://allTodayShiftsListView.column.status"
+                                autoWidth="true"
+                                flexGrow="0"/>
                         <column key="employeesShortFio"
                                 header="msg://allTodayShiftsListView.column.employees"/>
                     </columns>

@@ -148,7 +148,7 @@ public class WorkResultsStatisticsDialog extends StandardView {
             } else if (t == criminalTab) {
                 selectedMetric = WorkMetric.CRIMINAL_VIOLATIONS;
             } else {
-                selectedMetric = WorkMetric.IBD_WITH_MIGRANT;
+                selectedMetric = WorkMetric.IBDR;
             }
             updateSubMenuVisibility();
             refreshChart();
@@ -274,7 +274,7 @@ public class WorkResultsStatisticsDialog extends StandardView {
     private void updateSubMenuVisibility() {
         boolean admin = selectedMetric == WorkMetric.ADMINISTRATIVE_VIOLATIONS;
         boolean criminal = selectedMetric == WorkMetric.CRIMINAL_VIOLATIONS;
-        boolean ibdr = selectedMetric == WorkMetric.IBD_WITH_MIGRANT;
+        boolean ibdr = selectedMetric == WorkMetric.IBDR;
         articleFiltersRow.setVisible(admin);
         criminalFiltersRow.setVisible(criminal);
         ibdrLabel.setVisible(ibdr);
@@ -373,7 +373,7 @@ public class WorkResultsStatisticsDialog extends StandardView {
         long v = switch (selectedMetric) {
             case ADMINISTRATIVE_VIOLATIONS -> t.administrativeViolations();
             case CRIMINAL_VIOLATIONS -> t.criminalViolations();
-            case IBD_WITH_MIGRANT -> t.ibdWithMigrant();
+            case IBDR -> t.ibdr();
         };
         String totalsPattern = messageBundle.getMessage("workResultsStatisticsDialog.totalsLineSingle");
         totalsLine.setText(MessageFormat.format(totalsPattern, metricLabel(selectedMetric), v));
@@ -548,7 +548,7 @@ public class WorkResultsStatisticsDialog extends StandardView {
         return switch (m) {
             case ADMINISTRATIVE_VIOLATIONS -> messageBundle.getMessage("workResultsStatisticsDialog.metricAdministrative");
             case CRIMINAL_VIOLATIONS -> messageBundle.getMessage("workResultsStatisticsDialog.metricCriminal");
-            case IBD_WITH_MIGRANT -> messageBundle.getMessage("workResultsStatisticsDialog.metricIbdr");
+            case IBDR -> messageBundle.getMessage("workResultsStatisticsDialog.metricIbdr");
         };
     }
 

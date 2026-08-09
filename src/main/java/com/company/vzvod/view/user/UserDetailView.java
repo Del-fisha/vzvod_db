@@ -2,6 +2,7 @@ package com.company.vzvod.view.user;
 
 import com.company.vzvod.aop.UserDetailViewDataLoadSupport;
 import com.company.vzvod.entity.*;
+import com.company.vzvod.mobile.MobileAuthService;
 import com.company.vzvod.service.UserReadService;
 import com.company.vzvod.service.UserDialogSaveService;
 import com.company.vzvod.view.contacts.ContactsDetailView;
@@ -73,6 +74,9 @@ public class UserDetailView extends StandardDetailView<User> {
 
     @Autowired
     private UiAccessService uiAccessService;
+
+    @Autowired
+    private MobileAuthService mobileAuthService;
 
     @ViewComponent
     private TypedTextField<String> lastNameField;
@@ -154,12 +158,16 @@ public class UserDetailView extends StandardDetailView<User> {
 
         User user = getEditedEntity();
         String password = user.getPassword();
+        boolean passwordChanged = password != null && !password.isBlank() && !password.startsWith("{bcrypt}");
 
-        if (password != null && !password.isBlank() && !password.startsWith("{bcrypt}")) {
+        if (passwordChanged) {
             user.setPassword(passwordEncoder.encode(password));
         }
 
         User saved = userDialogSaveService.saveFromDialog(user);
+        if (passwordChanged) {
+            mobileAuthService.revokeBindingsForUser(saved.getId());
+        }
         getViewData().getDataContext().clear();
         userDc.setItem(saved);
         clearChanges();
