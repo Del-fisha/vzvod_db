@@ -25,7 +25,7 @@ public class ServiceInfoEntityEvents {
         }
 
         StatusInService status = serviceInfo.getStatus();
-        if (status != StatusInService.ACTIVE && status != StatusInService.VOCATION) {
+        if (!ServiceInfoVocationStatusService.isManagedStatus(status)) {
             return;
         }
 
@@ -35,7 +35,8 @@ public class ServiceInfoEntityEvents {
             return;
         }
 
-        boolean hasVocationToday = serviceInfoVocationStatusService.hasVocationToday(serviceInfo.getId(), LocalDate.now());
-        serviceInfo.setStatus(hasVocationToday ? StatusInService.VOCATION : StatusInService.ACTIVE);
+        serviceInfo.setStatus(
+                serviceInfoVocationStatusService.resolveExpectedStatus(serviceInfo.getId(), LocalDate.now())
+        );
     }
 }

@@ -1,6 +1,7 @@
 package com.company.vzvod.bot;
 
 import com.company.vzvod.bot.dto.BotAdministrativeViolationCreateRequest;
+import com.company.vzvod.bot.dto.BotCatalogOptionsResponse;
 import com.company.vzvod.bot.dto.BotEventsResponse;
 import com.company.vzvod.bot.dto.BotProfilePatchRequest;
 import com.company.vzvod.bot.dto.BotProfileResponse;
@@ -181,6 +182,14 @@ public class BotMeController {
     ) {
         apiKeyAuthorizer.verify(apiKey);
         return ResponseEntity.ok(botMeShiftsVocationsService.loadViolationOptions());
+    }
+
+    @GetMapping("/catalog-options")
+    public ResponseEntity<BotCatalogOptionsResponse> catalogOptions(
+            @RequestHeader(value = "X-Api-Key", required = false) String apiKey
+    ) {
+        apiKeyAuthorizer.verify(apiKey);
+        return ResponseEntity.ok(botMeShiftsVocationsService.loadCatalogOptions());
     }
 
     @PostMapping("/shifts/{shiftId}/administrative-violations")

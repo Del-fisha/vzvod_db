@@ -18,11 +18,21 @@ public class VocationBalanceService {
         this.dataManager = dataManager;
     }
 
+    /** Типы, которые списывают/добавляют дни в {@link ServiceInfo#getVacationDaysEntitled()}/{@link ServiceInfo#getVacationDaysAvailable()}. */
+    static List<Integer> balanceAffectingTypeIds() {
+        return List.of(
+                VocationType.MAIN.getId(),
+                VocationType.ADDITIONAL.getId(),
+                VocationType.PART_OF_MAIN.getId()
+        );
+    }
+
     /**
      * Пересчитывает положено/остаток отпуска за календарный год вокруг «сегодня».
      * Номинал на год = норматив по выслуге (месяцы) на 01.01 + доп. +5 за пороги 120/180/240 мес. в течение года
      * (если на 01.01 порог ещё не пройден) + сумма «добавлено дней» по выезду.
-     * Списание — только с пула: {@code countOfDays - daysAddedByDeparture} по основному и части основного.
+     * Списание — только с пула: {@code countOfDays - daysAddedByDeparture}
+     * по основному, дополнительному и части основного.
      */
     public void recalcAndSave(ServiceInfo serviceInfo) {
         if (serviceInfo == null || serviceInfo.getId() == null) {
@@ -132,7 +142,7 @@ public class VocationBalanceService {
                 .parameter("serviceInfoId", serviceInfoId)
                 .parameter("start", start)
                 .parameter("end", end)
-                .parameter("types", List.of(VocationType.MAIN.getId(), VocationType.PART_OF_MAIN.getId()))
+                .parameter("types", balanceAffectingTypeIds())
                 .one();
 
         return sum == null ? 0 : sum;
@@ -154,7 +164,7 @@ public class VocationBalanceService {
                 .parameter("serviceInfoId", serviceInfoId)
                 .parameter("start", start)
                 .parameter("end", end)
-                .parameter("types", List.of(VocationType.MAIN.getId(), VocationType.PART_OF_MAIN.getId()))
+                .parameter("types", balanceAffectingTypeIds())
                 .one();
 
         return sum == null ? 0 : sum;

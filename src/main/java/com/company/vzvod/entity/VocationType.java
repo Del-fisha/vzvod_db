@@ -9,7 +9,9 @@ public enum VocationType implements EnumClass<Integer> {
 
     MAIN(10),
     ADDITIONAL(20),
-    PART_OF_MAIN(30);
+    PART_OF_MAIN(30),
+    STUDY_LEAVE(40),
+    PTC(50);
 
     private final Integer id;
 

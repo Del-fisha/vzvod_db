@@ -3,19 +3,34 @@ package com.company.vzvod.service;
 import com.company.vzvod.entity.ArmyService;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.User;
+import com.company.vzvod.entity.VocationType;
 import io.jmix.core.DataManager;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class VocationBalanceServiceTest {
+
+    @Test
+    @DisplayName("В баланс входят MAIN/ADDITIONAL/PART_OF_MAIN, учебный и Цпп — нет")
+    void balanceAffectingTypes_includeMainAdditionalPartOfMain_only() {
+        var types = VocationBalanceService.balanceAffectingTypeIds();
+        assertTrue(types.contains(VocationType.MAIN.getId()));
+        assertTrue(types.contains(VocationType.ADDITIONAL.getId()));
+        assertTrue(types.contains(VocationType.PART_OF_MAIN.getId()));
+        assertFalse(types.contains(VocationType.STUDY_LEAVE.getId()));
+        assertFalse(types.contains(VocationType.PTC.getId()));
+    }
 
     @Test
     void calcCurrentYearStats_entitledOnJan1_usedByQuery_availableIsEntitledPlusAddedMinusUsed() {

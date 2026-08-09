@@ -5,6 +5,7 @@ import com.company.vzvod.bot.BotMeExtrasService;
 import com.company.vzvod.bot.BotMeProfileService;
 import com.company.vzvod.bot.BotMeShiftsVocationsService;
 import com.company.vzvod.bot.dto.BotAdministrativeViolationCreateRequest;
+import com.company.vzvod.bot.dto.BotCatalogOptionsResponse;
 import com.company.vzvod.bot.dto.BotColleaguesResponse;
 import com.company.vzvod.bot.dto.BotCriminalViolationCreateRequest;
 import com.company.vzvod.bot.dto.BotEducationDto;
@@ -212,6 +213,14 @@ public class MobileMeController {
     ) {
         userId(token);
         return ResponseEntity.ok(shiftsService.loadViolationOptions());
+    }
+
+    @GetMapping("/catalog-options")
+    public ResponseEntity<BotCatalogOptionsResponse> catalogOptions(
+            @RequestHeader(value = "X-Mobile-Token", required = false) String token
+    ) {
+        userId(token);
+        return ResponseEntity.ok(shiftsService.loadCatalogOptions());
     }
 
     @PostMapping("/shifts/{shiftId}/administrative-violations")
