@@ -153,6 +153,13 @@ public class BotMeShiftsVocationsService {
                         + "order by u.lastName, u.firstName")
                 .parameter("uid", myId)
                 .parameter("st", StatusInService.ACTIVE.getId())
+                .fetchPlan(fp -> fp
+                        .add("lastName")
+                        .add("firstName")
+                        .add("patronymic")
+                        .add("serviceInfo", si -> si
+                                .add("status")
+                                .add("department", d -> d.add("number"))))
                 .maxResults(COLLEAGUES_MAX_FETCH)
                 .list();
         int preferred = preferredDepartment;

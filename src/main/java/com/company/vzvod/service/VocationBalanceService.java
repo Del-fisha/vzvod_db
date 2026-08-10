@@ -2,7 +2,7 @@ package com.company.vzvod.service;
 
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.VocationType;
-import io.jmix.core.DataManager;
+import io.jmix.core.UnconstrainedDataManager;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -12,9 +12,9 @@ import java.util.UUID;
 @Service
 public class VocationBalanceService {
 
-    private final DataManager dataManager;
+    private final UnconstrainedDataManager dataManager;
 
-    public VocationBalanceService(DataManager dataManager) {
+    public VocationBalanceService(UnconstrainedDataManager dataManager) {
         this.dataManager = dataManager;
     }
 

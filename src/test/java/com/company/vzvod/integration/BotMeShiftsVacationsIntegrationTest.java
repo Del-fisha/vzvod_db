@@ -505,6 +505,59 @@ class BotMeShiftsVacationsIntegrationTest {
     }
 
     @Test
+    @DisplayName("GET /colleagues — сначала отделение preferred (сегодняшнее), затем другое")
+    void colleagues_preferredDepartmentFirst_thenOther() throws Exception {
+        persistUserBindingOnly();
+        final UUID[] preferredSi = new UUID[1];
+        final UUID[] otherSi = new UUID[1];
+        final UUID[] otherUserId = new UUID[1];
+        systemAuthenticator.runWithSystem(() -> {
+            User bound = dataManager.load(User.class).id(createdUserId).one();
+            Department dep1 = bound.getServiceInfo().getDepartment();
+            assertThat(dep1.getNumber()).isEqualTo(1);
+
+            preferredSi[0] = persistActiveColleagueInDepartment(dep1);
+
+            Department dep2 = dataManager.create(Department.class);
+            dep2.setNumber(2);
+            dep2 = dataManager.save(dep2);
+            otherSi[0] = persistActiveColleagueInDepartment(dep2);
+            otherUserId[0] = createdPartnerUserId;
+        });
+
+        MvcResult preferredFirst = mockMvc.perform(get("/api/bot/me/colleagues")
+                        .param("department", "1")
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID)))
+                .andExpect(status().isOk())
+                .andReturn();
+        JsonNode itemsPref1 = objectMapper.readTree(preferredFirst.getResponse().getContentAsString()).get("items");
+        assertThat(itemsPref1).hasSizeGreaterThanOrEqualTo(2);
+        assertThat(itemsPref1.get(0).get("serviceInfoId").asText()).isEqualTo(preferredSi[0].toString());
+        assertThat(itemsPref1.get(0).get("department").asInt()).isEqualTo(1);
+        assertThat(itemsPref1.get(1).get("serviceInfoId").asText()).isEqualTo(otherSi[0].toString());
+        assertThat(itemsPref1.get(1).get("department").asInt()).isEqualTo(2);
+
+        MvcResult preferredSecond = mockMvc.perform(get("/api/bot/me/colleagues")
+                        .param("department", "2")
+                        .header("X-Api-Key", API_KEY)
+                        .header("X-Telegram-Chat-Id", Long.toString(CHAT_ID)))
+                .andExpect(status().isOk())
+                .andReturn();
+        JsonNode itemsPref2 = objectMapper.readTree(preferredSecond.getResponse().getContentAsString()).get("items");
+        assertThat(itemsPref2.get(0).get("serviceInfoId").asText()).isEqualTo(otherSi[0].toString());
+        assertThat(itemsPref2.get(0).get("department").asInt()).isEqualTo(2);
+        assertThat(itemsPref2.get(1).get("serviceInfoId").asText()).isEqualTo(preferredSi[0].toString());
+        assertThat(itemsPref2.get(1).get("department").asInt()).isEqualTo(1);
+
+        systemAuthenticator.runWithSystem(() -> {
+            if (otherUserId[0] != null) {
+                removeUserGraph(otherUserId[0]);
+            }
+        });
+    }
+
+    @Test
     @DisplayName("PUT /shifts/{id} — обновление своей смены")
     void putShift_updates() throws Exception {
         persistUserShiftAndVocation();

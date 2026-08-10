@@ -4,30 +4,39 @@ import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.Vocation;
 import com.company.vzvod.service.ServiceInfoVocationStatusService;
 import com.company.vzvod.service.VocationBalanceService;
-import io.jmix.core.DataManager;
 import io.jmix.core.Id;
+import io.jmix.core.UnconstrainedDataManager;
 import io.jmix.core.event.EntityChangedEvent;
+import io.jmix.core.security.SystemAuthenticator;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.UUID;
 
+/**
+ * Пересчёт баланса/статуса отпуска.
+ * Мобильный/бот API не ставят UserDetails — используем UnconstrainedDataManager
+ * (+ system auth на случай вложенных слушателей с constrained DataManager).
+ */
 @Component
 public class VocationChangedListener {
 
-    private final DataManager dataManager;
+    private final UnconstrainedDataManager dataManager;
     private final VocationBalanceService vocationBalanceService;
     private final ServiceInfoVocationStatusService serviceInfoVocationStatusService;
+    private final SystemAuthenticator systemAuthenticator;
 
     public VocationChangedListener(
-            DataManager dataManager,
+            UnconstrainedDataManager dataManager,
             VocationBalanceService vocationBalanceService,
-            ServiceInfoVocationStatusService serviceInfoVocationStatusService
+            ServiceInfoVocationStatusService serviceInfoVocationStatusService,
+            SystemAuthenticator systemAuthenticator
     ) {
         this.dataManager = dataManager;
         this.vocationBalanceService = vocationBalanceService;
         this.serviceInfoVocationStatusService = serviceInfoVocationStatusService;
+        this.systemAuthenticator = systemAuthenticator;
     }
 
     @EventListener
@@ -36,12 +45,14 @@ public class VocationChangedListener {
             return;
         }
 
-        UUID serviceInfoId = resolveServiceInfoId(event);
-        if (serviceInfoId == null) {
-            return;
-        }
-        vocationBalanceService.recalcAndSave(serviceInfoId);
-        serviceInfoVocationStatusService.syncForServiceInfo(serviceInfoId, LocalDate.now());
+        systemAuthenticator.runWithSystem(() -> {
+            UUID serviceInfoId = resolveServiceInfoId(event);
+            if (serviceInfoId == null) {
+                return;
+            }
+            vocationBalanceService.recalcAndSave(serviceInfoId);
+            serviceInfoVocationStatusService.syncForServiceInfo(serviceInfoId, LocalDate.now());
+        });
     }
 
     /**
