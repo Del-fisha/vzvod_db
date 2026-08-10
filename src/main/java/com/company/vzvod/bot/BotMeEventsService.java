@@ -37,13 +37,44 @@ public class BotMeEventsService {
 
     @Transactional(readOnly = true)
     public BotEventsResponse loadUpcomingEvents(UUID userId) {
+        return loadEventsInRange(userId, LocalDate.now(), null);
+    }
+
+    /**
+     * Мероприятия в диапазоне дат (включительно). Если {@code from}/{@code to} null — без нижней/верхней границы.
+     */
+    @Transactional(readOnly = true)
+    public BotEventsResponse loadEventsInRange(UUID userId, LocalDate from, LocalDate to) {
         activeUserChecker.requireActive(userId);
-        LocalDate today = LocalDate.now();
-        List<Event> events = unconstrainedDataManager.load(Event.class)
-                .query("select e from Event e where e.date >= :today")
-                .parameter("today", today)
-                .maxResults(MAX_EVENTS)
-                .list();
+        if (from != null && to != null && from.isAfter(to)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "from must be <= to");
+        }
+        List<Event> events;
+        if (from != null && to != null) {
+            events = unconstrainedDataManager.load(Event.class)
+                    .query("select e from Event e where e.date >= :from and e.date <= :to")
+                    .parameter("from", from)
+                    .parameter("to", to)
+                    .maxResults(MAX_EVENTS)
+                    .list();
+        } else if (from != null) {
+            events = unconstrainedDataManager.load(Event.class)
+                    .query("select e from Event e where e.date >= :from")
+                    .parameter("from", from)
+                    .maxResults(MAX_EVENTS)
+                    .list();
+        } else if (to != null) {
+            events = unconstrainedDataManager.load(Event.class)
+                    .query("select e from Event e where e.date <= :to")
+                    .parameter("to", to)
+                    .maxResults(MAX_EVENTS)
+                    .list();
+        } else {
+            events = unconstrainedDataManager.load(Event.class)
+                    .query("select e from Event e")
+                    .maxResults(MAX_EVENTS)
+                    .list();
+        }
         events.sort(Comparator
                 .comparing(Event::getDate, Comparator.nullsLast(Comparator.naturalOrder()))
                 .thenComparing(Event::getTime, Comparator.nullsLast(Comparator.naturalOrder())));

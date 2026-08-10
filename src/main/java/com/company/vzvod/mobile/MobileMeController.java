@@ -28,6 +28,7 @@ import com.company.vzvod.bot.dto.BotVehicleUpsertRequest;
 import com.company.vzvod.bot.dto.BotVehiclesResponse;
 import com.company.vzvod.bot.dto.BotViolationOptionsResponse;
 import com.company.vzvod.bot.dto.BotVocationCreateRequest;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -41,6 +42,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @RestController
@@ -281,7 +283,14 @@ public class MobileMeController {
     }
 
     @GetMapping("/events")
-    public ResponseEntity<BotEventsResponse> events(@RequestHeader(value = "X-Mobile-Token", required = false) String token) {
+    public ResponseEntity<BotEventsResponse> events(
+            @RequestHeader(value = "X-Mobile-Token", required = false) String token,
+            @RequestParam(value = "from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(value = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
+    ) {
+        if (from != null || to != null) {
+            return ResponseEntity.ok(eventsService.loadEventsInRange(userId(token), from, to));
+        }
         return ResponseEntity.ok(eventsService.loadUpcomingEvents(userId(token)));
     }
 
@@ -295,9 +304,21 @@ public class MobileMeController {
 
     @GetMapping("/today-dashboard")
     public ResponseEntity<BotTodayDashboardResponse> todayDashboard(
-            @RequestHeader(value = "X-Mobile-Token", required = false) String token
+            @RequestHeader(value = "X-Mobile-Token", required = false) String token,
+            @RequestParam(value = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {
+        if (date != null) {
+            return ResponseEntity.ok(todayDashboardService.loadDayDashboard(userId(token), date));
+        }
         return ResponseEntity.ok(todayDashboardService.loadTodayDashboard(userId(token)));
+    }
+
+    @GetMapping("/day-dashboard")
+    public ResponseEntity<BotTodayDashboardResponse> dayDashboard(
+            @RequestHeader(value = "X-Mobile-Token", required = false) String token,
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {
+        return ResponseEntity.ok(todayDashboardService.loadDayDashboard(userId(token), date));
     }
 
     private UUID userId(String token) {

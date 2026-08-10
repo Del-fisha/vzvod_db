@@ -4,7 +4,7 @@ import com.company.vzvod.entity.ArmyService;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.User;
 import com.company.vzvod.entity.VocationType;
-import io.jmix.core.DataManager;
+import io.jmix.core.UnconstrainedDataManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -34,7 +34,8 @@ class VocationBalanceServiceTest {
 
     @Test
     void calcCurrentYearStats_entitledOnJan1_usedByQuery_availableIsEntitledPlusAddedMinusUsed() {
-        DataManager dataManager = mock(DataManager.class, RETURNS_DEEP_STUBS);
+        // Unconstrained: мобильный/бот create vacation без UserDetails в SecurityContext.
+        UnconstrainedDataManager dataManager = mock(UnconstrainedDataManager.class, RETURNS_DEEP_STUBS);
         when(dataManager.loadValue(anyString(), eq(Integer.class))
                 .parameter(anyString(), any())
                 .parameter(anyString(), any())
@@ -60,4 +61,3 @@ class VocationBalanceServiceTest {
         assertEquals(44, stats.available());
     }
 }
-
