@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="2026-08-10-200000-1" author="cursor">
+        <createTable tableName="ROUTE_CHECK">
+            <column name="ID" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="SHIFT_ID" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="SERVICE_INFO_ID" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ROUTE_NUMBER" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CHECKED_AT" type="time">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="ROUTE_CHECK"
+                                 baseColumnNames="SHIFT_ID"
+                                 referencedTableName="SHIFT"
+                                 referencedColumnNames="ID"
+                                 constraintName="FK_ROUTE_CHECK_ON_SHIFT"
+                                 onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint baseTableName="ROUTE_CHECK"
+                                 baseColumnNames="SERVICE_INFO_ID"
+                                 referencedTableName="SERVICE_INFO"
+                                 referencedColumnNames="ID"
+                                 constraintName="FK_ROUTE_CHECK_ON_SERVICE_INFO"/>
+
+        <createIndex tableName="ROUTE_CHECK" indexName="IDX_ROUTE_CHECK_SHIFT">
+            <column name="SHIFT_ID"/>
+        </createIndex>
+        <createIndex tableName="ROUTE_CHECK" indexName="IDX_ROUTE_CHECK_ROUTE">
+            <column name="ROUTE_NUMBER"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

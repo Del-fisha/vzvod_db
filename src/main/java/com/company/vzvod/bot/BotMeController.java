@@ -2,6 +2,7 @@ package com.company.vzvod.bot;
 
 import com.company.vzvod.bot.dto.BotAdministrativeViolationCreateRequest;
 import com.company.vzvod.bot.dto.BotCatalogOptionsResponse;
+import com.company.vzvod.bot.dto.BotCheckableRoutesResponse;
 import com.company.vzvod.bot.dto.BotEventCreateRequest;
 import com.company.vzvod.bot.dto.BotEventItem;
 import com.company.vzvod.bot.dto.BotEventsResponse;
@@ -9,6 +10,8 @@ import com.company.vzvod.bot.dto.BotProfilePatchRequest;
 import com.company.vzvod.bot.dto.BotProfileResponse;
 import com.company.vzvod.bot.dto.BotColleaguesResponse;
 import com.company.vzvod.bot.dto.BotCriminalViolationCreateRequest;
+import com.company.vzvod.bot.dto.BotRouteCheckCreateRequest;
+import com.company.vzvod.bot.dto.BotRouteCheckUpdateRequest;
 import com.company.vzvod.bot.dto.BotShiftEndTimeRequest;
 import com.company.vzvod.bot.dto.BotShiftItem;
 import com.company.vzvod.bot.dto.BotShiftMetricDeltaRequest;
@@ -16,8 +19,10 @@ import com.company.vzvod.bot.dto.BotShiftUpsertRequest;
 import com.company.vzvod.bot.dto.BotShiftsResponse;
 import com.company.vzvod.bot.dto.BotVacationsResponse;
 import com.company.vzvod.bot.dto.BotViolationOptionsResponse;
+import com.company.vzvod.service.RouteCheckService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,19 +45,22 @@ public class BotMeController {
     private final BotMeProfileService botMeProfileService;
     private final BotMeShiftsVocationsService botMeShiftsVocationsService;
     private final BotMeEventsService botMeEventsService;
+    private final RouteCheckService routeCheckService;
 
     public BotMeController(
             BotApiKeyAuthorizer apiKeyAuthorizer,
             BotTelegramBindingService telegramBindingService,
             BotMeProfileService botMeProfileService,
             BotMeShiftsVocationsService botMeShiftsVocationsService,
-            BotMeEventsService botMeEventsService
+            BotMeEventsService botMeEventsService,
+            RouteCheckService routeCheckService
     ) {
         this.apiKeyAuthorizer = apiKeyAuthorizer;
         this.telegramBindingService = telegramBindingService;
         this.botMeProfileService = botMeProfileService;
         this.botMeShiftsVocationsService = botMeShiftsVocationsService;
         this.botMeEventsService = botMeEventsService;
+        this.routeCheckService = routeCheckService;
     }
 
     @GetMapping("/profile")
@@ -211,6 +219,53 @@ public class BotMeController {
         apiKeyAuthorizer.verify(apiKey);
         UUID userId = resolveUserId(telegramChatIdHeader);
         return ResponseEntity.ok(botMeShiftsVocationsService.adjustCountOfStatements(userId, shiftId, body));
+    }
+
+    @GetMapping("/shifts/{shiftId}/checkable-routes")
+    public ResponseEntity<BotCheckableRoutesResponse> checkableRoutes(
+            @RequestHeader(value = "X-Api-Key", required = false) String apiKey,
+            @RequestHeader(value = "X-Telegram-Chat-Id", required = false) String telegramChatIdHeader,
+            @PathVariable("shiftId") UUID shiftId
+    ) {
+        apiKeyAuthorizer.verify(apiKey);
+        UUID userId = resolveUserId(telegramChatIdHeader);
+        return ResponseEntity.ok(routeCheckService.loadCheckableRoutes(userId, shiftId));
+    }
+
+    @PostMapping("/shifts/{shiftId}/route-checks")
+    public ResponseEntity<BotCheckableRoutesResponse.BotRouteCheckItem> recordRouteCheck(
+            @RequestHeader(value = "X-Api-Key", required = false) String apiKey,
+            @RequestHeader(value = "X-Telegram-Chat-Id", required = false) String telegramChatIdHeader,
+            @PathVariable("shiftId") UUID shiftId,
+            @RequestBody(required = false) BotRouteCheckCreateRequest body
+    ) {
+        apiKeyAuthorizer.verify(apiKey);
+        UUID userId = resolveUserId(telegramChatIdHeader);
+        return ResponseEntity.status(HttpStatus.CREATED).body(routeCheckService.recordCheck(userId, shiftId, body));
+    }
+
+    @PutMapping("/route-checks/{checkId}")
+    public ResponseEntity<BotCheckableRoutesResponse.BotRouteCheckItem> updateRouteCheck(
+            @RequestHeader(value = "X-Api-Key", required = false) String apiKey,
+            @RequestHeader(value = "X-Telegram-Chat-Id", required = false) String telegramChatIdHeader,
+            @PathVariable("checkId") UUID checkId,
+            @RequestBody(required = false) BotRouteCheckUpdateRequest body
+    ) {
+        apiKeyAuthorizer.verify(apiKey);
+        UUID userId = resolveUserId(telegramChatIdHeader);
+        return ResponseEntity.ok(routeCheckService.updateCheck(userId, checkId, body));
+    }
+
+    @DeleteMapping("/route-checks/{checkId}")
+    public ResponseEntity<Void> deleteRouteCheck(
+            @RequestHeader(value = "X-Api-Key", required = false) String apiKey,
+            @RequestHeader(value = "X-Telegram-Chat-Id", required = false) String telegramChatIdHeader,
+            @PathVariable("checkId") UUID checkId
+    ) {
+        apiKeyAuthorizer.verify(apiKey);
+        UUID userId = resolveUserId(telegramChatIdHeader);
+        routeCheckService.deleteCheck(userId, checkId);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/violation-options")

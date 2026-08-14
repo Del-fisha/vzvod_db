@@ -1,14 +1,18 @@
 package com.company.vzvod.service.dashboard;
 
 import com.company.vzvod.dashboard.todayshift.PeriodMetricRow;
+import com.company.vzvod.dashboard.todayshift.RouteCheckChipParts;
+import com.company.vzvod.dashboard.todayshift.RouteChecksRow;
 import com.company.vzvod.dashboard.todayshift.RouteDetailsRow;
 import com.company.vzvod.dashboard.todayshift.ShiftRouteRow;
 import com.company.vzvod.dashboard.todayshift.TodayShiftDashboardSnapshot;
 import com.company.vzvod.entity.ArticleOfAdministrative;
 import com.company.vzvod.entity.Dep;
 import com.company.vzvod.entity.TypeOfCriminal;
+import com.company.vzvod.service.RouteCheckService;
 import com.company.vzvod.service.TodayShiftDashboardService;
 import com.company.vzvod.shift.ShiftStatusBadgeFactory;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -18,6 +22,7 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.timepicker.TimePicker;
 import io.jmix.core.Messages;
 import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.kit.component.button.JmixButton;
@@ -25,6 +30,7 @@ import org.springframework.stereotype.Component;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
@@ -41,15 +47,18 @@ public class TodayShiftDashboardContentBuilder {
             DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.forLanguageTag("ru"));
 
     private final TodayShiftDashboardService todayShiftDashboardService;
+    private final RouteCheckService routeCheckService;
     private final Messages messages;
     private final UiComponents uiComponents;
 
     public TodayShiftDashboardContentBuilder(
             TodayShiftDashboardService todayShiftDashboardService,
+            RouteCheckService routeCheckService,
             Messages messages,
             UiComponents uiComponents
     ) {
         this.todayShiftDashboardService = todayShiftDashboardService;
+        this.routeCheckService = routeCheckService;
         this.messages = messages;
         this.uiComponents = uiComponents;
     }
@@ -74,6 +83,7 @@ public class TodayShiftDashboardContentBuilder {
         content.addClassName("today-shift-dashboard__content");
 
         content.add(buildHeader(snapshot, onRefresh));
+        content.add(buildRouteChecksPanel(snapshot, onRefresh));
         content.add(buildKpiGrid(snapshot));
         content.add(buildRoutesPanel(snapshot));
         content.add(buildDetailsRow(snapshot));
@@ -138,6 +148,163 @@ public class TodayShiftDashboardContentBuilder {
         header.add(actions);
         header.expand(titleBox);
         return header;
+    }
+
+    private Div buildRouteChecksPanel(TodayShiftDashboardSnapshot snapshot, Runnable onRefresh) {
+        Div panel = uiComponents.create(Div.class);
+        panel.addClassName("today-shift-dashboard__panel");
+        panel.addClassName("today-shift-dashboard__route-checks-panel");
+
+        H3 heading = uiComponents.create(H3.class);
+        heading.setText(msg("routeChecks"));
+        heading.addClassName("today-shift-dashboard__panel-title");
+        panel.add(heading);
+
+        List<RouteChecksRow> rows = snapshot.routeChecks() == null ? List.of() : snapshot.routeChecks();
+        if (rows.isEmpty()) {
+            panel.add(emptyState(msg("noRouteChecks")));
+            return panel;
+        }
+
+        Div table = uiComponents.create(Div.class);
+        table.addClassName("today-shift-dashboard__route-checks-table");
+
+        for (RouteChecksRow row : rows) {
+            Div line = uiComponents.create(Div.class);
+            line.addClassName("today-shift-dashboard__route-checks-row");
+
+            Span route = uiComponents.create(Span.class);
+            route.setText(row.routeLabel() == null || row.routeLabel().isBlank() ? "—" : row.routeLabel());
+            route.addClassName("today-shift-dashboard__route-checks-route");
+
+            Div checks = uiComponents.create(Div.class);
+            checks.addClassName("today-shift-dashboard__route-checks-times");
+            if (row.checks() == null || row.checks().isEmpty()) {
+                Span empty = uiComponents.create(Span.class);
+                empty.setText("—");
+                empty.addClassName("today-shift-dashboard__route-checks-empty");
+                checks.add(empty);
+            } else {
+                boolean first = true;
+                for (RouteChecksRow.RouteCheckEntry entry : row.checks()) {
+                    if (!first) {
+                        Span sep = uiComponents.create(Span.class);
+                        sep.setText(" — ");
+                        sep.addClassName("today-shift-dashboard__route-checks-sep");
+                        checks.add(sep);
+                    }
+                    first = false;
+                    checks.add(buildRouteCheckChip(entry, onRefresh));
+                }
+            }
+            line.add(route, checks);
+            table.add(line);
+        }
+        panel.add(table);
+        return panel;
+    }
+
+    private Div buildRouteCheckChip(RouteChecksRow.RouteCheckEntry entry, Runnable onRefresh) {
+        RouteCheckChipParts parts = RouteCheckChipParts.of(entry.checkedAt(), entry.checkerLabel());
+
+        // Div (block), не Span (inline): ФИО гарантированно под временем без зависимости от CSS темы.
+        Div chip = uiComponents.create(Div.class);
+        chip.addClassName("today-shift-dashboard__route-checks-chip");
+        chip.getStyle()
+                .set("display", "inline-flex")
+                .set("flex-direction", "column")
+                .set("align-items", "center")
+                .set("line-height", "1.2")
+                .set("text-align", "center")
+                .set("cursor", "pointer");
+        chip.getElement().setAttribute("title", msg("routeCheckEditHint"));
+        chip.addClickListener(e -> openRouteCheckDialog(entry, onRefresh));
+
+        Div time = uiComponents.create(Div.class);
+        time.setText(parts.time());
+        time.addClassName("today-shift-dashboard__route-checks-chip-time");
+        time.getStyle()
+                .set("display", "block")
+                .set("font-weight", "600")
+                .set("text-decoration", "underline dotted")
+                .set("text-underline-offset", "2px");
+        chip.add(time);
+
+        if (parts.name() != null && !parts.name().isBlank()) {
+            Div name = uiComponents.create(Div.class);
+            name.setText(parts.name());
+            name.addClassName("today-shift-dashboard__route-checks-chip-name");
+            name.getStyle()
+                    .set("display", "block")
+                    .set("font-size", "var(--lumo-font-size-xs)")
+                    .set("color", "var(--lumo-secondary-text-color)")
+                    .set("white-space", "nowrap");
+            chip.add(name);
+        }
+        return chip;
+    }
+
+    private void openRouteCheckDialog(RouteChecksRow.RouteCheckEntry entry, Runnable onRefresh) {
+        Dialog dialog = new Dialog();
+        dialog.setHeaderTitle(msg("routeCheckEditTitle"));
+        dialog.setWidth("360px");
+        dialog.setMaxHeight("none");
+        dialog.addClassName("today-shift-dashboard__route-checks-dialog");
+
+        TimePicker timePicker = new TimePicker();
+        timePicker.setLabel(msg("routeCheckTime"));
+        timePicker.setStep(java.time.Duration.ofMinutes(1));
+        timePicker.setValue(entry.checkedAt());
+        timePicker.setWidthFull();
+        timePicker.setAutoOpen(false);
+
+        String checkerName = entry.checkerLabel() == null || entry.checkerLabel().isBlank()
+                ? "—"
+                : entry.checkerLabel().trim();
+        Span checker = new Span(checkerName);
+        checker.addClassName("today-shift-dashboard__route-checks-dialog-checker");
+
+        JmixButton save = uiComponents.create(JmixButton.class);
+        save.setText(msg("routeCheckSave"));
+        save.addThemeName("primary");
+        save.addClickListener(e -> {
+            LocalTime value = timePicker.getValue();
+            if (value == null) {
+                return;
+            }
+            routeCheckService.updateCheckFromUi(entry.id(), value);
+            dialog.close();
+            onRefresh.run();
+        });
+
+        JmixButton delete = uiComponents.create(JmixButton.class);
+        delete.setText(msg("routeCheckDelete"));
+        delete.addThemeName("error");
+        delete.addClickListener(e -> {
+            routeCheckService.deleteCheckFromUi(entry.id());
+            dialog.close();
+            onRefresh.run();
+        });
+
+        JmixButton cancel = uiComponents.create(JmixButton.class);
+        cancel.setText(msg("routeCheckCancel"));
+        cancel.addClickListener(e -> dialog.close());
+
+        HorizontalLayout actions = uiComponents.create(HorizontalLayout.class);
+        actions.setSpacing(true);
+        actions.setPadding(false);
+        actions.setWidthFull();
+        actions.addClassName("today-shift-dashboard__route-checks-dialog-actions");
+        actions.add(save, delete, cancel);
+
+        VerticalLayout body = uiComponents.create(VerticalLayout.class);
+        body.setPadding(false);
+        body.setSpacing(false);
+        body.setWidthFull();
+        body.addClassName("today-shift-dashboard__route-checks-dialog-body");
+        body.add(timePicker, checker, actions);
+        dialog.add(body);
+        dialog.open();
     }
 
     private FlexLayout buildKpiGrid(TodayShiftDashboardSnapshot snapshot) {

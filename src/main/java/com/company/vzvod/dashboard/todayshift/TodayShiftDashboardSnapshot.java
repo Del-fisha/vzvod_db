@@ -16,6 +16,7 @@ public record TodayShiftDashboardSnapshot(
         List<ArticleCountRow> administrativeByArticle,
         List<CriminalTypeCountRow> criminalByType,
         List<RouteDetailsRow> routeDetails,
-        List<PeriodMetricRow> periodMetrics
+        List<PeriodMetricRow> periodMetrics,
+        List<RouteChecksRow> routeChecks
 ) {
 }

@@ -7,6 +7,7 @@ import com.company.vzvod.bot.dto.BotTodayTotals;
 import com.company.vzvod.dashboard.todayshift.ArticleCountRow;
 import com.company.vzvod.dashboard.todayshift.CriminalTypeCountRow;
 import com.company.vzvod.dashboard.todayshift.PeriodMetricRow;
+import com.company.vzvod.dashboard.todayshift.RouteChecksRow;
 import com.company.vzvod.dashboard.todayshift.RouteDetailsRow;
 import com.company.vzvod.dashboard.todayshift.ShiftRouteRow;
 import com.company.vzvod.dashboard.todayshift.TodayShiftDashboardSnapshot;
@@ -57,15 +58,18 @@ public class TodayShiftDashboardService {
     private final DataManager dataManager;
     private final UnconstrainedDataManager unconstrainedDataManager;
     private final MessageSource messageSource;
+    private final RouteCheckService routeCheckService;
 
     public TodayShiftDashboardService(
             DataManager dataManager,
             UnconstrainedDataManager unconstrainedDataManager,
-            MessageSource messageSource
+            MessageSource messageSource,
+            RouteCheckService routeCheckService
     ) {
         this.dataManager = dataManager;
         this.unconstrainedDataManager = unconstrainedDataManager;
         this.messageSource = messageSource;
+        this.routeCheckService = routeCheckService;
     }
 
     @Transactional(readOnly = true)
@@ -119,6 +123,7 @@ public class TodayShiftDashboardService {
 
         int departmentNumber = department == null ? 0 : department.getId();
         List<PeriodMetricRow> periodMetrics = buildPeriodMetrics(operationalDate, department);
+        List<RouteChecksRow> routeChecks = routeCheckService.loadRouteChecksRows(operationalDate, department);
 
         return new TodayShiftDashboardSnapshot(
                 operationalDate,
@@ -133,7 +138,8 @@ public class TodayShiftDashboardService {
                 toArticleRows(administrativeByArticle),
                 toCriminalRows(criminalByType),
                 List.copyOf(routeDetails),
-                periodMetrics
+                periodMetrics,
+                routeChecks
         );
     }
 

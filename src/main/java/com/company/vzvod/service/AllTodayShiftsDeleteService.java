@@ -4,6 +4,7 @@ import com.company.vzvod.entity.AdministrativeViolation;
 import com.company.vzvod.entity.AllTodayShifts;
 import com.company.vzvod.entity.CriminalViolation;
 import com.company.vzvod.entity.Dep;
+import com.company.vzvod.entity.RouteCheck;
 import com.company.vzvod.entity.Shift;
 import io.jmix.core.DataManager;
 import io.jmix.core.SaveContext;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -24,6 +26,23 @@ public class AllTodayShiftsDeleteService {
 
     public AllTodayShiftsDeleteService(DataManager dataManager) {
         this.dataManager = dataManager;
+    }
+
+    /**
+     * Удаляет все смены операционного дня (и связанные проверки/нарушения).
+     * Строка {@link AllTodayShifts} убирается, когда смен не остаётся.
+     */
+    @Transactional
+    public void deleteDay(LocalDate date, Dep department) {
+        if (date == null || department == null) {
+            return;
+        }
+        List<Shift> shifts = dataManager.load(Shift.class)
+                .query("select e from Shift e where e.date = :date and e.departmentToday = :department")
+                .parameter("date", date)
+                .parameter("department", department.getId())
+                .list();
+        deleteShifts(shifts);
     }
 
     @Transactional
@@ -56,6 +75,7 @@ public class AllTodayShiftsDeleteService {
             }
 
             removeViolations(loaded.getId(), saveContext);
+            removeRouteChecks(loaded.getId(), saveContext);
             saveContext.removing(loaded);
         }
 
@@ -76,6 +96,14 @@ public class AllTodayShiftsDeleteService {
 
         dataManager.load(CriminalViolation.class)
                 .query("select v from CriminalViolation v where v.shift.id = :shiftId")
+                .parameter("shiftId", shiftId)
+                .list()
+                .forEach(saveContext::removing);
+    }
+
+    private void removeRouteChecks(UUID shiftId, SaveContext saveContext) {
+        dataManager.load(RouteCheck.class)
+                .query("select c from RouteCheck c where c.shift.id = :shiftId")
                 .parameter("shiftId", shiftId)
                 .list()
                 .forEach(saveContext::removing);

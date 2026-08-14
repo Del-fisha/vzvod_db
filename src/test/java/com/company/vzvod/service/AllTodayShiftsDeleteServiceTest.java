@@ -7,6 +7,7 @@ import com.company.vzvod.entity.CriminalViolation;
 import com.company.vzvod.entity.Dep;
 import com.company.vzvod.entity.Impact;
 import com.company.vzvod.entity.NumberOfShift;
+import com.company.vzvod.entity.RouteCheck;
 import com.company.vzvod.entity.Shift;
 import com.company.vzvod.entity.TypeOfCriminal;
 import com.company.vzvod.entity.TypeOfShift;
@@ -133,6 +134,31 @@ class AllTodayShiftsDeleteServiceTest {
         assertDoesNotThrow(() -> deleteService.deleteShifts(Set.of()));
     }
 
+    @Test
+    @DisplayName("deleteDay удаляет смены дня вместе с проверками маршрутов")
+    void deleteDay_removesRouteChecksWithShifts() {
+        Shift checking = createShift(day, Dep.FIRST, NumberOfShift.ANOTHER);
+        checking.setTypeOfShift(TypeOfShift.CHECKING);
+        checking = dataManager.save(checking);
+
+        RouteCheck check = dataManager.create(RouteCheck.class);
+        check.setShift(checking);
+        check.setRouteNumber(NumberOfShift._28);
+        check.setCheckedAt(LocalTime.of(21, 14));
+        check = dataManager.save(check);
+        UUID checkId = check.getId();
+        UUID shiftId = checking.getId();
+
+        AllTodayShifts dayRow = syncService.ensureExists(day, Dep.FIRST);
+        UUID dayId = dayRow.getId();
+
+        deleteService.deleteDay(day, Dep.FIRST);
+
+        assertTrue(dataManager.load(Shift.class).id(shiftId).optional().isEmpty());
+        assertTrue(dataManager.load(RouteCheck.class).id(checkId).optional().isEmpty());
+        assertTrue(dataManager.load(AllTodayShifts.class).id(dayId).optional().isEmpty());
+    }
+
     private Shift createShift(LocalDate date, Dep department, NumberOfShift number) {
         Shift shift = dataManager.create(Shift.class);
         shift.setDate(date);
@@ -173,6 +199,11 @@ class AllTodayShiftsDeleteServiceTest {
                     .forEach(dataManager::remove);
             dataManager.load(CriminalViolation.class)
                     .query("select v from CriminalViolation v where v.shift.id = :id")
+                    .parameter("id", shift.getId())
+                    .list()
+                    .forEach(dataManager::remove);
+            dataManager.load(RouteCheck.class)
+                    .query("select c from RouteCheck c where c.shift.id = :id")
                     .parameter("id", shift.getId())
                     .list()
                     .forEach(dataManager::remove);

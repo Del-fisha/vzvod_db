@@ -580,11 +580,18 @@ public class BotMeShiftsVocationsService {
         return count == null ? 0 : count.intValue();
     }
 
-    private void validateCreate(BotShiftUpsertRequest req) {
+    void validateCreate(BotShiftUpsertRequest req) {
         validateCommon(req);
-        if (resolvePartnerIds(req).isEmpty()) {
+        if (resolvePartnerIds(req).isEmpty() && !isCheckingShift(req)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "partnerServiceInfoId required");
         }
+    }
+
+    private static boolean isCheckingShift(BotShiftUpsertRequest req) {
+        if (req == null || req.typeOfShiftId() == null || req.typeOfShiftId().isBlank()) {
+            return false;
+        }
+        return TypeOfShift.CHECKING == TypeOfShift.fromId(req.typeOfShiftId().trim());
     }
 
     /**

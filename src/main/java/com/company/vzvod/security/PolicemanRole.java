@@ -223,6 +223,14 @@ public interface PolicemanRole {
     void criminalViolationFullAccess();
 
     @EntityAttributePolicy(
+            entityClass = RouteCheck.class,
+            attributes = {"id", "shift", "serviceInfo", "routeNumber", "checkedAt"},
+            action = EntityAttributePolicyAction.MODIFY
+    )
+    @EntityPolicy(entityClass = RouteCheck.class, actions = EntityPolicyAction.ALL)
+    void routeCheckFullAccess();
+
+    @EntityAttributePolicy(
             entityClass = Event.class,
             attributes = {"id", "name", "description", "eventType", "date", "time", "place", "shiftOfDepartment"},
             action = EntityAttributePolicyAction.MODIFY

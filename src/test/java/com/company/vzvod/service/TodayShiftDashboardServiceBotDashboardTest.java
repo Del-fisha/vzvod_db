@@ -62,6 +62,9 @@ class TodayShiftDashboardServiceBotDashboardTest {
     @Mock
     private MessageSource messageSource;
 
+    @Mock
+    private RouteCheckService routeCheckService;
+
     @InjectMocks
     private TodayShiftDashboardService service;
 

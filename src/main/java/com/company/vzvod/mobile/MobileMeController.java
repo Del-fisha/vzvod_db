@@ -7,6 +7,7 @@ import com.company.vzvod.bot.BotMeShiftsVocationsService;
 import com.company.vzvod.bot.BotMeTodayDashboardService;
 import com.company.vzvod.bot.dto.BotAdministrativeViolationCreateRequest;
 import com.company.vzvod.bot.dto.BotCatalogOptionsResponse;
+import com.company.vzvod.bot.dto.BotCheckableRoutesResponse;
 import com.company.vzvod.bot.dto.BotColleaguesResponse;
 import com.company.vzvod.bot.dto.BotCriminalViolationCreateRequest;
 import com.company.vzvod.bot.dto.BotEducationDto;
@@ -16,6 +17,8 @@ import com.company.vzvod.bot.dto.BotEventItem;
 import com.company.vzvod.bot.dto.BotEventsResponse;
 import com.company.vzvod.bot.dto.BotProfilePatchRequest;
 import com.company.vzvod.bot.dto.BotProfileResponse;
+import com.company.vzvod.bot.dto.BotRouteCheckCreateRequest;
+import com.company.vzvod.bot.dto.BotRouteCheckUpdateRequest;
 import com.company.vzvod.bot.dto.BotShiftEndTimeRequest;
 import com.company.vzvod.bot.dto.BotShiftItem;
 import com.company.vzvod.bot.dto.BotShiftMetricDeltaRequest;
@@ -28,6 +31,7 @@ import com.company.vzvod.bot.dto.BotVehicleUpsertRequest;
 import com.company.vzvod.bot.dto.BotVehiclesResponse;
 import com.company.vzvod.bot.dto.BotViolationOptionsResponse;
 import com.company.vzvod.bot.dto.BotVocationCreateRequest;
+import com.company.vzvod.service.RouteCheckService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,6 +59,7 @@ public class MobileMeController {
     private final BotMeEventsService eventsService;
     private final BotMeExtrasService extrasService;
     private final BotMeTodayDashboardService todayDashboardService;
+    private final RouteCheckService routeCheckService;
 
     public MobileMeController(
             MobileAuthService mobileAuthService,
@@ -62,7 +67,8 @@ public class MobileMeController {
             BotMeShiftsVocationsService shiftsService,
             BotMeEventsService eventsService,
             BotMeExtrasService extrasService,
-            BotMeTodayDashboardService todayDashboardService
+            BotMeTodayDashboardService todayDashboardService,
+            RouteCheckService routeCheckService
     ) {
         this.mobileAuthService = mobileAuthService;
         this.profileService = profileService;
@@ -70,6 +76,7 @@ public class MobileMeController {
         this.eventsService = eventsService;
         this.extrasService = extrasService;
         this.todayDashboardService = todayDashboardService;
+        this.routeCheckService = routeCheckService;
     }
 
     @GetMapping("/profile")
@@ -197,6 +204,42 @@ public class MobileMeController {
             @RequestBody(required = false) BotShiftMetricDeltaRequest body
     ) {
         return ResponseEntity.ok(shiftsService.adjustMigrantAndIbdr(userId(token), shiftId, body));
+    }
+
+    @GetMapping("/shifts/{shiftId}/checkable-routes")
+    public ResponseEntity<BotCheckableRoutesResponse> checkableRoutes(
+            @RequestHeader(value = "X-Mobile-Token", required = false) String token,
+            @PathVariable UUID shiftId
+    ) {
+        return ResponseEntity.ok(routeCheckService.loadCheckableRoutes(userId(token), shiftId));
+    }
+
+    @PostMapping("/shifts/{shiftId}/route-checks")
+    public ResponseEntity<BotCheckableRoutesResponse.BotRouteCheckItem> recordRouteCheck(
+            @RequestHeader(value = "X-Mobile-Token", required = false) String token,
+            @PathVariable UUID shiftId,
+            @RequestBody(required = false) BotRouteCheckCreateRequest body
+    ) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(routeCheckService.recordCheck(userId(token), shiftId, body));
+    }
+
+    @PutMapping("/route-checks/{checkId}")
+    public ResponseEntity<BotCheckableRoutesResponse.BotRouteCheckItem> updateRouteCheck(
+            @RequestHeader(value = "X-Mobile-Token", required = false) String token,
+            @PathVariable UUID checkId,
+            @RequestBody(required = false) BotRouteCheckUpdateRequest body
+    ) {
+        return ResponseEntity.ok(routeCheckService.updateCheck(userId(token), checkId, body));
+    }
+
+    @DeleteMapping("/route-checks/{checkId}")
+    public ResponseEntity<Void> deleteRouteCheck(
+            @RequestHeader(value = "X-Mobile-Token", required = false) String token,
+            @PathVariable UUID checkId
+    ) {
+        routeCheckService.deleteCheck(userId(token), checkId);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/shifts/{shiftId}/count-of-statements")
