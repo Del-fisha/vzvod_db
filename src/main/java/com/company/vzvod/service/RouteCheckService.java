@@ -3,6 +3,7 @@ package com.company.vzvod.service;
 import com.company.vzvod.bot.dto.BotCheckableRoutesResponse;
 import com.company.vzvod.bot.dto.BotRouteCheckCreateRequest;
 import com.company.vzvod.bot.dto.BotRouteCheckUpdateRequest;
+import com.company.vzvod.dashboard.todayshift.RouteCheckCheckerOption;
 import com.company.vzvod.dashboard.todayshift.RouteChecksRow;
 import com.company.vzvod.entity.Dep;
 import com.company.vzvod.entity.NumberOfShift;
@@ -144,6 +145,11 @@ public class RouteCheckService {
 
     @Transactional
     public RouteCheck updateCheckFromUi(UUID checkId, LocalTime checkedAt) {
+        return updateCheckFromUi(checkId, checkedAt, null);
+    }
+
+    @Transactional
+    public RouteCheck updateCheckFromUi(UUID checkId, LocalTime checkedAt, UUID checkerServiceInfoId) {
         if (checkedAt == null) {
             throw new IllegalArgumentException("checkedAt required");
         }
@@ -152,13 +158,89 @@ public class RouteCheckService {
                 .fetchPlan(f -> f
                         .add("checkedAt")
                         .add("routeNumber")
-                        .add("serviceInfo", si -> si.add("user", u -> u
+                        .add("serviceInfo", si -> si.add("id").add("user", u -> u
                                 .add("lastName").add("firstName").add("patronymic")))
-                        .add("shift"))
+                        .add("shift", s -> s.add("date").add("departmentToday")))
                 .optional()
                 .orElseThrow(() -> new IllegalArgumentException("route check not found"));
         check.setCheckedAt(checkedAt.withSecond(0).withNano(0));
+        if (checkerServiceInfoId != null) {
+            UUID currentId = check.getServiceInfo() == null ? null : check.getServiceInfo().getId();
+            if (!checkerServiceInfoId.equals(currentId)) {
+                List<RouteCheckCheckerOption> allowed = loadCommandersForCheckUi(check);
+                if (!isAllowedChecker(checkerServiceInfoId, allowed)) {
+                    throw new IllegalArgumentException("checker is not on today's checking shift");
+                }
+                ServiceInfo checker = dataManager.load(ServiceInfo.class)
+                        .id(checkerServiceInfoId)
+                        .fetchPlan(f -> f.add("id").add("user", u -> u
+                                .add("lastName").add("firstName").add("patronymic")))
+                        .optional()
+                        .orElseThrow(() -> new IllegalArgumentException("checker not found"));
+                check.setServiceInfo(checker);
+            }
+        }
         return dataManager.save(check);
+    }
+
+    @Transactional(readOnly = true)
+    public List<RouteCheckCheckerOption> loadCommandersForCheckUi(UUID checkId) {
+        RouteCheck check = dataManager.load(RouteCheck.class)
+                .id(checkId)
+                .fetchPlan(f -> f
+                        .add("serviceInfo", si -> si.add("id").add("user", u -> u
+                                .add("lastName").add("firstName").add("patronymic")))
+                        .add("shift", s -> s.add("date").add("departmentToday")))
+                .optional()
+                .orElseThrow(() -> new IllegalArgumentException("route check not found"));
+        return loadCommandersForCheckUi(check);
+    }
+
+    static List<RouteCheckCheckerOption> collectCommanders(List<Shift> checkingShifts) {
+        Map<UUID, RouteCheckCheckerOption> unique = new LinkedHashMap<>();
+        for (Shift shift : checkingShifts) {
+            if (shift.getTypeOfShift() != TypeOfShift.CHECKING) {
+                continue;
+            }
+            if (shift.getUnits() == null) {
+                continue;
+            }
+            for (ServiceInfo si : shift.getUnits()) {
+                if (si == null || si.getId() == null) {
+                    continue;
+                }
+                unique.putIfAbsent(si.getId(), new RouteCheckCheckerOption(si.getId(), checkerShortFio(si)));
+            }
+        }
+        List<RouteCheckCheckerOption> list = new ArrayList<>(unique.values());
+        list.sort(Comparator.comparing(RouteCheckCheckerOption::label, Comparator.nullsLast(String::compareTo)));
+        return List.copyOf(list);
+    }
+
+    static List<RouteCheckCheckerOption> withCurrentChecker(
+            List<RouteCheckCheckerOption> commanders,
+            UUID currentId,
+            String currentLabel
+    ) {
+        if (currentId == null) {
+            return commanders == null ? List.of() : List.copyOf(commanders);
+        }
+        List<RouteCheckCheckerOption> source = commanders == null ? List.of() : commanders;
+        boolean present = source.stream().anyMatch(c -> currentId.equals(c.serviceInfoId()));
+        if (present) {
+            return List.copyOf(source);
+        }
+        List<RouteCheckCheckerOption> copy = new ArrayList<>(source);
+        copy.add(new RouteCheckCheckerOption(currentId, currentLabel == null ? "" : currentLabel.trim()));
+        copy.sort(Comparator.comparing(RouteCheckCheckerOption::label, Comparator.nullsLast(String::compareTo)));
+        return List.copyOf(copy);
+    }
+
+    static boolean isAllowedChecker(UUID checkerId, List<RouteCheckCheckerOption> options) {
+        if (checkerId == null || options == null) {
+            return false;
+        }
+        return options.stream().anyMatch(o -> checkerId.equals(o.serviceInfoId()));
     }
 
     @Transactional
@@ -204,7 +286,19 @@ public class RouteCheckService {
     private static RouteChecksRow.RouteCheckEntry toDashboardEntry(RouteCheck check) {
         String fio = checkerShortFio(check.getServiceInfo());
         String display = RouteCheckFormatter.formatEntry(check.getCheckedAt(), fio);
-        return new RouteChecksRow.RouteCheckEntry(check.getId(), check.getCheckedAt(), fio, display);
+        UUID checkerId = check.getServiceInfo() == null ? null : check.getServiceInfo().getId();
+        return new RouteChecksRow.RouteCheckEntry(check.getId(), check.getCheckedAt(), checkerId, fio, display);
+    }
+
+    private List<RouteCheckCheckerOption> loadCommandersForCheckUi(RouteCheck check) {
+        Shift shift = check.getShift();
+        LocalDate date = shift == null ? null : shift.getDate();
+        Dep department = shift == null ? null : shift.getDepartmentToday();
+        List<RouteCheckCheckerOption> commanders = collectCommanders(
+                loadCheckingShiftsWithUnits(dataManager, date, department)
+        );
+        UUID currentId = check.getServiceInfo() == null ? null : check.getServiceInfo().getId();
+        return withCurrentChecker(commanders, currentId, checkerShortFio(check.getServiceInfo()));
     }
 
     private BotCheckableRoutesResponse.BotRouteCheckItem toBotItem(RouteCheck check) {
@@ -349,7 +443,7 @@ public class RouteCheckService {
                         .add("checkedAt")
                         .add("routeNumber")
                         .add("shift", s -> s.add("departmentToday").add("date"))
-                        .add("serviceInfo", si -> si.add("user", u -> u
+                        .add("serviceInfo", si -> si.add("id").add("user", u -> u
                                 .add("lastName").add("firstName").add("patronymic"))))
                 .list();
         if (department == null) {
@@ -368,7 +462,7 @@ public class RouteCheckService {
                         .add("checkedAt")
                         .add("routeNumber")
                         .add("shift", s -> s.add("departmentToday").add("date"))
-                        .add("serviceInfo", si -> si.add("user", u -> u
+                        .add("serviceInfo", si -> si.add("id").add("user", u -> u
                                 .add("lastName").add("firstName").add("patronymic"))))
                 .list();
         if (department == null) {
@@ -377,6 +471,25 @@ public class RouteCheckService {
         return all.stream()
                 .filter(c -> c.getShift() != null && department.equals(c.getShift().getDepartmentToday()))
                 .toList();
+    }
+
+    private static List<Shift> loadCheckingShiftsWithUnits(DataManager manager, LocalDate date, Dep department) {
+        if (date == null) {
+            return List.of();
+        }
+        List<Shift> all = manager.load(Shift.class)
+                .query("select s from Shift s where s.date = :date order by s.number")
+                .parameter("date", date)
+                .fetchPlan(f -> f
+                        .add("number")
+                        .add("typeOfShift")
+                        .add("departmentToday")
+                        .add("units", u -> u
+                                .add("id")
+                                .add("user", user -> user
+                                        .add("lastName").add("firstName").add("patronymic"))))
+                .list();
+        return filterByDepartment(all, department);
     }
 
     private static List<Shift> filterByDepartment(List<Shift> all, Dep department) {

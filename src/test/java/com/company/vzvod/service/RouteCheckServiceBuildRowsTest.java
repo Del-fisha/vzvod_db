@@ -40,6 +40,8 @@ class RouteCheckServiceBuildRowsTest {
         assertEquals("МП 30", rows.get(1).routeLabel());
         assertEquals(2, rows.get(0).checks().size());
         assertEquals("10:15\nИванов И. О.", rows.get(0).checks().get(0).display());
+        assertEquals("Иванов И. О.", rows.get(0).checks().get(0).checkerLabel());
+        assertEquals(early.getServiceInfo().getId(), rows.get(0).checks().get(0).checkerId());
         assertEquals("15:00\nПетров П. С.", rows.get(0).checks().get(1).display());
         assertTrue(rows.get(1).checks().isEmpty());
     }
