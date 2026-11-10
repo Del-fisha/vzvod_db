@@ -46,10 +46,12 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -60,7 +62,6 @@ public class BotMeShiftsVocationsService {
     private static final int MAX_SHIFTS = 35;
     private static final int MAX_VOCATIONS = 30;
     private static final int COLLEAGUES_PAGE_SIZE = 8;
-    private static final int COLLEAGUES_MAX_FETCH = 200;
 
     private final UnconstrainedDataManager unconstrainedDataManager;
     private final BotActiveUserChecker activeUserChecker;
@@ -132,63 +133,16 @@ public class BotMeShiftsVocationsService {
     }
 
     /**
-     * Список активных сотрудников для выбора напарника.
-     * {@code preferredDepartment} — отделение «сегодня» (первыми в списке), затем другое.
-     * В ответе всегда оба отделения; подпись — краткое ФИО ({@code Фамилия И. О.}).
+     * Сотрудники со статусом «В строю», не занятые в незавершённой смене.
+     * Сначала отделение текущего сотрудника, затем другое, внутри — по фамилии.
+     * Параметр {@code preferredDepartment} используется, только если у сотрудника нет отделения 1 или 2.
      */
     @Transactional(readOnly = true)
     public BotColleaguesResponse loadColleagues(UUID userId, int preferredDepartment, int page, UUID excludeShiftId) {
-        if (preferredDepartment != 1 && preferredDepartment != 2) {
-            preferredDepartment = 1;
-        }
         if (page < 0) {
             page = 0;
         }
-        User me = loadUserWithServiceInfo(userId);
-        UUID myId = me.getId();
-        Set<UUID> busyInOpenShifts = openShiftParticipantIdsExcept(excludeShiftId);
-        List<User> users = unconstrainedDataManager.load(User.class)
-                .query("select u from User u join u.serviceInfo si join si.department d "
-                        + "where d.number in (1, 2) and u.id <> :uid and si.status = :st "
-                        + "order by u.lastName, u.firstName")
-                .parameter("uid", myId)
-                .parameter("st", StatusInService.ACTIVE.getId())
-                .fetchPlan(fp -> fp
-                        .add("lastName")
-                        .add("firstName")
-                        .add("patronymic")
-                        .add("serviceInfo", si -> si
-                                .add("status")
-                                .add("department", d -> d.add("number"))))
-                .maxResults(COLLEAGUES_MAX_FETCH)
-                .list();
-        int preferred = preferredDepartment;
-        List<User> available = new ArrayList<>(users.size());
-        for (User u : users) {
-            ServiceInfo si = u.getServiceInfo();
-            if (si == null || busyInOpenShifts.contains(si.getId())) {
-                continue;
-            }
-            available.add(u);
-        }
-        available.sort((a, b) -> {
-            int da = departmentNumber(a);
-            int db = departmentNumber(b);
-            boolean aPref = da == preferred;
-            boolean bPref = db == preferred;
-            if (aPref != bPref) {
-                return aPref ? -1 : 1;
-            }
-            String la = a.getLastName() == null ? "" : a.getLastName();
-            String lb = b.getLastName() == null ? "" : b.getLastName();
-            int byLast = la.compareToIgnoreCase(lb);
-            if (byLast != 0) {
-                return byLast;
-            }
-            String fa = a.getFirstName() == null ? "" : a.getFirstName();
-            String fb = b.getFirstName() == null ? "" : b.getFirstName();
-            return fa.compareToIgnoreCase(fb);
-        });
+        List<User> available = loadAvailableColleagues(userId, preferredDepartment, excludeShiftId);
         // Для мобильного клиента отдаём весь доступный список одной страницей.
         int pageSize = Math.max(COLLEAGUES_PAGE_SIZE, available.size());
         int from = page * pageSize;
@@ -207,6 +161,108 @@ public class BotMeShiftsVocationsService {
             items.add(new BotColleagueItem(si.getId(), colleagueLabel(u), departmentNumber(u)));
         }
         return new BotColleaguesResponse(items, hasMore);
+    }
+
+    /**
+     * Те же кандидаты, что и {@link #loadColleagues}, в виде {@link ServiceInfo} для лукапа в веб-клиенте.
+     * {@code extraExclude} — уже добавленные в редактируемую смену (ещё не сохранены).
+     */
+    @Transactional(readOnly = true)
+    public List<ServiceInfo> loadPartnerServiceInfos(UUID userId, UUID excludeShiftId, Set<UUID> extraExclude) {
+        List<User> available = loadAvailableColleagues(userId, 1, excludeShiftId);
+        List<UUID> ids = new ArrayList<>();
+        for (User user : available) {
+            ServiceInfo si = user.getServiceInfo();
+            if (si == null || si.getId() == null) {
+                continue;
+            }
+            if (extraExclude != null && extraExclude.contains(si.getId())) {
+                continue;
+            }
+            ids.add(si.getId());
+        }
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+        List<ServiceInfo> loaded = unconstrainedDataManager.load(ServiceInfo.class)
+                .ids(ids)
+                .fetchPlan(fp -> fp
+                        .add("post")
+                        .add("rank")
+                        .add("status")
+                        .add("department", d -> d.add("number"))
+                        .add("user", u -> u
+                                .add("firstName")
+                                .add("lastName")
+                                .add("patronymic")))
+                .list();
+        Map<UUID, ServiceInfo> byId = new HashMap<>();
+        for (ServiceInfo si : loaded) {
+            if (si.getId() != null) {
+                byId.put(si.getId(), si);
+            }
+        }
+        List<ServiceInfo> ordered = new ArrayList<>(ids.size());
+        for (UUID id : ids) {
+            ServiceInfo si = byId.get(id);
+            if (si != null) {
+                ordered.add(si);
+            }
+        }
+        return ordered;
+    }
+
+    private List<User> loadAvailableColleagues(UUID userId, int preferredDepartment, UUID excludeShiftId) {
+        User me = loadUserWithServiceInfo(userId);
+        int ownDepartment = departmentNumber(me);
+        int preferred = (ownDepartment == 1 || ownDepartment == 2)
+                ? ownDepartment
+                : (preferredDepartment == 2 ? 2 : 1);
+        Set<UUID> busyInOpenShifts = openShiftParticipantIdsExcept(excludeShiftId);
+        List<User> users = unconstrainedDataManager.load(User.class)
+                .query("select u from User u join u.serviceInfo si left join si.department d "
+                        + "where u.id <> :uid and si.status = :st "
+                        + "and (d is null or d.number in (1, 2))")
+                .parameter("uid", me.getId())
+                .parameter("st", StatusInService.ACTIVE.getId())
+                .fetchPlan(fp -> fp
+                        .add("lastName")
+                        .add("firstName")
+                        .add("patronymic")
+                        .add("serviceInfo", si -> si
+                                .add("status")
+                                .add("department", d -> d.add("number"))))
+                .list();
+        List<User> available = new ArrayList<>(users.size());
+        for (User u : users) {
+            ServiceInfo si = u.getServiceInfo();
+            if (si == null || si.getId() == null || busyInOpenShifts.contains(si.getId())) {
+                continue;
+            }
+            available.add(u);
+        }
+        available.sort((a, b) -> {
+            int da = departmentNumber(a);
+            int db = departmentNumber(b);
+            boolean aPref = da == preferred;
+            boolean bPref = db == preferred;
+            if (aPref != bPref) {
+                return aPref ? -1 : 1;
+            }
+            if (da != db) {
+                return Integer.compare(da, db);
+            }
+            String la = a.getLastName() == null ? "" : a.getLastName();
+            String lb = b.getLastName() == null ? "" : b.getLastName();
+            int byLast = la.compareToIgnoreCase(lb);
+            if (byLast != 0) {
+                return byLast;
+            }
+            String fa = a.getFirstName() == null ? "" : a.getFirstName();
+            String fb = b.getFirstName() == null ? "" : b.getFirstName();
+            return fa.compareToIgnoreCase(fb);
+        });
+        return available;
     }
 
     private static int departmentNumber(User u) {
@@ -582,16 +638,6 @@ public class BotMeShiftsVocationsService {
 
     void validateCreate(BotShiftUpsertRequest req) {
         validateCommon(req);
-        if (resolvePartnerIds(req).isEmpty() && !isCheckingShift(req)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "partnerServiceInfoId required");
-        }
-    }
-
-    private static boolean isCheckingShift(BotShiftUpsertRequest req) {
-        if (req == null || req.typeOfShiftId() == null || req.typeOfShiftId().isBlank()) {
-            return false;
-        }
-        return TypeOfShift.CHECKING == TypeOfShift.fromId(req.typeOfShiftId().trim());
     }
 
     /**
@@ -754,7 +800,9 @@ public class BotMeShiftsVocationsService {
         activeUserChecker.requireActive(userId);
         return unconstrainedDataManager.load(User.class)
                 .id(userId)
-                .fetchPlan(fp -> fp.add("serviceInfo", sf -> sf.add("id")))
+                .fetchPlan(fp -> fp.add("serviceInfo", sf -> sf
+                        .add("id")
+                        .add("department", d -> d.add("number"))))
                 .one();
     }
 

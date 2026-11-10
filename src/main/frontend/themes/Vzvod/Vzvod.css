@@ -129,7 +129,11 @@ vaadin-grid {
     border-radius: 16px;
     background-color: white;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
+}
+
+/* Пустая АП/УП: одна пустая строка. При записях высоту задаёт all-rows-visible, без лишних пустых. */
+vaadin-grid.shift-fit-rows[all-rows-visible] {
+    min-height: calc(var(--_grid-header-row-height, 48px) + var(--vaadin-grid-body-row-height, 46px));
 }
 
 vaadin-grid::part(header-cell) {
@@ -137,11 +141,8 @@ vaadin-grid::part(header-cell) {
     color: #0f2b3d;
     font-weight: 600;
     border-bottom: 1px solid #e2e8f0;
-
-    /* важное для переноса: */
-    white-space: normal;     /* разрешить перенос строк */
-    text-overflow: clip;     /* убрать многоточие */
-    overflow: visible;       /* чтоб текст не обрезался по ячейке */
+    white-space: normal;
+    text-overflow: clip;
 }
 
 vaadin-grid::part(cell) {

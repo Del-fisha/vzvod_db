@@ -11,19 +11,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.MessageSource;
-import org.springframework.web.server.ResponseStatusException;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("BotMeShiftsVocationsService: напарник для CHECKING")
+@DisplayName("BotMeShiftsVocationsService: смена без напарника")
 class BotMeShiftsVocationsServiceCheckingPartnerTest {
 
     @Mock
@@ -39,16 +35,15 @@ class BotMeShiftsVocationsServiceCheckingPartnerTest {
     private BotMeShiftsVocationsService service;
 
     @Test
-    @DisplayName("обычная смена без напарника — ошибка")
-    void validateCreate_requiresPartnerForRegularShift() {
+    @DisplayName("обычная смена без напарника — допустимо")
+    void validateCreate_allowsMissingPartnerForRegularShift() {
         BotShiftUpsertRequest req = upsert(
                 NumberOfShift._28.getId(),
                 TypeOfShift.VZVOD_ROUTE.getId(),
                 null,
                 null
         );
-        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> service.validateCreate(req));
-        assertEquals("partnerServiceInfoId required", ex.getReason());
+        assertDoesNotThrow(() -> service.validateCreate(req));
     }
 
     @Test
