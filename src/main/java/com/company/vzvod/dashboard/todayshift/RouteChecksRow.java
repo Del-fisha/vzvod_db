@@ -14,6 +14,7 @@ public record RouteChecksRow(
     public record RouteCheckEntry(
             UUID id,
             LocalTime checkedAt,
+            UUID checkerId,
             String checkerLabel,
             String display
     ) {

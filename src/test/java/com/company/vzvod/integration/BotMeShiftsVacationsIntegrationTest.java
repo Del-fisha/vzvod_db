@@ -505,8 +505,8 @@ class BotMeShiftsVacationsIntegrationTest {
     }
 
     @Test
-    @DisplayName("GET /colleagues — сначала отделение preferred (сегодняшнее), затем другое")
-    void colleagues_preferredDepartmentFirst_thenOther() throws Exception {
+    @DisplayName("GET /colleagues — сначала отделение текущего сотрудника, затем другое")
+    void colleagues_callerDepartmentFirst_thenOther() throws Exception {
         persistUserBindingOnly();
         final UUID[] preferredSi = new UUID[1];
         final UUID[] otherSi = new UUID[1];
@@ -545,10 +545,10 @@ class BotMeShiftsVacationsIntegrationTest {
                 .andExpect(status().isOk())
                 .andReturn();
         JsonNode itemsPref2 = objectMapper.readTree(preferredSecond.getResponse().getContentAsString()).get("items");
-        assertThat(itemsPref2.get(0).get("serviceInfoId").asText()).isEqualTo(otherSi[0].toString());
-        assertThat(itemsPref2.get(0).get("department").asInt()).isEqualTo(2);
-        assertThat(itemsPref2.get(1).get("serviceInfoId").asText()).isEqualTo(preferredSi[0].toString());
-        assertThat(itemsPref2.get(1).get("department").asInt()).isEqualTo(1);
+        assertThat(itemsPref2.get(0).get("serviceInfoId").asText()).isEqualTo(preferredSi[0].toString());
+        assertThat(itemsPref2.get(0).get("department").asInt()).isEqualTo(1);
+        assertThat(itemsPref2.get(1).get("serviceInfoId").asText()).isEqualTo(otherSi[0].toString());
+        assertThat(itemsPref2.get(1).get("department").asInt()).isEqualTo(2);
 
         systemAuthenticator.runWithSystem(() -> {
             if (otherUserId[0] != null) {

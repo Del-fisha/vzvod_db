@@ -1,6 +1,7 @@
 package com.company.vzvod.service.dashboard;
 
 import com.company.vzvod.dashboard.todayshift.PeriodMetricRow;
+import com.company.vzvod.dashboard.todayshift.RouteCheckCheckerOption;
 import com.company.vzvod.dashboard.todayshift.RouteCheckChipParts;
 import com.company.vzvod.dashboard.todayshift.RouteChecksRow;
 import com.company.vzvod.dashboard.todayshift.RouteDetailsRow;
@@ -12,6 +13,7 @@ import com.company.vzvod.entity.TypeOfCriminal;
 import com.company.vzvod.service.RouteCheckService;
 import com.company.vzvod.service.TodayShiftDashboardService;
 import com.company.vzvod.shift.ShiftStatusBadgeFactory;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
@@ -34,6 +36,8 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Сборка UI дашборда вне hot-deploy пакета view, чтобы DTO и сервис
@@ -258,11 +262,20 @@ public class TodayShiftDashboardContentBuilder {
         timePicker.setWidthFull();
         timePicker.setAutoOpen(false);
 
-        String checkerName = entry.checkerLabel() == null || entry.checkerLabel().isBlank()
+        List<RouteCheckCheckerOption> checkers = routeCheckService.loadCommandersForCheckUi(entry.id());
+        ComboBox<RouteCheckCheckerOption> checkerBox = new ComboBox<>();
+        checkerBox.setLabel(msg("routeCheckChecker"));
+        checkerBox.setItems(checkers);
+        checkerBox.setItemLabelGenerator(option -> option == null || option.label() == null || option.label().isBlank()
                 ? "—"
-                : entry.checkerLabel().trim();
-        Span checker = new Span(checkerName);
-        checker.addClassName("today-shift-dashboard__route-checks-dialog-checker");
+                : option.label());
+        checkerBox.setClearButtonVisible(false);
+        checkerBox.setWidthFull();
+        RouteCheckCheckerOption selected = checkers.stream()
+                .filter(c -> Objects.equals(c.serviceInfoId(), entry.checkerId()))
+                .findFirst()
+                .orElse(null);
+        checkerBox.setValue(selected);
 
         JmixButton save = uiComponents.create(JmixButton.class);
         save.setText(msg("routeCheckSave"));
@@ -272,7 +285,8 @@ public class TodayShiftDashboardContentBuilder {
             if (value == null) {
                 return;
             }
-            routeCheckService.updateCheckFromUi(entry.id(), value);
+            UUID checkerId = checkerBox.getValue() == null ? entry.checkerId() : checkerBox.getValue().serviceInfoId();
+            routeCheckService.updateCheckFromUi(entry.id(), value, checkerId);
             dialog.close();
             onRefresh.run();
         });
@@ -299,10 +313,10 @@ public class TodayShiftDashboardContentBuilder {
 
         VerticalLayout body = uiComponents.create(VerticalLayout.class);
         body.setPadding(false);
-        body.setSpacing(false);
+        body.setSpacing(true);
         body.setWidthFull();
         body.addClassName("today-shift-dashboard__route-checks-dialog-body");
-        body.add(timePicker, checker, actions);
+        body.add(timePicker, checkerBox, actions);
         dialog.add(body);
         dialog.open();
     }

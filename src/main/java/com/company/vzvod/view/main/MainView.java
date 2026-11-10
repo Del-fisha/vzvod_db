@@ -608,8 +608,26 @@ public class MainView extends StandardMainView {
                   const hoverId = $0;
                   const clickId = $1;
 
+                  function elementFrom(node){
+                    if (!node) return null;
+                    if (node.nodeType === 1) return node;
+                    return node.parentElement || null;
+                  }
+
+                  function releaseStuckUi(){
+                    document.querySelectorAll('vaadin-dialog-overlay').forEach(function(ov){
+                      if (!ov.opened) ov.remove();
+                    });
+                    document.body.classList.remove('vaadin-overlay-open');
+                    document.body.style.overflow = '';
+                    document.body.removeAttribute('inert');
+                    var layout = document.querySelector('vaadin-app-layout');
+                    if (layout) layout.removeAttribute('inert');
+                  }
+
                   function isInteractive(el){
-                    if (!el) return false;
+                    el = elementFrom(el);
+                    if (!el || !el.closest) return false;
                     const t = el.closest('button,a,[role="button"],input,textarea,select,vaadin-button,vaadin-tab,vaadin-item,[tabindex]');
                     if (!t) return false;
                     if (t.hasAttribute('disabled')) return false;
@@ -637,8 +655,39 @@ public class MainView extends StandardMainView {
                     play(hoverId);
                   }, {capture:true, passive:true});
 
+                  function pageHasView(){
+                    return !!document.querySelector(
+                      'vaadin-grid, vaadin-form-layout, .home-card, .home-stats-entry, vaadin-tabs, vaadin-login-form'
+                    );
+                  }
+
+                  // Если клиентский переход после сохранения смены очистил экран и завис
+                  // (заголовок не меняется), открываем ссылку обычной загрузкой страницы.
+                  function recoverNavigation(ev){
+                    if (ev.button !== 0 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;
+                    const el = elementFrom(ev.target);
+                    if (!el || !el.closest) return;
+                    const link = el.closest('a[href]');
+                    if (!link || link.target === '_blank') return;
+                    let url;
+                    try { url = new URL(link.href, window.location.href); }
+                    catch (e) { return; }
+                    if (url.origin !== window.location.origin) return;
+                    const wanted = url.pathname + url.search;
+                    const current = window.location.pathname + window.location.search;
+                    if (wanted === current) return;
+                    const href = url.href;
+                    window.setTimeout(function(){
+                      const now = window.location.pathname + window.location.search;
+                      if (now === wanted && pageHasView()) return;
+                      window.location.assign(href);
+                    }, 1000);
+                  }
+
                   document.addEventListener('click', function(ev){
-                    const el = ev.target;
+                    releaseStuckUi();
+                    recoverNavigation(ev);
+                    const el = elementFrom(ev.target);
                     if (!isInteractive(el)) return;
                     play(clickId);
                   }, {capture:true, passive:true});

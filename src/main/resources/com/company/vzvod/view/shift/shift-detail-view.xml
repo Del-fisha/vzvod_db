@@ -87,6 +87,7 @@
                     </hbox>
                     <dataGrid id="adminViolationsDataGrid"
                               dataContainer="administrativeViolationsDc"
+                              classNames="shift-fit-rows"
                               width="100%">
                         <columns>
                             <!-- подберите подходящие свойства вашей сущности AdministrativeViolation -->
@@ -112,6 +113,7 @@
                     </hbox>
                     <dataGrid id="criminalViolationsDataGrid"
                               dataContainer="criminalViolationsDc"
+                              classNames="shift-fit-rows"
                               width="100%">
                         <columns>
                             <!-- свойство type – ваш enum TypeOfCriminal -->

@@ -13,6 +13,7 @@ import com.company.vzvod.util.EmployeeOrdering;
 import com.company.vzvod.view.administrativeviolation.AdministrativeViolationDetailView;
 import com.company.vzvod.view.criminalviolation.CriminalViolationDetailView;
 import com.company.vzvod.view.main.MainView;
+import com.company.vzvod.view.serviceinfo.ServiceInfoListView;
 import com.vaadin.flow.router.Route;
 import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.flowui.DialogWindows;
@@ -32,6 +33,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 @Route(value = "shifts/:id", layout = MainView.class)
 @ViewController(id = "Shift.detail")
@@ -73,6 +77,14 @@ public class ShiftDetailView extends StandardDetailView<Shift> {
     @ViewComponent
     private CollectionPropertyContainer<ServiceInfo> unitsDc;
 
+    /** После успешного сохранения не показывать диалог «есть изменения» — он оставляет пустой экран. */
+    private boolean suppressUnsavedPrompt;
+
+    @Override
+    public boolean hasUnsavedChanges() {
+        return !suppressUnsavedPrompt && super.hasUnsavedChanges();
+    }
+
     @Subscribe
     public void onInitEntity(final InitEntityEvent<Shift> event) {
 
@@ -97,11 +109,6 @@ public class ShiftDetailView extends StandardDetailView<Shift> {
         }
     }
 
-    @Subscribe(id = "unitsDc", target = Target.DATA_CONTAINER)
-    public void onUnitsDcCollectionChange(CollectionContainer.CollectionChangeEvent<ServiceInfo> event) {
-        sortUnits();
-    }
-
     @Subscribe("dateField")
     public void onDateFieldTypedValueChange(
             SupportsTypedValue.TypedValueChangeEvent<TypedDatePicker<LocalDate>, LocalDate> event) {
@@ -120,10 +127,11 @@ public class ShiftDetailView extends StandardDetailView<Shift> {
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         unitsDataGrid.setAllRowsVisible(true);
-        adminViolationsDataGrid.setAllRowsVisible(true);
-        criminalViolationsDataGrid.setAllRowsVisible(true);
+        fitViolationGrid(adminViolationsDataGrid);
+        fitViolationGrid(criminalViolationsDataGrid);
         replaceViolationCreate(adminViolationsDataGrid, this::openNewAdministrativeViolation);
         replaceViolationCreate(criminalViolationsDataGrid, this::openNewCriminalViolation);
+        configureUnitsAddAction();
         configureUnitsDetachAction();
         sortUnits();
 
@@ -149,7 +157,53 @@ public class ShiftDetailView extends StandardDetailView<Shift> {
      */
     @Subscribe
     public void onReady(final ReadyEvent event) {
+        sortUnits();
         clearChanges();
+    }
+
+    /**
+     * После сохранения DataContext иногда остаётся dirty (сортировка состава, отделение по дате).
+     * Диалог «сохранить изменения» тогда открывается уже поверх закрытого экрана и оставляет
+     * блокирующий оверлей: меню не нажимается, пока не обновить страницу.
+     */
+    @Subscribe
+    public void onAfterSave(final AfterSaveEvent event) {
+        suppressUnsavedPrompt = true;
+        clearChanges();
+    }
+
+    @Subscribe
+    public void onBeforeClose(final BeforeCloseEvent event) {
+        if (event.closedWith(StandardOutcome.SAVE)) {
+            suppressUnsavedPrompt = true;
+            clearChanges();
+        }
+        releaseStuckOverlays();
+    }
+
+    @Subscribe(id = "administrativeViolationsDc", target = Target.DATA_CONTAINER)
+    public void onAdministrativeViolationsDcCollectionChange(
+            CollectionContainer.CollectionChangeEvent<AdministrativeViolation> event) {
+        fitViolationGrid(adminViolationsDataGrid);
+    }
+
+    @Subscribe(id = "criminalViolationsDc", target = Target.DATA_CONTAINER)
+    public void onCriminalViolationsDcCollectionChange(
+            CollectionContainer.CollectionChangeEvent<CriminalViolation> event) {
+        fitViolationGrid(criminalViolationsDataGrid);
+    }
+
+    /**
+     * Высота ровно по строкам. Пустой список — одна пустая строка (min-height в теме),
+     * без запаса пустых строк, который даёт высота грида по умолчанию.
+     */
+    private void fitViolationGrid(DataGrid<?> grid) {
+        if (grid == null) {
+            return;
+        }
+        grid.setAllRowsVisible(true);
+        grid.getStyle().remove("height");
+        grid.getStyle().remove("max-height");
     }
 
     private void applyDefaultTypeOfShift() {
@@ -170,6 +224,51 @@ public class ShiftDetailView extends StandardDetailView<Shift> {
      * list_remove для ManyToMany удаляет ServiceInfo из БД (Jmix RemoveOperation.saveIfNeeded).
      * Явно отвязываем сотрудника от смены, не трогая запись ServiceInfo.
      */
+    private void configureUnitsAddAction() {
+        Action add = unitsDataGrid.getAction("add");
+        if (add instanceof BaseAction baseAdd) {
+            baseAdd.withHandler(event -> openPartnerLookup());
+        }
+    }
+
+    private void openPartnerLookup() {
+        User user = (User) currentAuthentication.getUser();
+        Set<UUID> already = new HashSet<>();
+        for (ServiceInfo si : unitsDc.getItems()) {
+            if (si.getId() != null) {
+                already.add(si.getId());
+            }
+        }
+        UUID shiftId = getEditedEntity().getId();
+        dialogWindows.lookup(unitsDataGrid)
+                .withViewClass(ServiceInfoListView.class)
+                .withLookupComponentMultiSelect(true)
+                .withViewConfigurer(view -> {
+                    if (view instanceof ServiceInfoListView list) {
+                        list.configureShiftPartnerLookup(user.getId(), shiftId, already);
+                    }
+                })
+                .withAfterCloseListener(closeEvent -> {
+                    if (closeEvent.closedWith(StandardOutcome.SELECT)) {
+                        sortUnits();
+                    }
+                })
+                .open();
+    }
+
+    /** Модальный оверлей после диалога блокирует следующий переход и оставляет белую область. */
+    private void releaseStuckOverlays() {
+        getUI().ifPresent(ui -> ui.getPage().executeJs(
+                """
+                document.querySelectorAll('vaadin-dialog-overlay').forEach(function(ov){
+                  if (!ov.opened) ov.remove();
+                });
+                document.body.classList.remove('vaadin-overlay-open');
+                document.body.style.overflow = '';
+                document.body.removeAttribute('inert');
+                """));
+    }
+
     private void configureUnitsDetachAction() {
         Action remove = unitsDataGrid.getAction("remove");
         if (remove instanceof BaseAction baseRemove) {
@@ -182,7 +281,7 @@ public class ShiftDetailView extends StandardDetailView<Shift> {
         if (selected.isEmpty()) {
             return;
         }
-        getEditedEntity().getUnits().removeAll(selected);
+        unitsDc.getMutableItems().removeAll(selected);
         sortUnits();
         selected.forEach(unitsDataGrid::deselect);
     }
