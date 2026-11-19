@@ -33,7 +33,8 @@ class VocationBalanceServiceTest {
     }
 
     @Test
-    void calcCurrentYearStats_entitledOnJan1_usedByQuery_availableIsEntitledPlusAddedMinusUsed() {
+    @DisplayName("Положено — только норматив выслуги, использовано — календарные дни котла")
+    void calcCurrentYearStats_entitledIsSeniorityTier_usedIsCalendarPoolDays() {
         // Unconstrained: мобильный/бот create vacation без UserDetails в SecurityContext.
         UnconstrainedDataManager dataManager = mock(UnconstrainedDataManager.class, RETURNS_DEEP_STUBS);
         when(dataManager.loadValue(anyString(), eq(Integer.class))
@@ -41,7 +42,7 @@ class VocationBalanceServiceTest {
                 .parameter(anyString(), any())
                 .parameter(anyString(), any())
                 .parameter(anyString(), any())
-                .one()).thenReturn(3, 12, 3);
+                .one()).thenReturn(12);
 
         VocationBalanceService service = new VocationBalanceService(dataManager);
 
@@ -55,9 +56,34 @@ class VocationBalanceServiceTest {
 
         var stats = service.calcCurrentYearStats(serviceInfo, LocalDate.of(2026, 4, 24));
 
-        // 2010-01-01 -> 2026-01-01 = 16 календарных лет + 1 год за армию => номинальные 50 дней.
-        assertEquals(53, stats.entitled());
-        assertEquals(9, stats.used()); // сумма календарных дней минус сумма добавленных = 12 - 3
-        assertEquals(44, stats.available());
+        // 2010-01-01 -> 2026-01-01 = 16 календарных лет + 1 год за армию => 50 дней.
+        // «Добавлено дней» в положено не входит и из использованного не вычитается.
+        assertEquals(50, stats.entitled());
+        assertEquals(12, stats.used());
+        assertEquals(38, stats.available());
+    }
+
+    @Test
+    @DisplayName("Без даты начала службы котёл 40, списание — календарные дни")
+    void calcCurrentYearStats_withoutStartDate_isFortyMinusCalendarDays() {
+        UnconstrainedDataManager dataManager = mock(UnconstrainedDataManager.class, RETURNS_DEEP_STUBS);
+        when(dataManager.loadValue(anyString(), eq(Integer.class))
+                .parameter(anyString(), any())
+                .parameter(anyString(), any())
+                .parameter(anyString(), any())
+                .parameter(anyString(), any())
+                .one()).thenReturn(11);
+
+        VocationBalanceService service = new VocationBalanceService(dataManager);
+
+        ServiceInfo serviceInfo = new ServiceInfo();
+        serviceInfo.setId(UUID.randomUUID());
+        serviceInfo.setUser(new User());
+
+        var stats = service.calcCurrentYearStats(serviceInfo, LocalDate.of(2026, 2, 20));
+
+        assertEquals(40, stats.entitled());
+        assertEquals(11, stats.used());
+        assertEquals(29, stats.available());
     }
 }

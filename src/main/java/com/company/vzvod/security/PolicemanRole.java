@@ -148,6 +148,7 @@ public interface PolicemanRole {
                     "type",
                     "startDate",
                     "endDate",
+                    "displayEndDate",
                     "countOfDays",
                     "hasDeparture",
                     "cityToDrive",

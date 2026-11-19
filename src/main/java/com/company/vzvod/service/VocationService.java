@@ -3,6 +3,7 @@ package com.company.vzvod.service;
 import com.company.vzvod.entity.ArmyService;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.User;
+import com.company.vzvod.entity.VocationType;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -105,10 +106,50 @@ public final class VocationService {
         return nominalDaysAvailable(serviceInfo, date);
     }
 
+    /**
+     * Календарные дни отпуска, которые списываются с котла.
+     * «Добавлено дней» в {@code countOfDays} не входит и котёл не уменьшает.
+     */
     public static int poolDaysDebited(Integer countOfDays, Integer daysAddedByDeparture) {
         int total = countOfDays == null ? 0 : countOfDays;
-        int added = daysAddedByDeparture == null ? 0 : daysAddedByDeparture;
-        return Math.max(0, total - added);
+        return Math.max(0, total);
+    }
+
+    /**
+     * Последний день отсутствия: сохранённый конец плюс дни выезда.
+     * Ноль, пусто и отрицательное значение конец не сдвигают.
+     */
+    public static LocalDate absenceEnd(LocalDate endDate, Integer daysAddedByDeparture) {
+        if (endDate == null) {
+            return null;
+        }
+        int added = daysAddedByDeparture == null ? 0 : Math.max(0, daysAddedByDeparture);
+        return endDate.plusDays(added);
+    }
+
+    /**
+     * День попадает в отсутствие: от даты начала до {@link #absenceEnd} включительно.
+     */
+    public static boolean coversDay(LocalDate startDate, LocalDate endDate, Integer daysAddedByDeparture, LocalDate day) {
+        if (startDate == null || endDate == null || day == null || day.isBefore(startDate)) {
+            return false;
+        }
+        LocalDate until = absenceEnd(endDate, daysAddedByDeparture);
+        return until != null && !day.isAfter(until);
+    }
+
+    /**
+     * Сколько дней запроса списывается с котла 40/45/50/55.
+     * Учебный отпуск и ЦПП не списывают ничего. Добавленные дни сюда не передаются.
+     */
+    public static int daysDebitedFromPool(VocationType type, int calendarDays) {
+        if (type == null || calendarDays <= 0) {
+            return 0;
+        }
+        if (!VocationBalanceService.balanceAffectingTypeIds().contains(type.getId())) {
+            return 0;
+        }
+        return calendarDays;
     }
 
     private static int tierDaysForSeniorityMonths(int months) {

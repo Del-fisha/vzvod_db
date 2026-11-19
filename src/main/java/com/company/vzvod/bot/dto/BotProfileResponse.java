@@ -25,6 +25,9 @@ public record BotProfileResponse(
         LocalDate idCardUntil,
         /** Идентификатор {@link com.company.vzvod.entity.MetroStation#getId()} ближайшей станции метро. */
         Integer nearestMetro,
-        String nearestMetroLabel
+        String nearestMetroLabel,
+        /** Командир отделения, командир взвода или заместитель командира взвода. */
+        Boolean fullAccess,
+        LocalDate dateOfBirth
 ) {
 }

@@ -41,6 +41,7 @@
             <select id="typeField" property="type"/>
             <datePicker id="startDateField" property="startDate"/>
             <datePicker id="endDateField" property="endDate"/>
+            <datePicker id="displayEndDateField" property="displayEndDate" readOnly="true"/>
             <integerField id="vacationDaysUsedField"
                           readOnly="true"
                           label="msg://com.company.vzvod.view.vocation/vocationDetailView.vacationDaysUsedField.label"/>

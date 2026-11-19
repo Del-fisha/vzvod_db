@@ -63,6 +63,7 @@
                 <column property="type" width="1%"/>
                 <column property="startDate"/>
                 <column property="endDate"/>
+                <column property="displayEndDate" sortable="false"/>
 <!--                <column property="countOfDays"/>-->
 <!--                <column property="allRemaindDays"/>-->
                 <column property="cityToDrive"/>

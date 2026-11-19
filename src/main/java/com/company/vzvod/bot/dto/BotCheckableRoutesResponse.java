@@ -8,7 +8,8 @@ import java.util.UUID;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record BotCheckableRoutesResponse(
-        List<BotCheckableRouteItem> routes
+        List<BotCheckableRouteItem> routes,
+        List<BotRouteCheckerOption> commanders
 ) {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public record BotCheckableRouteItem(
@@ -23,7 +24,15 @@ public record BotCheckableRoutesResponse(
             UUID id,
             LocalTime checkedAt,
             String checkerLabel,
-            String display
+            String display,
+            UUID checkerServiceInfoId
+    ) {
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record BotRouteCheckerOption(
+            UUID serviceInfoId,
+            String label
     ) {
     }
 }

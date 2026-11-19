@@ -87,8 +87,8 @@ public class VocationBalanceIntegrationTest {
     }
 
     @Test
-    @DisplayName("Доступно = (положено + добавлено) - использовано")
-    void available_isEntitledPlusAddedMinusUsed() {
+    @DisplayName("Добавленные дни не меняют положено и не уменьшают списание календарных дней")
+    void addedDays_doNotChangeEntitledOrCalendarUsage() {
         int year = LocalDate.now().getYear();
 
         Vocation v1 = dataManager.create(Vocation.class);
@@ -112,9 +112,9 @@ public class VocationBalanceIntegrationTest {
         var stats = vocationBalanceService.recalcAndSave(serviceInfo.getId());
 
         int baseJan1Nominal = VocationService.nominalDaysAvailable(serviceInfo, LocalDate.of(year, 1, 1));
-        assertEquals(baseJan1Nominal + 2, stats.entitled());
-        assertEquals(13, stats.used()); // только пул: (10-2) + 5
-        assertEquals((baseJan1Nominal + 2) - 13, stats.available());
+        assertEquals(baseJan1Nominal, stats.entitled());
+        assertEquals(15, stats.used());
+        assertEquals(baseJan1Nominal - 15, stats.available());
     }
 
     @Test

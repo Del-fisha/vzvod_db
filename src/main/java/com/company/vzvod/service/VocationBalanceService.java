@@ -29,10 +29,10 @@ public class VocationBalanceService {
 
     /**
      * Пересчитывает положено/остаток отпуска за календарный год вокруг «сегодня».
-     * Номинал на год = норматив по выслуге (месяцы) на 01.01 + доп. +5 за пороги 120/180/240 мес. в течение года
-     * (если на 01.01 порог ещё не пройден) + сумма «добавлено дней» по выезду.
-     * Списание — только с пула: {@code countOfDays - daysAddedByDeparture}
-     * по основному, дополнительному и части основного.
+     * Положено = норматив по выслуге на 01.01 + 5 дней за порог 10/15/20 лет, если он наступает в этом году.
+     * «Добавлено дней», учебный отпуск и ЦПП этот лимит не меняют.
+     * Списание — {@code countOfDays} основного, дополнительного и части основного,
+     * отпуск целиком относится к году даты начала.
      */
     public void recalcAndSave(ServiceInfo serviceInfo) {
         if (serviceInfo == null || serviceInfo.getId() == null) {
@@ -61,30 +61,15 @@ public class VocationBalanceService {
         if (serviceInfo == null) {
             return new VocationYearStats(0, 0, 0);
         }
-        // Если дата начала службы не задана, используем базовый лимит 40,
-        // но всё равно учитываем уже созданные отпуска/добавленные дни в текущем году.
-        if (serviceInfo.getStartDate() == null) {
+        // Без даты начала службы или пользователя выслугу не посчитать: котёл 40 дней.
+        // Уже созданные отпуска этого года всё равно списываются.
+        if (serviceInfo.getStartDate() == null || serviceInfo.getUser() == null) {
             if (serviceInfo.getId() == null) {
                 return new VocationYearStats(40, 0, 40);
             }
             LocalDate yearStart = LocalDate.of(now.getYear(), 1, 1);
             LocalDate yearEnd = LocalDate.of(now.getYear(), 12, 31);
-            int added = loadAddedDays(serviceInfo.getId(), yearStart, yearEnd);
-            int entitled = 40 + Math.max(0, added);
-            int used = loadPoolDaysUsed(serviceInfo.getId(), yearStart, yearEnd);
-            int available = Math.max(0, entitled - used);
-            return new VocationYearStats(entitled, used, available);
-        }
-        if (serviceInfo.getUser() == null) {
-            // без пользователя не можем учесть армию/стаж — считаем как минимум 40,
-            // но по возможности учитываем фактические отпуска в этом году
-            if (serviceInfo.getId() == null) {
-                return new VocationYearStats(40, 0, 40);
-            }
-            LocalDate yearStart = LocalDate.of(now.getYear(), 1, 1);
-            LocalDate yearEnd = LocalDate.of(now.getYear(), 12, 31);
-            int added = loadAddedDays(serviceInfo.getId(), yearStart, yearEnd);
-            int entitled = 40 + Math.max(0, added);
+            int entitled = 40;
             int used = loadPoolDaysUsed(serviceInfo.getId(), yearStart, yearEnd);
             int available = Math.max(0, entitled - used);
             return new VocationYearStats(entitled, used, available);
@@ -95,8 +80,7 @@ public class VocationBalanceService {
 
         int nominalAtJan1 = VocationService.nominalDaysAvailable(serviceInfo, yearStart);
         int midYearBonuses = VocationService.midYearSeniorityBonuses(serviceInfo, yearStart, now);
-        int added = loadAddedDays(serviceInfo.getId(), yearStart, yearEnd);
-        int entitled = nominalAtJan1 + midYearBonuses + Math.max(0, added);
+        int entitled = nominalAtJan1 + midYearBonuses;
 
         int used = loadPoolDaysUsed(serviceInfo.getId(), yearStart, yearEnd);
         int available = Math.max(0, entitled - used);
@@ -123,38 +107,13 @@ public class VocationBalanceService {
         if (serviceInfoId == null) {
             return 0;
         }
-
-        int sumCounted = vocationSumCountedDays(serviceInfoId, start, end);
-        int sumAddedParts = loadAddedDays(serviceInfoId, start, end);
-        return Math.max(0, sumCounted - sumAddedParts);
+        return vocationSumCountedDays(serviceInfoId, start, end);
     }
 
     /** Сумма {@code countOfDays} только по тем же типам, что учитываются в балансе. */
     private int vocationSumCountedDays(UUID serviceInfoId, LocalDate start, LocalDate end) {
         Integer sum = dataManager.loadValue(
                         "select sum(coalesce(e.countOfDays, 0)) " +
-                                "from Vocation e " +
-                                "where e.userServiceInfo.id = :serviceInfoId " +
-                                "  and e.startDate >= :start and e.startDate <= :end " +
-                                "  and e.typeId in :types",
-                        Integer.class
-                )
-                .parameter("serviceInfoId", serviceInfoId)
-                .parameter("start", start)
-                .parameter("end", end)
-                .parameter("types", balanceAffectingTypeIds())
-                .one();
-
-        return sum == null ? 0 : sum;
-    }
-
-    private int loadAddedDays(UUID serviceInfoId, LocalDate start, LocalDate end) {
-        if (serviceInfoId == null) {
-            return 0;
-        }
-
-        Integer sum = dataManager.loadValue(
-                        "select sum(coalesce(e.daysAddedByDeparture, 0)) " +
                                 "from Vocation e " +
                                 "where e.userServiceInfo.id = :serviceInfoId " +
                                 "  and e.startDate >= :start and e.startDate <= :end " +

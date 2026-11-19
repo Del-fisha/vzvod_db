@@ -3,6 +3,7 @@ package com.company.vzvod.service;
 import com.company.vzvod.entity.ArmyService;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.User;
+import com.company.vzvod.entity.VocationType;
 import com.company.vzvod.test_support.PreTestEntities;
 import io.jmix.core.DataManager;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class VocationServiceTest {
 
@@ -125,9 +128,45 @@ class VocationServiceTest {
     }
 
     @Test
-    void poolDaysDebitedSubtractsAddedDaysOnly() {
-        assertEquals(8, VocationService.poolDaysDebited(10, 2));
+    @DisplayName("Дни из «добавлено дней» не входят в countOfDays и из котла не вычитаются")
+    void poolDaysDebited_countsCalendarDaysOnly() {
+        assertEquals(11, VocationService.poolDaysDebited(11, 3));
         assertEquals(10, VocationService.poolDaysDebited(10, null));
-        assertEquals(0, VocationService.poolDaysDebited(2, 5));
+        assertEquals(2, VocationService.poolDaysDebited(2, 5));
+    }
+
+    @Test
+    @DisplayName("Показанный конец отпуска сдвигается на добавленные дни")
+    void absenceEnd_extendsStoredEndByAddedDays() {
+        LocalDate end = LocalDate.of(2026, 2, 20);
+        assertEquals(LocalDate.of(2026, 2, 23), VocationService.absenceEnd(end, 3));
+        assertEquals(end, VocationService.absenceEnd(end, 0));
+        assertEquals(end, VocationService.absenceEnd(end, null));
+        assertEquals(end, VocationService.absenceEnd(end, -2));
+    }
+
+    @Test
+    @DisplayName("Отсутствие включает добавленные дни после сохранённого конца")
+    void coversDay_includesAddedDaysAfterEnd() {
+        LocalDate start = LocalDate.of(2026, 2, 10);
+        LocalDate end = LocalDate.of(2026, 2, 20);
+
+        assertTrue(VocationService.coversDay(start, end, 3, LocalDate.of(2026, 2, 10)));
+        assertTrue(VocationService.coversDay(start, end, 3, LocalDate.of(2026, 2, 20)));
+        assertTrue(VocationService.coversDay(start, end, 3, LocalDate.of(2026, 2, 23)));
+        assertFalse(VocationService.coversDay(start, end, 3, LocalDate.of(2026, 2, 9)));
+        assertFalse(VocationService.coversDay(start, end, 3, LocalDate.of(2026, 2, 24)));
+        assertFalse(VocationService.coversDay(start, end, 0, LocalDate.of(2026, 2, 21)));
+    }
+
+    @Test
+    @DisplayName("Из котла списываются только календарные дни основного, дополнительного и части основного")
+    void daysDebitedFromPool_ignoresStudyPtcAndAddedDays() {
+        assertEquals(11, VocationService.daysDebitedFromPool(VocationType.MAIN, 11));
+        assertEquals(5, VocationService.daysDebitedFromPool(VocationType.ADDITIONAL, 5));
+        assertEquals(4, VocationService.daysDebitedFromPool(VocationType.PART_OF_MAIN, 4));
+        assertEquals(0, VocationService.daysDebitedFromPool(VocationType.STUDY_LEAVE, 14));
+        assertEquals(0, VocationService.daysDebitedFromPool(VocationType.PTC, 10));
+        assertEquals(0, VocationService.daysDebitedFromPool(null, 10));
     }
 }

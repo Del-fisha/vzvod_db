@@ -49,11 +49,17 @@ public class BotMeExtrasService {
     @Transactional(readOnly = true)
     public BotEducationDto loadEducation(UUID userId) {
         User user = loadUser(userId);
-        Education e = user.getEducation();
-        if (e == null) {
-            return null;
-        }
-        return toEducationDto(e);
+        return educationOf(user);
+    }
+
+    @Transactional(readOnly = true)
+    public BotEducationDto loadEducationOf(UUID userId) {
+        User user = dataManager.load(User.class)
+                .id(userId)
+                .fetchPlan(fp -> fp.add("education"))
+                .optional()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
+        return educationOf(user);
     }
 
     @Transactional
@@ -86,6 +92,26 @@ public class BotMeExtrasService {
     @Transactional(readOnly = true)
     public BotVehiclesResponse loadVehicles(UUID userId) {
         activeUserChecker.requireActive(userId);
+        return vehiclesOf(userId);
+    }
+
+    @Transactional(readOnly = true)
+    public BotVehiclesResponse loadVehiclesOf(UUID userId) {
+        if (dataManager.load(User.class).id(userId).optional().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found");
+        }
+        return vehiclesOf(userId);
+    }
+
+    private BotEducationDto educationOf(User user) {
+        Education e = user.getEducation();
+        if (e == null) {
+            return null;
+        }
+        return toEducationDto(e);
+    }
+
+    private BotVehiclesResponse vehiclesOf(UUID userId) {
         List<Vehicle> list = dataManager.load(Vehicle.class)
                 .query("select v from Vehicle v where v.user.id = :uid order by v.stateNumber")
                 .parameter("uid", userId)
