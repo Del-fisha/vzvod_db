@@ -134,7 +134,7 @@ public class VocationBalanceService {
                 .id(serviceInfoId)
                 .fetchPlan(fp -> fp
                         .add("startDate")
-                        .add("monthsOfServiceBeforeLastAppointment")
+                        .add("serviceBreaks", breaks -> breaks.add("fromDate").add("toDate"))
                         .add("status")
                         .add("vacationDaysEntitled")
                         .add("vacationDaysAvailable")

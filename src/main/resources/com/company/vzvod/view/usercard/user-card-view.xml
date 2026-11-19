@@ -25,7 +25,6 @@
                     <property name="breastplate"/>
                     <property name="startDate"/>
                     <property name="startOfPost"/>
-                    <property name="monthsOfServiceBeforeLastAppointment"/>
                     <property name="vacationDaysAvailable"/>
                     <property name="vacationDaysEntitled"/>
                     <property name="idCard">
@@ -97,6 +96,21 @@
                             (:department is null and si.department is null)
                             or si.department = :department
                         order by u.serviceInfo.post, u.serviceInfo.rank desc, u.lastName
+                    ]]>
+                </query>
+            </loader>
+        </collection>
+
+        <collection id="serviceBreaksDc"
+                    class="com.company.vzvod.entity.ServiceBreak">
+            <fetchPlan extends="_base"/>
+            <loader id="serviceBreaksDl" readOnly="true">
+                <query>
+                    <![CDATA[
+                        select b
+                        from ServiceBreak b
+                        where b.serviceInfo = :serviceInfo
+                        order by b.fromDate
                     ]]>
                 </query>
             </loader>
@@ -243,10 +257,21 @@
                             <formItem>
                                 <textField property="startOfPost" readOnly="true"/>
                             </formItem>
-                            <formItem>
-                                <integerField property="monthsOfServiceBeforeLastAppointment" readOnly="true"/>
-                            </formItem>
                         </formLayout>
+                        <details id="serviceBreaksDetails"
+                                 summaryText="msg://com.company.vzvod.view.serviceinfo/serviceInfoDetailView.serviceBreaks"
+                                 opened="false"
+                                 width="100%">
+                            <dataGrid id="serviceBreaksDataGrid"
+                                      dataContainer="serviceBreaksDc"
+                                      width="24em"
+                                      allRowsVisible="true">
+                                <columns>
+                                    <column property="fromDate" width="12em" flexGrow="0"/>
+                                    <column property="toDate" width="12em" flexGrow="0"/>
+                                </columns>
+                            </dataGrid>
+                        </details>
                     </vbox>
 
                     <!-- Правая колонка (контакты и адреса) -->
@@ -420,6 +445,10 @@
                                         <column property="total" header="Всего"/>
                                     </columns>
                                 </dataGrid>
+                            </accordionPanel>
+
+                            <accordionPanel summaryText="Актуальная выслуга">
+                                <span id="senioritySpan"/>
                             </accordionPanel>
                         </accordion>
                     </vbox>

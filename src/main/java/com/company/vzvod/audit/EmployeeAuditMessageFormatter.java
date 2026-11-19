@@ -3,6 +3,7 @@ package com.company.vzvod.audit;
 import com.company.vzvod.entity.Contacts;
 import com.company.vzvod.entity.Education;
 import com.company.vzvod.entity.Penalty;
+import com.company.vzvod.entity.ServiceBreak;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.User;
 import com.company.vzvod.entity.Vehicle;
@@ -20,7 +21,8 @@ final class EmployeeAuditMessageFormatter {
             Education.class,
             Vehicle.class,
             Vocation.class,
-            Penalty.class
+            Penalty.class,
+            ServiceBreak.class
     );
 
     static boolean isEmployeeRelatedEntity(Class<?> entityClass) {
@@ -41,7 +43,8 @@ final class EmployeeAuditMessageFormatter {
             Map.entry("phone", "телефон"),
             Map.entry("email", "email"),
             Map.entry("breastplate", "номер жетона"),
-            Map.entry("monthsOfServiceBeforeLastAppointment", "месяцев выслуги до последнего устройства")
+            Map.entry("fromDate", "перерыв с"),
+            Map.entry("toDate", "перерыв по")
     );
 
     private EmployeeAuditMessageFormatter() {
@@ -72,6 +75,9 @@ final class EmployeeAuditMessageFormatter {
         }
         if (Penalty.class.equals(entityClass)) {
             return "взыскание";
+        }
+        if (ServiceBreak.class.equals(entityClass)) {
+            return "прерывание стажа службы";
         }
         return entityClass.getSimpleName();
     }

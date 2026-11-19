@@ -1,6 +1,7 @@
 package com.company.vzvod.service;
 
 import com.company.vzvod.entity.ArmyService;
+import com.company.vzvod.entity.ServiceBreak;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.User;
 import com.company.vzvod.entity.VocationType;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -70,12 +72,11 @@ class VocationServiceTest {
     @DisplayName("Общая выслуга в месяцах и отображение полными годами")
     void effectiveMonths_andYears() {
         serviceInfo.setStartDate(LocalDate.of(2016, 1, 1));
-        serviceInfo.setMonthsOfServiceBeforeLastAppointment(12);
         serviceInfo.getUser().setArmyService(ArmyService.NOT_SERVED);
         LocalDate onDate = LocalDate.of(2025, 6, 1);
 
-        assertEquals(125, VocationService.effectiveMonths(serviceInfo, onDate));
-        assertEquals(10, VocationService.effectiveYears(serviceInfo, onDate));
+        assertEquals(113, VocationService.effectiveMonths(serviceInfo, onDate));
+        assertEquals(9, VocationService.effectiveYears(serviceInfo, onDate));
     }
 
     @Test
@@ -114,17 +115,128 @@ class VocationServiceTest {
     }
 
     @Test
-    @DisplayName("Месяцы выслуги до последнего устройства увеличивают стаж для норматива отпуска")
-    void priorServiceMonths_increaseEffectiveTenure() {
-        serviceInfo.setStartDate(LocalDate.of(2016, 1, 1));
+    @DisplayName("Три перерыва по 20 дней уменьшают выслугу на 2 месяца")
+    void threeShortBreaks_subtractTwoMonths() {
+        serviceInfo.setStartDate(LocalDate.of(2014, 1, 10));
         serviceInfo.getUser().setArmyService(ArmyService.NOT_SERVED);
-        LocalDate onDate = LocalDate.of(2025, 6, 1);
+        LocalDate onDate = LocalDate.of(2024, 1, 10);
 
-        serviceInfo.setMonthsOfServiceBeforeLastAppointment(12);
+        assertEquals(120, VocationService.effectiveMonths(serviceInfo, onDate));
         assertEquals(45, VocationService.nominalDaysAvailable(serviceInfo, onDate));
 
-        serviceInfo.setMonthsOfServiceBeforeLastAppointment(0);
+        serviceInfo.setServiceBreaks(List.of(
+                breakBetween(LocalDate.of(2016, 2, 1), LocalDate.of(2016, 2, 20)),
+                breakBetween(LocalDate.of(2018, 5, 1), LocalDate.of(2018, 5, 20)),
+                breakBetween(LocalDate.of(2021, 9, 1), LocalDate.of(2021, 9, 20))
+        ));
+
+        assertEquals(118, VocationService.effectiveMonths(serviceInfo, onDate));
         assertEquals(40, VocationService.nominalDaysAvailable(serviceInfo, onDate));
+    }
+
+    @Test
+    @DisplayName("Один перерыв короче 30 дней месяц не отнимает, ровно 30 дней отнимают месяц")
+    void leftoverDays_accumulateToThirty() {
+        serviceInfo.setStartDate(LocalDate.of(2014, 1, 10));
+        serviceInfo.getUser().setArmyService(ArmyService.NOT_SERVED);
+        LocalDate onDate = LocalDate.of(2024, 1, 10);
+
+        serviceInfo.setServiceBreaks(List.of(
+                breakBetween(LocalDate.of(2016, 1, 1), LocalDate.of(2016, 1, 20))
+        ));
+        assertEquals(120, VocationService.effectiveMonths(serviceInfo, onDate));
+
+        serviceInfo.setServiceBreaks(List.of(
+                breakBetween(LocalDate.of(2016, 1, 1), LocalDate.of(2016, 1, 29))
+        ));
+        assertEquals(120, VocationService.effectiveMonths(serviceInfo, onDate));
+
+        serviceInfo.setServiceBreaks(List.of(
+                breakBetween(LocalDate.of(2016, 1, 1), LocalDate.of(2016, 1, 30))
+        ));
+        assertEquals(119, VocationService.effectiveMonths(serviceInfo, onDate));
+    }
+
+    @Test
+    @DisplayName("Календарный месяц перерыва и хвосты дней с разных перерывов складываются")
+    void calendarMonthPlusLeftoverDays() {
+        serviceInfo.setStartDate(LocalDate.of(2014, 1, 10));
+        serviceInfo.getUser().setArmyService(ArmyService.NOT_SERVED);
+        LocalDate onDate = LocalDate.of(2024, 1, 10);
+        serviceInfo.setServiceBreaks(List.of(
+                breakBetween(LocalDate.of(2018, 1, 1), LocalDate.of(2018, 2, 20)),
+                breakBetween(LocalDate.of(2019, 4, 1), LocalDate.of(2019, 4, 10))
+        ));
+
+        assertEquals(118, VocationService.effectiveMonths(serviceInfo, onDate));
+        assertEquals(40, VocationService.nominalDaysAvailable(serviceInfo, onDate));
+    }
+
+    @Test
+    @DisplayName("Пересечение вычитается один раз, кусок вне службы не считается")
+    void overlapMergedAndOutsideWindowIgnored() {
+        serviceInfo.setStartDate(LocalDate.of(2016, 6, 1));
+        serviceInfo.getUser().setArmyService(ArmyService.NOT_SERVED);
+        LocalDate onDate = LocalDate.of(2026, 6, 1);
+
+        serviceInfo.setServiceBreaks(List.of(
+                breakBetween(LocalDate.of(2015, 1, 1), LocalDate.of(2015, 6, 1))
+        ));
+        assertEquals(120, VocationService.effectiveMonths(serviceInfo, onDate));
+
+        serviceInfo.setServiceBreaks(List.of(
+                breakBetween(LocalDate.of(2016, 1, 1), LocalDate.of(2016, 6, 30))
+        ));
+        assertEquals(119, VocationService.effectiveMonths(serviceInfo, onDate));
+
+        serviceInfo.setServiceBreaks(List.of(
+                breakBetween(LocalDate.of(2018, 1, 1), LocalDate.of(2018, 1, 20)),
+                breakBetween(LocalDate.of(2018, 1, 10), LocalDate.of(2018, 1, 25))
+        ));
+        assertEquals(120, VocationService.effectiveMonths(serviceInfo, onDate));
+
+        serviceInfo.setServiceBreaks(List.of(
+                breakBetween(LocalDate.of(2026, 5, 1), LocalDate.of(2026, 8, 1))
+        ));
+        assertEquals(119, VocationService.effectiveMonths(serviceInfo, onDate));
+    }
+
+    @Test
+    @DisplayName("Год за армию прибавляется после вычитания перерыва")
+    void armyCredit_appliedAfterBreaks() {
+        serviceInfo.setStartDate(LocalDate.of(2015, 1, 1));
+        serviceInfo.getUser().setArmyService(ArmyService.SERVED);
+        LocalDate onDate = LocalDate.of(2024, 1, 1);
+
+        assertEquals(120, VocationService.effectiveMonths(serviceInfo, onDate));
+        assertEquals(45, VocationService.nominalDaysAvailable(serviceInfo, onDate));
+
+        serviceInfo.setServiceBreaks(List.of(
+                breakBetween(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 1, 30))
+        ));
+        assertEquals(119, VocationService.effectiveMonths(serviceInfo, onDate));
+        assertEquals(40, VocationService.nominalDaysAvailable(serviceInfo, onDate));
+    }
+
+    @Test
+    @DisplayName("Перерыв сдвигает день, когда внутри года наступает порог 10 лет")
+    void breakShiftsMidYearThreshold() {
+        serviceInfo.setStartDate(LocalDate.of(2013, 4, 3));
+        serviceInfo.getUser().setArmyService(ArmyService.NOT_SERVED);
+        serviceInfo.setServiceBreaks(List.of(
+                breakBetween(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 30))
+        ));
+
+        LocalDate yearStart = LocalDate.of(2023, 1, 1);
+        assertEquals(0, VocationService.midYearSeniorityBonuses(serviceInfo, yearStart, LocalDate.of(2023, 5, 2)));
+        assertEquals(5, VocationService.midYearSeniorityBonuses(serviceInfo, yearStart, LocalDate.of(2023, 5, 3)));
+    }
+
+    private static ServiceBreak breakBetween(LocalDate from, LocalDate to) {
+        ServiceBreak serviceBreak = new ServiceBreak();
+        serviceBreak.setFromDate(from);
+        serviceBreak.setToDate(to);
+        return serviceBreak;
     }
 
     @Test

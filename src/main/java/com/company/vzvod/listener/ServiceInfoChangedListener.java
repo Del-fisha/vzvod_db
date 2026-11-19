@@ -23,8 +23,7 @@ public class ServiceInfoChangedListener {
 
         boolean needRecalc =
                 event.getType() == EntityChangedEvent.Type.CREATED
-                        || event.getChanges().isChanged("startDate")
-                        || event.getChanges().isChanged("monthsOfServiceBeforeLastAppointment");
+                        || event.getChanges().isChanged("startDate");
 
         if (!needRecalc) {
             return;

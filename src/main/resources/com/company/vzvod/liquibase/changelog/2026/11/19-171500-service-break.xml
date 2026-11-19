@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="2026-11-19-171500-1" author="cursor">
+        <createTable tableName="SERVICE_BREAK">
+            <column name="ID" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="SERVICE_INFO_ID" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="FROM_DATE" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TO_DATE" type="date">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="SERVICE_BREAK"
+                                 baseColumnNames="SERVICE_INFO_ID"
+                                 referencedTableName="SERVICE_INFO"
+                                 referencedColumnNames="ID"
+                                 constraintName="FK_SERVICE_BREAK_ON_SERVICE_INFO"
+                                 onDelete="CASCADE"/>
+
+        <createIndex tableName="SERVICE_BREAK" indexName="IDX_SERVICE_BREAK_SERVICE_INFO">
+            <column name="SERVICE_INFO_ID"/>
+        </createIndex>
+
+        <dropColumn tableName="SERVICE_INFO" columnName="MONTHS_OF_SERVICE_BEFORE_LAST_APPOINTMENT"/>
+    </changeSet>
+
+</databaseChangeLog>

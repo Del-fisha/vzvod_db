@@ -9,10 +9,10 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
 /**
- * Норматив основного отпуска по общей выслуге в месяцах:
+ * Норматив основного отпуска по чистой выслуге в месяцах:
  * <ul>
  *     <li>месяцы от {@link ServiceInfo#getStartDate()} до даты расчёта;</li>
- *     <li>плюс {@link ServiceInfo#getMonthsOfServiceBeforeLastAppointment()};</li>
+ *     <li>минус месяцы перерывов стажа ({@link ServiceBreakRules});</li>
  *     <li>плюс 12 месяцев при {@link User#getArmyService()} {@code == SERVED}.</li>
  * </ul>
  * Пороги отпуска: 120 / 180 / 240 месяцев (10 / 15 / 20 лет). Для отображения пользователю
@@ -44,10 +44,12 @@ public final class VocationService {
             return 0;
         }
         LocalDate startDate = serviceInfo.getStartDate();
-        int monthsAtCurrentPost = onDate.isBefore(startDate)
+        int grossMonths = onDate.isBefore(startDate)
                 ? 0
                 : (int) ChronoUnit.MONTHS.between(startDate, onDate);
-        return monthsAtCurrentPost + priorServiceMonths(serviceInfo) + armyCreditMonths(serviceInfo.getUser());
+        int interruptedMonths = ServiceBreakRules.months(serviceInfo.getServiceBreaks(), startDate, onDate);
+        int netMonths = Math.max(0, grossMonths - interruptedMonths);
+        return netMonths + armyCreditMonths(serviceInfo.getUser());
     }
 
     /**
@@ -167,10 +169,5 @@ public final class VocationService {
 
     private static int armyCreditMonths(User user) {
         return user != null && user.getArmyService() == ArmyService.SERVED ? ARMY_CREDIT_MONTHS : 0;
-    }
-
-    private static int priorServiceMonths(ServiceInfo serviceInfo) {
-        Integer months = serviceInfo.getMonthsOfServiceBeforeLastAppointment();
-        return months == null ? 0 : Math.max(0, months);
     }
 }
