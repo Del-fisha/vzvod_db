@@ -43,6 +43,17 @@ public class BotStaffWorkService {
     @Transactional(readOnly = true)
     public BotStaffWorkResponse load(UUID viewerId, UUID targetUserId) {
         profileService.requireCommander(viewerId);
+        return build(targetUserId);
+    }
+
+    /** Та же сводка, что у карточки сотрудника, для текущего пользователя. */
+    @Transactional(readOnly = true)
+    public BotStaffWorkResponse loadOwn(UUID userId) {
+        profileService.loadProfile(userId);
+        return build(userId);
+    }
+
+    private BotStaffWorkResponse build(UUID targetUserId) {
         ServiceInfo si = dataManager.load(ServiceInfo.class)
                 .query("select s from ServiceInfo s where s.user.id = :uid")
                 .parameter("uid", targetUserId)

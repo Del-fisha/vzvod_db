@@ -13,6 +13,7 @@ public record BotTodayDashboardResponse(
         LocalDate operationalDate,
         int departmentNumber,
         List<BotTodayRouteRow> routes,
-        BotTodayTotals totals
+        BotTodayTotals totals,
+        List<BotRouteChecksRow> routeChecks
 ) {
 }

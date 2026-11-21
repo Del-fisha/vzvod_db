@@ -55,6 +55,14 @@ public class RouteCheckService {
         return buildRows(dayShifts, checks);
     }
 
+    /** Те же строки проверок для мобильного API, без Spring Security Authentication. */
+    @Transactional(readOnly = true)
+    public List<RouteChecksRow> loadRouteChecksRowsUnconstrained(LocalDate operationalDate, Dep department) {
+        List<Shift> dayShifts = loadDayShifts(unconstrainedDataManager, operationalDate, department);
+        List<RouteCheck> checks = loadChecksForDay(unconstrainedDataManager, operationalDate, department);
+        return buildRows(dayShifts, checks);
+    }
+
     @Transactional(readOnly = true)
     public BotCheckableRoutesResponse loadCheckableRoutes(UUID userId, UUID checkingShiftId) {
         ServiceInfo si = requireServiceInfo(userId);
@@ -280,6 +288,7 @@ public class RouteCheckService {
         }
 
         List<RouteChecksRow> rows = new ArrayList<>();
+        java.util.Set<String> added = new java.util.HashSet<>();
         for (Shift shift : dayShifts) {
             if (shift.getTypeOfShift() == TypeOfShift.CHECKING) {
                 continue;
@@ -289,15 +298,23 @@ public class RouteCheckService {
                 continue;
             }
             String routeId = route.getId();
-            List<RouteCheck> routeChecks = byRoute.getOrDefault(routeId, List.of());
-            List<RouteChecksRow.RouteCheckEntry> entries = routeChecks.stream()
-                    .sorted(Comparator.comparing(RouteCheck::getCheckedAt, Comparator.nullsLast(LocalTime::compareTo)))
-                    .map(RouteCheckService::toDashboardEntry)
-                    .toList();
-            rows.add(new RouteChecksRow(routeId, entries));
+            added.add(routeId);
+            rows.add(new RouteChecksRow(routeId, entriesOf(byRoute.getOrDefault(routeId, List.of()))));
+        }
+        for (Map.Entry<String, List<RouteCheck>> entry : byRoute.entrySet()) {
+            if (added.add(entry.getKey())) {
+                rows.add(new RouteChecksRow(entry.getKey(), entriesOf(entry.getValue())));
+            }
         }
         rows.sort(Comparator.comparing(RouteChecksRow::routeLabel, Comparator.nullsLast(String::compareTo)));
         return List.copyOf(rows);
+    }
+
+    private static List<RouteChecksRow.RouteCheckEntry> entriesOf(List<RouteCheck> routeChecks) {
+        return routeChecks.stream()
+                .sorted(Comparator.comparing(RouteCheck::getCheckedAt, Comparator.nullsLast(LocalTime::compareTo)))
+                .map(RouteCheckService::toDashboardEntry)
+                .toList();
     }
 
     private static RouteChecksRow.RouteCheckEntry toDashboardEntry(RouteCheck check) {

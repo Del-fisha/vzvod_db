@@ -90,6 +90,11 @@ public class MobileMeController {
         return ResponseEntity.ok(profileService.loadProfile(userId(token)));
     }
 
+    @GetMapping("/work")
+    public ResponseEntity<BotStaffWorkResponse> myWork(@RequestHeader(value = "X-Mobile-Token", required = false) String token) {
+        return ResponseEntity.ok(staffWorkService.loadOwn(userId(token)));
+    }
+
     @GetMapping("/staff")
     public ResponseEntity<BotStaffPageResponse> staff(
             @RequestHeader(value = "X-Mobile-Token", required = false) String token,

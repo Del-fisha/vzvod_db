@@ -22,6 +22,7 @@ class ServiceSeniorityTest {
 
         assertEquals(Period.of(10, 10, 18), net);
         assertEquals("10 лет, 10 месяцев, 18 дней", ServiceSeniority.format(net));
+        assertEquals("10 лет, 10 месяцев", ServiceSeniority.formatYearsMonths(net));
     }
 
     @Test

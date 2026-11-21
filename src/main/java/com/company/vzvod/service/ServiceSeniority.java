@@ -45,6 +45,13 @@ public final class ServiceSeniority {
                 + ", " + value.getDays() + " " + word(value.getDays(), "день", "дня", "дней");
     }
 
+    /** Годы и месяцы той же выслуги, без дней: «6 лет, 10 месяцев». */
+    public static String formatYearsMonths(Period period) {
+        Period value = period == null ? Period.ZERO : period;
+        return value.getYears() + " " + word(value.getYears(), "год", "года", "лет")
+                + ", " + value.getMonths() + " " + word(value.getMonths(), "месяц", "месяца", "месяцев");
+    }
+
     /**
      * Дни прерываний внутри {@code [startDate, onDate)}.
      */

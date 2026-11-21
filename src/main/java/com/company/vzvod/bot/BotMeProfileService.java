@@ -17,7 +17,9 @@ import com.company.vzvod.entity.Rank;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.StatusOfHousing;
 import com.company.vzvod.entity.TypeOfHousing;
+import com.company.vzvod.entity.ServiceBreak;
 import com.company.vzvod.entity.User;
+import com.company.vzvod.service.ServiceSeniority;
 import io.jmix.core.FetchPlanBuilder;
 import io.jmix.core.UnconstrainedDataManager;
 import org.springframework.context.MessageSource;
@@ -27,6 +29,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -95,10 +99,13 @@ public class BotMeProfileService {
             }
             matched.add(user);
         }
-        matched.sort(Comparator.comparing(
-                User::getDisplayName,
-                Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)
-        ));
+        matched.sort(Comparator
+                .comparing((User user) -> postSortKey(user.getServiceInfo() == null ? null : user.getServiceInfo().getPost()))
+                .thenComparing(
+                        (User user) -> rankSortKey(user.getServiceInfo() == null ? null : user.getServiceInfo().getRank()),
+                        Comparator.reverseOrder()
+                )
+                .thenComparing(User::getLastName, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)));
         List<BotStaffItem> items = new ArrayList<>();
         for (User user : StaffDirectoryPages.slice(matched, safePage, safeSize)) {
             ServiceInfo si = user.getServiceInfo();
@@ -241,6 +248,9 @@ public class BotMeProfileService {
                         .add("department", d -> d.add("number"))
                         .add("idCard", ic -> ic.add("issued").add("until").add("spl"))
                         .add("breastplate")
+                        .add("token")
+                        .add("startDate")
+                        .add("serviceBreaks", sb -> sb.add("fromDate").add("toDate"))
                         .add("medicalExamination")
                         .add("rank")
                         .add("post"));
@@ -297,7 +307,12 @@ public class BotMeProfileService {
                 metro == null ? null : metro.getId(),
                 metroMessage(metro),
                 roleResolver.shouldHaveFullAccess(post),
-                user.getDateOfBirth()
+                user.getDateOfBirth(),
+                si.getToken(),
+                card != null ? card.getSpl() : null,
+                seniorityLabel(si),
+                formatRussianMobile(phone),
+                dept == null ? null : dept.getNumber()
         );
     }
 
@@ -417,6 +432,35 @@ public class BotMeProfileService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, field + " too long");
         }
         return t;
+    }
+
+    private static String seniorityLabel(ServiceInfo si) {
+        if (si == null || si.getStartDate() == null) {
+            return null;
+        }
+        List<ServiceBreak> breaks = si.getServiceBreaks() == null ? List.of() : si.getServiceBreaks();
+        Period net = ServiceSeniority.net(si.getStartDate(), LocalDate.now(), breaks);
+        return ServiceSeniority.formatYearsMonths(net);
+    }
+
+    static String formatRussianMobile(String e164) {
+        if (e164 == null || e164.isBlank()) {
+            return null;
+        }
+        String digits = e164.replaceAll("\\D", "");
+        if (digits.length() == 11 && (digits.charAt(0) == '7' || digits.charAt(0) == '8')) {
+            String n = digits.substring(1);
+            return "+7 (" + n.substring(0, 3) + ") " + n.substring(3, 6) + "-" + n.substring(6, 8) + "-" + n.substring(8);
+        }
+        return e164.trim();
+    }
+
+    private static String postSortKey(Post post) {
+        return post == null || post.getId() == null ? "\uFFFF" : post.getId();
+    }
+
+    private static String rankSortKey(Rank rank) {
+        return rank == null || rank.getId() == null ? "" : rank.getId();
     }
 
     private static String maskRussianMobile(String e164) {
