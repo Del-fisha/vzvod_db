@@ -52,6 +52,7 @@ public interface PolicemanRole {
                     "breastplate",
                     "startDate",
                     "startOfPost",
+                    "serviceBreaks",
                     "penalty",
                     "incentive",
                     "shifts",
@@ -66,6 +67,14 @@ public interface PolicemanRole {
     )
     @EntityPolicy(entityClass = ServiceInfo.class, actions = EntityPolicyAction.ALL)
     void serviceInfoFullAccess();
+
+    @EntityAttributePolicy(
+            entityClass = ServiceBreak.class,
+            attributes = {"id", "serviceInfo", "fromDate", "toDate"},
+            action = EntityAttributePolicyAction.MODIFY
+    )
+    @EntityPolicy(entityClass = ServiceBreak.class, actions = EntityPolicyAction.ALL)
+    void serviceBreakFullAccess();
 
     @EntityAttributePolicy(
             entityClass = IdCard.class,
@@ -148,6 +157,7 @@ public interface PolicemanRole {
                     "type",
                     "startDate",
                     "endDate",
+                    "displayEndDate",
                     "countOfDays",
                     "hasDeparture",
                     "cityToDrive",
@@ -289,6 +299,7 @@ public interface PolicemanRole {
             "User.detail",
             "ServiceInfo.list",
             "ServiceInfo.detail",
+            "ServiceBreak.detail",
             "IdCard.detail",
             "Penalty.detail",
             "Penalty.list",

@@ -96,7 +96,8 @@ public class DailyShiftRaportView extends StandardView {
         commanderComboBox.setItems(
                 messages.getMessage(MSG_PREFIX + "commander.chief.full"),
                 messages.getMessage(MSG_PREFIX + "commander.deputy.full"),
-                ooopDeputyFull
+                ooopDeputyFull,
+                messages.getMessage(MSG_PREFIX + "commander.actingChief.full")
         );
 
         updatePetitionerForReportDate(today, true);
@@ -320,20 +321,29 @@ public class DailyShiftRaportView extends StandardView {
 
         String chiefPrefix = messages.getMessage(MSG_PREFIX + "commander.chief.prefix");
         String deputyPrefix = messages.getMessage(MSG_PREFIX + "commander.deputy.prefix");
+        String actingChiefPrefix = messages.getMessage(MSG_PREFIX + "commander.actingChief.prefix");
         String ooopDeputyPrefix = msgOrDefault(MSG_PREFIX + "commander.ooopDeputy.prefix", OOOP_DEPUTY_PREFIX_DEFAULT);
 
         String sNorm = normalizePrefixLike(s);
         String chiefNorm = normalizePrefixLike(chiefPrefix);
         String deputyNorm = normalizePrefixLike(deputyPrefix);
+        String actingChiefNorm = normalizePrefixLike(actingChiefPrefix);
         String ooopDeputyNorm = normalizePrefixLike(ooopDeputyPrefix);
 
-        if (sNorm.startsWith(chiefNorm)) {
+        if (sNorm.startsWith(ooopDeputyNorm)) {
             String[] parts = s.split("\\s+");
-            position = messages.getMessage(MSG_PREFIX + "commander.chief.position");
-            lastName = parts[1];
-            firstName = parts[2];
-            middleName = parts[3];
-            rank = parts[4];
+            position = msgOrDefault(MSG_PREFIX + "commander.ooopDeputy.position", OOOP_DEPUTY_POSITION_DEFAULT);
+            lastName = parts[3];
+            firstName = parts[4];
+            middleName = parts[5];
+            rank = parts[6];
+        } else if (sNorm.startsWith(actingChiefNorm)) {
+            String[] parts = s.split("\\s+");
+            position = messages.getMessage(MSG_PREFIX + "commander.actingChief.position");
+            lastName = parts[2];
+            firstName = parts[3];
+            middleName = parts[4];
+            rank = parts[5];
         } else if (sNorm.startsWith(deputyNorm)) {
             String[] parts = s.split("\\s+");
             position = messages.getMessage(MSG_PREFIX + "commander.deputy.position");
@@ -341,13 +351,13 @@ public class DailyShiftRaportView extends StandardView {
             firstName = parts[3];
             middleName = parts[4];
             rank = parts[5];
-        } else if (sNorm.startsWith(ooopDeputyNorm)) {
+        } else if (sNorm.startsWith(chiefNorm)) {
             String[] parts = s.split("\\s+");
-            position = msgOrDefault(MSG_PREFIX + "commander.ooopDeputy.position", OOOP_DEPUTY_POSITION_DEFAULT);
-            lastName = parts[3];
-            firstName = parts[4];
-            middleName = parts[5];
-            rank = parts[6];
+            position = messages.getMessage(MSG_PREFIX + "commander.chief.position");
+            lastName = parts[1];
+            firstName = parts[2];
+            middleName = parts[3];
+            rank = parts[4];
         } else {
             position = s;
             lastName = s;

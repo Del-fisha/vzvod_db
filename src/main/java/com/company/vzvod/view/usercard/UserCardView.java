@@ -2,12 +2,14 @@ package com.company.vzvod.view.usercard;
 
 import com.company.vzvod.entity.*;
 import com.company.vzvod.service.PenaltyExpirationService;
+import com.company.vzvod.service.ServiceSeniority;
 import com.company.vzvod.service.VocationBalanceService;
 import com.company.vzvod.view.shiftblank.ShiftBlankView;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.grid.ItemDoubleClickEvent;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
@@ -63,6 +65,9 @@ public class UserCardView extends StandardView {
     private CollectionLoader<Shift> shiftsDl;
 
     @ViewComponent
+    private CollectionLoader<ServiceBreak> serviceBreaksDl;
+
+    @ViewComponent
     private CollectionLoader<Incentive> incentivesDl;
 
     @ViewComponent
@@ -97,6 +102,12 @@ public class UserCardView extends StandardView {
 
     @ViewComponent
     private KeyValueCollectionContainer workResultsDc;
+
+    @ViewComponent
+    private Span senioritySpan;
+
+    @ViewComponent
+    private CollectionContainer<ServiceBreak> serviceBreaksDc;
 
     @ViewComponent
     private H2 header;
@@ -234,6 +245,10 @@ public class UserCardView extends StandardView {
         shiftsDl.setParameter("user", user);
         shiftsDl.load();
 
+        serviceBreaksDl.setParameter("serviceInfo", serviceInfo);
+        serviceBreaksDl.load();
+        refreshSeniority(serviceInfo);
+
         incentivesDl.setParameter("serviceInfo", serviceInfo);
         incentivesDl.load();
 
@@ -285,6 +300,19 @@ public class UserCardView extends StandardView {
             return;
         }
         grid.setAllRowsVisible(true);
+    }
+
+    private void refreshSeniority(ServiceInfo serviceInfo) {
+        if (senioritySpan == null) {
+            return;
+        }
+        if (serviceInfo == null || serviceInfo.getStartDate() == null) {
+            senioritySpan.setText("Дата начала службы не указана");
+            return;
+        }
+        List<ServiceBreak> breaks = serviceBreaksDc == null ? List.of() : serviceBreaksDc.getItems();
+        senioritySpan.setText(ServiceSeniority.format(
+                ServiceSeniority.net(serviceInfo.getStartDate(), LocalDate.now(), breaks)));
     }
 
     private List<KeyValueEntity> buildWorkResults(ServiceInfo serviceInfo) {

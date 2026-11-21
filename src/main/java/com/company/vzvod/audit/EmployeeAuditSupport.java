@@ -5,6 +5,7 @@ import com.company.vzvod.entity.Contacts;
 import com.company.vzvod.entity.Education;
 import com.company.vzvod.entity.IdCard;
 import com.company.vzvod.entity.Penalty;
+import com.company.vzvod.entity.ServiceBreak;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.User;
 import com.company.vzvod.entity.Vehicle;
@@ -162,6 +163,12 @@ public class EmployeeAuditSupport {
                 return p.getUserServiceInfo().getUser().getShortFio();
             }
         }
+        if (ServiceBreak.class.equals(entityClass)) {
+            ServiceBreak serviceBreak = dataManager.load(ServiceBreak.class).id(uuid).optional().orElse(null);
+            if (serviceBreak != null && serviceBreak.getServiceInfo() != null && serviceBreak.getServiceInfo().getUser() != null) {
+                return serviceBreak.getServiceInfo().getUser().getShortFio();
+            }
+        }
         if (IdCard.class.equals(entityClass)) {
             IdCard idCard = dataManager.load(IdCard.class).id(uuid).optional().orElse(null);
             User user = findUserByIdCard(idCard);
@@ -197,6 +204,9 @@ public class EmployeeAuditSupport {
         }
         if (entity instanceof Penalty penalty && penalty.getUserServiceInfo() != null) {
             return penalty.getUserServiceInfo().getUser();
+        }
+        if (entity instanceof ServiceBreak serviceBreak && serviceBreak.getServiceInfo() != null) {
+            return serviceBreak.getServiceInfo().getUser();
         }
         if (entity instanceof Education education) {
             return findUserByEducation(education);

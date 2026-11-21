@@ -1,0 +1,485 @@
+/* Телефон и планшет. Класс на <html> ставит device-adaptive.js по экрану устройства.
+   Монитор эти правила не получает. Стартовый дашборд (.home-stats-entry) прокручивается.
+   Остальные экраны держатся в видимой области: колонки складываются, шрифт меньше. */
+
+html.device-phone {
+    --lumo-font-size-xxs: 0.62rem;
+    --lumo-font-size-xs: 0.7rem;
+    --lumo-font-size-s: 0.78rem;
+    --lumo-font-size-m: 0.84rem;
+    --lumo-font-size-l: 0.98rem;
+    --lumo-font-size-xl: 1.12rem;
+    --lumo-font-size-xxl: 1.28rem;
+    --lumo-font-size-xxxl: 1.5rem;
+    --lumo-size-xs: 1.45rem;
+    --lumo-size-s: 1.7rem;
+    --lumo-size-m: 2rem;
+    --lumo-size-l: 2.25rem;
+    --lumo-size-xl: 2.6rem;
+    --lumo-space-xs: 0.2rem;
+    --lumo-space-s: 0.35rem;
+    --lumo-space-m: 0.5rem;
+    --lumo-space-l: 0.7rem;
+    --lumo-space-xl: 0.9rem;
+    --vaadin-app-layout-drawer-width: min(86vw, 270px);
+}
+
+html.device-tablet {
+    --lumo-font-size-xs: 0.75rem;
+    --lumo-font-size-s: 0.82rem;
+    --lumo-font-size-m: 0.9rem;
+    --lumo-font-size-l: 1.05rem;
+    --lumo-font-size-xl: 1.25rem;
+    --lumo-font-size-xxl: 1.45rem;
+    --lumo-size-m: 2.15rem;
+    --lumo-size-l: 2.5rem;
+    --lumo-space-m: 0.65rem;
+    --lumo-space-l: 0.9rem;
+    --vaadin-app-layout-drawer-width: 280px;
+}
+
+html.device-phone,
+html.device-tablet {
+    height: 100%;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+html.device-phone body,
+html.device-tablet body {
+    height: 100dvh;
+    max-width: 100vw;
+    overflow: hidden;
+}
+
+html.device-phone vaadin-app-layout,
+html.device-tablet vaadin-app-layout {
+    height: 100dvh;
+    max-width: 100vw;
+}
+
+html.device-phone vaadin-app-layout::part(content),
+html.device-tablet vaadin-app-layout::part(content) {
+    overflow: hidden;
+    min-width: 0;
+    min-height: 0;
+}
+
+html.device-phone .home-stats-entry,
+html.device-tablet .home-stats-entry {
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow: auto !important;
+    -webkit-overflow-scrolling: touch;
+}
+
+html.device-phone .jmix-main-view-header,
+html.device-tablet .jmix-main-view-header {
+    min-width: 0;
+    gap: 0.25rem;
+    box-sizing: border-box;
+}
+
+html.device-phone .jmix-main-view-title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.95rem;
+}
+
+html.device-phone .jmix-main-view-navigation,
+html.device-tablet .jmix-main-view-navigation {
+    overflow: auto;
+}
+
+html.device-phone .bg-audio-controls {
+    top: auto !important;
+    bottom: max(8px, env(safe-area-inset-bottom)) !important;
+    right: 8px !important;
+    max-width: calc(100vw - 16px);
+}
+
+html.device-tablet .bg-audio-controls {
+    top: 8px !important;
+    right: 8px !important;
+}
+
+/* Стартовые карточки */
+html.device-phone .home-stats-widget-slot,
+html.device-tablet.orientation-portrait .home-stats-widget-slot {
+    grid-template-columns: 1fr;
+}
+
+html.device-tablet.orientation-landscape .home-stats-widget-slot {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+html.device-phone .home-card,
+html.device-tablet .home-card {
+    min-height: 0;
+    padding: 14px 14px 12px;
+}
+
+html.device-phone .home-card__title {
+    font-size: var(--lumo-font-size-l);
+    margin: 8px 0 4px;
+}
+
+html.device-phone .home-card__cta {
+    margin-top: 10px;
+    padding: 8px 12px;
+}
+
+/* Колонки экранов складываются, фиксированные ширины не вылезают за экран */
+html.device-phone vaadin-vertical-layout,
+html.device-phone vaadin-horizontal-layout,
+html.device-phone vaadin-form-layout,
+html.device-tablet vaadin-vertical-layout,
+html.device-tablet vaadin-horizontal-layout,
+html.device-tablet vaadin-form-layout,
+html.device-phone vaadin-details,
+html.device-tablet vaadin-details {
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box;
+}
+
+html.device-phone vaadin-horizontal-layout,
+html.device-tablet.orientation-portrait vaadin-horizontal-layout {
+    flex-wrap: wrap !important;
+}
+
+html.device-phone vaadin-horizontal-layout > vaadin-vertical-layout,
+html.device-phone vaadin-horizontal-layout > vaadin-form-layout,
+html.device-tablet.orientation-portrait vaadin-horizontal-layout > vaadin-vertical-layout,
+html.device-tablet.orientation-portrait vaadin-horizontal-layout > vaadin-form-layout {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 1 1 100% !important;
+}
+
+html.device-tablet.orientation-landscape vaadin-horizontal-layout > vaadin-vertical-layout,
+html.device-tablet.orientation-landscape vaadin-horizontal-layout > vaadin-form-layout {
+    min-width: 0 !important;
+    max-width: 100% !important;
+}
+
+html.device-phone vaadin-details,
+html.device-tablet.orientation-portrait vaadin-details {
+    width: 100% !important;
+    align-self: stretch !important;
+}
+
+html.device-phone vaadin-button,
+html.device-phone .jmix-button,
+html.device-tablet vaadin-button,
+html.device-tablet .jmix-button {
+    padding: 0.35rem 0.75rem !important;
+    font-size: 0.8rem !important;
+    min-height: 2rem;
+    max-width: 100%;
+}
+
+html.device-phone vaadin-text-field,
+html.device-phone vaadin-password-field,
+html.device-phone vaadin-number-field,
+html.device-phone vaadin-email-field,
+html.device-phone vaadin-text-area,
+html.device-phone vaadin-select,
+html.device-phone vaadin-combo-box,
+html.device-phone vaadin-date-picker,
+html.device-phone vaadin-time-picker,
+html.device-phone vaadin-integer-field {
+    font-size: 16px;
+    max-width: 100%;
+}
+
+html.device-phone vaadin-form-item,
+html.device-tablet.orientation-portrait vaadin-form-item {
+    --vaadin-form-item-label-width: 100%;
+    font-size: 0.8rem;
+}
+
+html.device-phone vaadin-form-item::part(label),
+html.device-tablet vaadin-form-item::part(label) {
+    font-size: 0.75rem;
+}
+
+html.device-phone vaadin-grid,
+html.device-tablet vaadin-grid {
+    max-width: 100%;
+    min-width: 0;
+    font-size: 0.75rem;
+}
+
+html.device-phone vaadin-grid::part(header-cell),
+html.device-phone vaadin-grid::part(body-cell),
+html.device-phone vaadin-grid::part(cell),
+html.device-tablet vaadin-grid::part(header-cell),
+html.device-tablet vaadin-grid::part(body-cell),
+html.device-tablet vaadin-grid::part(cell) {
+    font-size: 0.72rem;
+    line-height: 1.15;
+    padding: 2px 4px;
+}
+
+html.device-phone vaadin-grid::part(header-cell),
+html.device-tablet.orientation-portrait vaadin-grid::part(header-cell) {
+    white-space: normal;
+}
+
+html.device-phone vaadin-dialog-overlay,
+html.device-tablet vaadin-dialog-overlay {
+    max-width: 100vw !important;
+}
+
+html.device-phone vaadin-dialog-overlay::part(overlay) {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    max-height: 100dvh !important;
+    border-radius: 0;
+}
+
+html.device-tablet vaadin-dialog-overlay::part(overlay) {
+    width: min(94vw, 880px) !important;
+    max-width: 94vw !important;
+    max-height: 94dvh !important;
+}
+
+html.device-phone vaadin-dialog-overlay::part(content),
+html.device-tablet vaadin-dialog-overlay::part(content) {
+    padding: 0.65rem !important;
+    max-height: calc(100dvh - 8px);
+    box-sizing: border-box;
+}
+
+html.device-phone vaadin-dialog-overlay vaadin-scroller,
+html.device-tablet vaadin-dialog-overlay vaadin-scroller {
+    max-height: 42dvh !important;
+    height: auto !important;
+}
+
+html.device-phone vaadin-tabs,
+html.device-tablet vaadin-tabs {
+    max-width: 100%;
+}
+
+html.device-phone vaadin-tabs::part(tabs),
+html.device-tablet vaadin-tabs::part(tabs) {
+    overflow-x: auto;
+}
+
+/* Списки мероприятий: переключатель сверху, таблица на остаток экрана */
+html.device-phone .events-switcher,
+html.device-tablet.orientation-portrait .events-switcher {
+    width: 100% !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+}
+
+html.device-phone .events-switcher vaadin-button,
+html.device-tablet.orientation-portrait .events-switcher vaadin-button {
+    width: auto !important;
+    flex: 1 1 30%;
+    justify-content: center;
+}
+
+html.device-phone vaadin-horizontal-layout:has(.events-switcher),
+html.device-tablet.orientation-portrait vaadin-horizontal-layout:has(.events-switcher) {
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    align-items: stretch !important;
+}
+
+html.device-phone .events-content,
+html.device-tablet .events-content {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    flex: 1 1 auto !important;
+}
+
+html.device-phone .events-content vaadin-grid,
+html.device-tablet .events-content vaadin-grid {
+    height: 100% !important;
+    min-height: 0 !important;
+}
+
+/* Все сотрудники: оба отдела на одном экране, строки листаются внутри таблицы */
+html.device-phone .user-list-small,
+html.device-tablet .user-list-small {
+    height: 100% !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+}
+
+html.device-phone .user-list-small > vaadin-vertical-layout,
+html.device-tablet.orientation-portrait .user-list-small > vaadin-vertical-layout {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+html.device-phone .user-list-small vaadin-details,
+html.device-tablet.orientation-portrait .user-list-small vaadin-details {
+    flex: 0 1 auto;
+    max-height: 28%;
+    overflow: hidden;
+}
+
+html.device-phone .user-list-small vaadin-details vaadin-grid,
+html.device-tablet.orientation-portrait .user-list-small vaadin-details vaadin-grid {
+    height: 18vh !important;
+    min-height: 4.2rem !important;
+    max-height: 7.5rem !important;
+}
+
+html.device-phone .user-list-small vaadin-horizontal-layout,
+html.device-tablet.orientation-portrait .user-list-small vaadin-horizontal-layout {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100% !important;
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+}
+
+html.device-phone .user-list-small vaadin-horizontal-layout > vaadin-vertical-layout,
+html.device-tablet.orientation-portrait .user-list-small vaadin-horizontal-layout > vaadin-vertical-layout {
+    width: 100% !important;
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    max-height: 50%;
+    display: flex;
+    flex-direction: column;
+}
+
+html.device-phone .user-list-small vaadin-horizontal-layout vaadin-grid,
+html.device-tablet.orientation-portrait .user-list-small vaadin-horizontal-layout vaadin-grid {
+    flex: 1 1 auto;
+    min-height: 0 !important;
+    height: auto !important;
+}
+
+html.device-tablet.orientation-landscape .user-list-small vaadin-horizontal-layout > vaadin-vertical-layout {
+    width: 50% !important;
+    min-width: 0 !important;
+    flex: 1 1 0 !important;
+}
+
+html.device-tablet.orientation-landscape .user-list-small vaadin-grid {
+    min-height: 0 !important;
+}
+
+/* Карточка сотрудника */
+html.device-phone .user-card-view vaadin-horizontal-layout > div,
+html.device-tablet.orientation-portrait .user-card-view vaadin-horizontal-layout > div {
+    display: none;
+}
+
+html.device-phone .user-card-view h2,
+html.device-phone .user-card-view h3,
+html.device-tablet .user-card-view h2,
+html.device-tablet .user-card-view h3 {
+    font-size: var(--lumo-font-size-m);
+    margin: 0.15rem 0;
+}
+
+html.device-phone .user-card-view vaadin-grid,
+html.device-tablet.orientation-portrait .user-card-view vaadin-grid {
+    min-height: 0 !important;
+}
+
+html.device-phone .user-card-view vaadin-accordion-panel::part(summary),
+html.device-tablet .user-card-view vaadin-accordion-panel::part(summary) {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+}
+
+/* Дашборд сегодняшней смены: плотнее, матрица не шире экрана. Вертикальная прокрутка
+   остаётся внутри его собственного скроллера — иначе сводка не помещается. */
+html.device-phone .today-shift-dashboard,
+html.device-tablet .today-shift-dashboard {
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    padding: 0.35rem !important;
+}
+
+html.device-phone .today-shift-dashboard__scroller,
+html.device-tablet .today-shift-dashboard__scroller {
+    min-height: 0;
+}
+
+html.device-phone .today-shift-dashboard__title,
+html.device-tablet .today-shift-dashboard__title {
+    font-size: 1.15rem;
+}
+
+html.device-phone .today-shift-dashboard__kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.35rem;
+}
+
+html.device-phone .today-shift-dashboard__kpi-value,
+html.device-tablet .today-shift-dashboard__kpi-value {
+    font-size: 1.35rem;
+}
+
+html.device-phone .today-shift-dashboard__kpi-card,
+html.device-phone .today-shift-dashboard__panel,
+html.device-phone .today-shift-dashboard__header {
+    padding: 0.45rem;
+    border-radius: 12px;
+}
+
+html.device-phone .today-shift-dashboard__matrix--period,
+html.device-tablet.orientation-portrait .today-shift-dashboard__matrix--period {
+    grid-template-columns: minmax(0, 1.5fr) repeat(4, minmax(0, 0.75fr));
+    font-size: 0.58rem;
+}
+
+html.device-phone .today-shift-dashboard__matrix--routes {
+    font-size: 0.55rem;
+}
+
+html.device-phone .today-shift-dashboard__matrix-cell,
+html.device-tablet .today-shift-dashboard__matrix-cell {
+    padding: 0.12rem 0.15rem;
+}
+
+html.device-phone .today-shift-dashboard__route-checks-row {
+    grid-template-columns: 3.6rem minmax(0, 1fr);
+}
+
+html.device-phone .today-shift-dashboard__route-checks-chip-name {
+    white-space: normal;
+}
+
+html.device-phone .today-shift-dashboard__department-badge {
+    white-space: normal;
+}
+
+/* Вход */
+html.device-phone vaadin-login-form-wrapper,
+html.device-tablet vaadin-login-form-wrapper,
+html.device-phone .jmix-login-main-layout,
+html.device-tablet .jmix-login-main-layout {
+    width: 100% !important;
+    max-width: 100vw !important;
+    box-sizing: border-box;
+    padding: 0.75rem !important;
+}
+
+html.device-phone:not(:has(vaadin-app-layout)) body,
+html.device-tablet:not(:has(vaadin-app-layout)) body {
+    overflow: auto;
+    height: auto;
+    min-height: 100dvh;
+}

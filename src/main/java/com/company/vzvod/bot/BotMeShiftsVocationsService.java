@@ -35,6 +35,7 @@ import com.company.vzvod.entity.User;
 import com.company.vzvod.entity.Vocation;
 import com.company.vzvod.entity.VocationType;
 import com.company.vzvod.service.DepartmentConverter;
+import com.company.vzvod.service.VocationService;
 import io.jmix.core.UnconstrainedDataManager;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
@@ -879,7 +880,7 @@ public class BotMeShiftsVocationsService {
             items.add(new BotVocationItem(
                     v.getId(),
                     v.getStartDate(),
-                    v.getEndDate(),
+                    VocationService.absenceEnd(v.getEndDate(), v.getDaysAddedByDeparture()),
                     v.getCountOfDays(),
                     v.getTypeId(),
                     typeLabel,
@@ -911,7 +912,7 @@ public class BotMeShiftsVocationsService {
         int days = (int) java.time.temporal.ChronoUnit.DAYS.between(body.startDate(), body.endDate()) + 1;
         boolean departure = Boolean.TRUE.equals(body.hasDeparture());
         int added = body.daysAddedByDeparture() == null ? 0 : Math.max(0, body.daysAddedByDeparture());
-        int debit = days + (departure ? added : 0);
+        int debit = VocationService.daysDebitedFromPool(type, days);
         int available = si.getVacationDaysAvailable() == null ? 0 : si.getVacationDaysAvailable();
         if (debit > available) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "not enough vacation days");

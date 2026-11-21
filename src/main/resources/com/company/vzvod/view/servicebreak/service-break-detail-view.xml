@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://serviceBreakDetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="serviceBreakDc"
+                  class="com.company.vzvod.entity.ServiceBreak">
+            <fetchPlan extends="_base">
+                <property name="serviceInfo"/>
+            </fetchPlan>
+            <loader id="serviceBreakDl"/>
+        </instance>
+    </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+    <actions>
+        <action id="saveCloseAction" type="detail_saveClose"/>
+        <action id="closeAction" type="detail_close"/>
+    </actions>
+    <layout>
+        <formLayout id="form" dataContainer="serviceBreakDc">
+            <responsiveSteps>
+                <responsiveStep minWidth="0" columns="1"/>
+                <responsiveStep minWidth="40em" columns="2"/>
+            </responsiveSteps>
+            <datePicker id="fromDateField" property="fromDate"/>
+            <datePicker id="toDateField" property="toDate"/>
+            <entityPicker id="serviceInfoField" property="serviceInfo" visible="false"/>
+        </formLayout>
+        <hbox id="detailActions">
+            <button id="saveAndCloseButton" action="saveCloseAction"/>
+            <button id="closeButton" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

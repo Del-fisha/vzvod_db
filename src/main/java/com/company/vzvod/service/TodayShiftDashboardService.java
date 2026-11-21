@@ -1,13 +1,14 @@
 package com.company.vzvod.service;
 
 import com.company.vzvod.bot.dto.BotLabeledCount;
+import com.company.vzvod.bot.dto.BotRouteChecksRow;
 import com.company.vzvod.bot.dto.BotTodayDashboardResponse;
 import com.company.vzvod.bot.dto.BotTodayRouteRow;
 import com.company.vzvod.bot.dto.BotTodayTotals;
+import com.company.vzvod.dashboard.todayshift.RouteChecksRow;
 import com.company.vzvod.dashboard.todayshift.ArticleCountRow;
 import com.company.vzvod.dashboard.todayshift.CriminalTypeCountRow;
 import com.company.vzvod.dashboard.todayshift.PeriodMetricRow;
-import com.company.vzvod.dashboard.todayshift.RouteChecksRow;
 import com.company.vzvod.dashboard.todayshift.RouteDetailsRow;
 import com.company.vzvod.dashboard.todayshift.ShiftRouteRow;
 import com.company.vzvod.dashboard.todayshift.TodayShiftDashboardSnapshot;
@@ -220,7 +221,39 @@ public class TodayShiftDashboardService {
                 toLabeledCriminalRows(criminalByType)
         );
 
-        return new BotTodayDashboardResponse(operationalDate, departmentNumber, List.copyOf(routes), totals);
+        return new BotTodayDashboardResponse(
+                operationalDate,
+                departmentNumber,
+                List.copyOf(routes),
+                totals,
+                toBotRouteChecks(operationalDate, department)
+        );
+    }
+
+    private List<BotRouteChecksRow> toBotRouteChecks(LocalDate operationalDate, Dep department) {
+        List<RouteChecksRow> rows = routeCheckService.loadRouteChecksRowsUnconstrained(operationalDate, department);
+        if (rows == null || rows.isEmpty()) {
+            return List.of();
+        }
+        List<BotRouteChecksRow> mapped = new ArrayList<>();
+        for (RouteChecksRow row : rows) {
+            List<BotRouteChecksRow.BotRouteCheckColumn> columns = new ArrayList<>();
+            if (row.checks() != null) {
+                for (RouteChecksRow.RouteCheckEntry entry : row.checks()) {
+                    String time = entry.checkedAt() == null ? null : entry.checkedAt().withSecond(0).withNano(0).toString();
+                    if (time != null && time.length() >= 5) {
+                        time = time.substring(0, 5);
+                    }
+                    String label = entry.checkerLabel();
+                    columns.add(new BotRouteChecksRow.BotRouteCheckColumn(
+                            time,
+                            label == null || label.isBlank() ? null : label
+                    ));
+                }
+            }
+            mapped.add(new BotRouteChecksRow(row.routeLabel(), List.copyOf(columns)));
+        }
+        return List.copyOf(mapped);
     }
 
     private static List<String> employeesList(Shift shift) {

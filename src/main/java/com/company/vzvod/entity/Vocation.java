@@ -1,5 +1,6 @@
 package com.company.vzvod.entity;
 
+import com.company.vzvod.service.VocationService;
 import io.jmix.core.DeletePolicy;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.OnDeleteInverse;
@@ -99,6 +100,15 @@ public class Vocation {
 
     public void setDaysAddedByDeparture(Integer daysAddedByDeparture) {
         this.daysAddedByDeparture = daysAddedByDeparture;
+    }
+
+    /**
+     * Конец отсутствия для показа: сохранённый конец плюс «добавлено дней».
+     */
+    @JmixProperty
+    @DependsOnProperties({"endDate", "daysAddedByDeparture"})
+    public LocalDate getDisplayEndDate() {
+        return VocationService.absenceEnd(endDate, daysAddedByDeparture);
     }
 
     public void setId(UUID id) {

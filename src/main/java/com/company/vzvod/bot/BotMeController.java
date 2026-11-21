@@ -12,6 +12,8 @@ import com.company.vzvod.bot.dto.BotColleaguesResponse;
 import com.company.vzvod.bot.dto.BotCriminalViolationCreateRequest;
 import com.company.vzvod.bot.dto.BotRouteCheckCreateRequest;
 import com.company.vzvod.bot.dto.BotRouteCheckUpdateRequest;
+import com.company.vzvod.bot.dto.BotStaffPageResponse;
+import com.company.vzvod.bot.dto.BotStaffWorkResponse;
 import com.company.vzvod.bot.dto.BotShiftEndTimeRequest;
 import com.company.vzvod.bot.dto.BotShiftItem;
 import com.company.vzvod.bot.dto.BotShiftMetricDeltaRequest;
@@ -46,6 +48,7 @@ public class BotMeController {
     private final BotMeShiftsVocationsService botMeShiftsVocationsService;
     private final BotMeEventsService botMeEventsService;
     private final RouteCheckService routeCheckService;
+    private final BotStaffWorkService staffWorkService;
 
     public BotMeController(
             BotApiKeyAuthorizer apiKeyAuthorizer,
@@ -53,7 +56,8 @@ public class BotMeController {
             BotMeProfileService botMeProfileService,
             BotMeShiftsVocationsService botMeShiftsVocationsService,
             BotMeEventsService botMeEventsService,
-            RouteCheckService routeCheckService
+            RouteCheckService routeCheckService,
+            BotStaffWorkService staffWorkService
     ) {
         this.apiKeyAuthorizer = apiKeyAuthorizer;
         this.telegramBindingService = telegramBindingService;
@@ -61,6 +65,7 @@ public class BotMeController {
         this.botMeShiftsVocationsService = botMeShiftsVocationsService;
         this.botMeEventsService = botMeEventsService;
         this.routeCheckService = routeCheckService;
+        this.staffWorkService = staffWorkService;
     }
 
     @GetMapping("/profile")
@@ -71,6 +76,41 @@ public class BotMeController {
         apiKeyAuthorizer.verify(apiKey);
         UUID userId = resolveUserId(telegramChatIdHeader);
         return ResponseEntity.ok(botMeProfileService.loadProfile(userId));
+    }
+
+    @GetMapping("/staff")
+    public ResponseEntity<BotStaffPageResponse> staff(
+            @RequestHeader(value = "X-Api-Key", required = false) String apiKey,
+            @RequestHeader(value = "X-Telegram-Chat-Id", required = false) String telegramChatIdHeader,
+            @RequestParam(value = "q", required = false) String query,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "pageSize", defaultValue = "20") int pageSize
+    ) {
+        apiKeyAuthorizer.verify(apiKey);
+        UUID userId = resolveUserId(telegramChatIdHeader);
+        return ResponseEntity.ok(botMeProfileService.listStaff(userId, query, page, pageSize));
+    }
+
+    @GetMapping("/staff/{targetUserId}/profile")
+    public ResponseEntity<BotProfileResponse> staffProfile(
+            @RequestHeader(value = "X-Api-Key", required = false) String apiKey,
+            @RequestHeader(value = "X-Telegram-Chat-Id", required = false) String telegramChatIdHeader,
+            @PathVariable("targetUserId") UUID targetUserId
+    ) {
+        apiKeyAuthorizer.verify(apiKey);
+        UUID userId = resolveUserId(telegramChatIdHeader);
+        return ResponseEntity.ok(botMeProfileService.loadStaffProfile(userId, targetUserId));
+    }
+
+    @GetMapping("/staff/{targetUserId}/work")
+    public ResponseEntity<BotStaffWorkResponse> staffWork(
+            @RequestHeader(value = "X-Api-Key", required = false) String apiKey,
+            @RequestHeader(value = "X-Telegram-Chat-Id", required = false) String telegramChatIdHeader,
+            @PathVariable("targetUserId") UUID targetUserId
+    ) {
+        apiKeyAuthorizer.verify(apiKey);
+        UUID userId = resolveUserId(telegramChatIdHeader);
+        return ResponseEntity.ok(staffWorkService.load(userId, targetUserId));
     }
 
     @GetMapping("/shifts")

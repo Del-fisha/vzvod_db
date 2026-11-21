@@ -12,6 +12,7 @@ import com.company.vzvod.entity.StatusOfHousing;
 import com.company.vzvod.entity.TypeOfHousing;
 import com.company.vzvod.entity.User;
 import com.company.vzvod.entity.UserTelegramBinding;
+import com.company.vzvod.service.ServiceSeniority;
 import com.company.vzvod.test_support.PreTestEntities;
 import io.jmix.core.DataManager;
 import io.jmix.core.security.SystemAuthenticator;
@@ -27,8 +28,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -90,6 +93,7 @@ class BotMeProfileIntegrationTest {
         serviceInfo.setUser(user);
         user.setServiceInfo(serviceInfo);
         serviceInfo.setStatus(StatusInService.ACTIVE);
+        serviceInfo.setStartDate(LocalDate.of(2016, 1, 1));
 
         Department department = dataManager.create(Department.class);
         PreTestEntities.updateDepartment(department);
@@ -156,7 +160,13 @@ class BotMeProfileIntegrationTest {
                 .andExpect(jsonPath("$.idCardIssued").exists())
                 .andExpect(jsonPath("$.idCardUntil").exists())
                 .andExpect(jsonPath("$.nearestMetro").value(MetroStation.BALTIYSKAYA.getId()))
-                .andExpect(jsonPath("$.nearestMetroLabel").value("Балтийская"));
+                .andExpect(jsonPath("$.nearestMetroLabel").value("Балтийская"))
+                .andExpect(jsonPath("$.token").value("65492"))
+                .andExpect(jsonPath("$.spl").value("123456"))
+                .andExpect(jsonPath("$.mobilePhone").value("+7 (911) 555-77-88"))
+                .andExpect(jsonPath("$.seniorityLabel").value(ServiceSeniority.formatYearsMonths(
+                        ServiceSeniority.net(LocalDate.of(2016, 1, 1), LocalDate.now(), List.of())
+                )));
     }
 
     @Test

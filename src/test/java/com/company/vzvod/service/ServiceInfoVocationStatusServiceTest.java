@@ -2,6 +2,7 @@ package com.company.vzvod.service;
 
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.StatusInService;
+import com.company.vzvod.entity.Vocation;
 import com.company.vzvod.entity.VocationType;
 import io.jmix.core.FetchPlanBuilder;
 import io.jmix.core.UnconstrainedDataManager;
@@ -19,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -102,7 +102,7 @@ class ServiceInfoVocationStatusServiceTest {
         si.setStatus(StatusInService.ACTIVE);
 
         stubServiceInfo(dataManager, id, si);
-        stubTypeIds(dataManager, List.of(VocationType.STUDY_LEAVE.getId()));
+        stubCoveringVocations(dataManager, covering(VocationType.STUDY_LEAVE, today, today, 0));
 
         new ServiceInfoVocationStatusService(dataManager).syncForServiceInfo(id, today);
 
@@ -121,7 +121,7 @@ class ServiceInfoVocationStatusServiceTest {
         si.setStatus(StatusInService.ACTIVE);
 
         stubServiceInfo(dataManager, id, si);
-        stubTypeIds(dataManager, List.of(VocationType.PTC.getId()));
+        stubCoveringVocations(dataManager, covering(VocationType.PTC, today, today, 0));
 
         new ServiceInfoVocationStatusService(dataManager).syncForServiceInfo(id, today);
 
@@ -140,11 +140,35 @@ class ServiceInfoVocationStatusServiceTest {
         si.setStatus(StatusInService.STUDY_LEAVE);
 
         stubServiceInfo(dataManager, id, si);
-        stubTypeIds(dataManager, List.of());
+        stubCoveringVocations(dataManager, List.of());
 
         new ServiceInfoVocationStatusService(dataManager).syncForServiceInfo(id, today);
 
         assertEquals(StatusInService.ACTIVE, si.getStatus());
+        verify(dataManager).save(si);
+    }
+
+    @Test
+    @DisplayName("syncForServiceInfo: добавленные дни после конца отпуска держат статус «в отпуске»")
+    void sync_addedDaysKeepVocationStatus() {
+        UnconstrainedDataManager dataManager = mock(UnconstrainedDataManager.class, RETURNS_DEEP_STUBS);
+        UUID id = UUID.randomUUID();
+        LocalDate today = LocalDate.of(2026, 2, 23);
+        ServiceInfo si = new ServiceInfo();
+        si.setId(id);
+        si.setStatus(StatusInService.ACTIVE);
+
+        stubServiceInfo(dataManager, id, si);
+        stubCoveringVocations(dataManager, covering(
+                VocationType.MAIN,
+                LocalDate.of(2026, 2, 10),
+                LocalDate.of(2026, 2, 20),
+                3
+        ));
+
+        new ServiceInfoVocationStatusService(dataManager).syncForServiceInfo(id, today);
+
+        assertEquals(StatusInService.VOCATION, si.getStatus());
         verify(dataManager).save(si);
     }
 
@@ -171,11 +195,21 @@ class ServiceInfoVocationStatusServiceTest {
                 .optional()).thenReturn(Optional.of(si));
     }
 
-    private static void stubTypeIds(UnconstrainedDataManager dataManager, List<Integer> typeIds) {
-        when(dataManager.loadValue(anyString(), eq(Integer.class))
+    private static void stubCoveringVocations(UnconstrainedDataManager dataManager, List<Vocation> vocations) {
+        when(dataManager.load(Vocation.class)
+                .query(anyString())
                 .parameter(anyString(), any())
                 .parameter(anyString(), any())
-                .list()).thenReturn(typeIds);
+                .list()).thenReturn(vocations);
+    }
+
+    private static List<Vocation> covering(VocationType type, LocalDate start, LocalDate end, int added) {
+        Vocation vocation = new Vocation();
+        vocation.setType(type);
+        vocation.setStartDate(start);
+        vocation.setEndDate(end);
+        vocation.setDaysAddedByDeparture(added);
+        return List.of(vocation);
     }
 
     @SuppressWarnings("unchecked")

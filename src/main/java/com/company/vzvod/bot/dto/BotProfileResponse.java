@@ -25,6 +25,18 @@ public record BotProfileResponse(
         LocalDate idCardUntil,
         /** Идентификатор {@link com.company.vzvod.entity.MetroStation#getId()} ближайшей станции метро. */
         Integer nearestMetro,
-        String nearestMetroLabel
+        String nearestMetroLabel,
+        /** Командир отделения, командир взвода или заместитель командира взвода. */
+        Boolean fullAccess,
+        LocalDate dateOfBirth,
+        /** Личный номер БШ ({@code ServiceInfo.token}). */
+        String token,
+        /** Номер СПЛ служебного удостоверения. */
+        String spl,
+        /** Чистая выслуга на сегодня: «N лет, M месяцев». */
+        String seniorityLabel,
+        /** Полный номер для карточки, {@code +7 (999) 999-99-99}. */
+        String mobilePhone,
+        Integer departmentNumber
 ) {
 }

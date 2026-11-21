@@ -31,7 +31,7 @@ class BotMeTodayDashboardServiceTest {
         LocalDate date = LocalDate.of(2026, 8, 10);
         Dep dep = DepartmentConverter.departmentFromDate(date);
         BotTodayDashboardResponse expected = new BotTodayDashboardResponse(
-                date, dep.getId(), List.of(), null
+                date, dep.getId(), List.of(), null, List.of()
         );
         when(todayShiftDashboardService.loadBotDashboard(date, dep)).thenReturn(expected);
 

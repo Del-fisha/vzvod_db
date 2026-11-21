@@ -38,19 +38,7 @@ public class ServiceInfoVocationStatusService {
             return false;
         }
 
-        Long cnt = dataManager.loadValue(
-                        "select count(v) " +
-                                "from Vocation v " +
-                                "where v.userServiceInfo.id = :serviceInfoId " +
-                                "  and v.startDate <= :today " +
-                                "  and v.endDate >= :today",
-                        Long.class
-                )
-                .parameter("serviceInfoId", serviceInfoId)
-                .parameter("today", today)
-                .one();
-
-        return cnt != null && cnt > 0;
+        return !typeIdsCovering(serviceInfoId, today).isEmpty();
     }
 
     /**
@@ -100,18 +88,32 @@ public class ServiceInfoVocationStatusService {
         if (serviceInfoId == null || today == null) {
             return StatusInService.ACTIVE;
         }
-        List<Integer> typeIds = dataManager.loadValue(
-                        "select v.typeId " +
-                                "from Vocation v " +
-                                "where v.userServiceInfo.id = :serviceInfoId " +
-                                "  and v.startDate <= :today " +
-                                "  and v.endDate >= :today",
-                        Integer.class
-                )
+        return resolveFromTypeIds(typeIdsCovering(serviceInfoId, today));
+    }
+
+    private List<Integer> typeIdsCovering(UUID serviceInfoId, LocalDate today) {
+        List<Integer> typeIds = new ArrayList<>();
+        for (Vocation vocation : loadStartedNotAfter(serviceInfoId, today)) {
+            if (VocationService.coversDay(
+                    vocation.getStartDate(),
+                    vocation.getEndDate(),
+                    vocation.getDaysAddedByDeparture(),
+                    today
+            )) {
+                typeIds.add(vocation.getTypeId());
+            }
+        }
+        return typeIds;
+    }
+
+    private List<Vocation> loadStartedNotAfter(UUID serviceInfoId, LocalDate today) {
+        return dataManager.load(Vocation.class)
+                .query("select v from Vocation v " +
+                        "where v.userServiceInfo.id = :serviceInfoId " +
+                        "  and v.startDate <= :today")
                 .parameter("serviceInfoId", serviceInfoId)
                 .parameter("today", today)
                 .list();
-        return resolveFromTypeIds(typeIds);
     }
 
     /**
@@ -170,18 +172,23 @@ public class ServiceInfoVocationStatusService {
         List<Vocation> covering = dataManager.load(Vocation.class)
                 .query("select v from Vocation v " +
                         "where v.userServiceInfo.id in :ids " +
-                        "  and v.startDate <= :today " +
-                        "  and v.endDate >= :today")
+                        "  and v.startDate <= :today")
                 .parameter("ids", ids)
                 .parameter("today", today)
                 .fetchPlan(fp -> fp
                         .add("typeId")
+                        .add("startDate")
+                        .add("endDate")
+                        .add("daysAddedByDeparture")
                         .add("userServiceInfo", siFp -> siFp.add("id")))
                 .list();
 
         Map<UUID, Set<Integer>> typesByServiceInfo = new HashMap<>();
         for (Vocation v : covering) {
             if (v.getUserServiceInfo() == null || v.getUserServiceInfo().getId() == null) {
+                continue;
+            }
+            if (!VocationService.coversDay(v.getStartDate(), v.getEndDate(), v.getDaysAddedByDeparture(), today)) {
                 continue;
             }
             typesByServiceInfo
@@ -200,8 +207,8 @@ public class ServiceInfoVocationStatusService {
             }
         }
 
-        if (!toSave.isEmpty()) {
-            dataManager.save(toSave);
+        for (ServiceInfo si : toSave) {
+            dataManager.save(si);
         }
     }
 }

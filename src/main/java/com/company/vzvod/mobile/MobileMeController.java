@@ -20,6 +20,9 @@ import com.company.vzvod.bot.dto.BotProfileResponse;
 import com.company.vzvod.bot.dto.BotRouteCheckCreateRequest;
 import com.company.vzvod.bot.dto.BotRouteCheckUpdateRequest;
 import com.company.vzvod.bot.dto.BotShiftEndTimeRequest;
+import com.company.vzvod.bot.BotStaffWorkService;
+import com.company.vzvod.bot.dto.BotStaffPageResponse;
+import com.company.vzvod.bot.dto.BotStaffWorkResponse;
 import com.company.vzvod.bot.dto.BotShiftItem;
 import com.company.vzvod.bot.dto.BotShiftMetricDeltaRequest;
 import com.company.vzvod.bot.dto.BotShiftUpsertRequest;
@@ -60,6 +63,7 @@ public class MobileMeController {
     private final BotMeExtrasService extrasService;
     private final BotMeTodayDashboardService todayDashboardService;
     private final RouteCheckService routeCheckService;
+    private final BotStaffWorkService staffWorkService;
 
     public MobileMeController(
             MobileAuthService mobileAuthService,
@@ -68,7 +72,8 @@ public class MobileMeController {
             BotMeEventsService eventsService,
             BotMeExtrasService extrasService,
             BotMeTodayDashboardService todayDashboardService,
-            RouteCheckService routeCheckService
+            RouteCheckService routeCheckService,
+            BotStaffWorkService staffWorkService
     ) {
         this.mobileAuthService = mobileAuthService;
         this.profileService = profileService;
@@ -77,11 +82,62 @@ public class MobileMeController {
         this.extrasService = extrasService;
         this.todayDashboardService = todayDashboardService;
         this.routeCheckService = routeCheckService;
+        this.staffWorkService = staffWorkService;
     }
 
     @GetMapping("/profile")
     public ResponseEntity<BotProfileResponse> profile(@RequestHeader(value = "X-Mobile-Token", required = false) String token) {
         return ResponseEntity.ok(profileService.loadProfile(userId(token)));
+    }
+
+    @GetMapping("/work")
+    public ResponseEntity<BotStaffWorkResponse> myWork(@RequestHeader(value = "X-Mobile-Token", required = false) String token) {
+        return ResponseEntity.ok(staffWorkService.loadOwn(userId(token)));
+    }
+
+    @GetMapping("/staff")
+    public ResponseEntity<BotStaffPageResponse> staff(
+            @RequestHeader(value = "X-Mobile-Token", required = false) String token,
+            @RequestParam(value = "q", required = false) String query,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "pageSize", defaultValue = "20") int pageSize
+    ) {
+        return ResponseEntity.ok(profileService.listStaff(userId(token), query, page, pageSize));
+    }
+
+    @GetMapping("/staff/{targetUserId}/profile")
+    public ResponseEntity<BotProfileResponse> staffProfile(
+            @RequestHeader(value = "X-Mobile-Token", required = false) String token,
+            @PathVariable UUID targetUserId
+    ) {
+        return ResponseEntity.ok(profileService.loadStaffProfile(userId(token), targetUserId));
+    }
+
+    @GetMapping("/staff/{targetUserId}/work")
+    public ResponseEntity<BotStaffWorkResponse> staffWork(
+            @RequestHeader(value = "X-Mobile-Token", required = false) String token,
+            @PathVariable UUID targetUserId
+    ) {
+        return ResponseEntity.ok(staffWorkService.load(userId(token), targetUserId));
+    }
+
+    @GetMapping("/staff/{targetUserId}/education")
+    public ResponseEntity<BotEducationDto> staffEducation(
+            @RequestHeader(value = "X-Mobile-Token", required = false) String token,
+            @PathVariable UUID targetUserId
+    ) {
+        profileService.requireCommander(userId(token));
+        BotEducationDto dto = extrasService.loadEducationOf(targetUserId);
+        return dto == null ? ResponseEntity.noContent().build() : ResponseEntity.ok(dto);
+    }
+
+    @GetMapping("/staff/{targetUserId}/vehicles")
+    public ResponseEntity<BotVehiclesResponse> staffVehicles(
+            @RequestHeader(value = "X-Mobile-Token", required = false) String token,
+            @PathVariable UUID targetUserId
+    ) {
+        profileService.requireCommander(userId(token));
+        return ResponseEntity.ok(extrasService.loadVehiclesOf(targetUserId));
     }
 
     @PutMapping("/profile")

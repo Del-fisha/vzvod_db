@@ -17,7 +17,7 @@
                 <property name="breastplate"/>
                 <property name="startDate"/>
                 <property name="startOfPost"/>
-                <property name="monthsOfServiceBeforeLastAppointment"/>
+                <property name="serviceBreaks"/>
                 <property name="department"/>
                 <property name="shifts"/>
                 <property name="incentive"/>
@@ -30,6 +30,7 @@
                 <property name="vacationDaysAvailable"/>
             </fetchPlan>
             <loader id="serviceInfoDl"/>
+            <collection id="serviceBreaksDc" property="serviceBreaks"/>
         </instance>
         <collection id="departmentsDc" class="com.company.vzvod.entity.Department">
             <loader id="departmentsDl" readOnly="true">
@@ -91,10 +92,15 @@
                     <datePicker id="startOfPostField" property="startOfPost"/>
                 </formItem>
 
-                <formItem>
-                    <integerField id="monthsOfServiceBeforeLastAppointmentField"
-                                  property="monthsOfServiceBeforeLastAppointment"
-                                  min="0"/>
+                <formItem colspan="2">
+                    <details id="serviceBreaksDetails"
+                             summaryText="msg://serviceInfoDetailView.serviceBreaks"
+                             opened="false"
+                             width="100%">
+                        <vbox id="serviceBreaksBox" width="100%" padding="false" spacing="true"/>
+                        <button id="addServiceBreakBtn"
+                                text="msg://serviceInfoDetailView.addServiceBreak"/>
+                    </details>
                 </formItem>
 
                 <formItem>

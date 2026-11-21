@@ -4,6 +4,9 @@ import com.company.vzvod.bot.dto.BotAddressPatch;
 import com.company.vzvod.bot.dto.BotAddressResponse;
 import com.company.vzvod.bot.dto.BotProfilePatchRequest;
 import com.company.vzvod.bot.dto.BotProfileResponse;
+import com.company.vzvod.bot.dto.BotStaffItem;
+import com.company.vzvod.bot.dto.BotStaffPageResponse;
+import com.company.vzvod.security.PostBasedRoleResolver;
 import com.company.vzvod.entity.Address;
 import com.company.vzvod.entity.Contacts;
 import com.company.vzvod.entity.Department;
@@ -14,7 +17,9 @@ import com.company.vzvod.entity.Rank;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.StatusOfHousing;
 import com.company.vzvod.entity.TypeOfHousing;
+import com.company.vzvod.entity.ServiceBreak;
 import com.company.vzvod.entity.User;
+import com.company.vzvod.service.ServiceSeniority;
 import io.jmix.core.FetchPlanBuilder;
 import io.jmix.core.UnconstrainedDataManager;
 import org.springframework.context.MessageSource;
@@ -24,6 +29,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -37,21 +47,109 @@ public class BotMeProfileService {
     private final UnconstrainedDataManager unconstrainedDataManager;
     private final BotActiveUserChecker activeUserChecker;
     private final MessageSource messageSource;
+    private final PostBasedRoleResolver roleResolver;
 
     public BotMeProfileService(
             UnconstrainedDataManager unconstrainedDataManager,
             BotActiveUserChecker activeUserChecker,
-            MessageSource messageSource
+            MessageSource messageSource,
+            PostBasedRoleResolver roleResolver
     ) {
         this.unconstrainedDataManager = unconstrainedDataManager;
         this.activeUserChecker = activeUserChecker;
         this.messageSource = messageSource;
+        this.roleResolver = roleResolver;
     }
 
     @Transactional(readOnly = true)
     public BotProfileResponse loadProfile(UUID userId) {
         User user = loadActiveUser(userId);
         return toResponse(user);
+    }
+
+    /**
+     * Командир отделения, командир взвода или заместитель командира взвода.
+     */
+    @Transactional(readOnly = true)
+    public void requireCommander(UUID viewerId) {
+        activeUserChecker.requireActive(viewerId);
+        User viewer = unconstrainedDataManager.load(User.class)
+                .id(viewerId)
+                .fetchPlan(fp -> fp.add("serviceInfo", si -> si.add("post")))
+                .optional()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
+        Post post = viewer.getServiceInfo() == null ? null : viewer.getServiceInfo().getPost();
+        if (!roleResolver.shouldHaveFullAccess(post)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "commander only");
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public BotStaffPageResponse listStaff(UUID viewerId, String query, int page, int pageSize) {
+        requireCommander(viewerId);
+        int safePage = StaffDirectoryPages.normalizePage(page);
+        int safeSize = StaffDirectoryPages.normalizePageSize(pageSize);
+        List<User> matched = new ArrayList<>();
+        for (User user : loadStaffUsers()) {
+            if (user.getServiceInfo() == null) {
+                continue;
+            }
+            if (!StaffDirectoryPages.matches(user.getDisplayName(), query)) {
+                continue;
+            }
+            matched.add(user);
+        }
+        matched.sort(Comparator
+                .comparing((User user) -> postSortKey(user.getServiceInfo() == null ? null : user.getServiceInfo().getPost()))
+                .thenComparing(
+                        (User user) -> rankSortKey(user.getServiceInfo() == null ? null : user.getServiceInfo().getRank()),
+                        Comparator.reverseOrder()
+                )
+                .thenComparing(User::getLastName, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)));
+        List<BotStaffItem> items = new ArrayList<>();
+        for (User user : StaffDirectoryPages.slice(matched, safePage, safeSize)) {
+            ServiceInfo si = user.getServiceInfo();
+            items.add(new BotStaffItem(
+                    user.getId(),
+                    user.getDisplayName(),
+                    postMessage(si.getPost()),
+                    departmentLabel(si.getDepartment()),
+                    rankMessage(si.getRank())
+            ));
+        }
+        return new BotStaffPageResponse(
+                items,
+                safePage,
+                StaffDirectoryPages.hasMore(matched.size(), safePage, safeSize)
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public BotProfileResponse loadStaffProfile(UUID viewerId, UUID targetUserId) {
+        requireCommander(viewerId);
+        User user = unconstrainedDataManager.load(User.class)
+                .id(targetUserId)
+                .fetchPlan(this::buildUserProfileFetchPlan)
+                .optional()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
+        if (user.getServiceInfo() == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found");
+        }
+        return toResponse(user);
+    }
+
+    private List<User> loadStaffUsers() {
+        return unconstrainedDataManager.load(User.class)
+                .query("select u from User u")
+                .fetchPlan(fp -> fp
+                        .add("firstName")
+                        .add("lastName")
+                        .add("patronymic")
+                        .add("serviceInfo", si -> si
+                                .add("post")
+                                .add("rank")
+                                .add("department", d -> d.add("number"))))
+                .list();
     }
 
     @Transactional
@@ -139,6 +237,7 @@ public class BotMeProfileService {
         fp.add("firstName")
                 .add("lastName")
                 .add("patronymic")
+                .add("dateOfBirth")
                 .add("contactsInfo", c -> c
                         .add("phoneNumber")
                         .add("nearestMetroStation")
@@ -149,6 +248,9 @@ public class BotMeProfileService {
                         .add("department", d -> d.add("number"))
                         .add("idCard", ic -> ic.add("issued").add("until").add("spl"))
                         .add("breastplate")
+                        .add("token")
+                        .add("startDate")
+                        .add("serviceBreaks", sb -> sb.add("fromDate").add("toDate"))
                         .add("medicalExamination")
                         .add("rank")
                         .add("post"));
@@ -203,7 +305,14 @@ public class BotMeProfileService {
                 card != null ? card.getIssued() : null,
                 card != null ? card.getUntil() : null,
                 metro == null ? null : metro.getId(),
-                metroMessage(metro)
+                metroMessage(metro),
+                roleResolver.shouldHaveFullAccess(post),
+                user.getDateOfBirth(),
+                si.getToken(),
+                card != null ? card.getSpl() : null,
+                seniorityLabel(si),
+                formatRussianMobile(phone),
+                dept == null ? null : dept.getNumber()
         );
     }
 
@@ -323,6 +432,35 @@ public class BotMeProfileService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, field + " too long");
         }
         return t;
+    }
+
+    private static String seniorityLabel(ServiceInfo si) {
+        if (si == null || si.getStartDate() == null) {
+            return null;
+        }
+        List<ServiceBreak> breaks = si.getServiceBreaks() == null ? List.of() : si.getServiceBreaks();
+        Period net = ServiceSeniority.net(si.getStartDate(), LocalDate.now(), breaks);
+        return ServiceSeniority.formatYearsMonths(net);
+    }
+
+    static String formatRussianMobile(String e164) {
+        if (e164 == null || e164.isBlank()) {
+            return null;
+        }
+        String digits = e164.replaceAll("\\D", "");
+        if (digits.length() == 11 && (digits.charAt(0) == '7' || digits.charAt(0) == '8')) {
+            String n = digits.substring(1);
+            return "+7 (" + n.substring(0, 3) + ") " + n.substring(3, 6) + "-" + n.substring(6, 8) + "-" + n.substring(8);
+        }
+        return e164.trim();
+    }
+
+    private static String postSortKey(Post post) {
+        return post == null || post.getId() == null ? "\uFFFF" : post.getId();
+    }
+
+    private static String rankSortKey(Rank rank) {
+        return rank == null || rank.getId() == null ? "" : rank.getId();
     }
 
     private static String maskRussianMobile(String e164) {

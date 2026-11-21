@@ -55,6 +55,14 @@ public class RouteCheckService {
         return buildRows(dayShifts, checks);
     }
 
+    /** Те же строки проверок для мобильного API, без Spring Security Authentication. */
+    @Transactional(readOnly = true)
+    public List<RouteChecksRow> loadRouteChecksRowsUnconstrained(LocalDate operationalDate, Dep department) {
+        List<Shift> dayShifts = loadDayShifts(unconstrainedDataManager, operationalDate, department);
+        List<RouteCheck> checks = loadChecksForDay(unconstrainedDataManager, operationalDate, department);
+        return buildRows(dayShifts, checks);
+    }
+
     @Transactional(readOnly = true)
     public BotCheckableRoutesResponse loadCheckableRoutes(UUID userId, UUID checkingShiftId) {
         ServiceInfo si = requireServiceInfo(userId);
@@ -88,7 +96,19 @@ public class RouteCheckService {
         }
         routes.sort(Comparator.comparing(BotCheckableRoutesResponse.BotCheckableRouteItem::routeLabel,
                 Comparator.nullsLast(String::compareTo)));
-        return new BotCheckableRoutesResponse(List.copyOf(routes));
+        List<BotCheckableRoutesResponse.BotRouteCheckerOption> commanders = collectCommanders(
+                loadCheckingShiftsWithUnits(
+                        unconstrainedDataManager,
+                        checkingShift.getDate(),
+                        checkingShift.getDepartmentToday()
+                )
+        ).stream()
+                .map(option -> new BotCheckableRoutesResponse.BotRouteCheckerOption(
+                        option.serviceInfoId(),
+                        option.label()
+                ))
+                .toList();
+        return new BotCheckableRoutesResponse(List.copyOf(routes), commanders);
     }
 
     @Transactional
@@ -126,12 +146,17 @@ public class RouteCheckService {
             UUID checkId,
             BotRouteCheckUpdateRequest body
     ) {
-        if (body == null || body.checkedAt() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "checkedAt required");
+        if (body == null || (body.checkedAt() == null && body.checkerServiceInfoId() == null)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "checkedAt or checkerServiceInfoId required");
         }
         ServiceInfo si = requireServiceInfo(userId);
         RouteCheck check = loadCheckForUpdate(checkId, si.getId());
-        check.setCheckedAt(body.checkedAt().withSecond(0).withNano(0));
+        if (body.checkedAt() != null) {
+            check.setCheckedAt(body.checkedAt().withSecond(0).withNano(0));
+        }
+        if (body.checkerServiceInfoId() != null) {
+            applyChecker(check, body.checkerServiceInfoId());
+        }
         RouteCheck saved = unconstrainedDataManager.save(check);
         return toBotItem(reloadCheck(saved.getId()));
     }
@@ -263,6 +288,7 @@ public class RouteCheckService {
         }
 
         List<RouteChecksRow> rows = new ArrayList<>();
+        java.util.Set<String> added = new java.util.HashSet<>();
         for (Shift shift : dayShifts) {
             if (shift.getTypeOfShift() == TypeOfShift.CHECKING) {
                 continue;
@@ -272,15 +298,23 @@ public class RouteCheckService {
                 continue;
             }
             String routeId = route.getId();
-            List<RouteCheck> routeChecks = byRoute.getOrDefault(routeId, List.of());
-            List<RouteChecksRow.RouteCheckEntry> entries = routeChecks.stream()
-                    .sorted(Comparator.comparing(RouteCheck::getCheckedAt, Comparator.nullsLast(LocalTime::compareTo)))
-                    .map(RouteCheckService::toDashboardEntry)
-                    .toList();
-            rows.add(new RouteChecksRow(routeId, entries));
+            added.add(routeId);
+            rows.add(new RouteChecksRow(routeId, entriesOf(byRoute.getOrDefault(routeId, List.of()))));
+        }
+        for (Map.Entry<String, List<RouteCheck>> entry : byRoute.entrySet()) {
+            if (added.add(entry.getKey())) {
+                rows.add(new RouteChecksRow(entry.getKey(), entriesOf(entry.getValue())));
+            }
         }
         rows.sort(Comparator.comparing(RouteChecksRow::routeLabel, Comparator.nullsLast(String::compareTo)));
         return List.copyOf(rows);
+    }
+
+    private static List<RouteChecksRow.RouteCheckEntry> entriesOf(List<RouteCheck> routeChecks) {
+        return routeChecks.stream()
+                .sorted(Comparator.comparing(RouteCheck::getCheckedAt, Comparator.nullsLast(LocalTime::compareTo)))
+                .map(RouteCheckService::toDashboardEntry)
+                .toList();
     }
 
     private static RouteChecksRow.RouteCheckEntry toDashboardEntry(RouteCheck check) {
@@ -288,6 +322,29 @@ public class RouteCheckService {
         String display = RouteCheckFormatter.formatEntry(check.getCheckedAt(), fio);
         UUID checkerId = check.getServiceInfo() == null ? null : check.getServiceInfo().getId();
         return new RouteChecksRow.RouteCheckEntry(check.getId(), check.getCheckedAt(), checkerId, fio, display);
+    }
+
+    private void applyChecker(RouteCheck check, UUID checkerServiceInfoId) {
+        UUID currentId = check.getServiceInfo() == null ? null : check.getServiceInfo().getId();
+        if (checkerServiceInfoId.equals(currentId)) {
+            return;
+        }
+        Shift shift = check.getShift();
+        LocalDate date = shift == null ? null : shift.getDate();
+        Dep department = shift == null ? null : shift.getDepartmentToday();
+        List<RouteCheckCheckerOption> allowed = withCurrentChecker(
+                collectCommanders(loadCheckingShiftsWithUnits(unconstrainedDataManager, date, department)),
+                currentId,
+                checkerShortFio(check.getServiceInfo())
+        );
+        if (!isAllowedChecker(checkerServiceInfoId, allowed)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "checker is not on today's checking shift");
+        }
+        ServiceInfo checker = unconstrainedDataManager.load(ServiceInfo.class)
+                .id(checkerServiceInfoId)
+                .optional()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "checker not found"));
+        check.setServiceInfo(checker);
     }
 
     private List<RouteCheckCheckerOption> loadCommandersForCheckUi(RouteCheck check) {
@@ -304,11 +361,13 @@ public class RouteCheckService {
     private BotCheckableRoutesResponse.BotRouteCheckItem toBotItem(RouteCheck check) {
         String fio = checkerShortFio(check.getServiceInfo());
         String display = RouteCheckFormatter.formatEntry(check.getCheckedAt(), fio);
+        UUID checkerId = check.getServiceInfo() == null ? null : check.getServiceInfo().getId();
         return new BotCheckableRoutesResponse.BotRouteCheckItem(
                 check.getId(),
                 check.getCheckedAt(),
                 fio == null || fio.isBlank() ? null : fio,
-                display
+                display,
+                checkerId
         );
     }
 
@@ -365,6 +424,8 @@ public class RouteCheckService {
                                 .add("lastName").add("firstName").add("patronymic")))
                         .add("shift", s -> s
                                 .add("id")
+                                .add("date")
+                                .add("departmentToday")
                                 .add("endTime")
                                 .add("typeOfShift")
                                 .add("units", u -> u.add("id"))))
@@ -385,7 +446,7 @@ public class RouteCheckService {
                 .fetchPlan(f -> f
                         .add("checkedAt")
                         .add("routeNumber")
-                        .add("serviceInfo", si -> si.add("user", u -> u
+                        .add("serviceInfo", si -> si.add("id").add("user", u -> u
                                 .add("lastName").add("firstName").add("patronymic"))))
                 .one();
     }
@@ -473,7 +534,7 @@ public class RouteCheckService {
                 .toList();
     }
 
-    private static List<Shift> loadCheckingShiftsWithUnits(DataManager manager, LocalDate date, Dep department) {
+    private static List<Shift> loadCheckingShiftsWithUnits(UnconstrainedDataManager manager, LocalDate date, Dep department) {
         if (date == null) {
             return List.of();
         }

@@ -3,6 +3,7 @@ package com.company.vzvod.view.serviceinfo;
 import com.company.vzvod.entity.IdCard;
 import com.company.vzvod.entity.Post;
 import com.company.vzvod.entity.Qualification;
+import com.company.vzvod.entity.ServiceBreak;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.StatusInService;
 import com.company.vzvod.security.UiAccessService;
@@ -12,17 +13,27 @@ import com.company.vzvod.view.main.MainView;
 import com.company.vzvod.view.penalty.PenaltyListView;
 import com.company.vzvod.view.shift.ShiftListView;
 import com.company.vzvod.view.vocation.VocationListView;
+import com.company.vzvod.service.ServiceBreakRules;
 import com.company.vzvod.service.ServiceInfoDialogSaveService;
 import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import io.jmix.core.DataManager;
 import io.jmix.core.EntityStates;
+import io.jmix.core.Messages;
+import io.jmix.core.metamodel.datatype.DatatypeRegistry;
 import io.jmix.flowui.DialogWindows;
+import io.jmix.flowui.Notifications;
+import io.jmix.flowui.UiComponents;
+import io.jmix.flowui.component.datepicker.TypedDatePicker;
 import io.jmix.flowui.kit.component.button.JmixButton;
+import io.jmix.flowui.model.CollectionContainer;
 import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Route(value = "service-infoes/:id", layout = MainView.class)
@@ -30,6 +41,8 @@ import java.util.UUID;
 @ViewDescriptor(path = "service-info-detail-view.xml")
 @EditedEntityContainer("serviceInfoDc")
 public class ServiceInfoDetailView extends StandardDetailView<ServiceInfo> {
+
+    private static final String FIELD_WIDTH = "16em";
 
 
     @ViewComponent
@@ -50,6 +63,24 @@ public class ServiceInfoDetailView extends StandardDetailView<ServiceInfo> {
     @Autowired
     private UiAccessService uiAccessService;
 
+    @Autowired
+    private Notifications notifications;
+
+    @Autowired
+    private UiComponents uiComponents;
+
+    @Autowired
+    private Messages messages;
+
+    @Autowired
+    private DatatypeRegistry datatypeRegistry;
+
+    @ViewComponent
+    private CollectionContainer<ServiceBreak> serviceBreaksDc;
+
+    @ViewComponent
+    private VerticalLayout serviceBreaksBox;
+
     @ViewComponent
     private io.jmix.flowui.component.combobox.EntityComboBox<?> departmentField;
     @ViewComponent
@@ -61,7 +92,7 @@ public class ServiceInfoDetailView extends StandardDetailView<ServiceInfo> {
     @ViewComponent
     private io.jmix.flowui.component.datepicker.TypedDatePicker<?> startOfPostField;
     @ViewComponent
-    private io.jmix.flowui.component.textfield.JmixIntegerField monthsOfServiceBeforeLastAppointmentField;
+    private JmixButton addServiceBreakBtn;
 
     @ViewComponent
     private JmixButton incentiveListButton;
@@ -76,12 +107,11 @@ public class ServiceInfoDetailView extends StandardDetailView<ServiceInfo> {
         serviceInfo.setPost(Post.POLICEMAN);
         serviceInfo.setMedicalExamination(false);
         serviceInfo.setQualificationClass(Qualification.NONE);
-        serviceInfo.setMonthsOfServiceBeforeLastAppointment(0);
-
     }
 
     @Subscribe
     public void onReady(ReadyEvent event) {
+        renderServiceBreaks();
         if (uiAccessService.hasFullAccessRole()) {
             return;
         }
@@ -91,13 +121,94 @@ public class ServiceInfoDetailView extends StandardDetailView<ServiceInfo> {
         if (postField != null) postField.setReadOnly(true);
         if (startDateField != null) startDateField.setReadOnly(true);
         if (startOfPostField != null) startOfPostField.setReadOnly(true);
-        if (monthsOfServiceBeforeLastAppointmentField != null) {
-            monthsOfServiceBeforeLastAppointmentField.setReadOnly(true);
-        }
+        if (addServiceBreakBtn != null) addServiceBreakBtn.setVisible(false);
 
         // Поощрения/взыскания: кнопки видны, но не активны
         if (incentiveListButton != null) incentiveListButton.setEnabled(false);
         if (penaltyListButton != null) penaltyListButton.setEnabled(false);
+    }
+
+    @Subscribe(id = "serviceBreaksDc", target = Target.DATA_CONTAINER)
+    public void onServiceBreaksDcCollectionChange(CollectionContainer.CollectionChangeEvent<ServiceBreak> event) {
+        renderServiceBreaks();
+    }
+
+    @Subscribe(id = "addServiceBreakBtn", subject = "clickListener")
+    public void onAddServiceBreakBtnClick(ClickEvent<JmixButton> event) {
+        ServiceBreak created = getViewData().getDataContext().create(ServiceBreak.class);
+        created.setServiceInfo(getEditedEntity());
+        serviceBreaksDc.getMutableItems().add(created);
+    }
+
+    private void renderServiceBreaks() {
+        if (serviceBreaksBox == null || serviceBreaksDc == null) {
+            return;
+        }
+        boolean editable = uiAccessService.hasFullAccessRole();
+        if (addServiceBreakBtn != null) {
+            addServiceBreakBtn.setVisible(editable);
+        }
+        serviceBreaksBox.removeAll();
+
+        HorizontalLayout header = new HorizontalLayout();
+        header.setPadding(false);
+        header.setSpacing(true);
+        header.add(columnLabel("com.company.vzvod.entity/ServiceBreak.fromDate"));
+        header.add(columnLabel("com.company.vzvod.entity/ServiceBreak.toDate"));
+        if (editable) {
+            header.add(removeSpacer());
+        }
+        serviceBreaksBox.add(header);
+
+        for (ServiceBreak serviceBreak : serviceBreaksDc.getItems()) {
+            serviceBreaksBox.add(breakRow(serviceBreak, editable));
+        }
+    }
+
+    private HorizontalLayout breakRow(ServiceBreak serviceBreak, boolean editable) {
+        HorizontalLayout row = new HorizontalLayout();
+        row.setPadding(false);
+        row.setSpacing(true);
+        row.add(dateField(serviceBreak.getFromDate(), editable, serviceBreak::setFromDate));
+        row.add(dateField(serviceBreak.getToDate(), editable, serviceBreak::setToDate));
+        if (editable) {
+            JmixButton remove = uiComponents.create(JmixButton.class);
+            remove.setText("×");
+            remove.addThemeNames("tertiary-inline", "error");
+            remove.setWidth("2.5em");
+            remove.addClickListener(click -> {
+                getViewData().getDataContext().remove(serviceBreak);
+                serviceBreaksDc.getMutableItems().remove(serviceBreak);
+            });
+            row.add(remove);
+        }
+        return row;
+    }
+
+    private com.vaadin.flow.component.html.Span columnLabel(String messageKey) {
+        com.vaadin.flow.component.html.Span label = new com.vaadin.flow.component.html.Span(messages.getMessage(messageKey));
+        label.setWidth(FIELD_WIDTH);
+        return label;
+    }
+
+    private com.vaadin.flow.component.html.Span removeSpacer() {
+        com.vaadin.flow.component.html.Span spacer = new com.vaadin.flow.component.html.Span();
+        spacer.setWidth("2.5em");
+        return spacer;
+    }
+
+    private TypedDatePicker<LocalDate> dateField(LocalDate value, boolean editable, java.util.function.Consumer<LocalDate> setter) {
+        TypedDatePicker<LocalDate> picker = uiComponents.create(TypedDatePicker.class);
+        picker.setDatatype(datatypeRegistry.get(LocalDate.class));
+        picker.setWidth(FIELD_WIDTH);
+        picker.setReadOnly(!editable);
+        picker.setValue(value);
+        picker.addValueChangeListener(change -> {
+            if (change.isFromClient()) {
+                setter.accept(change.getValue());
+            }
+        });
+        return picker;
     }
 
     /**
@@ -107,6 +218,12 @@ public class ServiceInfoDetailView extends StandardDetailView<ServiceInfo> {
      */
     @Subscribe
     public void onBeforeSave(final BeforeSaveEvent event) {
+        String breakProblem = ServiceBreakRules.problem(getEditedEntity());
+        if (breakProblem != null) {
+            event.preventSave();
+            notifications.create(breakProblem).show();
+            return;
+        }
         event.preventSave();
 
         ServiceInfo saved = serviceInfoDialogSaveService.saveFromDialog(getEditedEntity());

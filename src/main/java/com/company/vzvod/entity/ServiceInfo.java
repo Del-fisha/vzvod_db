@@ -7,7 +7,6 @@ import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.PastOrPresent;
@@ -71,9 +70,9 @@ public class ServiceInfo {
     @Column(name = "START_OF_POST")
     private LocalDate startOfPost;
 
-    @Min(0)
-    @Column(name = "MONTHS_OF_SERVICE_BEFORE_LAST_APPOINTMENT", nullable = false)
-    private Integer monthsOfServiceBeforeLastAppointment = 0;
+    @Composition
+    @OneToMany(mappedBy = "serviceInfo", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ServiceBreak> serviceBreaks = new ArrayList<>();
 
     @OneToMany(mappedBy = "userServiceInfo", cascade = CascadeType.ALL)
     private List<Penalty> penalty;

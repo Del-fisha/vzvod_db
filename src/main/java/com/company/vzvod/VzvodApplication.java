@@ -2,9 +2,9 @@ package com.company.vzvod;
 
 import com.company.vzvod.job.ServiceInfoYearlyRecalcJob;
 import com.google.common.base.Strings;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.component.page.Push;
-import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.theme.Theme;
 import org.quartz.JobDetail;
 import org.quartz.Trigger;
@@ -30,6 +30,7 @@ import static org.quartz.TriggerBuilder.newTrigger;
 
 @Push
 @Theme(value = "Vzvod")
+@JsModule("./device-adaptive.js")
 @EnableAspectJAutoProxy
 @SpringBootApplication
 public class VzvodApplication implements AppShellConfigurator {

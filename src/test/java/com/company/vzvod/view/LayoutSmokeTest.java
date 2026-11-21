@@ -11,6 +11,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class LayoutSmokeTest {
 
     @Test
+    void serviceInfoDetail_hasCollapsedBreaksAndNoPriorMonthsField() throws IOException {
+        String xml = readResource("/com/company/vzvod/view/serviceinfo/service-info-detail-view.xml");
+        assertTrue(xml.contains("id=\"serviceBreaksDetails\""));
+        assertTrue(xml.contains("id=\"serviceBreaksBox\""));
+        assertTrue(xml.contains("opened=\"false\""));
+        assertFalse(xml.contains("serviceBreaksDataGrid"));
+        assertFalse(xml.contains("monthsOfServiceBeforeLastAppointment"));
+
+        String card = readResource("/com/company/vzvod/view/usercard/user-card-view.xml");
+        assertTrue(card.contains("id=\"serviceBreaksDetails\""));
+        assertFalse(card.contains("monthsOfServiceBeforeLastAppointment"));
+    }
+
+    @Test
     void userCardView_hasVacationEntitledUsedAvailableFields() throws IOException {
         String xml = readResource("/com/company/vzvod/view/usercard/user-card-view.xml");
         assertTrue(xml.contains("id=\"vacationDaysEntitledField\""));
