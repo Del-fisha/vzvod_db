@@ -19,6 +19,7 @@ import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.User;
 import io.jmix.core.UnconstrainedDataManager;
 import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -36,10 +37,16 @@ public class AnnualBoardService {
 
     private final UnconstrainedDataManager dataManager;
     private final BotMeProfileService profileService;
+    private final JdbcTemplate jdbcTemplate;
 
-    public AnnualBoardService(UnconstrainedDataManager dataManager, BotMeProfileService profileService) {
+    public AnnualBoardService(
+            UnconstrainedDataManager dataManager,
+            BotMeProfileService profileService,
+            JdbcTemplate jdbcTemplate
+    ) {
         this.dataManager = dataManager;
         this.profileService = profileService;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Transactional(readOnly = true)
@@ -77,8 +84,7 @@ public class AnnualBoardService {
         LocalDate today = AnnualRules.todayMoscow();
         ServiceInfo si = user.getServiceInfo();
         if (request.medicalExamination() != null) {
-            si.setMedicalExamination(request.medicalExamination());
-            dataManager.save(si);
+            writeMedical(si.getId(), request.medicalExamination());
         }
         if (request.cpd() != null) {
             setChecked(si, AnnualItemKind.CPD, today.getYear(), request.cpd());
@@ -86,7 +92,8 @@ public class AnnualBoardService {
         if (request.psychologist() != null) {
             setChecked(si, AnnualItemKind.PSYCHOLOGIST, today.getYear(), request.psychologist());
         }
-        return board(user, today);
+        Boolean medical = request.medicalExamination();
+        return board(user, today, medical);
     }
 
     @Transactional(readOnly = true)
@@ -139,6 +146,9 @@ public class AnnualBoardService {
         if (request.performedOn() != null) {
             mark.setPerformedOn(request.performedOn());
             mark.setValidUntil(AnnualRules.initialValidUntil(kind, request.performedOn(), user.getDateOfBirth(), today));
+            if (kind.group() == AnnualItemKind.Group.ANALYSIS) {
+                mark.setChecked(true);
+            }
             snap = snap(mark);
         }
         if (Boolean.TRUE.equals(request.extend())) {
@@ -150,16 +160,14 @@ public class AnnualBoardService {
             mark.setValidUntil(extension.validUntil());
             mark.setChecked(true);
         } else if (request.checked() != null) {
-            if (request.checked() && !AnnualRules.dateAllowsCheck(kind, snap(mark), user.getDateOfBirth(), today)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Сначала укажите дату");
-            }
             mark.setChecked(request.checked());
         }
         dataManager.save(mark);
+        Boolean medical = null;
         if (syncMedical) {
-            syncMedical(user, si, today);
+            medical = syncMedical(user, si, today);
         }
-        return board(user, today);
+        return board(user, today, medical);
     }
 
     private void setChecked(ServiceInfo si, AnnualItemKind kind, int year, boolean checked) {
@@ -168,16 +176,30 @@ public class AnnualBoardService {
         dataManager.save(mark);
     }
 
-    private void syncMedical(User user, ServiceInfo si, LocalDate today) {
+    private boolean syncMedical(User user, ServiceInfo si, LocalDate today) {
         List<ItemState> items = states(user, marksOf(si.getId()), today);
         boolean passed = items.stream().filter(item -> item.kind().profosmotr()).allMatch(ItemState::counts);
-        if (!Boolean.valueOf(passed).equals(si.getMedicalExamination())) {
-            si.setMedicalExamination(passed);
-            dataManager.save(si);
-        }
+        writeMedical(si.getId(), passed);
+        return passed;
+    }
+
+    /**
+     * Точечное обновление. Сохранение всей ServiceInfo здесь нельзя:
+     * карточка загружена не целиком, и EclipseLink падает на незапрошенном status.
+     */
+    private void writeMedical(UUID serviceInfoId, boolean passed) {
+        jdbcTemplate.update(
+                "update service_info set medical_examination = ? where id = ?",
+                passed,
+                serviceInfoId
+        );
     }
 
     private AnnualBoardDto board(User user, LocalDate today) {
+        return board(user, today, null);
+    }
+
+    private AnnualBoardDto board(User user, LocalDate today, Boolean medicalOverride) {
         ServiceInfo si = user.getServiceInfo();
         List<ItemState> items = states(user, marksOf(si.getId()), today);
         int done = 0;
@@ -198,7 +220,9 @@ public class AnnualBoardService {
                     item.validUntil()
             ));
         }
-        boolean medical = si.getMedicalExamination() != null && si.getMedicalExamination();
+        boolean medical = medicalOverride != null
+                ? medicalOverride
+                : si.getMedicalExamination() != null && si.getMedicalExamination();
         return new AnnualBoardDto(isFemale(user), medical, AnnualRules.percent(done, items.size()), dtos);
     }
 

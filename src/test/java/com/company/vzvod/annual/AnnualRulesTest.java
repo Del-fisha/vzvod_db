@@ -83,7 +83,38 @@ class AnnualRulesTest {
     }
 
     @Test
-    @DisplayName("Без даты флюорографию нельзя отметить")
+    @DisplayName("Подпись анализа: нет даты, срок, просрочка")
+    void analysisCaption() {
+        assertEquals(AnnualRules.AnalysisNote.UNKNOWN, AnnualRules.analysisCaption(
+                AnnualItemKind.BLOOD, null, null, BIRTH_2000, LocalDate.of(2026, 6, 1)).note());
+
+        AnnualRules.AnalysisCaption blood = AnnualRules.analysisCaption(
+                AnnualItemKind.BLOOD, LocalDate.of(2026, 3, 2), null, BIRTH_2000, LocalDate.of(2026, 6, 1));
+        assertEquals(AnnualRules.AnalysisNote.VALID, blood.note());
+        assertEquals(LocalDate.of(2026, 12, 31), blood.until());
+
+        assertEquals(AnnualRules.AnalysisNote.EXPIRED, AnnualRules.analysisCaption(
+                AnnualItemKind.BLOOD, LocalDate.of(2025, 3, 2), null, BIRTH_2000, LocalDate.of(2026, 6, 1)).note());
+
+        AnnualRules.AnalysisCaption fluoro = AnnualRules.analysisCaption(
+                AnnualItemKind.FLUOROGRAPHY,
+                LocalDate.of(2025, 12, 30),
+                LocalDate.of(2026, 12, 30),
+                BIRTH_2000,
+                LocalDate.of(2026, 6, 1));
+        assertEquals(AnnualRules.AnalysisNote.VALID, fluoro.note());
+        assertEquals(LocalDate.of(2026, 12, 30), fluoro.until());
+
+        assertEquals(AnnualRules.AnalysisNote.EXPIRED, AnnualRules.analysisCaption(
+                AnnualItemKind.FLUOROGRAPHY,
+                LocalDate.of(2024, 1, 1),
+                LocalDate.of(2025, 1, 1),
+                BIRTH_2000,
+                LocalDate.of(2026, 6, 1)).note());
+    }
+
+    @Test
+    @DisplayName("Без даты флюорография не считается пройденной")
     void fluorographyCheckNeedsDate() {
         assertFalse(AnnualRules.dateAllowsCheck(AnnualItemKind.FLUOROGRAPHY, Snap.EMPTY, BIRTH_2000, LocalDate.of(2025, 1, 1)));
         assertTrue(AnnualRules.dateAllowsCheck(

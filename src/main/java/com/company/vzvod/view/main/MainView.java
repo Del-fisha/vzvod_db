@@ -678,9 +678,10 @@ public class MainView extends StandardMainView {
                     if (wanted === current) return;
                     const href = url.href;
                     window.setTimeout(function(){
-                      const now = window.location.pathname + window.location.search;
-                      if (now === wanted && pageHasView()) return;
-                      window.location.assign(href);
+                    const now = window.location.pathname + window.location.search;
+                    const annual = wanted.indexOf('/annual/') >= 0 || wanted.endsWith('/annual');
+                    if (now === wanted && (pageHasView() || annual)) return;
+                    window.location.assign(href);
                     }, 1000);
                   }
 

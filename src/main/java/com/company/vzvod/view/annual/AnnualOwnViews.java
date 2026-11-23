@@ -27,7 +27,7 @@ abstract class AnnualOwnView extends StandardView {
     }
 
     private void render() {
-        screens.showOwn(body, section(), this::render);
+        screens.showOwn(body, section());
     }
 }
 

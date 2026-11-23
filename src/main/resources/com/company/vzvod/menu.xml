@@ -23,7 +23,7 @@
         <item id="annual_cpd" view="AnnualCpdView" title="ЦПД"/>
         <item id="annual_tests" view="AnnualTestsView" title="Зачёты"/>
         <item id="annual_psych" view="AnnualPsychView" title="Психолог"/>
-        <item id="annual_others" view="AnnualOthersView" title="Другие сотрудники"/>
+        <item id="annual_others" view="AnnualOthersView" title="Результаты коллег"/>
     </menu>
 
     <menu id="application" title="msg://com.company.vzvod/menu.application.title" opened="true">

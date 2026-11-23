@@ -2,6 +2,6 @@
 <view xmlns="http://jmix.io/schema/flowui/view"
       title="Ежегодно">
     <layout>
-        <vbox id="body" width="100%" padding="true" spacing="true"/>
+        <vbox id="body" classNames="annual-board" width="100%" padding="true" spacing="true"/>
     </layout>
 </view>

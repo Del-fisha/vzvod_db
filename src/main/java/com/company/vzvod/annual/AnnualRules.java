@@ -76,6 +76,40 @@ public final class AnnualRules {
         };
     }
 
+    public enum AnalysisNote {
+        UNKNOWN, VALID, EXPIRED
+    }
+
+    public record AnalysisCaption(AnalysisNote note, LocalDate until) {
+    }
+
+    /**
+     * Подпись под датой анализа. Галочка на неё не влияет: дата нужна для срока.
+     */
+    public static AnalysisCaption analysisCaption(
+            AnnualItemKind kind,
+            LocalDate performedOn,
+            LocalDate validUntil,
+            LocalDate birth,
+            LocalDate today
+    ) {
+        if (performedOn == null) {
+            return new AnalysisCaption(AnalysisNote.UNKNOWN, null);
+        }
+        Snap asChecked = new Snap(true, performedOn, validUntil);
+        boolean valid = counts(kind, asChecked, birth, today);
+        LocalDate until = switch (kind) {
+            case BLOOD -> LocalDate.of(performedOn.getYear(), 12, 31);
+            case FLUOROGRAPHY -> fluoroUntil(asChecked);
+            case ECG -> ecgUntil(asChecked, birth, today);
+            default -> validUntil;
+        };
+        if (valid) {
+            return new AnalysisCaption(AnalysisNote.VALID, until);
+        }
+        return new AnalysisCaption(AnalysisNote.EXPIRED, null);
+    }
+
     public static boolean dateAllowsCheck(AnnualItemKind kind, Snap snap, LocalDate birth, LocalDate today) {
         if (!kind.rollingAnalysis()) {
             return true;
