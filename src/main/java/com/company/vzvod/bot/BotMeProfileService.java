@@ -85,8 +85,13 @@ public class BotMeProfileService {
     }
 
     @Transactional(readOnly = true)
+    public void requireActive(UUID viewerId) {
+        activeUserChecker.requireActive(viewerId);
+    }
+
+    @Transactional(readOnly = true)
     public BotStaffPageResponse listStaff(UUID viewerId, String query, int page, int pageSize) {
-        requireCommander(viewerId);
+        requireActive(viewerId);
         int safePage = StaffDirectoryPages.normalizePage(page);
         int safeSize = StaffDirectoryPages.normalizePageSize(pageSize);
         List<User> matched = new ArrayList<>();
@@ -126,7 +131,7 @@ public class BotMeProfileService {
 
     @Transactional(readOnly = true)
     public BotProfileResponse loadStaffProfile(UUID viewerId, UUID targetUserId) {
-        requireCommander(viewerId);
+        requireActive(viewerId);
         User user = unconstrainedDataManager.load(User.class)
                 .id(targetUserId)
                 .fetchPlan(this::buildUserProfileFetchPlan)

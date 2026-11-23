@@ -126,7 +126,7 @@ public class MobileMeController {
             @RequestHeader(value = "X-Mobile-Token", required = false) String token,
             @PathVariable UUID targetUserId
     ) {
-        profileService.requireCommander(userId(token));
+        profileService.requireActive(userId(token));
         BotEducationDto dto = extrasService.loadEducationOf(targetUserId);
         return dto == null ? ResponseEntity.noContent().build() : ResponseEntity.ok(dto);
     }
@@ -136,7 +136,7 @@ public class MobileMeController {
             @RequestHeader(value = "X-Mobile-Token", required = false) String token,
             @PathVariable UUID targetUserId
     ) {
-        profileService.requireCommander(userId(token));
+        profileService.requireActive(userId(token));
         return ResponseEntity.ok(extrasService.loadVehiclesOf(targetUserId));
     }
 
