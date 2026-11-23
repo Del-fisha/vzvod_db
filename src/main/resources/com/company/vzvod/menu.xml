@@ -18,6 +18,14 @@
               title="msg://com.company.vzvod/menu.my_incentives.title"/>
     </menu>
 
+    <menu id="annual" title="Ежегодно" opened="true">
+        <item id="annual_prof" view="AnnualProfView" title="Профосмотр"/>
+        <item id="annual_cpd" view="AnnualCpdView" title="ЦПД"/>
+        <item id="annual_tests" view="AnnualTestsView" title="Зачёты"/>
+        <item id="annual_psych" view="AnnualPsychView" title="Психолог"/>
+        <item id="annual_others" view="AnnualOthersView" title="Другие сотрудники"/>
+    </menu>
+
     <menu id="application" title="msg://com.company.vzvod/menu.application.title" opened="true">
         <item id="menuAllShifts" view="AllTodayShifts.list"
               title="msg://com.company.vzvod/menu.all_shifts.title"/>

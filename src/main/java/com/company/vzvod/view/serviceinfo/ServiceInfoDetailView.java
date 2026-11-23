@@ -26,6 +26,7 @@ import io.jmix.core.metamodel.datatype.DatatypeRegistry;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.Notifications;
 import io.jmix.flowui.UiComponents;
+import io.jmix.flowui.component.checkbox.JmixCheckbox;
 import io.jmix.flowui.component.datepicker.TypedDatePicker;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.CollectionContainer;
@@ -100,6 +101,9 @@ public class ServiceInfoDetailView extends StandardDetailView<ServiceInfo> {
     @ViewComponent
     private JmixButton penaltyListButton;
 
+    @ViewComponent("medicalExamination")
+    private JmixCheckbox medicalExaminationField;
+
     @Subscribe
     public void onInitEntity(final InitEntityEvent<ServiceInfo> event) {
         ServiceInfo serviceInfo = event.getEntity();
@@ -112,6 +116,9 @@ public class ServiceInfoDetailView extends StandardDetailView<ServiceInfo> {
     @Subscribe
     public void onReady(ReadyEvent event) {
         renderServiceBreaks();
+        if (medicalExaminationField != null) {
+            medicalExaminationField.setReadOnly(true);
+        }
         if (uiAccessService.hasFullAccessRole()) {
             return;
         }

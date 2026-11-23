@@ -292,6 +292,14 @@ public interface PolicemanRole {
     @EntityPolicy(entityClass = Department.class, actions = EntityPolicyAction.ALL)
     void departmentFullAccess();
 
+    @EntityAttributePolicy(
+            entityClass = AnnualMark.class,
+            attributes = {"id", "serviceInfo", "kind", "markYear", "checked", "performedOn", "validUntil"},
+            action = EntityAttributePolicyAction.MODIFY
+    )
+    @EntityPolicy(entityClass = AnnualMark.class, actions = EntityPolicyAction.ALL)
+    void annualMarkFullAccess();
+
     @ViewPolicy(viewIds = {
             "MainView",
             "UserListView",
@@ -339,7 +347,12 @@ public interface PolicemanRole {
             "WorkResultsStatisticsDialog",
             "TodayShiftDashboardView",
             "DayShiftDashboardView",
-            "AllTodayShifts.list"
+            "AllTodayShifts.list",
+            "AnnualProfView",
+            "AnnualCpdView",
+            "AnnualTestsView",
+            "AnnualPsychView",
+            "AnnualOthersView"
     })
     void userViews();
 
@@ -357,7 +370,13 @@ public interface PolicemanRole {
             "future_events",
             "last_events",
             "deleted_events",
-            "CompensatoryTimeRaportView"
+            "CompensatoryTimeRaportView",
+            "annual",
+            "annual_prof",
+            "annual_cpd",
+            "annual_tests",
+            "annual_psych",
+            "annual_others"
     })
     void userMenu();
 

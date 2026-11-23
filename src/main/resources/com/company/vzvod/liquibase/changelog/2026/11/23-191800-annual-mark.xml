@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="2026-11-23-191800-1" author="cursor">
+        <createTable tableName="ANNUAL_MARK">
+            <column name="ID" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="SERVICE_INFO_ID" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="KIND" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="MARK_YEAR" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CHECKED" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PERFORMED_ON" type="date"/>
+            <column name="VALID_UNTIL" type="date"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="ANNUAL_MARK"
+                                 baseColumnNames="SERVICE_INFO_ID"
+                                 referencedTableName="SERVICE_INFO"
+                                 referencedColumnNames="ID"
+                                 constraintName="FK_ANNUAL_MARK_ON_SERVICE_INFO"
+                                 onDelete="CASCADE"/>
+
+        <addUniqueConstraint tableName="ANNUAL_MARK"
+                             columnNames="SERVICE_INFO_ID, KIND, MARK_YEAR"
+                             constraintName="UK_ANNUAL_MARK_SI_KIND_YEAR"/>
+
+        <createIndex tableName="ANNUAL_MARK" indexName="IDX_ANNUAL_MARK_SERVICE_INFO">
+            <column name="SERVICE_INFO_ID"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
