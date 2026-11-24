@@ -10,6 +10,7 @@ import com.company.vzvod.entity.Dep;
 import com.company.vzvod.entity.Department;
 import com.company.vzvod.entity.IdCard;
 import com.company.vzvod.entity.NumberOfShift;
+import com.company.vzvod.entity.Post;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.Shift;
 import com.company.vzvod.entity.StatusInService;
@@ -101,6 +102,23 @@ class BotMeShiftsVacationsIntegrationTest {
         createdPartnerUserId = null;
         createdShiftId = null;
         systemAuthenticator.end();
+    }
+
+    private static int indexOfServiceInfo(JsonNode items, UUID serviceInfoId) {
+        String id = serviceInfoId.toString();
+        for (int i = 0; i < items.size(); i++) {
+            JsonNode item = items.get(i);
+            if (item.get("serviceInfoId") != null && id.equals(item.get("serviceInfoId").asText())) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private static JsonNode itemByServiceInfo(JsonNode items, UUID serviceInfoId) {
+        int index = indexOfServiceInfo(items, serviceInfoId);
+        assertThat(index).isGreaterThanOrEqualTo(0);
+        return items.get(index);
     }
 
     private void removeUserGraph(UUID userId) {
@@ -500,28 +518,38 @@ class BotMeShiftsVacationsIntegrationTest {
         JsonNode items = objectMapper.readTree(result.getResponse().getContentAsString()).get("items");
         assertThat(items).anySatisfy(item -> {
             assertThat(item.get("serviceInfoId").asText()).isEqualTo(colleagueSiId[0].toString());
-            assertThat(item.get("label").asText()).isEqualTo("Пётр П.");
+            assertThat(item.get("label").asText()).isEqualTo("Петров П. П.");
         });
     }
 
     @Test
-    @DisplayName("GET /colleagues — сначала отделение текущего сотрудника, затем другое")
-    void colleagues_callerDepartmentFirst_thenOther() throws Exception {
+    @DisplayName("GET /colleagues — сначала должность, затем фамилия, отделение на порядок не влияет")
+    void colleagues_postThenLastName_ignoresPreferredDepartment() throws Exception {
         persistUserBindingOnly();
-        final UUID[] preferredSi = new UUID[1];
-        final UUID[] otherSi = new UUID[1];
+        final UUID[] commanderSi = new UUID[1];
+        final UUID[] policemanSi = new UUID[1];
+        final UUID[] policemanUserId = new UUID[1];
         final UUID[] otherUserId = new UUID[1];
         systemAuthenticator.runWithSystem(() -> {
             User bound = dataManager.load(User.class).id(createdUserId).one();
             Department dep1 = bound.getServiceInfo().getDepartment();
             assertThat(dep1.getNumber()).isEqualTo(1);
 
-            preferredSi[0] = persistActiveColleagueInDepartment(dep1);
+            policemanSi[0] = persistActiveColleagueInDepartment(dep1);
+            policemanUserId[0] = createdPartnerUserId;
+            User policeman = dataManager.load(User.class).id(createdPartnerUserId).one();
+            policeman.setLastName("Андреев");
+            policeman.getServiceInfo().setPost(Post.POLICEMAN);
+            dataManager.save(policeman);
 
             Department dep2 = dataManager.create(Department.class);
             dep2.setNumber(2);
             dep2 = dataManager.save(dep2);
-            otherSi[0] = persistActiveColleagueInDepartment(dep2);
+            commanderSi[0] = persistActiveColleagueInDepartment(dep2);
+            User commander = dataManager.load(User.class).id(createdPartnerUserId).one();
+            commander.setLastName("Яковлев");
+            commander.getServiceInfo().setPost(Post.COM_OTD);
+            dataManager.save(commander);
             otherUserId[0] = createdPartnerUserId;
         });
 
@@ -532,11 +560,14 @@ class BotMeShiftsVacationsIntegrationTest {
                 .andExpect(status().isOk())
                 .andReturn();
         JsonNode itemsPref1 = objectMapper.readTree(preferredFirst.getResponse().getContentAsString()).get("items");
-        assertThat(itemsPref1).hasSizeGreaterThanOrEqualTo(2);
-        assertThat(itemsPref1.get(0).get("serviceInfoId").asText()).isEqualTo(preferredSi[0].toString());
-        assertThat(itemsPref1.get(0).get("department").asInt()).isEqualTo(1);
-        assertThat(itemsPref1.get(1).get("serviceInfoId").asText()).isEqualTo(otherSi[0].toString());
-        assertThat(itemsPref1.get(1).get("department").asInt()).isEqualTo(2);
+        int commanderIndex = indexOfServiceInfo(itemsPref1, commanderSi[0]);
+        int policemanIndex = indexOfServiceInfo(itemsPref1, policemanSi[0]);
+        assertThat(commanderIndex).isGreaterThanOrEqualTo(0);
+        assertThat(policemanIndex).isGreaterThanOrEqualTo(0);
+        assertThat(commanderIndex).isLessThan(policemanIndex);
+        JsonNode commander = itemByServiceInfo(itemsPref1, commanderSi[0]);
+        assertThat(commander.get("post").asText()).isEqualTo(Post.COM_OTD.getId());
+        assertThat(commander.get("department").asInt()).isEqualTo(2);
 
         MvcResult preferredSecond = mockMvc.perform(get("/api/bot/me/colleagues")
                         .param("department", "2")
@@ -545,12 +576,14 @@ class BotMeShiftsVacationsIntegrationTest {
                 .andExpect(status().isOk())
                 .andReturn();
         JsonNode itemsPref2 = objectMapper.readTree(preferredSecond.getResponse().getContentAsString()).get("items");
-        assertThat(itemsPref2.get(0).get("serviceInfoId").asText()).isEqualTo(preferredSi[0].toString());
-        assertThat(itemsPref2.get(0).get("department").asInt()).isEqualTo(1);
-        assertThat(itemsPref2.get(1).get("serviceInfoId").asText()).isEqualTo(otherSi[0].toString());
-        assertThat(itemsPref2.get(1).get("department").asInt()).isEqualTo(2);
+        assertThat(indexOfServiceInfo(itemsPref2, commanderSi[0]))
+                .isGreaterThanOrEqualTo(0)
+                .isLessThan(indexOfServiceInfo(itemsPref2, policemanSi[0]));
 
         systemAuthenticator.runWithSystem(() -> {
+            if (policemanUserId[0] != null) {
+                removeUserGraph(policemanUserId[0]);
+            }
             if (otherUserId[0] != null) {
                 removeUserGraph(otherUserId[0]);
             }

@@ -36,6 +36,7 @@ import com.company.vzvod.entity.Vocation;
 import com.company.vzvod.entity.VocationType;
 import com.company.vzvod.service.DepartmentConverter;
 import com.company.vzvod.service.VocationService;
+import com.company.vzvod.util.EmployeeOrdering;
 import io.jmix.core.UnconstrainedDataManager;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
@@ -135,15 +136,15 @@ public class BotMeShiftsVocationsService {
 
     /**
      * Сотрудники со статусом «В строю», не занятые в незавершённой смене.
-     * Сначала отделение текущего сотрудника, затем другое, внутри — по фамилии.
-     * Параметр {@code preferredDepartment} используется, только если у сотрудника нет отделения 1 или 2.
+     * Сначала должность, затем фамилия.
+     * {@code preferredDepartment} оставлен в контракте API и на порядок больше не влияет.
      */
     @Transactional(readOnly = true)
     public BotColleaguesResponse loadColleagues(UUID userId, int preferredDepartment, int page, UUID excludeShiftId) {
         if (page < 0) {
             page = 0;
         }
-        List<User> available = loadAvailableColleagues(userId, preferredDepartment, excludeShiftId);
+        List<User> available = loadAvailableColleagues(userId, excludeShiftId);
         // Для мобильного клиента отдаём весь доступный список одной страницей.
         int pageSize = Math.max(COLLEAGUES_PAGE_SIZE, available.size());
         int from = page * pageSize;
@@ -159,7 +160,11 @@ public class BotMeShiftsVocationsService {
             if (si == null) {
                 continue;
             }
-            items.add(new BotColleagueItem(si.getId(), colleagueLabel(u), departmentNumber(u)));
+            items.add(new BotColleagueItem(
+                    si.getId(),
+                    colleagueLabel(u),
+                    departmentNumber(u),
+                    si.getPost() == null ? null : si.getPost().getId()));
         }
         return new BotColleaguesResponse(items, hasMore);
     }
@@ -170,7 +175,7 @@ public class BotMeShiftsVocationsService {
      */
     @Transactional(readOnly = true)
     public List<ServiceInfo> loadPartnerServiceInfos(UUID userId, UUID excludeShiftId, Set<UUID> extraExclude) {
-        List<User> available = loadAvailableColleagues(userId, 1, excludeShiftId);
+        List<User> available = loadAvailableColleagues(userId, excludeShiftId);
         List<UUID> ids = new ArrayList<>();
         for (User user : available) {
             ServiceInfo si = user.getServiceInfo();
@@ -213,12 +218,8 @@ public class BotMeShiftsVocationsService {
         return ordered;
     }
 
-    private List<User> loadAvailableColleagues(UUID userId, int preferredDepartment, UUID excludeShiftId) {
+    private List<User> loadAvailableColleagues(UUID userId, UUID excludeShiftId) {
         User me = loadUserWithServiceInfo(userId);
-        int ownDepartment = departmentNumber(me);
-        int preferred = (ownDepartment == 1 || ownDepartment == 2)
-                ? ownDepartment
-                : (preferredDepartment == 2 ? 2 : 1);
         Set<UUID> busyInOpenShifts = openShiftParticipantIdsExcept(excludeShiftId);
         List<User> users = unconstrainedDataManager.load(User.class)
                 .query("select u from User u join u.serviceInfo si left join si.department d "
@@ -232,6 +233,7 @@ public class BotMeShiftsVocationsService {
                         .add("patronymic")
                         .add("serviceInfo", si -> si
                                 .add("status")
+                                .add("post")
                                 .add("department", d -> d.add("number"))))
                 .list();
         List<User> available = new ArrayList<>(users.size());
@@ -242,27 +244,8 @@ public class BotMeShiftsVocationsService {
             }
             available.add(u);
         }
-        available.sort((a, b) -> {
-            int da = departmentNumber(a);
-            int db = departmentNumber(b);
-            boolean aPref = da == preferred;
-            boolean bPref = db == preferred;
-            if (aPref != bPref) {
-                return aPref ? -1 : 1;
-            }
-            if (da != db) {
-                return Integer.compare(da, db);
-            }
-            String la = a.getLastName() == null ? "" : a.getLastName();
-            String lb = b.getLastName() == null ? "" : b.getLastName();
-            int byLast = la.compareToIgnoreCase(lb);
-            if (byLast != 0) {
-                return byLast;
-            }
-            String fa = a.getFirstName() == null ? "" : a.getFirstName();
-            String fb = b.getFirstName() == null ? "" : b.getFirstName();
-            return fa.compareToIgnoreCase(fb);
-        });
+        available.sort(EmployeeOrdering.userByPostThenLastName()
+                .thenComparing(u -> u.getFirstName() == null ? "" : u.getFirstName(), String.CASE_INSENSITIVE_ORDER));
         return available;
     }
 

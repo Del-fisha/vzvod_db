@@ -32,8 +32,8 @@ public class ServiceInfoListView extends StandardListView<ServiceInfo> {
     private Set<UUID> excludeServiceInfoIds = Set.of();
 
     /**
-     * Лукап «добавить в смену»: только «В строю», не занятые другой сменой,
-     * своё отделение сверху, затем другое, внутри — по фамилии.
+     * Лукап «добавить в смену»: только «В строю», не занятые другой сменой.
+     * Сначала должность, затем фамилия.
      */
     public void configureShiftPartnerLookup(UUID currentUserId, UUID shiftId, Set<UUID> alreadyOnShift) {
         this.shiftPartnerUserId = currentUserId;
