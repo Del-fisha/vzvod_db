@@ -72,11 +72,11 @@ public class UserListView extends StandardView {
                         left join u.serviceInfo si
                         left join si.department d
                         where d is null
-                        order by u.serviceInfo.post, u.serviceInfo.rank desc
+                        order by u.serviceInfo.post
                         """)
                 .fetchPlan(loadContext.getFetchPlan())
                 .list();
-        users.sort(EmployeeOrdering.userComparator());
+        users.sort(EmployeeOrdering.userByPostThenLastName());
         return users;
     }
 
@@ -89,11 +89,11 @@ public class UserListView extends StandardView {
                         join u.serviceInfo si
                         join si.department d
                         where d.number = 1
-                        order by u.serviceInfo.post, u.serviceInfo.rank desc
+                        order by u.serviceInfo.post
                         """)
                 .fetchPlan(loadContext.getFetchPlan())
                 .list();
-        users.sort(EmployeeOrdering.userComparator());
+        users.sort(EmployeeOrdering.userByPostThenLastName());
         return users;
     }
 
@@ -106,11 +106,11 @@ public class UserListView extends StandardView {
                         join u.serviceInfo si
                         join si.department d
                         where d.number = 2
-                        order by u.serviceInfo.post, u.serviceInfo.rank desc
+                        order by u.serviceInfo.post
                         """)
                 .fetchPlan(loadContext.getFetchPlan())
                 .list();
-        users.sort(EmployeeOrdering.userComparator());
+        users.sort(EmployeeOrdering.userByPostThenLastName());
         return users;
     }
 }

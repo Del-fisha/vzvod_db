@@ -3,15 +3,20 @@ package com.company.vzvod.view.penalty;
 import com.company.vzvod.entity.Penalty;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.security.UiAccessService;
+import com.company.vzvod.util.DirectoryListOrder;
+import com.company.vzvod.util.SortedListLoader;
 import com.company.vzvod.view.main.MainView;
 import com.vaadin.flow.router.Route;
 import com.company.vzvod.service.PenaltyExpirationService;
+import io.jmix.core.DataManager;
+import io.jmix.core.LoadContext;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Route(value = "penalties", layout = MainView.class)
 @ViewController(id = "Penalty.list")
@@ -25,6 +30,9 @@ public class PenaltyListView extends StandardListView<Penalty> {
 
     @Autowired
     private PenaltyExpirationService penaltyExpirationService;
+
+    @Autowired
+    private DataManager dataManager;
 
     @Autowired
     private UiAccessService uiAccessService;
@@ -65,6 +73,11 @@ public class PenaltyListView extends StandardListView<Penalty> {
         if (removeAction != null) {
             removeAction.setEnabled(false);
         }
+    }
+
+    @Install(to = "penaltiesDl", target = Target.DATA_LOADER)
+    private List<Penalty> penaltiesDlLoadDelegate(LoadContext<Penalty> loadContext) {
+        return SortedListLoader.load(dataManager, loadContext, DirectoryListOrder.penaltyByDateThenLastName());
     }
 
     @Install(to = "penaltiesDataGrid.createAction", subject = "initializer")

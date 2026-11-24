@@ -19,6 +19,7 @@
             join e.units u
             join u.user usr
             where usr.username = :current_user_username
+            order by e.date desc nulls last, e.id desc
         ]]>
                 </query>
             </loader>

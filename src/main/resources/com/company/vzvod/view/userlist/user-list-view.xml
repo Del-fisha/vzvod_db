@@ -21,7 +21,7 @@
                         left join u.serviceInfo si
                         left join si.department d
                         where d is null
-                        order by u.serviceInfo.post, u.serviceInfo.rank desc, u.lastName
+                        order by u.serviceInfo.post
                     ]]>
                 </query>
             </loader>
@@ -44,7 +44,7 @@
                         join u.serviceInfo si
                         join si.department d
                         where d.number = 1
-                        order by u.serviceInfo.post, u.serviceInfo.rank desc, u.lastName
+                        order by u.serviceInfo.post
                     ]]>
                 </query>
             </loader>
@@ -67,7 +67,7 @@
                         join u.serviceInfo si
                         join si.department d
                         where d.number = 2
-                        order by u.serviceInfo.post, u.serviceInfo.rank desc, u.lastName
+                        order by u.serviceInfo.post
                     ]]>
                 </query>
             </loader>

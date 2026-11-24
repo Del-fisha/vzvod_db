@@ -24,16 +24,33 @@ public final class EmployeeOrdering {
 
     public static Comparator<ServiceInfo> serviceInfoComparator() {
         return Comparator
-                .comparing(EmployeeOrdering::postSortKey, Comparator.nullsLast(String::compareTo))
+                .comparing(EmployeeOrdering::postKey, Comparator.nullsLast(String::compareTo))
                 .thenComparing(EmployeeOrdering::rankSortKey, Comparator.nullsLast(Comparator.reverseOrder()))
                 .thenComparing(si -> lastNameSortKey(si.getUser()), Comparator.nullsLast(String::compareTo));
     }
 
     public static Comparator<User> userComparator() {
         return Comparator
-                .comparing((User u) -> postSortKey(u.getServiceInfo()), Comparator.nullsLast(String::compareTo))
+                .comparing((User u) -> postKey(u.getServiceInfo()), Comparator.nullsLast(String::compareTo))
                 .thenComparing(u -> rankSortKey(u.getServiceInfo()), Comparator.nullsLast(Comparator.reverseOrder()))
-                .thenComparing(u -> lastNameSortKey(u), Comparator.nullsLast(String::compareTo));
+                .thenComparing(u -> lastNameKey(u), Comparator.nullsLast(String::compareTo));
+    }
+
+    /**
+     * Должность, затем фамилия. Звание в этот порядок не входит.
+     */
+    public static Comparator<User> userByPostThenLastName() {
+        return Comparator
+                .comparing((User u) -> postKey(u.getServiceInfo()), Comparator.nullsLast(String::compareTo))
+                .thenComparing(u -> lastNameKey(u), Comparator.nullsLast(String::compareTo));
+    }
+
+    public static String postSortKey(ServiceInfo si) {
+        return postKey(si);
+    }
+
+    public static String lastNameSortKey(User user) {
+        return lastNameKey(user);
     }
 
     public static void sortServiceInfosInPlace(Iterable<ServiceInfo> items) {
@@ -42,7 +59,7 @@ public final class EmployeeOrdering {
         }
     }
 
-    private static String postSortKey(ServiceInfo si) {
+    private static String postKey(ServiceInfo si) {
         if (si == null) {
             return null;
         }
@@ -58,7 +75,7 @@ public final class EmployeeOrdering {
         return rank == null ? null : rank.getId();
     }
 
-    private static String lastNameSortKey(User user) {
+    private static String lastNameKey(User user) {
         if (user == null || user.getLastName() == null) {
             return null;
         }
