@@ -55,6 +55,9 @@ public class CompensatoryTimeRaportView extends StandardView {
     @ViewComponent
     private TypedDatePicker<LocalDate> dayOffDateField;
 
+    @ViewComponent
+    private TypedDatePicker<LocalDate> petitionDateField;
+
     @Autowired
     private CompensatoryTimeRaportSender raportSender;
 
@@ -80,6 +83,7 @@ public class CompensatoryTimeRaportView extends StandardView {
         LocalDate today = LocalDate.now();
         reportDateField.setTypedValue(today);
         dayOffDateField.setTypedValue(today);
+        petitionDateField.setTypedValue(today);
 
         String ooopDeputyFull = msgOrDefault(MSG_PREFIX + "recipient.ooopDeputy.full", OOOP_DEPUTY_FULL_DEFAULT);
         recipientComboBox.setItems(
@@ -141,9 +145,10 @@ public class CompensatoryTimeRaportView extends StandardView {
         String recipientStr = recipientComboBox.getValue();
         LocalDate reportDate = reportDateField.getTypedValue();
         LocalDate dayOffDate = dayOffDateField.getTypedValue();
+        LocalDate petitionDate = petitionDateField.getTypedValue();
 
         if (employee == null || interceder == null || recipientStr == null
-                || reportDate == null || dayOffDate == null) {
+                || reportDate == null || dayOffDate == null || petitionDate == null) {
             notifications.create(messages.getMessage(MSG_PREFIX + "validation.fillAllFields"))
                     .withType(Notifications.Type.WARNING)
                     .show();
@@ -178,6 +183,7 @@ public class CompensatoryTimeRaportView extends StandardView {
         raport.setRecipient(recipientDto);
         raport.setReportDate(reportDate.format(formatter));
         raport.setDayOffDate(dayOffDate.format(formatter));
+        raport.setPetitionDate(petitionDate.format(formatter));
 
         try {
             if (openPdf) {

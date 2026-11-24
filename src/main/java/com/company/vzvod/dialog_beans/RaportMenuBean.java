@@ -2,7 +2,9 @@ package com.company.vzvod.dialog_beans;
 
 import com.company.vzvod.view.raport.CompensatoryTimeRaportView;
 import com.company.vzvod.view.raport.DailyShiftRaportView;
+import com.company.vzvod.view.raport.FinancialAssistanceRaportView;
 import com.company.vzvod.view.raport.ServiceBookSupplementView;
+import com.company.vzvod.view.raport.ShiftTransferRaportView;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.component.UiComponentUtils;
 import io.jmix.flowui.view.View;
@@ -28,6 +30,22 @@ public class RaportMenuBean {
 
         dialogWindows
                 .view(currentView, DailyShiftRaportView.class)
+                .open();
+    }
+
+    public void openShiftTransferRaport() {
+        View<?> currentView = UiComponentUtils.getCurrentView();
+
+        dialogWindows
+                .view(currentView, ShiftTransferRaportView.class)
+                .open();
+    }
+
+    public void openFinancialAssistanceRaport() {
+        View<?> currentView = UiComponentUtils.getCurrentView();
+
+        dialogWindows
+                .view(currentView, FinancialAssistanceRaportView.class)
                 .open();
     }
 

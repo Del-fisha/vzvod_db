@@ -49,6 +49,24 @@ public class PrintHubView extends StandardView {
         dailyShift.addCardClickListener(() -> raportMenuBean.openDailyShiftRaport());
         printWidgetsSlot.add(dailyShift);
 
+        HomeCard shiftTransfer = new HomeCard(
+                "Замена смены",
+                "(Распечатать рапорт на замену смены)",
+                "Открыть",
+                "var(--lumo-contrast-70pct)"
+        );
+        shiftTransfer.addCardClickListener(() -> raportMenuBean.openShiftTransferRaport());
+        printWidgetsSlot.add(shiftTransfer);
+
+        HomeCard financialAssistance = new HomeCard(
+                "Мат помощь",
+                "(Распечатать рапорт на материальную помощь, несколько сотрудников — несколько страниц)",
+                "Открыть",
+                "var(--lumo-warning-color)"
+        );
+        financialAssistance.addCardClickListener(() -> raportMenuBean.openFinancialAssistanceRaport());
+        printWidgetsSlot.add(financialAssistance);
+
         HomeCard serviceBook = new HomeCard(
                 "Дополнение к служебной книжке",
                 "(Корешки, опись, таблица телефонов, таблица позывных)",

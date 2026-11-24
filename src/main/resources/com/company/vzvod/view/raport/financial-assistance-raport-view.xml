@@ -1,0 +1,84 @@
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="Мат помощь">
+
+    <data>
+        <collection id="employeesDept1Dc"
+                    class="com.company.vzvod.entity.User">
+            <fetchPlan extends="_base"/>
+            <loader id="employeesDept1Dl">
+                <query>
+                    <![CDATA[
+                        select u
+                        from User u
+                        join u.serviceInfo si
+                        where si.post not in ('A', 'B')
+                          and si.department.number = 1
+                        order by u.serviceInfo.post, u.serviceInfo.rank desc, u.lastName
+                    ]]>
+                </query>
+            </loader>
+        </collection>
+
+        <collection id="employeesDept2Dc"
+                    class="com.company.vzvod.entity.User">
+            <fetchPlan extends="_base"/>
+            <loader id="employeesDept2Dl">
+                <query>
+                    <![CDATA[
+                        select u
+                        from User u
+                        join u.serviceInfo si
+                        where si.post not in ('A', 'B')
+                          and si.department.number = 2
+                        order by u.serviceInfo.post, u.serviceInfo.rank desc, u.lastName
+                    ]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+
+    <layout spacing="true" padding="true" width="700px" height="560px">
+
+        <hbox width="100%">
+            <multiSelectComboBox id="employeeDept1Picker"
+                                 metaClass="User"
+                                 label="msg://com.company.vzvod.view.raport/financialAssistanceRaportView.employeeDept1Picker.label"
+                                 itemsContainer="employeesDept1Dc"
+                                 width="100%"/>
+
+            <multiSelectComboBox id="employeeDept2Picker"
+                                 metaClass="User"
+                                 label="msg://com.company.vzvod.view.raport/financialAssistanceRaportView.employeeDept2Picker.label"
+                                 itemsContainer="employeesDept2Dc"
+                                 width="100%"/>
+        </hbox>
+
+        <comboBox id="commanderComboBox"
+                  label="msg://com.company.vzvod.view.raport/financialAssistanceRaportView.commanderComboBox.label"
+                  width="100%"/>
+
+        <hbox width="100%">
+            <textField id="yearField"
+                       datatype="string"
+                       label="msg://com.company.vzvod.view.raport/financialAssistanceRaportView.yearField.label"/>
+
+            <datePicker id="reportDateField"
+                        label="msg://com.company.vzvod.view.raport/financialAssistanceRaportView.reportDateField.label"
+                        datatype="localDate"/>
+        </hbox>
+
+        <hbox width="100%" spacing="true">
+            <button id="sendBtn"
+                    text="msg://com.company.vzvod.view.raport/financialAssistanceRaportView.sendBtn.text"
+                    themeNames="primary"/>
+
+            <button id="sendAndPrintBtn"
+                    text="msg://com.company.vzvod.view.raport/financialAssistanceRaportView.sendAndPrintBtn.text"
+                    themeNames="primary contrast"/>
+        </hbox>
+    </layout>
+</view>

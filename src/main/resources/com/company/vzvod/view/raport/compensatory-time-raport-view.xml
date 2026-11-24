@@ -91,6 +91,11 @@
                         datatype="localDate"/>
         </hbox>
 
+        <datePicker id="petitionDateField"
+                    label="msg://com.company.vzvod.view.raport/compensatoryTimeRaportView.petitionDateField.label"
+                    datatype="localDate"
+                    width="100%"/>
+
         <hbox width="100%" spacing="true">
             <button id="sendBtn"
                     text="msg://com.company.vzvod.view.raport/compensatoryTimeRaportView.sendBtn.text"

@@ -1,0 +1,109 @@
+<view xmlns="http://jmix.io/schema/flowui/view">
+
+    <data>
+        <collection id="employeesDept1Dc"
+                    class="com.company.vzvod.entity.User">
+            <fetchPlan extends="_base"/>
+            <loader id="employeesDept1Dl">
+                <query>
+                    <![CDATA[
+                        select u
+                        from User u
+                        join u.serviceInfo si
+                        where si.post not in ('A', 'B')
+                          and si.department.number = 1
+                        order by u.serviceInfo.post, u.serviceInfo.rank desc, u.lastName
+                    ]]>
+                </query>
+            </loader>
+        </collection>
+
+        <collection id="employeesDept2Dc"
+                    class="com.company.vzvod.entity.User">
+            <fetchPlan extends="_base"/>
+            <loader id="employeesDept2Dl">
+                <query>
+                    <![CDATA[
+                        select u
+                        from User u
+                        join u.serviceInfo si
+                        where si.post not in ('A', 'B')
+                          and si.department.number = 2
+                        order by u.serviceInfo.post, u.serviceInfo.rank desc, u.lastName
+                    ]]>
+                </query>
+            </loader>
+        </collection>
+
+        <collection id="commandersDc"
+                    class="com.company.vzvod.entity.User">
+            <fetchPlan extends="_base"/>
+            <loader id="commandersDl">
+                <query>
+                    <![CDATA[
+                        select u from User u
+                        where u.serviceInfo.post not in ('D', 'E')
+                        order by u.serviceInfo.post, u.serviceInfo.rank desc, u.lastName
+                    ]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+
+    <layout spacing="true" padding="true" width="650px" height="650px">
+
+        <hbox width="100%">
+            <entityComboBox id="employeeDept1Picker"
+                            metaClass="User"
+                            label="msg://com.company.vzvod.view.raport/shiftTransferRaportView.employeeDept1Picker.label"
+                            itemsContainer="employeesDept1Dc"
+                            width="100%"/>
+
+            <entityComboBox id="employeeDept2Picker"
+                            metaClass="User"
+                            label="msg://com.company.vzvod.view.raport/shiftTransferRaportView.employeeDept2Picker.label"
+                            itemsContainer="employeesDept2Dc"
+                            width="100%"/>
+        </hbox>
+
+        <entityComboBox id="petitionerUserPicker"
+                        metaClass="User"
+                        label="msg://com.company.vzvod.view.raport/shiftTransferRaportView.petitionerUserPicker.label"
+                        itemsContainer="commandersDc"
+                        width="100%"/>
+
+        <comboBox id="commanderComboBox"
+                  label="msg://com.company.vzvod.view.raport/shiftTransferRaportView.commanderComboBox.label"
+                  width="100%"/>
+
+        <hbox width="100%">
+            <datePicker id="oldTimeDateField"
+                        label="msg://com.company.vzvod.view.raport/shiftTransferRaportView.oldTimeDateField.label"
+                        datatype="localDate"/>
+
+            <datePicker id="newTimeDateField"
+                        label="msg://com.company.vzvod.view.raport/shiftTransferRaportView.newTimeDateField.label"
+                        datatype="localDate"/>
+        </hbox>
+
+        <datePicker id="reportDateField"
+                    label="msg://com.company.vzvod.view.raport/shiftTransferRaportView.reportDateField.label"
+                    datatype="localDate"
+                    width="100%"/>
+
+        <hbox width="100%" spacing="true">
+            <button id="sendBtn"
+                    text="msg://com.company.vzvod.view.raport/shiftTransferRaportView.sendBtn.text"
+                    themeNames="primary"/>
+
+            <button id="sendAndPrintBtn"
+                    text="msg://com.company.vzvod.view.raport/shiftTransferRaportView.sendAndPrintBtn.text"
+                    themeNames="primary contrast"/>
+        </hbox>
+    </layout>
+</view>
+
