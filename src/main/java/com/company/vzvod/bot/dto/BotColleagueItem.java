@@ -8,6 +8,8 @@ import java.util.UUID;
 public record BotColleagueItem(
         UUID serviceInfoId,
         String label,
-        Integer department
+        Integer department,
+        /** Id должности ({@code A}…{@code E}), чтобы клиент мог повторить порядок списка. */
+        String post
 ) {
 }
