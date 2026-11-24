@@ -3,14 +3,20 @@ package com.company.vzvod.view.criminalviolation;
 import com.company.vzvod.entity.CriminalViolation;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.security.UiAccessService;
+import com.company.vzvod.util.DirectoryListOrder;
+import com.company.vzvod.util.SortedListLoader;
 import com.company.vzvod.view.main.MainView;
 import com.company.vzvod.view.shared.CurrentUserServiceInfoLoader;
 import com.vaadin.flow.router.Route;
+import io.jmix.core.DataManager;
+import io.jmix.core.LoadContext;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
 
 @Route(value = "my-criminal-violations", layout = MainView.class)
 @ViewController(id = "MyCriminalViolation.list")
@@ -26,6 +32,9 @@ public class MyCriminalViolationListView extends StandardListView<CriminalViolat
     private CurrentUserServiceInfoLoader currentUserServiceInfoLoader;
 
     @Autowired
+    private DataManager dataManager;
+
+    @Autowired
     private UiAccessService uiAccessService;
 
     @ViewComponent
@@ -39,6 +48,11 @@ public class MyCriminalViolationListView extends StandardListView<CriminalViolat
         ServiceInfo serviceInfo = currentUserServiceInfoLoader.loadCurrentUserServiceInfo();
         criminalViolationsDl.setParameter("serviceInfo", serviceInfo);
         criminalViolationsDl.load();
+    }
+
+    @Install(to = "criminalViolationsDl", target = Target.DATA_LOADER)
+    private List<CriminalViolation> criminalViolationsDlLoadDelegate(LoadContext<CriminalViolation> loadContext) {
+        return SortedListLoader.load(dataManager, loadContext, DirectoryListOrder.criminalByDate());
     }
 
     @Subscribe

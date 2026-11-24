@@ -3,14 +3,20 @@ package com.company.vzvod.view.incentive;
 import com.company.vzvod.entity.Incentive;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.security.UiAccessService;
+import com.company.vzvod.util.DirectoryListOrder;
+import com.company.vzvod.util.SortedListLoader;
 import com.company.vzvod.view.main.MainView;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.router.Route;
+import io.jmix.core.DataManager;
+import io.jmix.core.LoadContext;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
 
 
 @Route(value = "incentives", layout = MainView.class)
@@ -28,6 +34,9 @@ public class IncentiveListView extends StandardListView<Incentive> {
 
     @Autowired
     private DialogWindows dialogWindows;
+
+    @Autowired
+    private DataManager dataManager;
 
     @ViewComponent
     private JmixButton createMultipleButton;
@@ -80,6 +89,11 @@ public class IncentiveListView extends StandardListView<Incentive> {
         window.open();
     }
 
+
+    @Install(to = "incentivesDl", target = Target.DATA_LOADER)
+    private List<Incentive> incentivesDlLoadDelegate(LoadContext<Incentive> loadContext) {
+        return SortedListLoader.load(dataManager, loadContext, DirectoryListOrder.incentiveByDateThenLastName());
+    }
 
     @Install(to = "incentivesDataGrid.createAction", subject = "initializer")
     private void incentivesDataGridCreateInitializer(Incentive incentive) {

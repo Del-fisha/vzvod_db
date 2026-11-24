@@ -3,12 +3,18 @@ package com.company.vzvod.view.vocation;
 import com.company.vzvod.entity.ServiceInfo;
 import com.company.vzvod.entity.Vocation;
 import com.company.vzvod.security.UiAccessService;
+import com.company.vzvod.util.DirectoryListOrder;
+import com.company.vzvod.util.SortedListLoader;
 import com.company.vzvod.view.main.MainView;
 import com.vaadin.flow.router.Route;
+import io.jmix.core.DataManager;
+import io.jmix.core.LoadContext;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
 
 
 @Route(value = "vocations", layout = MainView.class)
@@ -23,6 +29,9 @@ public class VocationListView extends StandardListView<Vocation> {
 
     @Autowired
     private UiAccessService uiAccessService;
+
+    @Autowired
+    private DataManager dataManager;
 
     @ViewComponent
     private JmixButton removeButton;
@@ -55,6 +64,11 @@ public class VocationListView extends StandardListView<Vocation> {
         if (removeAction != null) {
             removeAction.setEnabled(false);
         }
+    }
+
+    @Install(to = "vocationsDl", target = Target.DATA_LOADER)
+    private List<Vocation> vocationsDlLoadDelegate(LoadContext<Vocation> loadContext) {
+        return SortedListLoader.load(dataManager, loadContext, DirectoryListOrder.vocationOrder());
     }
 
     @Install(to = "vocationsDataGrid.createAction", subject = "initializer")

@@ -84,6 +84,7 @@
                 <property name="patronymic"/>
                 <property name="serviceInfo">
                     <property name="department"/>
+                    <property name="post"/>
                 </property>
             </fetchPlan>
             <loader id="colleaguesDl">
@@ -95,7 +96,7 @@
                         where
                             (:department is null and si.department is null)
                             or si.department = :department
-                        order by u.serviceInfo.post, u.serviceInfo.rank desc, u.lastName
+                        order by u.serviceInfo.post
                     ]]>
                 </query>
             </loader>

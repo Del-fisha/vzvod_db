@@ -2,6 +2,7 @@ package com.company.vzvod.view.usercard;
 
 import com.company.vzvod.entity.*;
 import com.company.vzvod.service.PenaltyExpirationService;
+import com.company.vzvod.util.EmployeeOrdering;
 import com.company.vzvod.service.ServiceSeniority;
 import com.company.vzvod.service.VocationBalanceService;
 import com.company.vzvod.view.shiftblank.ShiftBlankView;
@@ -17,6 +18,7 @@ import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 import com.company.vzvod.view.main.MainView;
 import io.jmix.core.DataManager;
+import io.jmix.core.LoadContext;
 import io.jmix.core.Metadata;
 import io.jmix.core.entity.KeyValueEntity;
 import io.jmix.flowui.ViewNavigators;
@@ -32,6 +34,7 @@ import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -423,6 +426,13 @@ public class UserCardView extends StandardView {
                     .findFirst()
                     .ifPresent(colleaguesDataGrid::select);
         }
+    }
+
+    @Install(to = "colleaguesDl", target = Target.DATA_LOADER)
+    private List<User> colleaguesDlLoadDelegate(LoadContext<User> loadContext) {
+        List<User> users = new ArrayList<>(dataManager.loadList(loadContext));
+        users.sort(EmployeeOrdering.userByPostThenLastName());
+        return users;
     }
 
     @Supply(to = "colleaguesDataGrid.shortFio", subject = "renderer")
